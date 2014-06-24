@@ -10,13 +10,28 @@ import struct
 
 
 def process_hdr(fname):
-
     with open(fname, 'r') as fh:
         lines = fh.readlines()
 
     hdr = {}
     for line in lines:
-        print(line),
+        if line.startswith(";"):
+            continue
+
+        split_ln = line.split("=")
+        if len(split_ln) > 1:
+            split_ln = [i.strip(" {}\r\n") for i in split_ln]
+            hdr.update({
+                split_ln[0]: split_ln[1]
+            })
+
+    for key in hdr.keys():
+        # Substitute spaces for underscores
+        key_repl = key.replace(" ", "_")
+        if key_repl is not key:
+            hdr[key_repl] = hdr[key]
+            del hdr[key]
+
     return hdr
 
 
@@ -47,7 +62,7 @@ def readBil(filename, numlines, pixperline, numbands, dataformat="<d"):
     try:
         bilfile = open(filename, "rb")
     except:
-        print "Failed to open BIL file " + filename
+        print("Failed to open BIL file %s" % (filename))
         raise
 
     # Create a list of bands containing an empty list for each band
@@ -82,7 +97,7 @@ def readBil(filename, numlines, pixperline, numbands, dataformat="<d"):
 
 # Wrapper function for readBil/readBsq that allows you to omit the number of
 # pixels per line (works it out from the file size)
-def readyb(filename, numlines, numbands, dataformat="<d", filetype="bil"):
+def readyb(filename, bil_hdr, dataformat="<d"):
     fileinfo = os.stat(filename)
     filesize = fileinfo[stat.ST_SIZE]
 
@@ -91,6 +106,10 @@ def readyb(filename, numlines, numbands, dataformat="<d", filetype="bil"):
         bytesperpix = struct.calcsize(dataformat)
     except:
         raise ValueError("Supplied format \"%s\" is invalid" % str(dataformat))
+
+    numbands = int(bil_hdr["bands"])
+    numlines = int(bil_hdr["lines"])
+    filetype = bil_hdr["interleave"]
 
     pixperline = ((filesize / float(numbands)) /
                   float(numlines)) / float(bytesperpix)
@@ -116,7 +135,7 @@ def readyb(filename, numlines, numbands, dataformat="<d", filetype="bil"):
 fn = "data/e127a041b_nav_post_processed.bil"
 hdr_fn = "data/e127a041b_nav_post_processed.bil.hdr"
 
-print(json.dumps(process_hdr(hdr_fn), indent=4))
+print(json.dumps(readyb(fn, process_hdr(hdr_fn)), indent=4))
 
 """
 
