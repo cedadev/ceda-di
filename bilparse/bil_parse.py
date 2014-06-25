@@ -3,11 +3,13 @@
 # arsf-dan.nerc.ac.uk/trac/attachment/ticket/287/data_handler.py
 # Original author: Ben Taylor (benj)
 
+from __future__ import division
 import json
 from multiprocessing import Process
 import os
 import stat
 import struct
+import sys
 
 
 def process_hdr(fname):
@@ -50,8 +52,9 @@ def read_bil(filename, numlines, pixperline, numbands, unpack_fmt="<d"):
     # Check file size matches with size attributes
     fileinfo = os.stat(filename)
     filesize = fileinfo[stat.ST_SIZE]
-    checknum = ((((filesize / float(numbands)) / float(numlines)) /
-                float(bytesperpix)) / pixperline)
+
+    checknum = int((((filesize / numbands) /
+                   numlines) / bytesperpix) / pixperline)
 
     if (checknum != 1):
         raise ValueError("File size and supplied attributes do not match")
@@ -108,8 +111,7 @@ def read_yb(bil_hdr, unpack_fmt="<d"):
     except:
         raise ValueError("Supplied format \"%s\" is invalid" % str(unpack_fmt))
 
-    pixperline = ((filesize / float(numbands)) /
-                  float(numlines)) / float(bytesperpix)
+    pixperline = int((filesize / numbands) / numlines) / bytesperpix
 
     # Should be an integer, if not, then an attribute is wrong or file corrupt
     # is wrong or the file is corrupt
@@ -151,12 +153,14 @@ def get_bil_nav(header_fname):
         out.write(json.dumps(pre_json, indent=4))
 
 
-header_fnames = ["data/e134011b_nav_post_processed.bil.hdr",
-                 "data/e319011b_nav_post_processed.bil.hdr",
-                 "data/e127a041b_nav_post_processed.bil.hdr"]
-
-
 if __name__ == '__main__':
-    for header_fname in header_fnames:
-        p = Process(target=get_bil_nav, args=(header_fname,))
-        p.start()
+    for root, dirs, files in os.walk(sys.argv[1]):
+        for f in files:
+            if (f.endswith(".hdr") and
+                ("nav" in f) and
+                    ("qual" not in f)):
+                header_fname = os.path.join(root, f)
+                print(header_fname)
+
+                p = Process(target=get_bil_nav, args=(header_fname,))
+                p.start()
