@@ -70,11 +70,9 @@ def read_bil(filename, numlines, pixperline, numbands, unpack_fmt="<d"):
     # Create a list of bands containing an empty list for each band
     bands = [[] for i in xrange(0, numbands)]
 
-    # BIL format so have to cycle through lines at top level rather than bands
     for linenum in xrange(0, numlines):
         for bandnum in xrange(0, numbands):
             if (linenum == 0):
-                # For each band create an empty list of lines in the band
                 bands[bandnum] = [[] for i in xrange(0, numlines)]
 
             for pixnum in xrange(0, pixperline):
@@ -89,8 +87,7 @@ def read_bil(filename, numlines, pixperline, numbands, unpack_fmt="<d"):
 
                 # If everything worked, unpack the binary value
                 # and store it in the appropriate pixel value
-                bands[bandnum][linenum].append(
-                    struct.unpack(unpack_fmt, datum)[0])
+                bands[bandnum][linenum] = struct.unpack(unpack_fmt, datum)[0]
 
     bil.close()
 
@@ -137,15 +134,20 @@ def get_bil_nav(header_fname):
     pre_json = []
     for l in xrange(int(header["lines"])):
         st_point = {
-            "time": bil[0][l][0],
-            "lat": bil[1][l][0],
-            "lon": bil[2][l][0],
-            "alt": bil[3][l][0],
-            "roll": bil[4][l][0],
-            "pitch": bil[5][l][0],
-            "heading": bil[6][l][0]
+            "time": bil[0][l],
+            "lat": bil[1][l],
+            "lon": bil[2][l],
+            "alt": bil[3][l],
+            "roll": bil[4][l],
+            "pitch": bil[5][l],
+            "heading": bil[6][l]
         }
         pre_json.append(st_point)
+
+    try:
+        os.mkdir("out")
+    except OSError:
+        pass
 
     output = format("out/%s.json" %
                     (os.path.splitext(os.path.basename(header_fname))[0]))
@@ -169,6 +171,6 @@ if __name__ == '__main__':
 
                     while len(procs) > 8:
                         procs = [x for x in procs if x.is_alive()]
-                        time.sleep(1)
+                        time.sleep(0.1)
 
                     p.start()
