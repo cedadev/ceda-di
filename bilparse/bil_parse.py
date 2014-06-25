@@ -4,6 +4,7 @@
 # Original author: Ben Taylor (benj)
 
 import json
+from multiprocessing import Process
 import os
 import stat
 import struct
@@ -15,9 +16,11 @@ def process_hdr(fname):
 
     hdr = {}
     for line in lines:
+        # Ignore comments
         if line.startswith(";"):
             continue
 
+        # Load keys into dict
         split_ln = line.split("=")
         if len(split_ln) > 1:
             split_ln = [i.strip(" {}\r\n") for i in split_ln]
@@ -28,26 +31,21 @@ def process_hdr(fname):
     for key in hdr.keys():
         # Substitute spaces for underscores
         key_repl = key.replace(" ", "_")
-        if key_repl is not key:
+        if key_repl != key:
             hdr[key_repl] = hdr[key]
             del hdr[key]
+
+    # Add bil filename into header
+    hdr["filename"] = os.path.splitext(fname)[0]
 
     return hdr
 
 
-# Reads a BIL file and returns a list containing the data from the file
-# dataformat: Format string for data, as Python struct definitionN
-def readBil(filename, numlines, pixperline, numbands, dataformat="<d"):
-
-    if (not os.path.isfile(filename)):
-        raise ValueError("Supplied filename \"%s\" does not exist" %
-                         (str(filename)))
-
-    # Check given format string is valid
-    try:
-        bytesperpix = struct.calcsize(dataformat)
+def read_bil(filename, numlines, pixperline, numbands, unpack_fmt="<d"):
+    try:  # Check given format string is valid
+        bytesperpix = struct.calcsize(unpack_fmt)
     except:
-        raise ValueError("Supplied format \"%s\" is invalid" % str(dataformat))
+        raise ValueError("Supplied format \"%s\" is invalid" % str(unpack_fmt))
 
     # Check file size matches with size attributes
     fileinfo = os.stat(filename)
@@ -60,7 +58,7 @@ def readBil(filename, numlines, pixperline, numbands, dataformat="<d"):
 
     # Open the file for reading in binary mode
     try:
-        bilfile = open(filename, "rb")
+        bil = open(filename, "rb")
     except:
         print("Failed to open BIL file %s" % (filename))
         raise
@@ -79,50 +77,49 @@ def readBil(filename, numlines, pixperline, numbands, dataformat="<d"):
 
                 # Read one data item (pixel) from the data file.
                 # No error checking - we want this to fall over if it fails.
-                dataitem = bilfile.read(bytesperpix)
+                datum = bil.read(bytesperpix)
 
                 # If we get a blank string then hit EOF early, raise an error
-                if (dataitem == ""):
+                if (datum == ""):
                     raise EOFError("Unexpected EOF :(")
 
                 # If everything worked, unpack the binary value
                 # and store it in the appropriate pixel value
                 bands[bandnum][linenum].append(
-                    struct.unpack(dataformat, dataitem)[0])
+                    struct.unpack(unpack_fmt, datum)[0])
 
-    bilfile.close()
+    bil.close()
 
     return bands
 
 
-# Wrapper function for readBil/readBsq that allows you to omit the number of
-# pixels per line (works it out from the file size)
-def readyb(filename, bil_hdr, dataformat="<d"):
+def read_yb(bil_hdr, unpack_fmt="<d"):
+    numbands = int(bil_hdr["bands"])
+    numlines = int(bil_hdr["lines"])
+    filetype = bil_hdr["interleave"]
+    filename = bil_hdr["filename"]
+
     fileinfo = os.stat(filename)
     filesize = fileinfo[stat.ST_SIZE]
 
     # Check given format string is valid
     try:
-        bytesperpix = struct.calcsize(dataformat)
+        bytesperpix = struct.calcsize(unpack_fmt)
     except:
-        raise ValueError("Supplied format \"%s\" is invalid" % str(dataformat))
-
-    numbands = int(bil_hdr["bands"])
-    numlines = int(bil_hdr["lines"])
-    filetype = bil_hdr["interleave"]
+        raise ValueError("Supplied format \"%s\" is invalid" % str(unpack_fmt))
 
     pixperline = ((filesize / float(numbands)) /
                   float(numlines)) / float(bytesperpix)
 
-    # Should be an integer, if it's not then one of the given attributes
+    # Should be an integer, if not, then an attribute is wrong or file corrupt
     # is wrong or the file is corrupt
     if (numlines == int(numlines)):
         if (filetype == "bil"):
-            return readBil(filename,
-                           int(numlines),
-                           int(pixperline),
-                           int(numbands),
-                           dataformat)
+            return read_bil(filename,
+                            int(numlines),
+                            int(pixperline),
+                            int(numbands),
+                            unpack_fmt)
         else:
             raise ValueError("File type argument must be 'bil', got: %s"
                              % filetype)
@@ -130,58 +127,36 @@ def readyb(filename, bil_hdr, dataformat="<d"):
         raise ValueError("File size and supplied attributes do not match")
 
 
-# fn = "data/e134011b_nav_post_processed.bil"
-# fn = "data/e319011b_nav_post_processed.bil"
-fn = "data/e127a041b_nav_post_processed.bil"
-hdr_fn = "data/e127a041b_nav_post_processed.bil.hdr"
+def get_bil_nav(header_fname):
+    header = process_hdr(header_fname)
+    bil = read_yb(header)
 
-print(json.dumps(readyb(fn, process_hdr(hdr_fn)), indent=4))
+    pre_json = []
+    for l in xrange(int(header["lines"])):
+        st_point = {
+            "time": bil[0][l][0],
+            "lat": bil[1][l][0],
+            "lon": bil[2][l][0],
+            "alt": bil[3][l][0],
+            "roll": bil[4][l][0],
+            "pitch": bil[5][l][0],
+            "heading": bil[6][l][0]
+        }
+        pre_json.append(st_point)
 
-"""
+    output = format("out/%s.json" %
+                    (os.path.splitext(os.path.basename(header_fname))[0]))
 
-nlns = 23343
-nbands = 7
-bil = readyb(fn, nlns, nbands)
+    with open(output, 'w') as out:
+        out.write(json.dumps(pre_json, indent=4))
 
-pre_json = []
-for l in xrange(nlns):
-    st_point = {
-        "time": bil[0][l][0],
-        "lat": bil[1][l][0],
-        "lon": bil[2][l][0],
-        "alt": bil[3][l][0],
-        "roll": bil[4][l][0],
-        "pitch": bil[5][l][0],
-        "heading": bil[6][l][0]
-    }
-    pre_json.append(st_point)
-"""
 
-#with open("out.txt", 'w') as out:
-#    out.write(json.dumps(pre_json, indent=4))
+header_fnames = ["data/e134011b_nav_post_processed.bil.hdr",
+                 "data/e319011b_nav_post_processed.bil.hdr",
+                 "data/e127a041b_nav_post_processed.bil.hdr"]
 
-x = """<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://earth.google.com/kml/2.0">
-<Document>
-  <name>KML Example file</name>
-  <description>Simple markers</description>
 
-  <Placemark>
-    <name>ARSF Sample LineString</name>
-    <description>Sample coordinates extracted from BIL file</description>
-    <LineString>
-      <coordinates>
-"""
-
-z = """      </coordinates>
-    </LineString>
-  </Placemark>
-</Document>
-</kml>
-"""
-
-#with open("out.kml", 'w') as out:
-#    out.write(x)
-#    for i in pre_json:
-#        out.write(format("%f, %f, %fi\n" % (i["lon"], i["lat"], i["alt"])))
-#    out.write(z)
+if __name__ == '__main__':
+    for header_fname in header_fnames:
+        p = Process(target=get_bil_nav, args=(header_fname,))
+        p.start()
