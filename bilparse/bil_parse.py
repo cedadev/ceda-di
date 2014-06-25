@@ -103,8 +103,7 @@ def read_yb(bil_hdr, unpack_fmt="<d"):
     fileinfo = os.stat(filename)
     filesize = fileinfo[stat.ST_SIZE]
 
-    # Check given format string is valid
-    try:
+    try:  # Check given format string is valid
         bytesperpix = struct.calcsize(unpack_fmt)
     except:
         raise ValueError("Supplied format \"%s\" is invalid" % str(unpack_fmt))
@@ -112,7 +111,6 @@ def read_yb(bil_hdr, unpack_fmt="<d"):
     pixperline = int((filesize / numbands) / numlines) / bytesperpix
 
     # Should be an integer, if not, then an attribute is wrong or file corrupt
-    # is wrong or the file is corrupt
     if (numlines == int(numlines)):
         if (filetype == "bil"):
             return read_bil(filename,
@@ -131,18 +129,16 @@ def get_bil_nav(header_fname):
     header = process_hdr(header_fname)
     bil = read_yb(header)
 
-    pre_json = []
-    for l in xrange(int(header["lines"])):
-        st_point = {
-            "time": bil[0][l],
-            "lat": bil[1][l],
-            "lon": bil[2][l],
-            "alt": bil[3][l],
-            "roll": bil[4][l],
-            "pitch": bil[5][l],
-            "heading": bil[6][l]
-        }
-        pre_json.append(st_point)
+    swath_path = {
+        "lines": header["lines"],
+        "time": bil[0],
+        "lat": bil[1],
+        "lon": bil[2],
+        "alt": bil[3],
+        "roll": bil[4],
+        "pitch": bil[5],
+        "heading": bil[6]
+    }
 
     try:
         os.mkdir("out")
@@ -153,7 +149,7 @@ def get_bil_nav(header_fname):
                     (os.path.splitext(os.path.basename(header_fname))[0]))
 
     with open(output, 'w') as out:
-        out.write(json.dumps(pre_json, indent=4))
+        out.write(json.dumps(swath_path, indent=4))
 
 
 if __name__ == '__main__':
@@ -165,12 +161,12 @@ if __name__ == '__main__':
                     header_fname = os.path.join(root, f)
                     print(header_fname)
 
-                    p = multiprocessing.Process(
-                        target=get_bil_nav, args=(header_fname,))
+                    p = multiprocessing.Process(target=get_bil_nav,
+                                                args=(header_fname,))
                     procs.append(p)
 
-                    while len(procs) > 8:
-                        procs = [x for x in procs if x.is_alive()]
+                    while len(procs) > 10:
+                        procs = [x for x in procs if (x.exitcode is None)]
                         time.sleep(0.1)
 
                     p.start()
