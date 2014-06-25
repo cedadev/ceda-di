@@ -5,11 +5,12 @@
 
 from __future__ import division
 import json
-from multiprocessing import Process
+import multiprocessing
 import os
 import stat
 import struct
 import sys
+import time
 
 
 def process_hdr(fname):
@@ -154,13 +155,20 @@ def get_bil_nav(header_fname):
 
 
 if __name__ == '__main__':
+    procs = []
     for root, dirs, files in os.walk(sys.argv[1]):
         for f in files:
-            if (f.endswith(".hdr") and
-                ("nav" in f) and
-                    ("qual" not in f)):
-                header_fname = os.path.join(root, f)
-                print(header_fname)
+            if root.endswith("navigation"):
+                if (f.endswith(".hdr") and ("qual" not in f)):
+                    header_fname = os.path.join(root, f)
+                    print(header_fname)
 
-                p = Process(target=get_bil_nav, args=(header_fname,))
-                p.start()
+                    p = multiprocessing.Process(
+                        target=get_bil_nav, args=(header_fname,))
+                    procs.append(p)
+
+                    while len(procs) > 8:
+                        procs = [x for x in procs if x.is_alive()]
+                        time.sleep(1)
+
+                    p.start()
