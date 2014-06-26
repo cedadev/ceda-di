@@ -4,169 +4,137 @@
 # Original author: Ben Taylor (benj)
 
 from __future__ import division
-import json
-import multiprocessing
 import os
 import stat
 import struct
-import sys
-import time
 
 
-def process_hdr(fname):
-    with open(fname, 'r') as fh:
-        lines = fh.readlines()
+class BilFile:
+    """
+    BilFile constructor.
+    Params:
+        * header_path: Path to BIL header file.
 
-    hdr = {}
-    for line in lines:
-        # Ignore comments
-        if line.startswith(";"):
-            continue
+        * bil_path:    Path to BIL file. Guessed from header if not provided.
+                       Default: None
 
-        # Load keys into dict
-        split_ln = line.split("=")
-        if len(split_ln) > 1:
-            split_ln = [i.strip(" {}\r\n") for i in split_ln]
-            hdr.update({
-                split_ln[0]: split_ln[1]
-            })
+        * unpack_fmt:  C struct format string describing structure of data.
+                       Default: "<d" - little-endian, double precision
+    """
+    def __init__(self, header_path, bil_path=None, unpack_fmt="<d"):
+        self.hdr_path = header_path
 
-    for key in hdr.keys():
-        # Substitute spaces for underscores
-        key_repl = key.replace(" ", "_")
-        if key_repl != key:
-            hdr[key_repl] = hdr[key]
-            del hdr[key]
-
-    # Add bil filename into header
-    hdr["filename"] = os.path.splitext(fname)[0]
-
-    return hdr
-
-
-def read_bil(filename, numlines, pixperline, numbands, unpack_fmt="<d"):
-    try:  # Check given format string is valid
-        bytesperpix = struct.calcsize(unpack_fmt)
-    except:
-        raise ValueError("Supplied format \"%s\" is invalid" % str(unpack_fmt))
-
-    # Check file size matches with size attributes
-    fileinfo = os.stat(filename)
-    filesize = fileinfo[stat.ST_SIZE]
-
-    checknum = int((((filesize / numbands) /
-                   numlines) / bytesperpix) / pixperline)
-
-    if (checknum != 1):
-        raise ValueError("File size and supplied attributes do not match")
-
-    # Open the file for reading in binary mode
-    try:
-        bil = open(filename, "rb")
-    except:
-        print("Failed to open BIL file %s" % (filename))
-        raise
-
-    # Create a list of bands containing an empty list for each band
-    bands = [[] for i in xrange(0, numbands)]
-
-    for linenum in xrange(0, numlines):
-        for bandnum in xrange(0, numbands):
-            if (linenum == 0):
-                bands[bandnum] = [[] for i in xrange(0, numlines)]
-
-            for pixnum in xrange(0, pixperline):
-
-                # Read one data item (pixel) from the data file.
-                # No error checking - we want this to fall over if it fails.
-                datum = bil.read(bytesperpix)
-
-                # If we get a blank string then hit EOF early, raise an error
-                if (datum == ""):
-                    raise EOFError("Unexpected EOF :(")
-
-                # If everything worked, unpack the binary value
-                # and store it in the appropriate pixel value
-                bands[bandnum][linenum] = struct.unpack(unpack_fmt, datum)[0]
-
-    bil.close()
-
-    return bands
-
-
-def read_yb(bil_hdr, unpack_fmt="<d"):
-    numbands = int(bil_hdr["bands"])
-    numlines = int(bil_hdr["lines"])
-    filetype = bil_hdr["interleave"]
-    filename = bil_hdr["filename"]
-
-    fileinfo = os.stat(filename)
-    filesize = fileinfo[stat.ST_SIZE]
-
-    try:  # Check given format string is valid
-        bytesperpix = struct.calcsize(unpack_fmt)
-    except:
-        raise ValueError("Supplied format \"%s\" is invalid" % str(unpack_fmt))
-
-    pixperline = int((filesize / numbands) / numlines) / bytesperpix
-
-    # Should be an integer, if not, then an attribute is wrong or file corrupt
-    if (numlines == int(numlines)):
-        if (filetype == "bil"):
-            return read_bil(filename,
-                            int(numlines),
-                            int(pixperline),
-                            int(numbands),
-                            unpack_fmt)
+        if bil_path:
+            self.bil_path = bil_path
         else:
-            raise ValueError("File type argument must be 'bil', got: %s"
-                             % filetype)
-    else:
-        raise ValueError("File size and supplied attributes do not match")
+            self.bil_path = os.path.splitext(self.hdr_path)[0]
 
+        self.unpack_fmt = unpack_fmt
 
-def get_bil_nav(header_fname):
-    header = process_hdr(header_fname)
-    bil = read_yb(header)
+        # Try loading the header file
+        self.hdr = self.process_hdr()
 
-    swath_path = {
-        "lines": header["lines"],
-        "time": bil[0],
-        "lat": bil[1],
-        "lon": bil[2],
-        "alt": bil[3],
-        "roll": bil[4],
-        "pitch": bil[5],
-        "heading": bil[6]
-    }
+    """
+    Checks the format string for validity.
 
-    try:
-        os.mkdir("out")
-    except OSError:
-        pass
+    Return:
+        * The number of bytes for the data type specified in the format string.
+    """
+    def check_valid_fmt_string(self):
+        try:  # Check given format string is valid
+            num_bytes = struct.calcsize(self.unpack_fmt)
+        except:
+            raise ValueError("Supplied format \"%s\" is invalid" %
+                             str(self.unpack_fmt))
 
-    output = format("out/%s.json" %
-                    (os.path.splitext(os.path.basename(header_fname))[0]))
+        return num_bytes
 
-    with open(output, 'w') as out:
-        out.write(json.dumps(swath_path, indent=4))
+    """
+    Parses the provided header file.
 
+    Return:
+        * A dict, containing header file parsed into key/value pairs.
+    """
+    def process_hdr(self):
+        with open(self.hdr_path, 'r') as fh:
+            lines = fh.readlines()
 
-if __name__ == '__main__':
-    procs = []
-    for root, dirs, files in os.walk(sys.argv[1]):
-        for f in files:
-            if root.endswith("navigation"):
-                if (f.endswith(".hdr") and ("qual" not in f)):
-                    header_fname = os.path.join(root, f)
-                    print(header_fname)
+        hdr = {}
+        for line in lines:
+            # Ignore comments
+            if line.startswith(";"):
+                continue
 
-                    p = multiprocessing.Process(target=get_bil_nav,
-                                                args=(header_fname,))
-                    procs.append(p)
+            # Load keys into dict
+            split_ln = line.split("=")
+            if len(split_ln) > 1:
+                split_ln = [i.strip(" {}\r\n") for i in split_ln]
+                hdr.update({
+                    split_ln[0]: split_ln[1]
+                })
 
-                    while len(procs) > 10:
-                        procs = [x for x in procs if (x.exitcode is None)]
-                        time.sleep(0.1)
+        return hdr
 
-                    p.start()
+    """
+    Reads the BIL file binary data from information provided in the header.
+
+    Return:
+        * A 2-dimensional list containing the data from the BIL file.
+    """
+    def read_bil(self):
+        filename = self.hdr["filename"]
+        bands = self.hdr["bands"]
+        lines = self.hdr["lines"]
+
+        try:
+            filesize = self.hdr["filesize"]
+            pixperline = self.hdr["pixperline"]
+        except KeyError:
+            filesize = os.stat(self.bil_path)[stat.ST_SIZE]
+            bytesperpix = self.check_valid_fmt_string()
+
+        # Check file size matches with size attributes
+        checknum = int((((filesize / bands) /
+                       lines) / bytesperpix) / pixperline)
+
+        if (checknum != 1):
+            raise ValueError("File size and supplied attributes do not match")
+
+        with open(filename, 'rb') as bil:
+            # Create a list of bands containing an empty list for each band
+            bands = []
+            for i in xrange(0, bands):
+                bands.append([])
+                bands[i] = [[] for j in xrange(0, lines)]
+
+            for linenum in xrange(0, lines):
+                for bandnum in xrange(0, bands):
+                    for pixnum in xrange(0, pixperline):
+                        # Read one data item (pixel) from the data file.
+                        datum = bil.read(bytesperpix)
+
+                        # If we get a blank string then we hit EOF unexpectedly
+                        if (datum == ""):
+                            raise EOFError("Unexpected EOF :(")
+
+                        # If everything worked, unpack the binary value
+                        # and store it in the appropriate pixel value
+                        bands[bandnum][linenum] = \
+                            struct.unpack(self.unpack_fmt, datum)[0]
+
+        return bands
+
+    """
+    Calculates the number of pixels per line based on file size.
+    """
+    def calc_from_yb(self):
+        bands = int(self.hdr["bands"])
+        lines = int(self.hdr["lines"])
+
+        filesize = os.stat(self.bil_path)[stat.ST_SIZE]
+        bytesperpix = self.check_valid_fmt_string()
+        pixperline = int((filesize / bands) / lines) / bytesperpix
+
+        self.hdr["pixperline"] = pixperline
+        self.hdr["bytesperpix"] = bytesperpix
+        self.hdr["filesize"] = filesize
