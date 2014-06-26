@@ -4,12 +4,18 @@ import json
 import multiprocessing
 import os
 import time
-import bilparse.bilfile as libbil
+import lib_bil.bilfile as bilfile
+
+
+def reprint(line):
+    # http://stackoverflow.com/a/12586667
+    CURSOR_UP = '\x1b[1A'
+    ERASE_LINE = '\x1b[2K'
+    print("%s%s%s" % (CURSOR_UP, ERASE_LINE, line))
 
 
 def get_bil_nav(header_fname):
-    b = libbil.BilFile(header_fname)
-    b.calc_from_yb()
+    b = bilfile.BilFile(header_fname)
     bil = b.read_bil()
 
     swath_path = {
@@ -36,21 +42,27 @@ if __name__ == '__main__':
     except OSError:
         pass
 
+    # Indexing
+    data_files = []  # List of viable data files
     procs = []  # List of processes
     for root, dirs, files in os.walk("/neodc/arsf/2011/"):
         for f in files:
             if root.endswith("navigation"):
                 if (f.endswith(".hdr") and ("qual" not in f)):
-                    header_fname = os.path.join(root, f)
-                    print(header_fname)
+                    header_fpath = os.path.join(root, f)
+                    data_files.append(header_fpath)
+                    reprint("%d files indexed." % (len(data_files)))
 
-                    p = multiprocessing.Process(target=get_bil_nav,
-                                                args=(header_fname,))
-                    procs.append(p)
+    # Process the header files
+    print()
+    for header_fpath in data_files:
+        reprint("Processing: %s" % (os.path.basename(header_fpath)))
+        p = multiprocessing.Process(target=get_bil_nav,
+                                    args=(header_fpath,))
+        procs.append(p)
 
-                    while len(procs) > 10:
-                        procs = [x for x in procs if (x.exitcode is None)]
-                        time.sleep(0.1)
+        while len(procs) > 10:
+            procs = [x for x in procs if (x.exitcode is None)]
+            time.sleep(0.1)
 
-                    p.start()
-                    p.join()
+        p.start()
