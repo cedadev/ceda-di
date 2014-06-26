@@ -4,6 +4,7 @@ data/
 include/
 lib/
 local/
+man/
 out/
 
 *.pyc
