@@ -82,13 +82,14 @@ class BilFile:
         * A 2-dimensional list containing the data from the BIL file.
     """
     def read_bil(self):
-        filename = self.hdr["filename"]
-        bands = self.hdr["bands"]
-        lines = self.hdr["lines"]
+        filename = self.bil_path
+        bands = int(self.hdr["bands"])
+        lines = int(self.hdr["lines"])
+        pixperline = int(self.hdr["pixperline"])
 
         try:
             filesize = self.hdr["filesize"]
-            pixperline = self.hdr["pixperline"]
+            bytesperpix = self.hdr["bytesperpix"]
         except KeyError:
             filesize = os.stat(self.bil_path)[stat.ST_SIZE]
             bytesperpix = self.check_valid_fmt_string()
@@ -101,11 +102,11 @@ class BilFile:
             raise ValueError("File size and supplied attributes do not match")
 
         with open(filename, 'rb') as bil:
-            # Create a list of bands containing an empty list for each band
-            bands = []
+            # Pre-allocate list
+            bil_data = []
             for i in xrange(0, bands):
-                bands.append([])
-                bands[i] = [[] for j in xrange(0, lines)]
+                bil_data.append([])
+                bil_data[i] = [[] for j in xrange(0, lines)]
 
             for linenum in xrange(0, lines):
                 for bandnum in xrange(0, bands):
@@ -119,10 +120,10 @@ class BilFile:
 
                         # If everything worked, unpack the binary value
                         # and store it in the appropriate pixel value
-                        bands[bandnum][linenum] = \
+                        bil_data[bandnum][linenum] = \
                             struct.unpack(self.unpack_fmt, datum)[0]
 
-        return bands
+        return bil_data
 
     """
     Calculates the number of pixels per line based on file size.
