@@ -33,6 +33,10 @@ class BilFile:
 
         # Try loading the header file
         self.hdr = self.process_hdr()
+        
+        # Calculate pixels per line
+        if not self.hdr["pixperline"]:
+            self.calc_from_yb()
 
     """
     Checks the format string for validity.
@@ -136,6 +140,6 @@ class BilFile:
         bytesperpix = self.check_valid_fmt_string()
         pixperline = int((filesize / bands) / lines) / bytesperpix
 
-        self.hdr["pixperline"] = pixperline
         self.hdr["bytesperpix"] = bytesperpix
         self.hdr["filesize"] = filesize
+        self.hdr["pixperline"] = pixperline
