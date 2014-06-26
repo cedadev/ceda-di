@@ -35,7 +35,7 @@ class BilFile:
         self.hdr = self.process_hdr()
         
         # Calculate pixels per line
-        if not self.hdr["pixperline"]:
+        if not "pixperline" in self.hdr:
             self.calc_from_yb()
 
     """
