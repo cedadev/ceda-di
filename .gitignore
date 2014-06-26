@@ -5,3 +5,5 @@ include/
 lib/
 local/
 out/
+
+*.pyc
