@@ -1,14 +1,18 @@
 ﻿#! /usr/bin/env python
 
 import lib_cedata.bilfile as bilfile
-import numpy as np
-from mpl_toolkits.basemap import Basemap
+import matplotlib
 import matplotlib.pyplot as plt
+from mpl_toolkits.basemap import Basemap
 import multiprocessing
 import os
 
 
 def draw_map(data):
+    font = {'family' : 'sans-serif',
+            'size'   : 4}
+    matplotlib.rc('font', **font)
+
     lllat = lllon = urlat = urlon = None
     avg_lat = avg_lon = 0.0
     for key in data.keys():
@@ -24,21 +28,33 @@ def draw_map(data):
             elif lon < lllon or lllon is None:
                 lllon = lon
 
-    m = Basemap(projection='gall', resolution='f',
-                llcrnrlon=(lllon*1.1),
-                llcrnrlat=(lllat*1.05),
-                urcrnrlon=(urlon*1.1),
-                urcrnrlat=(urlat*1.05))
-    m.bluemarble()
+        avg_lat += sum(data[key]["lat"])/len(data[key]["lat"])
+        avg_lon += sum(data[key]["lon"])/len(data[key]["lon"])
+    avg_lat /= len(data.keys())
+    avg_lon /= len(data.keys())
+
+    left = (avg_lon - 2)
+    bottom = (avg_lat - 2)
+    right = (avg_lon + 2)
+    top = (avg_lat + 2)
+    m = Basemap(projection='gall',
+                resolution='f',
+                llcrnrlon=left,
+                llcrnrlat=bottom,
+                urcrnrlon=right,
+                urcrnrlat=top)
+    m.shadedrelief()
 
     if data is not None:
         for key in data.keys():
             coords = data[key]
-            ys = coords["lat"][0::50]
-            xs = coords["lon"][0::50]
-            m.plot(xs, ys, 'r-', lw=0.1, latlon=True)
-
-    plt.savefig("out.png", dpi=2048, bbox_inches='tight')
+            xs = coords["lon"][0::100]
+            ys = coords["lat"][0::100]
+            lbl = os.path.basename(key).split("_nav_post_processed.bil.hdr")[0]
+            m.plot(xs, ys, lw=0.5, latlon=True, label=lbl)
+    
+    plt.legend()
+    plt.savefig("out.png", dpi=320, bbox_inches='tight')
 
 
 def reprint(line):
@@ -76,7 +92,7 @@ if __name__ == '__main__':
     data_files = []  # List of viable data files
     procs = []  # List of processes
     print("")
-    for root, dirs, files in os.walk("/neodc/arsf/2011/"):
+    for root, dirs, files in os.walk("/neodc/arsf/2011/EM10_06/EM10_06-2011_260_Italy/hyperspectral"):
         for f in files:
             if root.endswith("navigation"):
                 if (f.endswith(".hdr") and ("qual" not in f)):
