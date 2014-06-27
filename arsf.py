@@ -1,10 +1,44 @@
 ﻿#! /usr/bin/env python
 
-import json
+import lib_cedata.bilfile as bilfile
+import numpy as np
+from mpl_toolkits.basemap import Basemap
+import matplotlib.pyplot as plt
 import multiprocessing
 import os
-import time
-import lib_bil.bilfile as bilfile
+
+
+def draw_map(data):
+    lllat = lllon = urlat = urlon = None
+    avg_lat = avg_lon = 0.0
+    for key in data.keys():
+        for lat in data[key]["lat"]:
+            if lat > urlat or urlat is None:
+                urlat = lat
+            elif lat < lllat or lllat is None:
+                lllat = lat
+
+        for lon in data[key]["lon"]:
+            if lon > urlon or urlon is None:
+                urlon = lon
+            elif lon < lllon or lllon is None:
+                lllon = lon
+
+    m = Basemap(projection='gall', resolution='f',
+                llcrnrlon=(lllon*1.1),
+                llcrnrlat=(lllat*1.05),
+                urcrnrlon=(urlon*1.1),
+                urcrnrlat=(urlat*1.05))
+    m.bluemarble()
+
+    if data is not None:
+        for key in data.keys():
+            coords = data[key]
+            ys = coords["lat"][0::50]
+            xs = coords["lon"][0::50]
+            m.plot(xs, ys, 'r-', lw=0.1, latlon=True)
+
+    plt.savefig("out.png", dpi=2048, bbox_inches='tight')
 
 
 def reprint(line):
@@ -14,7 +48,7 @@ def reprint(line):
     print("%s%s%s" % (CURSOR_UP, ERASE_LINE, line))
 
 
-def get_bil_nav(header_fname):
+def get_bil_nav(header_fname, multiproc_manager_dict):
     b = bilfile.BilFile(header_fname)
     bil = b.read_bil()
 
@@ -29,22 +63,19 @@ def get_bil_nav(header_fname):
         "heading": bil[6]
     }
 
-    output = format("out/%s.json" %
-                    (os.path.splitext(os.path.basename(header_fname))[0]))
+    multiproc_manager_dict[header_fname] = swath_path
 
-    with open(output, 'w') as out:
-        out.write(json.dumps(swath_path, indent=4))
+
+def wait_for_processes(proc_list, nprocs=0):
+    while len(proc_list) > nprocs:
+        proc_list = [x for x in proc_list if (x.is_alive())]
 
 
 if __name__ == '__main__':
-    try:
-        os.mkdir("out")
-    except OSError:
-        pass
-
     # Indexing
     data_files = []  # List of viable data files
     procs = []  # List of processes
+    print("")
     for root, dirs, files in os.walk("/neodc/arsf/2011/"):
         for f in files:
             if root.endswith("navigation"):
@@ -54,15 +85,17 @@ if __name__ == '__main__':
                     reprint("%d files indexed." % (len(data_files)))
 
     # Process the header files
-    print()
+    m = multiprocessing.Manager()
+    fdata = m.dict()
+    print("")
     for header_fpath in data_files:
         reprint("Processing: %s" % (os.path.basename(header_fpath)))
         p = multiprocessing.Process(target=get_bil_nav,
-                                    args=(header_fpath,))
+                                    args=(header_fpath, fdata,))
+
+        wait_for_processes(procs, 4)
         procs.append(p)
-
-        while len(procs) > 10:
-            procs = [x for x in procs if (x.exitcode is None)]
-            time.sleep(0.1)
-
         p.start()
+
+    wait_for_processes(procs, 0)
+    draw_map(fdata)
