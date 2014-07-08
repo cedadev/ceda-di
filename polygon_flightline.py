@@ -1,22 +1,37 @@
 ﻿#! /usr/bin/env python
 
 from __future__ import division
-import lib_cedata.bilfile as bilfile
 from math import asin, atan2, cos, degrees, pi, radians, sin
+from scipy.ndimage import gaussian_filter1d
+from scipy.spatial import ConvexHull
+
+import lib_cedata.bilfile as bilfile
+import matplotlib.pyplot as plt
+import numpy as np
+
 import multiprocessing
 import os
-from scipy.ndimage import gaussian_filter1d
 import time
 
 
 def reprint(line):
+    """
+        Prints text on the same line as the previous print statement.
+        :param str line: The text to print
+    """
     # http://stackoverflow.com/a/12586667
     CURSOR_UP = '\x1b[1A'
     ERASE_LINE = '\x1b[2K'
     print("%s%s%s" % (CURSOR_UP, ERASE_LINE, line))
 
 
-def get_bil_nav(header_fname, multiproc_manager_dict):
+def get_bil_nav(header_fname, mm_dict):
+    """
+        :param str header_fname: Filename of header file
+        :param multiprocessing.manager.dict mm_dict: Proc-safe dictionary
+                                    datatype provided by "multiprocessing"
+
+    """
     b = bilfile.BilFile(header_fname)
     bil = b.read_bil()
 
@@ -31,7 +46,7 @@ def get_bil_nav(header_fname, multiproc_manager_dict):
         "heading": bil[6]
     }
 
-    multiproc_manager_dict[header_fname] = swath_path
+    mm_dict[header_fname] = swath_path
 
 
 def wait_for_processes(proc_list, nprocs=0):
@@ -63,9 +78,6 @@ def gen_file_list(path):
                     header_fpath = os.path.join(root, f)
                     data_files.append(header_fpath)
                     reprint("%d file(s) indexed." % (len(data_files)))
-
-                if len(data_files) >= 3:
-                    return data_files
 
     return data_files
 
@@ -103,47 +115,6 @@ def latlon_offset(lat_dec, lon_dec, d_metres, tc_deg):
     return (degrees(lat), degrees(lon))
 
 
-def output_kml_placemark(coord_string, name):
-    start = """  <Placemark>
-    <name>"""+name+"""</name>"""+"""
-    <LineString>
-      <coordinates>"""
-
-    end = """      </coordinates>
-    </LineString>
-  </Placemark>"""
-
-    return start+coord_string+end
-
-
-def output_kml_polygon(coord_string, name):
-    start = """  <Placemark>
-    <name>"""+name+"""</name>"""+"""
-    <Polygon>
-      <outerBoundaryIs>
-        <LinearRing>
-          <coordinates>"""
-
-    end = """          </coordinates>
-        </LinearRing>
-      </outerBoundaryIs>
-    </Polygon>
-  </Placemark>"""
-
-    return start+coord_string+end
-
-
-def output_kml_header():
-    return """<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
-<Document>
-"""
-
-
-def output_kml_end():
-    return """</Document>
-</kml>"""
-
 if __name__ == '__main__':
     # Indexing
     data_files = gen_file_list("/neodc/arsf/2011/")
@@ -152,6 +123,7 @@ if __name__ == '__main__':
     procs = []
     m = multiprocessing.Manager()
     fdata = m.dict()
+
     print("")
     for header_fpath in data_files:
         reprint("Processing: %s" % (os.path.basename(header_fpath)))
@@ -164,46 +136,15 @@ if __name__ == '__main__':
 
     wait_for_processes(procs, 0)
 
-    orig = []
-    front = []
-    back = []
-    pos = fdata[fdata.keys()[1]]
-    for i in xrange(0, int(pos["lines"])):
-        if i % 50 == 0:
-            front_latlon = latlon_offset(float(pos["lat"][i]),
-                                         float(pos["lon"][i]),
-                                         (0.34 * float(pos["alt"][i])),
-                                         float(pos["heading"][i]))
+    coords = []
+    for key in fdata.keys():
+        file_coords = zip(fdata[key]["lat"], fdata[key]["lon"])
+        plt.plot(file_coords, 'ko')
+        coords.extend(file_coords)
+    np_coords = np.array(coords)
 
-            back_latlon = latlon_offset(float(pos["lat"][i]),
-                                        float(pos["lon"][i]),
-                                        (-0.34 * float(pos["alt"][i])),
-                                        float(pos["heading"][i]))
+    c = ConvexHull(np_coords)
+    for simplex in c.simplices:
+        plt.plot(np_coords[simplex, 0], np_coords[simplex, 1], 'k--')
 
-            back.append(back_latlon)
-            front.append(front_latlon)
-            orig.append((pos["lat"][i], pos["lon"][i]))
-
-    # Gaussian filter to smooth out bounds
-    sigma = 5
-
-    fr_lat = [x[0] for x in front]
-    fr_lon = [x[1] for x in front]
-    front = zip(gaussian_filter1d(fr_lat, sigma), gaussian_filter1d(fr_lon, sigma))
-
-    bk_lat = [x[0] for x in back]
-    bk_lon = [x[1] for x in back]
-    back = zip(gaussian_filter1d(bk_lat, sigma), gaussian_filter1d(bk_lon, sigma))
-
-with open("linestrings.kml", 'w') as f:
-    f.write(output_kml_header())
-    f.write(output_kml_placemark("\n".join([("%f, %f" % (x[1], x[0])) for x in orig]), "orig"))
-    f.write(output_kml_placemark("\n".join([("%f, %f" % (x[1], x[0])) for x in front]), "front"))
-    f.write(output_kml_placemark("\n".join([("%f, %f" % (x[1], x[0])) for x in back]), "back"))
-    f.write(output_kml_end())
-
-with open("polygon.kml", 'w') as f:
-    f.write(output_kml_header())
-    f.write(output_kml_polygon("\n".join([("%f, %f" % (x[1], x[0])) for x in front]) +
-            "\n".join([("%f, %f" % (x[1], x[0])) for x in back]), "polygon"))
-    f.write(output_kml_end())
+    plt.savefig("out.png")
