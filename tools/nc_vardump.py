@@ -1,19 +1,23 @@
 ﻿#! /usr/bin/env python
 
-from netCDF4 import Dataset
+import datetime
 import json
+import netCDF4
 import os
 import sys
 
+
+def iter_attributes(nc):
+    sep = ": "
+    for i in nc.ncattrs():
+        yield (i, sep, getattr(nc, i))
+
+
 for arg in sys.argv[1:]:
-    output_fname = os.path.splitext(os.path.basename(arg))[0]
-    output_fname += ".json"
-    with open(output_fname, 'w') as f:
-        with Dataset(arg, 'r') as nc:
-            f.write(json.dumps(nc.variables,
-                               indent=4,
-                               sort_keys=True,
-                               default=repr))
-                               
-            for k, v in nc.variables.iteritems():
-                print k, type(v), v[0]
+    with netCDF4.Dataset(arg, 'r') as nc:
+        for k, s, v in iter_attributes(nc):
+            print k, s, v
+            
+        print "\n", ('-' * 20), "\n"
+        for k, v in nc.variables.iteritems():
+            print k, type(v), v[0]
