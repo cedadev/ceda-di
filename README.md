@@ -3,11 +3,12 @@ arsf-geo-map
 
 Python backend for extracting geospatial and temporal extent information
 from various EUFAR data formats, including:
-    * ENVI BIL
-    * ENVI BSQ
-    * NetCDF
-    * GeoTIFF (using EXIF metadata)
-    * and others
+
+* ENVI BIL
+* ENVI BSQ
+* NetCDF
+* GeoTIFF (using EXIF metadata)
+* and others
 
 The Python backend extracts the required data and outputs it as JSON documents,
 ready for ingest into CEDA's FatCat system and an ElasticSearch platform.

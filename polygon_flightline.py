@@ -5,7 +5,7 @@ from math import asin, atan2, cos, degrees, pi, radians, sin
 from scipy.ndimage import gaussian_filter1d
 from scipy.spatial import ConvexHull
 
-import eufar.bilfile as bilfile
+import eufar.envi as envi
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -32,7 +32,7 @@ def get_bil_nav(header_fname, mm_dict):
                                     datatype provided by "multiprocessing"
 
     """
-    b = bilfile.BilFile(header_fname)
+    b = envi.BilFile(header_fname)
     bil = b.read_bil()
 
     swath_path = {

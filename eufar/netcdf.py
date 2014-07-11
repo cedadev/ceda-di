@@ -28,10 +28,10 @@ ALT_NAMES = ["ALTITUDE", "ALT_GIN", "alt_alti_gps_25", "alt_alti_gps_1",
 
 def _get_netcdf_var_from_regex(regex, nc, flags=None):
     """
-    Returns the first matching variable from 'nc', that matches 'regex'.
+    Return the first matching variable from 'nc', that matches 'regex'.
 
     :param str(regex): Regex for variable name to match
-    :param NetCDF4.Dataset nc: NetCDF4 dataset to search for variables in
+    :param netCDF4.Dataset nc: NetCDF4 dataset to search for variables in
     :return str(var_name): The name of the first variable from var_list in nc
     """
     for var in nc.variables:
@@ -42,10 +42,10 @@ def _get_netcdf_var_from_regex(regex, nc, flags=None):
 
 def _get_netcdf_var_from_list(var_list, nc):
     """
-    Returns the first matching variable from 'var_list' that's in 'nc'.
+    Return the first matching variable from 'var_list' that's in 'nc'.
 
     :param list(str) var_list: List of variable names
-    :param NetCDF4.Dataset nc: NetCDF4 dataset to search for variables in
+    :param netCDF4.Dataset nc: NetCDF4 dataset to search for variables in
     :return str(var_name): The name of the first variable from var_list in nc
     """
     for var in var_list:
@@ -57,7 +57,15 @@ def _get_netcdf_var_from_list(var_list, nc):
 
 def _time_from_num_format(nc, tm_var):
     """
+    Return a 1-dimensional list of timestamps from the NetCDF file, calculated
+    from either epoch time, GPS time or Julian fractional time.
+    
+    :param netCDF4.Dataset nc: Dataset to extract timestamps from
+    :param str tm_var: Variable name for "time" in nc
+    :return list(datetime.datetime): List of datetime objects
     """
+    # TODO Julian fractional time
+    
     shape = nc.variables[tm_var].shape[0]
     if shape == 1:
         tm_list = list(nc.variables[tm_var][:].ravel())
@@ -97,6 +105,12 @@ def _time_from_num_format(nc, tm_var):
 
 def _time_from_str_format(nc, tm_var):
     """
+    Return a 1-dimensional list of timestamps from the NetCDF file, calculated
+    from an ISO-style timestamp (e.g. 2011-08-04 00:00:00).
+        
+    :param netCDF4.Dataset nc: Dataset to extract timestamps from
+    :param str tm_var: Variable name for "time" in nc
+    :return list(datetime.datetime): List of datetime objects
     """
     for tm_str in TIME_FORMATS:
         try:
@@ -115,6 +129,12 @@ def _time_from_str_format(nc, tm_var):
 
 def get_time_data(nc):
     """
+    Return a 1-dimensional list of timestamps from the NetCDF file.
+    Uses helper methods to do so.
+        
+    :param netCDF4.Dataset nc: Dataset to extract timestamps from
+    :param str tm_var: Variable name for "time" in nc
+    :return list(datetime.datetime): List of datetime objects
     """
     # If base_time isn't in the format we expect, we may have to calculate it
     tm_var = _get_netcdf_var_from_regex("time", nc, flags=re.IGNORECASE)
@@ -134,10 +154,10 @@ def get_time_data(nc):
 
 def get_geospatial(fname):
     """
-    Opens specified NetCDF file and extracts lat/lon/alt/timestamp data.
+    Open specified NetCDF file and extract lat/lon/alt/timestamp data.
 
     :param str fname: Filename of the NetCDF file to open
-    :returns: dict with lists of lat/lon/alt and timestamps for each file
+    :return dict: Dict with lists of lat/lon/alt and timestamps for each file
     """
 
     with Dataset(fname, 'r') as netcdf_data:

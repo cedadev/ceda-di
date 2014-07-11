@@ -36,8 +36,8 @@ class BilFile(_geospatial):
 
     def check_valid_fmt_string(self):
         """
-        Checks the format string for validity.
-        :return int Number of bytes needed for type in the format string:
+        Check the format string for validity.
+        :return int: Number of bytes needed for type in the format string
         """
         try:  # Check given format string is valid
             num_bytes = struct.calcsize(self.unpack_fmt)
@@ -49,8 +49,8 @@ class BilFile(_geospatial):
 
     def process_hdr(self):
         """
-        Parses the provided header file.
-        :return dict Header file parsed into key/value pairs:
+        Parse the provided header file.
+        :return dict: Header file parsed into key/value pairs
         """
         with open(self.hdr_path, 'r') as fh:
             lines = fh.readlines()
@@ -73,8 +73,8 @@ class BilFile(_geospatial):
 
     def read_bil(self):
         """
-        Reads the BIL file binary data from information provided in the header.
-        :return list(list()) A 2-d list containing the data from the BIL file:
+        Read the BIL file binary data from information provided in the header.
+        :return list(list()): A 2-d list containing the data from the BIL file
         """
         filename = self.bil_path
         bands = int(self.hdr["bands"])
@@ -121,7 +121,7 @@ class BilFile(_geospatial):
 
     def calc_from_yb(self):
         """
-        Calculates the number of pixels per line based on file size.
+        Calculate the number of pixels per line based on file size.
         """
         bands = int(self.hdr["bands"])
         lines = int(self.hdr["lines"])
