@@ -13,16 +13,17 @@ def iter_attributes(nc):
         yield (i, sep, getattr(nc, i))
         
         
-def dump_nc(nc):
+def dump(nc):
+    print("NetCDF Variable Summary")
     for k, s, v in iter_attributes(nc):
             print k, s, v
             
     print "\n", ('-' * 20), "\n"
     for k, v in nc.variables.iteritems():
-        print k, ": ", v[0]
+        print k, ": ", v
 
 
 if __name__ == "__main__":
     for arg in sys.argv[1:]:
         with netCDF4.Dataset(arg, 'r') as nc:
-            dump_nc(nc)
+            dump(nc)
