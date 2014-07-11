@@ -15,13 +15,13 @@ import tools.nc_dump
 TIME_FORMATS = ["seconds since %Y-%m-%d %H:%M:%S %z",
                 "seconds since %Y-%m-%d %H:%M:%S %Z",
                 "seconds since %Y-%m-%d %H:%M:%S 00:00 %Z"]
-                
+
 LAT_NAMES = ["GPS_LAT", "LAT_GIN", "pos_lat_gps_25", "pos_lat_gps_1",
              "pos_lat_airinspp_1", "GPS_LAT_NP", "Lat", "latitude"]
-             
+
 LON_NAMES = ["GPS_LON", "LON_GIN", "pos_lon_gps_25", "pos_lon_gps_1",
              "pos_lon_airinspp_1", "GPS_LON_NP", "Lon", "longitude"]
-             
+
 ALT_NAMES = ["ALTITUDE", "ALT_GIN", "alt_alti_gps_25", "alt_alti_gps_1",
              "alt_airinspp_1", "GPS_ALT_NP", "Alt", "height_above_sea_level"]
 
@@ -51,7 +51,7 @@ def _get_netcdf_var_from_list(var_list, nc):
     for var in var_list:
             if var in nc.variables:
                 return var
-                
+
     raise AttributeError("Could not find attribute in list: %s", var_list)
 
 
@@ -71,17 +71,17 @@ def _time_from_num_format(nc, tm_var):
             for j in xrange(0, shape):
                 time.append(int(times[i + j]))
             tm_list.append(dt(*time))
-            
+
         return tm_list
-        
+
     if hasattr(nc.variables[tm_var], "units"):
         # Tries to parse from epoch time
         tm_str = nc.variables[tm_var].units
     elif hasattr(nc, "date"):
         # Tries to parse from GPS time
         nc_date = re.match(r"(\d{2})/(\d{2})/(\d{4})", nc.date).groups()
-        tm_str = ("seconds since %s-%s-%s 00:00:00 UTC" % 
-                     (nc_date[2], nc_date[1], nc_date[0]))
+        tm_str = ("seconds since %s-%s-%s 00:00:00 UTC" %  # Continued
+                 (nc_date[2], nc_date[1], nc_date[0]))
 
     try:
         # Try converting the epoch/GPS timestamps to datetime objects here
@@ -102,8 +102,8 @@ def _time_from_str_format(nc, tm_var):
         try:
             tm_list = nc.variables[tm_var]
             base_time = dt.strptime(str(tm_list[0]), tm_str)
-            timestamps = [base_time + timedelta(seconds=int(sec))
-                             for sec in tm_list]
+            timestamps = [base_time + timedelta(seconds=int(sec))  # Continued
+                          for sec in tm_list]
             return timestamps
         except ValueError:
             # Variable isn't in the format we tried, so try next alternative
@@ -123,7 +123,7 @@ def get_time_data(nc):
     # If 'datum' is a numpy n-dimensional array then check type of first item
     if isinstance(datum, numpy.ndarray):
         datum = datum.flat[0]
-    
+
     # Is time a numeric time format? (epoch, GPS or Julian)
     if isinstance(datum, numpy.float32) or isinstance(datum, numpy.float64):
         return _time_from_num_format(nc, tm_var)
@@ -158,7 +158,7 @@ def get_geospatial(fname):
                 "lon": [float(x) for x in lon],
                 "lat": [float(x) for x in lat],
                 "alt": [float(x) for x in alt],
-                "time":[dt.isoformat(x) for x in timestamps]
+                "time": [dt.isoformat(x) for x in timestamps]
             }
 
             return finfo
@@ -172,7 +172,7 @@ if __name__ == "__main__":
         gps_info = get_geospatial(fname)
         print(fname)
 
-        out_name = "out/" + os.path.splitext(
-                                os.path.basename(fname))[0] + ".json"
+        root_fname = os.path.splitext(os.path.basename(fname))[0] + ".json"
+        out_name = "out/" + root_fname
         with open(out_name, 'w') as f:
             f.write(json.dumps(gps_info, indent=4))
