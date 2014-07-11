@@ -1,6 +1,6 @@
 ﻿#! /usr/bin/env python
 
-import lib_cedata.bilfile as bilfile
+import eufar.bilfile as bilfile
 import matplotlib.pyplot as plt
 import multiprocessing
 import os

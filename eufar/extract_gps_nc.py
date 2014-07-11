@@ -10,6 +10,7 @@ import re
 import sys
 import time
 
+# TODO move this lot to a config file
 TIME_FORMATS = ["seconds since %Y-%m-%d %H:%M:%S %z",
                 "seconds since %Y-%m-%d %H:%M:%S %Z",
                 "seconds since %Y-%m-%d %H:%M:%S 00:00 %Z"]
@@ -98,7 +99,7 @@ def get_time_data(nc):
 
 
 def get_lat_lon_alt_data(nc):
-    print "nope"
+    raise ValueError("Not implemented")
 
 
 def raw_gps_safire(fname):
