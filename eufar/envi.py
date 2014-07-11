@@ -29,7 +29,7 @@ class BilFile(_geospatial):
 
         # Try loading the header file
         self.hdr = self.process_hdr()
-        
+
         # Calculate pixels per line
         if not "pixperline" in self.hdr:
             self.calc_from_yb()
@@ -37,7 +37,7 @@ class BilFile(_geospatial):
     def check_valid_fmt_string(self):
         """
         Checks the format string for validity.
-        :return int The number of bytes needed for the data type in format string:
+        :return int Number of bytes needed for type in the format string:
         """
         try:  # Check given format string is valid
             num_bytes = struct.calcsize(self.unpack_fmt)
