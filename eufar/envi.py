@@ -4,12 +4,13 @@
 # Original author: Ben Taylor (benj)
 
 from __future__ import division
+from _datafile import _geospatial
 import os
 import stat
 import struct
 
 
-class BilFile:
+class BilFile(_geospatial):
     """
     BilFile constructor.
     Params:
