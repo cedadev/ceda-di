@@ -11,18 +11,13 @@ import struct
 
 
 class BilFile(_geospatial):
-    """
-    BilFile constructor.
-    Params:
-        * header_path: Path to BIL header file.
-
-        * bil_path:    Path to BIL file. Guessed from header if not provided.
-                       Default: None
-
-        * unpack_fmt:  C struct format string describing structure of data.
-                       Default: "<d" - little-endian, double precision
-    """
     def __init__(self, header_path, bil_path=None, unpack_fmt="<d"):
+        """
+        :param str header_path: Path to BIL header file.
+        :param str bil_path: Path to file. Guessed from header if not provided.
+        :param str unpack_fmt: Format string describing structure of data.
+                               Default: "<d" - little-endian, double precision
+        """
         self.hdr_path = header_path
 
         if bil_path:
@@ -39,13 +34,11 @@ class BilFile(_geospatial):
         if not "pixperline" in self.hdr:
             self.calc_from_yb()
 
-    """
-    Checks the format string for validity.
-
-    Return:
-        * The number of bytes for the data type specified in the format string.
-    """
     def check_valid_fmt_string(self):
+        """
+        Checks the format string for validity.
+        :return int The number of bytes needed for the data type in format string:
+        """
         try:  # Check given format string is valid
             num_bytes = struct.calcsize(self.unpack_fmt)
         except:
@@ -54,13 +47,11 @@ class BilFile(_geospatial):
 
         return num_bytes
 
-    """
-    Parses the provided header file.
-
-    Return:
-        * A dict, containing header file parsed into key/value pairs.
-    """
     def process_hdr(self):
+        """
+        Parses the provided header file.
+        :return dict Header file parsed into key/value pairs:
+        """
         with open(self.hdr_path, 'r') as fh:
             lines = fh.readlines()
 
@@ -80,13 +71,11 @@ class BilFile(_geospatial):
 
         return hdr
 
-    """
-    Reads the BIL file binary data from information provided in the header.
-
-    Return:
-        * A 2-dimensional list containing the data from the BIL file.
-    """
     def read_bil(self):
+        """
+        Reads the BIL file binary data from information provided in the header.
+        :return list(list()) A 2-d list containing the data from the BIL file:
+        """
         filename = self.bil_path
         bands = int(self.hdr["bands"])
         lines = int(self.hdr["lines"])
@@ -130,10 +119,10 @@ class BilFile(_geospatial):
 
         return bil_data
 
-    """
-    Calculates the number of pixels per line based on file size.
-    """
     def calc_from_yb(self):
+        """
+        Calculates the number of pixels per line based on file size.
+        """
         bands = int(self.hdr["bands"])
         lines = int(self.hdr["lines"])
 
