@@ -1,8 +1,8 @@
 from io import envi
-from io._datafile import _geospatial
+from _dataset import _geospatial
 
 class BIL(_geospatial):
-    def get_geospatial(header_fpath):
+    def get_geospatial(self, header_fpath):
         """
         :param str header_fpath: Filename of header file
         :return dict: A dict containing geospatial and temporal information
@@ -26,5 +26,5 @@ class BIL(_geospatial):
         
         
 class BSQ(_geospatial):
-    def get_geospatial(header_fpath):
+    def get_geospatial(self, header_fpath):
         raise NotImplementedError("Not implemented")
