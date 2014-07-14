@@ -4,13 +4,12 @@
 # Original author: Ben Taylor (benj)
 
 from __future__ import division
-from _datafile import _geospatial
 import os
 import stat
 import struct
 
 
-class BilFile(_geospatial):
+class BilFile():
     def __init__(self, header_path, bil_path=None, unpack_fmt="<d"):
         """
         :param str header_path: Path to BIL header file.
