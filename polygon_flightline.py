@@ -16,8 +16,8 @@ import time
 
 def reprint(line):
     """
-        Prints text on the same line as the previous print statement.
-        :param str line: The text to print
+    Print text on the same line as the previous print statement.
+    :param str line: The text to print
     """
     # http://stackoverflow.com/a/12586667
     CURSOR_UP = '\x1b[1A'
@@ -27,11 +27,11 @@ def reprint(line):
 
 def get_bil_nav(header_fname, mm_dict):
     """
-        :param str header_fname: Filename of header file
-        :param multiprocessing.manager.dict mm_dict: Proc-safe dictionary
-                                    datatype provided by "multiprocessing"
-
+    :param str header_fname: Filename of header file
+    :param multiprocessing.manager.dict mm_dict: Proc-safe dictionary
+                                datatype provided by "multiprocessing"
     """
+    
     b = envi.BilFile(header_fname)
     bil = b.read_bil()
 
@@ -51,11 +51,11 @@ def get_bil_nav(header_fname, mm_dict):
 
 def wait_for_processes(proc_list, nprocs=0):
     """
-        :param list proc_list: List of active processes
-        :param int n_procs: Number of processes desired in the list
+    :param list proc_list: List of active processes
+    :param int n_procs: Number of processes desired in the list
 
-        Waits for processes in proc_list to complete until there are 'n_procs'
-        processes remaining.
+    Wait for processes in proc_list to complete until there are 'n_procs'
+    processes remaining.
     """
     while len(proc_list) > nprocs:
         proc_list = [x for x in proc_list if (x.is_alive())]
@@ -64,10 +64,10 @@ def wait_for_processes(proc_list, nprocs=0):
 
 def gen_file_list(path):
     """
-        :param str path: Path of directory to walk
-        :returns: list -- List of files in tree
+    :param str path: Path of directory to walk
+    :returns: list -- List of files in tree
 
-        Recursively walks a directory tree, returning a list of files.
+    Recursively walk a directory tree, returning a list of files.
     """
     data_files = []  # List of viable data files
     print("")
@@ -84,13 +84,13 @@ def gen_file_list(path):
 
 def latlon_offset(lat_dec, lon_dec, d_metres, tc_deg):
     """
-        :param float lat_dec: Decimal latitude of the point to offset
-        :param float lon_dec: Decimal longitude of the point to offset
-        :param float d_metres: Distance to offset the coordinate by (metres)
-        :param float tc_deg: Direction to offset point (degrees)
-        :returns: (float, float) -- Offset decimal latitude and longitude
+    :param float lat_dec: Decimal latitude of the point to offset
+    :param float lon_dec: Decimal longitude of the point to offset
+    :param float d_metres: Distance to offset the coordinate by (metres)
+    :param float tc_deg: Direction to offset point (degrees)
+    :return: (float, float) -- Offset decimal latitude and longitude
 
-        Calculates coordinates of a point offset by a certain distance
+        Calculate coordinates of a point offset by a certain distance
         See: http://williams.best.vwh.net/avform.htm#LL
     """
 
