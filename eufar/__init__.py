@@ -1,3 +1,3 @@
 #! /usr/bin/env python
 
-__all__ = ["bilfile", "extract_gps_nc"]
+__all__ = ["extract_gps_nc"]

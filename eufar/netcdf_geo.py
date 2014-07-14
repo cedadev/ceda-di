@@ -83,10 +83,10 @@ def _time_from_num_format(nc, tm_var):
         return tm_list
 
     if hasattr(nc.variables[tm_var], "units"):
-        # Tries to parse from epoch time
+        # Try to parse from epoch time
         tm_str = nc.variables[tm_var].units
     elif hasattr(nc, "date"):
-        # Tries to parse from GPS time
+        # Try to parse from GPS time
         nc_date = re.match(r"(\d{2})/(\d{2})/(\d{4})", nc.date).groups()
         tm_str = ("seconds since %s-%s-%s 00:00:00 UTC" %  # Continued
                  (nc_date[2], nc_date[1], nc_date[0]))
