@@ -13,7 +13,7 @@ import time
 import tools.nc_dump
 
 
-class NetCDFGeo(_geospatial):
+class NetCDF(_geospatial):
     TIME_FORMATS = ["seconds since %Y-%m-%d %H:%M:%S %z",
                     "seconds since %Y-%m-%d %H:%M:%S %Z",
                     "seconds since %Y-%m-%d %H:%M:%S 00:00 %Z"]
@@ -27,6 +27,9 @@ class NetCDFGeo(_geospatial):
     ALT_NAMES = ["ALTITUDE", "ALT_GIN", "alt_alti_gps_25",
                  "alt_alti_gps_1", "alt_airinspp_1", "GPS_ALT_NP",
                  "Alt", "height_above_sea_level"]
+
+    def __init__(self, fpath):
+        self.fpath = fpath
 
     def _get_netcdf_var_from_regex(self, regex, nc, flags=None):
         """
@@ -66,17 +69,17 @@ class NetCDFGeo(_geospatial):
         """
         # TODO Julian fractional time
 
-        shape = nc.variables[tm_var].shape[0]
-        if shape == 1:
+        shape = nc.variables[tm_var].shape
+        if len(shape) <= 1:
             tm_list = list(nc.variables[tm_var][:].ravel())
         else:
             # If this is reached, the times are in a strange numpy.ndarray
             # Here, we convert to datetime objects (small loss of precision)
             times = list(nc.variables[tm_var][:].ravel(order='F'))
             tm_list = []
-            for i in xrange(0, len(times), shape):
+            for i in xrange(0, len(times), shape[0]):
                 time = []
-                for j in xrange(0, shape):
+                for j in xrange(0, shape[0]):
                     time.append(int(times[i + j]))
                 tm_list.append(dt(*time))
 
@@ -134,7 +137,8 @@ class NetCDFGeo(_geospatial):
         :return list(datetime.datetime): List of datetime objects
         """
         # If base_time isn't in expected format, we may have to calculate it
-        tm_var = _get_netcdf_var_from_regex("time", nc, flags=re.IGNORECASE)
+        tm_var = self._get_netcdf_var_from_regex("time",
+                                                 nc, flags=re.IGNORECASE)
         datum = nc.variables[tm_var][0]
 
         # If 'datum' is a numpy ndarray then check type of first item
@@ -144,34 +148,36 @@ class NetCDFGeo(_geospatial):
         # Is time a numeric time format? (epoch, GPS or Julian)
         if isinstance(datum, numpy.float32) or \
                 isinstance(datum, numpy.float64):
-            return _time_from_num_format(nc, tm_var)
+            return self._time_from_num_format(nc, tm_var)
 
         # If string, then time is timestamp
         elif isinstance(datum, str):
-            return _time_from_str_format(nc, tm_var)
+            return self._time_from_str_format(nc, tm_var)
 
-    def get_geospatial(self, fname):
+    def get_geospatial(self):
         """
         Open specified NetCDF file and extract lat/lon/alt/timestamp data.
 
-        :param str fname: Filename of the NetCDF file to open
         :return dict: Dict with lat/lon/alt and timestamp lists for each file
         """
 
-        with Dataset(fname, 'r') as netcdf_data:
-            timestamps = get_time_data(netcdf_data)
+        with Dataset(self.fpath, 'r') as netcdf_data:
+            timestamps = self.get_time_data(netcdf_data)
             try:
-                lon_var = _get_nc_var_from_list(self.LON_NAMES, netcdf_data)
+                lon_var = self._get_nc_var_from_list(self.LON_NAMES,
+                                                     netcdf_data)
                 lon = netcdf_data.variables[lon_var][:].ravel()[10:-10]
 
-                lat_var = _get_nc_var_from_list(self.LAT_NAMES, netcdf_data)
+                lat_var = self._get_nc_var_from_list(self.LAT_NAMES,
+                                                     netcdf_data)
                 lat = netcdf_data.variables[lat_var][:].ravel()[10:-10]
 
-                alt_var = _get_nc_var_from_list(self.ALT_NAMES, netcdf_data)
+                alt_var = self._get_nc_var_from_list(self.ALT_NAMES,
+                                                     netcdf_data)
                 alt = netcdf_data.variables[alt_var][:].ravel()[10:-10]
 
                 finfo = {
-                    "filename": os.path.basename(fname),
+                    "filename": os.path.basename(self.fpath),
                     "length": len(timestamps),
                     "lon": [float(x) for x in lon],
                     "lat": [float(x) for x in lat],
@@ -182,4 +188,4 @@ class NetCDFGeo(_geospatial):
                 return finfo
             except KeyError as k:
                 tools.nc_dump.dump(netcdf_data)
-                raise("\nKeyError: %s (%s)" % (str(k), fname))
+                raise("\nKeyError: %s (%s)" % (str(k), self.fpath))
