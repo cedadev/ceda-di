@@ -5,7 +5,7 @@ from math import asin, atan2, cos, degrees, pi, radians, sin
 from scipy.ndimage import gaussian_filter1d
 from scipy.spatial import ConvexHull
 
-import eufar.envi as envi
+import eufar.io.envi as envi
 import matplotlib.pyplot as plt
 import numpy as np
 
