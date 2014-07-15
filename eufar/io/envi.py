@@ -9,20 +9,26 @@ import stat
 import struct
 
 
-class BilFile():
-    def __init__(self, header_path, bil_path=None, unpack_fmt="<d"):
+class EnviFile(object):
+    """
+    x: Number of lines
+    y: Number of bands
+    z: Pixels per line
+    """
+    def __init__(self, header_path, path=None, unpack_fmt="<d"):
         """
-        :param str header_path: Path to BIL header file.
-        :param str bil_path: Path to file. Guessed from header if not provided.
+        :param str header_path: Path to header file.
+        :param str path: Path to file. Guessed from header if not provided.
         :param str unpack_fmt: Format string describing structure of data.
                                Default: "<d" - little-endian, double precision
         """
         self.hdr_path = header_path
 
-        if bil_path:
-            self.bil_path = bil_path
+        if path:
+            self.path = path
         else:
-            self.bil_path = os.path.splitext(self.hdr_path)[0]
+            print path
+            self.path = os.path.splitext(header_path)[0]
 
         self.unpack_fmt = unpack_fmt
 
@@ -31,7 +37,7 @@ class BilFile():
 
         # Calculate pixels per line
         if not "pixperline" in self.hdr:
-            self.calc_from_yb()
+            self.calc_from_xy()
 
     def check_valid_fmt_string(self):
         """
@@ -70,12 +76,26 @@ class BilFile():
 
         return hdr
 
-    def read_bil(self):
+    def calc_from_xy(self):
         """
-        Read the BIL file binary data from information provided in the header.
-        :return list(list()): A 2-d list containing the data from the BIL file
+        Calculate the number of pixels per line based on file size.
+        (See class docstring for definitions of x, y and z).
         """
-        filename = self.bil_path
+        bands = int(self.hdr["bands"])
+        lines = int(self.hdr["lines"])
+
+        filesize = os.stat(self.path)[stat.ST_SIZE]
+        bytesperpix = self.check_valid_fmt_string()
+        pixperline = int((filesize / bands) / lines) / bytesperpix
+
+        self.hdr["bytesperpix"] = bytesperpix
+        self.hdr["filesize"] = filesize
+        self.hdr["pixperline"] = pixperline
+
+    def read(self, x_size, y_size, z_size):
+        """
+        """
+        filename = self.path
         bands = int(self.hdr["bands"])
         lines = int(self.hdr["lines"])
         pixperline = int(self.hdr["pixperline"])
@@ -84,7 +104,7 @@ class BilFile():
             filesize = self.hdr["filesize"]
             bytesperpix = self.hdr["bytesperpix"]
         except KeyError:
-            filesize = os.stat(self.bil_path)[stat.ST_SIZE]
+            filesize = os.stat(self.path)[stat.ST_SIZE]
             bytesperpix = self.check_valid_fmt_string()
 
         # Check file size matches with size attributes
@@ -94,18 +114,18 @@ class BilFile():
         if (checknum != 1):
             raise ValueError("File size and supplied attributes do not match")
 
-        with open(filename, 'rb') as bil:
+        with open(filename, 'rb') as envi:
             # Pre-allocate list
-            bil_data = []
+            data = []
             for i in xrange(0, bands):
-                bil_data.append([])
-                bil_data[i] = [[] for j in xrange(0, lines)]
+                data.append([])
+                data[i] = [[] for j in xrange(0, lines)]
 
             for linenum in xrange(0, lines):
                 for bandnum in xrange(0, bands):
                     for pixnum in xrange(0, pixperline):
                         # Read one data item (pixel) from the data file.
-                        datum = bil.read(bytesperpix)
+                        datum = envi.read(bytesperpix)
 
                         # If we get a blank string then we hit EOF unexpectedly
                         if (datum == ""):
@@ -113,22 +133,18 @@ class BilFile():
 
                         # If everything worked, unpack the binary value
                         # and store it in the appropriate pixel value
-                        bil_data[bandnum][linenum] = \
+                        data[bandnum][linenum] = \
                             struct.unpack(self.unpack_fmt, datum)[0]
 
-        return bil_data
+        return data
 
-    def calc_from_yb(self):
-        """
-        Calculate the number of pixels per line based on file size.
-        """
-        bands = int(self.hdr["bands"])
-        lines = int(self.hdr["lines"])
 
-        filesize = os.stat(self.bil_path)[stat.ST_SIZE]
-        bytesperpix = self.check_valid_fmt_string()
-        pixperline = int((filesize / bands) / lines) / bytesperpix
+##############################
+class BilFile(EnviFile):
+    def __init__(self, header_path, path=None, unpack_fmt="<d"):
+	print header_path, path, unpack_fmt
+        super(BilFile, self).__init__(header_path, path, unpack_fmt)
 
-        self.hdr["bytesperpix"] = bytesperpix
-        self.hdr["filesize"] = filesize
-        self.hdr["pixperline"] = pixperline
+    def read(self):
+        super(BilFile, self).read(1, 2, 3)
+        print "yay"
