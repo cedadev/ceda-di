@@ -11,8 +11,8 @@ import struct
 
 class EnviFile(object):
     """
-    x: Number of lines
-    y: Number of bands
+    x: Number of bands
+    y: Number of lines
     z: Pixels per line
     """
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
@@ -27,7 +27,6 @@ class EnviFile(object):
         if path:
             self.path = path
         else:
-            print path
             self.path = os.path.splitext(header_path)[0]
 
         self.unpack_fmt = unpack_fmt
@@ -96,9 +95,6 @@ class EnviFile(object):
         """
         """
         filename = self.path
-        bands = int(self.hdr["bands"])
-        lines = int(self.hdr["lines"])
-        pixperline = int(self.hdr["pixperline"])
 
         try:
             filesize = self.hdr["filesize"]
@@ -108,9 +104,11 @@ class EnviFile(object):
             bytesperpix = self.check_valid_fmt_string()
 
         # Check file size matches with size attributes
+        bands = int(self.hdr["bands"])
+        lines = int(self.hdr["lines"])
+        pixperline = int(self.hdr["pixperline"])
         checknum = int((((filesize / bands) /
                        lines) / bytesperpix) / pixperline)
-
         if (checknum != 1):
             raise ValueError("File size and supplied attributes do not match")
 
@@ -121,9 +119,9 @@ class EnviFile(object):
                 data.append([])
                 data[i] = [[] for j in xrange(0, lines)]
 
-            for linenum in xrange(0, lines):
-                for bandnum in xrange(0, bands):
-                    for pixnum in xrange(0, pixperline):
+            for y in xrange(0, y_size):
+                for x in xrange(0, x_size):
+                    for z in xrange(0, z_size):
                         # Read one data item (pixel) from the data file.
                         datum = envi.read(bytesperpix)
 
@@ -133,7 +131,7 @@ class EnviFile(object):
 
                         # If everything worked, unpack the binary value
                         # and store it in the appropriate pixel value
-                        data[bandnum][linenum] = \
+                        data[x][y] = \
                             struct.unpack(self.unpack_fmt, datum)[0]
 
         return data
@@ -142,9 +140,9 @@ class EnviFile(object):
 ##############################
 class BilFile(EnviFile):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
-	print header_path, path, unpack_fmt
         super(BilFile, self).__init__(header_path, path, unpack_fmt)
 
     def read(self):
-        super(BilFile, self).read(1, 2, 3)
-        print "yay"
+        super(BilFile, self).read(int(self.hdr["bands"]),
+                                  int(self.hdr["lines"]),
+                                  int(self.hdr["pixperline"]))
