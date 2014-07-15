@@ -1,7 +1,6 @@
 from io import envi
 from _dataset import _geospatial
 
-
 class BIL(_geospatial):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
         self.b = envi.BilFile(header_path, path, unpack_fmt)
@@ -12,9 +11,9 @@ class BIL(_geospatial):
         :return dict: A dict containing geospatial and temporal information
         """
 
-        bil = b.read_bil()
+        bil = self.b.read()
         swath_path = {
-            "lines": b.hdr["lines"],
+            "lines": self.b.hdr["lines"],
             "time": bil[0],
             "lat": bil[1],
             "lon": bil[2],
