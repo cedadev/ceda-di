@@ -78,7 +78,6 @@ class EnviFile(object):
     def calc_from_xy(self):
         """
         Calculate the number of pixels per line based on file size.
-        (See class docstring for definitions of x, y and z).
         """
         bands = int(self.hdr["bands"])
         lines = int(self.hdr["lines"])
@@ -93,6 +92,7 @@ class EnviFile(object):
 
     def read(self, x_size, y_size, z_size):
         """
+        See class docstring for x/y/z mappings.
         """
         filename = self.path
 
@@ -115,9 +115,9 @@ class EnviFile(object):
         with open(filename, 'rb') as envi:
             # Pre-allocate list
             data = []
-            for i in xrange(0, bands):
+            for i in xrange(0, x_size):
                 data.append([])
-                data[i] = [[] for j in xrange(0, lines)]
+                data[i] = [[] for j in xrange(0, y_size)]
 
             for y in xrange(0, y_size):
                 for x in xrange(0, x_size):
@@ -143,6 +143,6 @@ class BilFile(EnviFile):
         super(BilFile, self).__init__(header_path, path, unpack_fmt)
 
     def read(self):
-        super(BilFile, self).read(int(self.hdr["bands"]),
-                                  int(self.hdr["lines"]),
-                                  int(self.hdr["pixperline"]))
+        return super(BilFile, self).read(int(self.hdr["bands"]),
+                                         int(self.hdr["lines"]),
+                                         int(self.hdr["pixperline"]))
