@@ -1,3 +1,1 @@
-#! /usr/bin/env python
-
-__all__ = ["netcdf_geo", "envi_geo"]
+__all__ = ["envi_geo", "exif_geo", "netcdf_geo"]

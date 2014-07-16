@@ -1,6 +1,3 @@
-﻿#! /usr/bin/env python
-
-
 class _geospatial(object):
     def __init__(self):
         exception = \

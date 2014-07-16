@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 # Adapted from Axel's KML script (axll@faam.ac.uk)
 
 from datetime import timedelta, datetime as dt

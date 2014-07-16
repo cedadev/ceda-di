@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 # Taken and adapted from:
 # arsf-dan.nerc.ac.uk/trac/attachment/ticket/287/data_handler.py
 # Original author: Ben Taylor (benj)
@@ -137,7 +136,6 @@ class EnviFile(object):
         return data
 
 
-##############################
 class BilFile(EnviFile):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
         super(BilFile, self).__init__(header_path, path, unpack_fmt)
@@ -145,4 +143,13 @@ class BilFile(EnviFile):
     def read(self):
         return super(BilFile, self).read(int(self.hdr["bands"]),
                                          int(self.hdr["lines"]),
+                                         int(self.hdr["pixperline"]))
+                                         
+class BsqFile(EnviFile):
+    def __init__(self, header_path, path=None, unpack_fmt="<d"):
+        super(BsqFile, self).__init__(header_path, path, unpack_fmt)
+        
+    def read(self):
+        return super(BsqFile, self).read(int(self.hdr["lines"]),
+                                         int(self.hdr["bands"]),
                                          int(self.hdr["pixperline"]))
