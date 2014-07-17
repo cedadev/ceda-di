@@ -1,85 +1,49 @@
 from pyhdf.HDF import *
-from pyhdf.V   import *
-from pyhdf.VS  import *
-from pyhdf.SD  import *
+from pyhdf.V import *
+from pyhdf.VS import *
 import json
 import sys
 
-def describevg(refnum):
-    # Open vgroup in read mode.
+
+def dump_lat_lng(refnum, v, vs):
     vg = v.attach(refnum)
-    
+
     if vg._name != "Navigation":
         vg.detach()
         return
-    
-    # Read the contents of the vgroup.
-    members = vg.tagrefs()
 
-    lats, lngs = ([], [])
-
-    # Display info about each member.
-    index = -1
-    for tag, ref in members:
-        index += 1
-        # Vdata tag
-        if tag == HC.DFTAG_VH:
-            vd = vs.attach(ref)
-            nrecs, intmode, fields, size, name = vd.inquire()
-            
-            if "NVlat2" == name:
-                while True:
-                    try:
-                        rec = vd.read()       # read next record
-                        lats.append(rec[0][0])
-                    except HDF4Error:             # end of vdata reached
-                        break
-                        
-            elif "NVlng2" == name:
-                while True:
-                    try:
-                        rec = vd.read()       # read next record
-                        lngs.append(rec[0][0])
-                    except HDF4Error:             # end of vdata reached
-                        break
-           
-            vd.detach()
-            
-            nav_stuff = {
-                "lats": lats,
-                "lngs": lngs,
-            }
-            
-            with open("out.json", 'w') as f:
-                f.write(json.dumps(nav_stuff, indent=4))
-
-    # Close vgroup
+    coords = {}
+    for nav in ["NVlat2", "NVlng2"]:
+        ref = vs.find(nav)
+        vd = vs.attach(ref)
+        coords[nav] = []
+        while True:
+            try:
+                rec = vd.read()
+                coords[nav].append(rec[0][0])
+            except HDF4Error:
+                break
+        vd.detach()
     vg.detach()
 
-# Open HDF file in readonly mode.
-filename = sys.argv[1]
-hdf = HDF(filename)
+    return coords
 
-# Initialize the SD, V and VS interfaces on the file.
-sd = SD(filename)
+# Open HDF file and instantiate interfaces
+hdf = HDF(sys.argv[1])
 vs = hdf.vstart()
-v  = hdf.vgstart()
+v = hdf.vgstart()
 
-# Scan all vgroups in the file.
+# Check all vgroups, dump relevant data
+q = multiprocessing.Queue()
 ref = -1
-while 1:
+while True:
     try:
         ref = v.getid(ref)
-        describevg(ref)
-            
-    except HDF4Error as msg:    # no more vgroup
+        dump_lat_lng(ref, v, vs, q)
+    except HDF4Error:
         break
-    
 
-# Terminate V, VS and SD interfaces.
+# Close interfaces and HDF file
 v.end()
 vs.end()
-sd.end()
-
-# Close HDF file.
 hdf.close()
