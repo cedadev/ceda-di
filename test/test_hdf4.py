@@ -12,22 +12,17 @@ def describevg(refnum):
     if vg._name != "Navigation":
         vg.detach()
         return
-    
-    # Read the contents of the vgroup.
-    members = vg.tagrefs()
 
-    lats, lngs = ([], [])
-
-    # Display info about each member.
-    index = -1
-    for tag, ref in members:
-        index += 1
+    lats = lngs =[]
+    ref = vs.find("NVlat2")
+    for tag, ref in vg.tagrefs():
         # Vdata tag
         if tag == HC.DFTAG_VH:
             vd = vs.attach(ref)
             nrecs, intmode, fields, size, name = vd.inquire()
             
             if "NVlat2" == name:
+                print ref
                 while True:
                     try:
                         rec = vd.read()       # read next record
