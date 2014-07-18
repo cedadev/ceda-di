@@ -1,6 +1,7 @@
 bin/
 build/
 data/
+doc/
 include/
 lib/
 local/
