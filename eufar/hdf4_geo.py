@@ -1,49 +1,63 @@
 from pyhdf.HDF import *
 from pyhdf.V import *
 from pyhdf.VS import *
-import json
-import sys
 
+class HDF4_geo(object):
+    """
+    ARSF/EUFAR HDF4 Geospatial context manager
+    """
+    def __init__(self, fname):
+        self.fname = fname
+        
+    def __enter__(self):
+        # Open HDF file and interfaces
+        self.hdf = HDF(self.fname)
+        self.vs = self.hdf.vstart()
+        self.v = self.hdf.vgstart()
+        
+        return self
 
-def dump_lat_lng(refnum, v, vs):
-    vg = v.attach(refnum)
+    def __exit__(self, *args):
+        # Close interfaces and HDF file
+        self.v.end()
+        self.vs.end()
+        self.hdf.close()        
 
-    if vg._name != "Navigation":
-        vg.detach()
-        return
+    def get_coords(self, v, vs, fn):
+        mappings = {
+            "NVlat2": "lat",
+            "NVlng2": "lng",
+        }
+    
+        coords = {}
+        coords[fn] = {}
+        for k, v in mappings.iteritems():
+            ref = vs.find(k)
+            vd = vs.attach(ref)
+            
+            coords[fn][v] = []
+            while True:
+                try:
+                    coord = float(vd.read()[0][0]) / (10**7)
+                    coords[fn][v].append(coord)
+                except HDF4Error:  # End of file
+                    break
 
-    coords = {}
-    for nav in ["NVlat2", "NVlng2"]:
-        ref = vs.find(nav)
-        vd = vs.attach(ref)
-        coords[nav] = []
+            vd.detach()
+        return coords
+        
+    def get_geospatial(self):
+        ref = -1
         while True:
             try:
-                rec = vd.read()
-                coords[nav].append(rec[0][0])
+                ref = self.v.getid(ref)
+                vg = self.v.attach(ref)
+                
+                if vg._name == "Navigation":
+                    finfo = self.get_coords(self.v, self.vs, self.fname)
+                    vg.detach()
+                    return finfo
+                    
+                vg.detach()
             except HDF4Error:
                 break
-        vd.detach()
-    vg.detach()
-
-    return coords
-
-# Open HDF file and instantiate interfaces
-hdf = HDF(sys.argv[1])
-vs = hdf.vstart()
-v = hdf.vgstart()
-
-# Check all vgroups, dump relevant data
-q = multiprocessing.Queue()
-ref = -1
-while True:
-    try:
-        ref = v.getid(ref)
-        dump_lat_lng(ref, v, vs, q)
-    except HDF4Error:
-        break
-
-# Close interfaces and HDF file
-v.end()
-vs.end()
-hdf.close()
