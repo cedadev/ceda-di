@@ -3,6 +3,8 @@ build/
 data/
 doc/
 include/
+lib64/
+lib64
 lib/
 local/
 man/
