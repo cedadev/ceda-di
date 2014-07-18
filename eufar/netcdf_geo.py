@@ -29,6 +29,12 @@ class NetCDF(_geospatial):
 
     def __init__(self, fpath):
         self.fpath = fpath
+        
+    def __enter__(self):
+        return self
+        
+    def __exit__(self):
+        pass
 
     def _get_netcdf_var_from_regex(self, regex, nc, flags=None):
         """
