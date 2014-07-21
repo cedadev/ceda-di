@@ -6,7 +6,14 @@ class _geospatial(object):
 
         raise NotImplementedError(exception)
 
-    def get_geospatial(self):
+    def get_file_level(self, fpath):
+        file_level = {
+            "filename": os.path.basename(fpath),
+            "path": self.path,
+            "size": os.stat(fpath).st_size,
+        }
+
+	def get_geospatial(self):
         self.__init__()
 
     def get_temporal(self):
