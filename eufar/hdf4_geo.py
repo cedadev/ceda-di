@@ -23,7 +23,7 @@ class HDF4_geo(object):
 
         return self
 
-    def __exit__(self):
+    def __exit__(self, *args):
         """
         Close interfaces and HDF file after finishing use in context manager.
         """

@@ -33,7 +33,7 @@ class NetCDF(_geospatial):
     def __enter__(self):
         return self
 
-    def __exit__(self):
+    def __exit__(self, *args):
         pass
 
     def _get_netcdf_var_from_regex(self, regex, nc, flags=None):

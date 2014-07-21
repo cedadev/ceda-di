@@ -17,7 +17,7 @@ class BIL(_geospatial):
                               self.unpack_fmt)
         return self
 
-    def __exit__(self):
+    def __exit__(self, *args):
         pass
 
     def get_geospatial(self):
