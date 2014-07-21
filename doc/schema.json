@@ -33,13 +33,11 @@
         "temporal": {
             "type": "object",
             "description": "Start and end date time information associated with the file",
-            "properties": {
-                "start_time": "string",
-                "end_time": "string",
-                "time_step": "string",
-                "time_unit": "string",
-                "aggregation":  "boolean",
-            }
+            "start_time": "string",
+            "end_time": "string",
+            "time_step": "string",
+            "time_unit": "string",
+            "aggregation":  "boolean",
         },
         "parameters": {
             "type": "array",
@@ -56,10 +54,8 @@
         },
         "data_format": {
             "description": "Information on the format and version number of the data in the file",
-            "properties": {
-                "format": "string",
-                "version": "string",
-            }
+            "format": "string",
+            "version": "string",
         },
     }
 }
