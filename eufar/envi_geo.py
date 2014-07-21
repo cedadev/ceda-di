@@ -2,7 +2,31 @@ from io import envi
 from _dataset import _geospatial
 
 
-class BIL(_geospatial):
+class ENVI(_geospatial):
+    def __init__(self):
+        raise NotImplementedError("Do not instantiate this class. Use BIL/BSQ.")
+        
+    def get_geospatial(self):
+        """
+        :param str header_fpath: Filename of header file
+        :return dict: A dict containing geospatial and temporal information
+        """
+        
+        data = self.b.read()
+        swath_path = {
+            "lines": self.b.hdr["lines"],
+            "time": data[0],
+            "lat": data[1],
+            "lon": data[2],
+            "alt": data[3],
+            "roll": data[4],
+            "pitch": data[5],
+            "heading": data[6]
+        }
+
+        return swath_path
+
+class BIL(ENVI):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
         self.header_path = header_path
         self.path = path
@@ -20,29 +44,9 @@ class BIL(_geospatial):
 
     def __exit__(self, *args):
         pass
+        
 
-    def get_geospatial(self):
-        """
-        :param str header_fpath: Filename of header file
-        :return dict: A dict containing geospatial and temporal information
-        """
-
-        bil = self.b.read()
-        swath_path = {
-            "lines": self.b.hdr["lines"],
-            "time": bil[0],
-            "lat": bil[1],
-            "lon": bil[2],
-            "alt": bil[3],
-            "roll": bil[4],
-            "pitch": bil[5],
-            "heading": bil[6]
-        }
-
-        return swath_path
-
-
-class BSQ(_geospatial):
+class BSQ(ENVI):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
         self.header_path = header_path
         self.path = path
@@ -60,23 +64,3 @@ class BSQ(_geospatial):
 
     def __exit__(self):
         pass
-
-    def get_geospatial(self):
-        """
-        :param str header_fpath: Filename of header file
-        :return dict: A dict containing geospatial and temporal information
-        """
-
-        bil = self.b.read()
-        swath_path = {
-            "lines": self.b.hdr["lines"],
-            "time": bil[0],
-            "lat": bil[1],
-            "lon": bil[2],
-            "alt": bil[3],
-            "roll": bil[4],
-            "pitch": bil[5],
-            "heading": bil[6]
-        }
-
-        return swath_path
