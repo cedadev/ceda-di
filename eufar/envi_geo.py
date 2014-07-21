@@ -1,30 +1,31 @@
 from io import envi
 from _dataset import _geospatial
+import os
 
 
 class ENVI(_geospatial):
     def __init__(self):
         raise NotImplementedError("Do not instantiate this class. Use BIL/BSQ.")
-        
+
     def get_geospatial(self):
         """
         :param str header_fpath: Filename of header file
         :return dict: A dict containing geospatial and temporal information
         """
-        
-        data = self.b.read()
-        swath_path = {
+
+        self.data = self.b.read()
+        flightline = {
             "lines": self.b.hdr["lines"],
-            "time": data[0],
-            "lat": data[1],
-            "lon": data[2],
-            "alt": data[3],
-            "roll": data[4],
-            "pitch": data[5],
-            "heading": data[6]
+            "time": self.data[0],
+            "lat": self.data[1],
+            "lon": self.data[2],
+            "alt": self.data[3],
+            "roll": self.data[4],
+            "pitch": self.data[5],
+            "heading": self.data[6],
         }
 
-        return swath_path
+        return flightline
 
 class BIL(ENVI):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
@@ -42,9 +43,12 @@ class BIL(ENVI):
                               self.unpack_fmt)
         return self
 
+    def open(self):
+        __enter__()
+
     def __exit__(self, *args):
         pass
-        
+
 
 class BSQ(ENVI):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
@@ -61,6 +65,9 @@ class BSQ(ENVI):
                               self.path,
                               self.unpack_fmt)
         return self
+
+    def open(self):
+        __enter__()
 
     def __exit__(self):
         pass
