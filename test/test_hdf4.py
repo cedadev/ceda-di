@@ -1,80 +1,18 @@
-from pyhdf.HDF import *
-from pyhdf.V   import *
-from pyhdf.VS  import *
-from pyhdf.SD  import *
+from eufar.hdf4_geo import *
 import json
-import sys
 
-def describevg(refnum):
-    # Open vgroup in read mode.
-    vg = v.attach(refnum)
-    
-    if vg._name != "Navigation":
-        vg.detach()
-        return
+with open("files.txt", 'r') as f:
+    files = f.readlines()[:5]
+    files = map(str.rstrip, files)
 
-    lats = lngs =[]
-    ref = vs.find("NVlat2")
-    for tag, ref in vg.tagrefs():
-        # Vdata tag
-        if tag == HC.DFTAG_VH:
-            vd = vs.attach(ref)
-            nrecs, intmode, fields, size, name = vd.inquire()
-            
-            if "NVlat2" == name:
-                print ref
-                while True:
-                    try:
-                        rec = vd.read()       # read next record
-                        lats.append(rec[0][0])
-                    except HDF4Error:             # end of vdata reached
-                        break
-                        
-            elif "NVlng2" == name:
-                while True:
-                    try:
-                        rec = vd.read()       # read next record
-                        lngs.append(rec[0][0])
-                    except HDF4Error:             # end of vdata reached
-                        break
-           
-            vd.detach()
-            
-            nav_stuff = {
-                "lats": lats,
-                "lngs": lngs,
-            }
-            
-            with open("out.json", 'w') as f:
-                f.write(json.dumps(nav_stuff, indent=4))
+finfo = {}
+for f in files:
+    with HDF4_geo(f) as hdf:
+        finfo.update(hdf.get_geospatial())
 
-    # Close vgroup
-    vg.detach()
-
-# Open HDF file in readonly mode.
-filename = sys.argv[1]
-hdf = HDF(filename)
-
-# Initialize the SD, V and VS interfaces on the file.
-sd = SD(filename)
-vs = hdf.vstart()
-v  = hdf.vgstart()
-
-# Scan all vgroups in the file.
-ref = -1
-while 1:
-    try:
-        ref = v.getid(ref)
-        describevg(ref)
-            
-    except HDF4Error as msg:    # no more vgroup
-        break
-    
-
-# Terminate V, VS and SD interfaces.
-v.end()
-vs.end()
-sd.end()
-
-# Close HDF file.
-hdf.close()
+with open("out.csv", 'w') as f:
+    for k, v in finfo.iteritems():
+        f.write("latitude,longitude\n")
+        for i in xrange(0, len(v["lat"])):
+            if (i % 2 == 0):
+                f.write("%f,%f\n" % (v["lat"][i], v["lng"][i]))
