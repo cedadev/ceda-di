@@ -1,0 +1,65 @@
+{
+    "$schema": "http://json-schema.org/draft-03/schema#",
+    "author": "Steve Donegan (steve.donegan@stfc.ac.uk)",
+    "modified": "Charles Newey (charles.newey@stfc.ac.uk)",
+    "description": "File level EUFAR metadata product",
+    "properties": {
+        "file": {
+            "description": "Basic archive information for the data file",
+            "filename": "string",
+            "path": "string",
+            "size": "integer",
+            "corrupt": "string",
+            "status": "string",
+        },
+        "spatial": {
+            "description": "Spatial data extracted from the data file",
+            "geometries": {
+                "description": "Spatial information provided in WKT format",
+                "reference": "string",
+                "aggregation": "boolean",
+                "geometry_wkt": "string",
+            },
+            "identifier": {
+                "description": "Information on spatial identifiers associated with the data file",
+                "abs_id": "string",
+                "rel_id": "string",
+                "x_id": "string",
+                "y_id": "string",
+                "format": "string",
+                "location_name": "string",
+            }
+        },
+        "temporal": {
+            "type": "object",
+            "description": "Start and end date time information associated with the file",
+            "properties": {
+                "start_time": "string",
+                "end_time": "string",
+                "time_step": "string",
+                "time_unit": "string",
+                "aggregation":  "boolean",
+            }
+        },
+        "parameters": {
+            "type": "array",
+            "description": "All parameters associated with the file",
+            "items": {"key": "value"},
+        },
+        "data_processing_level": {
+            "description": "Processing level of the data in the file i.e L1, L2 etc",
+            "level": "string",
+        },
+        "data_type":  {
+            "description": "Type of data held by the file i.e. scene or model",
+            "type": "string",
+        },
+        "data_format": {
+            "description": "Information on the format and version number of the data in the file",
+            "properties": {
+                "format": "string",
+                "version": "string",
+            }
+        },
+    }
+}

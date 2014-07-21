@@ -6,7 +6,7 @@ class Properties(object):
                  temporal=None, parameters=None, data_format=None):
         """
         Construct a eufar.metadata.Properties object with data conforming to
-        Steve Donegan's FatCat JSON metadata structure
+        Steve Donegan's FatCat JSON metadata structure.
         (see "arsf-geo-map/doc/schema.json")
         """
 
@@ -16,7 +16,7 @@ class Properties(object):
         self.parameters = parameters
         self.data_format = data_format
 
-    def to_json():
+    def __str__():
         properties = {
             "file": {
                 "properties": self.file_level,
