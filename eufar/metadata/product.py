@@ -5,17 +5,18 @@ class Properties(object):
     def __init__(self, file_level=None, spatial=None,
                  temporal=None, parameters=None, data_format=None):
         """
-        Construct a eufar.metadata.Properties object with data conforming to
-        Steve Donegan's FatCat JSON metadata structure.
+        Construct a eufar.metadata.Properties object with data conforming
+        to Steve Donegan's FatCat JSON metadata structure.
         (see "arsf-geo-map/doc/schema.json")
         """
+        # TODO document parameters
 
         self.file_level = file_level
-        self.spatial = spatial
+        self.spatial = _geospatial_list_to_wkt(spatial)
         self.temporal = temporal
         self.parameters = parameters
         self.data_format = data_format
-        
+
     def _geospatial_list_to_wkt(self):
         raise NotImplementedError("Not implemented yet.")
 
