@@ -9,6 +9,9 @@ class BIL(_geospatial):
         self.unpack_fmt = unpack_fmt
 
     def __enter__(self):
+        """
+        Used to set up file when used in context manager.
+        """
         self.b = envi.BilFile(self.header_path,
                               self.path,
                               self.unpack_fmt)
@@ -45,6 +48,9 @@ class BSQ(_geospatial):
         self.unpack_fmt = unpack_fmt
 
     def __enter__(self):
+        """
+        Used to set up file as context manager.
+        """
         self.b = envi.BsqFile(self.header_path,
                               self.path,
                               self.unpack_fmt)

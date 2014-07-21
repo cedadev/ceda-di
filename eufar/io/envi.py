@@ -138,18 +138,30 @@ class EnviFile(object):
 
 class BilFile(EnviFile):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
+        """
+        Call superclass constructor with appropriate parameters.
+        """
         super(BilFile, self).__init__(header_path, path, unpack_fmt)
 
     def read(self):
+        """
+        Read BIL file (reading bytes in correct order)
+        """
         return super(BilFile, self).read(int(self.hdr["bands"]),
                                          int(self.hdr["lines"]),
                                          int(self.hdr["pixperline"]))
                                          
 class BsqFile(EnviFile):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
+        """
+        Call superclass constructor with appropriate parameters.
+        """
         super(BsqFile, self).__init__(header_path, path, unpack_fmt)
         
     def read(self):
+        """
+        Read BSQ file (reading bytes in correct order)
+        """
         return super(BsqFile, self).read(int(self.hdr["lines"]),
                                          int(self.hdr["bands"]),
                                          int(self.hdr["pixperline"]))
