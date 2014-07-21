@@ -11,6 +11,7 @@ class BIL(_geospatial):
     def __enter__(self):
         """
         Used to set up file when used in context manager.
+        :return self:
         """
         self.b = envi.BilFile(self.header_path,
                               self.path,
@@ -50,6 +51,7 @@ class BSQ(_geospatial):
     def __enter__(self):
         """
         Used to set up file as context manager.
+        :return self:
         """
         self.b = envi.BsqFile(self.header_path,
                               self.path,

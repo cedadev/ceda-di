@@ -162,7 +162,6 @@ class NetCDF(_geospatial):
     def get_geospatial(self):
         """
         Open specified NetCDF file and extract lat/lon/alt/timestamp data.
-
         :return dict: Dict with lat/lon/alt and timestamp lists for each file
         """
 

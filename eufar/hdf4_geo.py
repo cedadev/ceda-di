@@ -16,6 +16,7 @@ class HDF4_geo(object):
     def __enter__(self):
         """
         Open HDF file and interfaces for use as context manager.
+        :return self:
         """
         self.hdf = HDF(self.fname)
         self.vs = self.hdf.vstart()
@@ -34,10 +35,11 @@ class HDF4_geo(object):
     def get_coords(self, v, vs, fn):
         """
         Iterate through vgroup and return a list of coordinates (if existing).
-        
+
         :param HDF4.V.v v: VGroup object
         :param HDF4.V.vs vs: VData object
         :param str fn: Filename of the object
+        :return dict: Dict containing geospatial and temporal information.
         """
         mappings = {
             "NVlat2": "lat",
@@ -65,6 +67,8 @@ class HDF4_geo(object):
         """
         Search through HDF4 file, returning a list of coordinates from the
         'Navigation' vgroup (if it exists).
+
+        :return dict: Dict containing geospatial and temporal information.
         """
         ref = -1
         while True:

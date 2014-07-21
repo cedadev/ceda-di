@@ -7,6 +7,9 @@ import xmltodict
 
 class EXIF_geo(object):
     def __init__(self, fname):
+        """
+        :param str fname: File name to construct EXIF_geo object from.
+        """
         self.fname = fname
 
     def __enter__(self):
@@ -28,8 +31,8 @@ class EXIF_geo(object):
 
     def get_geospatial(self):
         """
-        Return a dictionary containing metadata and geospatial information
-        :return dict: Dict containing metadata and geospatial information
+        Return a dictionary containing metadata and geospatial information.
+        :return dict: Dict containing metadata and geospatial information.
         """
         finfo = {}
         finfo[self.fname] = {}
