@@ -6,5 +6,11 @@ class _geospatial(object):
 
         raise NotImplementedError(exception)
 
-    def get_geospatial_dict(self):
+    def get_geospatial(self):
+        self.__init__()
+
+    def get_temporal(self):
+        self.__init__()
+
+    def get_parameters(self):
         self.__init__()
