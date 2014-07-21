@@ -15,8 +15,11 @@ class Properties(object):
         self.temporal = temporal
         self.parameters = parameters
         self.data_format = data_format
+        
+    def _geospatial_list_to_wkt(self):
+        raise NotImplementedError("Not implemented yet.")
 
-    def __str__():
+    def __str__(self):
         properties = {
             "file": {
                 "properties": self.file_level,

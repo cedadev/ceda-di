@@ -49,7 +49,7 @@ class NetCDF(_geospatial):
             if search is not None:
                 return var
 
-    def _get_nc_var_from_list(self, var_list, nc):
+    def _nc_var_from_list(self, var_list, nc):
         """
         Return the first matching variable from 'var_list' that's in 'nc'.
 
@@ -168,16 +168,13 @@ class NetCDF(_geospatial):
         with Dataset(self.fpath, 'r') as netcdf_data:
             timestamps = self.get_time_data(netcdf_data)
             try:
-                lon_var = self._get_nc_var_from_list(self.LON_NAMES,
-                                                     netcdf_data)
+                lon_var = self._nc_var_from_list(self.LON_NAMES, netcdf_data)
                 lon = netcdf_data.variables[lon_var][:].ravel()[10:-10]
 
-                lat_var = self._get_nc_var_from_list(self.LAT_NAMES,
-                                                     netcdf_data)
+                lat_var = self._nc_var_from_list(self.LAT_NAMES, netcdf_data)
                 lat = netcdf_data.variables[lat_var][:].ravel()[10:-10]
 
-                alt_var = self._get_nc_var_from_list(self.ALT_NAMES,
-                                                     netcdf_data)
+                alt_var = self._nc_var_from_list(self.ALT_NAMES, netcdf_data)
                 alt = netcdf_data.variables[alt_var][:].ravel()[10:-10]
 
                 finfo = {
