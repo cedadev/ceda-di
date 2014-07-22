@@ -1,18 +1,22 @@
 from io import envi
+from metadata import product
 from _dataset import _geospatial
 
 
 class ENVI(_geospatial):
-    def __init__(self):
-        self.header_path = None
-        self.data_format = None
-        self.path = None
-        self.unpack_fmt = None
-        raise NotImplementedError("Do not instantiate this class. Use BIL/BSQ.")
+    def __init__(self, header_path, path=None, unpack_fmt="<d"):
+        self.b = None
+        self.extension = None
+        self.header_path = header_path
+        self.path = path
+        self.unpack_fmt = unpack_fmt
+
+    def read(self):
+        raise NotImplementedError("Not implemented - this is a base class.")
 
     def _load_data(self):
-        if not self.data:
-            self.b.read()
+        if not hasattr(self, "data"):
+            self.data = self.b.read()
 
     def get_geospatial(self):
         """
@@ -21,12 +25,12 @@ class ENVI(_geospatial):
 
         self._load_data()
         spatial = {
-            "lat": data[1],
-            "lon": data[2],
-            "alt": data[3],
-            "roll": data[4],
-            "pitch": data[5],
-            "heading": data[6]
+            "lat": self.data[1],
+            "lon": self.data[2],
+            "alt": self.data[3],
+            "roll": self.data[4],
+            "pitch": self.data[5],
+            "heading": self.data[6]
         }
 
         return spatial
@@ -47,44 +51,54 @@ class ENVI(_geospatial):
 
         return data_format
 
+    def get_properties(self):
+        file_level = super(ENVI, self).get_file_level(self.b.path)
+        prop = product.Properties(file_level=file_level,
+                                  temporal=self.get_temporal(),
+                                  data_format=self.get_data_format(),
+                                  spatial=self.get_geospatial())
+        return prop
+
 
 class BIL(ENVI):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
-        self.header_path = header_path
+        super(BIL, self).__init__(header_path, path, unpack_fmt)
+        self.extension = ".bil"
         self.data_format = "ENVI BIL (Band Interleaved by Line)"
-        self.path = path
-        self.unpack_fmt = unpack_fmt
 
     def __enter__(self):
-        """
-        Used to set up file when used in context manager.
-        :return self:
-        """
-        self.b = envi.BilFile(self.header_path,
-                              self.path,
-                              self.unpack_fmt)
+        self.read()
         return self
 
     def __exit__(self, *args):
         pass
 
+    def read(self):
+        if not hasattr(self, "data"):
+            self.b = envi.BilFile(header_path=self.header_path,
+                                  path=self.path,
+                                  unpack_fmt=self.unpack_fmt)
+            self.data = self.b.read()
+        return self.data
+
 
 class BSQ(ENVI):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
-        self.header_path = header_path
+        super(BSQ, self).__init__(header_path, path, unpack_fmt)
+        self.extension = ".bsq"
         self.data_format = "ENVI BSQ (Band Sequential)"
-        self.path = path
-        self.unpack_fmt = unpack_fmt
 
     def __enter__(self):
-        """
-        Used to set up file as context manager.
-        :return self:
-        """
-        self.b = envi.BsqFile(self.header_path,
-                              self.path,
-                              self.unpack_fmt)
+        self.data = self.read()
         return self
 
-    def __exit__(self):
+    def __exit__(self, *args):
         pass
+
+    def read(self):
+        if not hasattr(self, "data"):
+            self.b = envi.BsqFile(header_path=self.header_path,
+                                  path=self.path,
+                                  unpack_fmt=self.unpack_fmt)
+            self.data = self.b.read()
+        return self.data

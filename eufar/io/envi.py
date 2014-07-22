@@ -23,7 +23,7 @@ class EnviFile(object):
         """
         self.hdr_path = header_path
 
-        if path:
+        if path is not None:
             self.path = path
         else:
             self.path = os.path.splitext(header_path)[0]
@@ -49,6 +49,14 @@ class EnviFile(object):
                              str(self.unpack_fmt))
 
         return num_bytes
+
+    def get_path(self, path, ext):
+        p = os.path.splitext(path)[0]
+        if not os.path.isfile(p):
+            p += ext
+
+        print p
+        return p
 
     def process_hdr(self):
         """
@@ -141,7 +149,17 @@ class BilFile(EnviFile):
         """
         Call superclass constructor with appropriate parameters.
         """
+        self.extension = ".bil"
+        if path is None:
+            path = super(BilFile, self).get_path(header_path, self.extension)
         super(BilFile, self).__init__(header_path, path, unpack_fmt)
+
+    def __enter__(self):
+        self.data = self.read()
+        return self
+
+    def __exit__(self, *args):
+        pass
 
     def read(self):
         """
@@ -150,14 +168,26 @@ class BilFile(EnviFile):
         return super(BilFile, self).read(int(self.hdr["bands"]),
                                          int(self.hdr["lines"]),
                                          int(self.hdr["pixperline"]))
-                                         
+
+
 class BsqFile(EnviFile):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
         """
         Call superclass constructor with appropriate parameters.
         """
+        self.extension = ".bsq"
+        if path is None:
+            path = super(BsqFile, self).get_path(header_path, self.extension)
+
         super(BsqFile, self).__init__(header_path, path, unpack_fmt)
-        
+
+    def __enter__(self):
+        self.data = self.read()
+        return self
+
+    def __exit__(self, *args):
+        pass
+
     def read(self):
         """
         Read BSQ file (reading bytes in correct order)
