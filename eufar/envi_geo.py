@@ -67,7 +67,7 @@ class BIL(ENVI):
 
     def __exit__(self, *args):
         pass
-        
+
 
 class BSQ(ENVI):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):

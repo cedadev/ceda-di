@@ -1,6 +1,3 @@
-import os
-
-
 class _geospatial(object):
     def __init__(self):
         exception = \
