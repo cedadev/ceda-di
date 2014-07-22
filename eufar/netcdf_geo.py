@@ -1,16 +1,17 @@
 # Adapted from Axel's KML script (axll@faam.ac.uk)
 
 from datetime import timedelta, datetime as dt
-from _dataset import _geospatial
-from netCDF4 import Dataset
 import json
 import numpy
 import os
 import re
 import sys
 import time
-import tools.nc_dump
 
+from netCDF4 import Dataset
+
+from _dataset import _geospatial
+from metadata import product
 
 class NetCDF(_geospatial):
     TIME_FORMATS = ["seconds since %Y-%m-%d %H:%M:%S %z",
@@ -159,34 +160,58 @@ class NetCDF(_geospatial):
         elif isinstance(datum, str):
             return self._time_from_str_format(nc, tm_var)
 
-    def get_geospatial(self):
+    def get_geospatial(self, netcdf_data):
         """
         Open specified NetCDF file and extract lat/lon/alt/timestamp data.
         :return dict: Dict with lat/lon/alt and timestamp lists for each file
         """
 
+        try:
+            lon_var = self._nc_var_from_list(self.LON_NAMES, netcdf_data)
+            lon = netcdf_data.variables[lon_var][:].ravel()[10:-10]
+
+            lat_var = self._nc_var_from_list(self.LAT_NAMES, netcdf_data)
+            lat = netcdf_data.variables[lat_var][:].ravel()[10:-10]
+
+            alt_var = self._nc_var_from_list(self.ALT_NAMES, netcdf_data)
+            alt = netcdf_data.variables[alt_var][:].ravel()[10:-10]
+
+            finfo = {
+                "filename": os.path.basename(self.fpath),
+                "lon": [float(x) for x in lon],
+                "lat": [float(x) for x in lat],
+                "alt": [float(x) for x in alt],
+            }
+
+            return finfo
+        except KeyError as k:
+            tools.nc_dump.dump(netcdf_data)
+            raise("\nKeyError: %s (%s)" % (str(k), self.fpath))
+
+    def get_properties(self):
         with Dataset(self.fpath, 'r') as netcdf_data:
+            # Timestamps
             timestamps = self.get_time_data(netcdf_data)
-            try:
-                lon_var = self._nc_var_from_list(self.LON_NAMES, netcdf_data)
-                lon = netcdf_data.variables[lon_var][:].ravel()[10:-10]
+            temporal = {
+                "start_time": dt.isoformat(timestamps[0]),
+                "end_time": dt.isoformat(timestamps[-1])
+            }
 
-                lat_var = self._nc_var_from_list(self.LAT_NAMES, netcdf_data)
-                lat = netcdf_data.variables[lat_var][:].ravel()[10:-10]
+            # File-level
+            file_level = super(NetCDF, self).get_file_level(self.fpath)
 
-                alt_var = self._nc_var_from_list(self.ALT_NAMES, netcdf_data)
-                alt = netcdf_data.variables[alt_var][:].ravel()[10:-10]
+            # Geospatial
+            geospatial = {
+                "geometry_wkt": self.get_geospatial(netcdf_data)
+            }
 
-                finfo = {
-                    "filename": os.path.basename(self.fpath),
-                    "length": len(timestamps),
-                    "lon": [float(x) for x in lon],
-                    "lat": [float(x) for x in lat],
-                    "alt": [float(x) for x in alt],
-                    "time": [dt.isoformat(x) for x in timestamps]
-                }
+            # Data format
+            data_format = {"format": "NetCDF"}
 
-                return finfo
-            except KeyError as k:
-                tools.nc_dump.dump(netcdf_data)
-                raise("\nKeyError: %s (%s)" % (str(k), self.fpath))
+            # Create properties object
+            props = product.Properties(temporal=temporal,
+                                       file_level=file_level,
+                                       spatial=geospatial,
+                                       data_format=data_format)
+
+            return props
