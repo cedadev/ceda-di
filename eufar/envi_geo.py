@@ -4,6 +4,10 @@ from _dataset import _geospatial
 
 class ENVI(_geospatial):
     def __init__(self):
+        self.header_path = None
+        self.data_format = None
+        self.path = None
+        self.unpack_fmt = None
         raise NotImplementedError("Do not instantiate this class. Use BIL/BSQ.")
 
     def _load_data(self):
@@ -12,7 +16,6 @@ class ENVI(_geospatial):
 
     def get_geospatial(self):
         """
-        :param str header_fpath: Filename of header file
         :return dict: A dict containing geospatial and temporal information
         """
 

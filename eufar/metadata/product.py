@@ -5,9 +5,9 @@ class Properties(object):
     def __init__(self, file_level=None, spatial=None,
                  temporal=None, parameters=None, data_format=None):
         """
-        Construct a eufar.metadata.Properties object with data conforming
-        to Steve Donegan's FatCat JSON metadata structure.
-        (see "arsf-geo-map/doc/schema.json")
+        Construct a 'eufar.metadata.Properties' object with data
+        conforming to Steve Donegan's FatCat JSON metadata structure.
+        (see "doc/schema.json")
         """
         # TODO document parameters
 
@@ -17,25 +17,23 @@ class Properties(object):
         self.parameters = parameters
         self.data_format = data_format
 
-    def _geospatial_list_to_wkt(self):
-        raise NotImplementedError("Not implemented yet.")
+    def _to_wkt(self, spatial):
+        lats = spatial["lat"]
+        lons = spatial["lon"]
+
+        coord_list = []        
+        for lat, lon in zip(lats, lons):
+            coord_list.append("%f %f" % (lat, lon))
+
+        linestring = "LINESTRING (%s)" % ', '.join(coord_list)
+        return linestring
 
     def __str__(self):
         properties = {
-            "file": {
-                "properties": self.file_level,
-            },
-            "spatial": {
-                "properties": self.spatial,
-            },
-            "temporal": {
-                "properties": self.temporal,
-            },
-            "parameters": {
-                "properties": self.parameters,
-            },
-            "data_format": {
-                "properties": self.data_format,
-            },
+            "data_format": self.data_format,
+            "file": self.file_level,
+            "parameters": self.parameters,
+            "spatial": _to_wkt(self.spatial),
+            "temporal": self.temporal,
         }
         return json.dumps(properties, indent=4)
