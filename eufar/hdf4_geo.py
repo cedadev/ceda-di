@@ -2,8 +2,11 @@ from pyhdf.HDF import *
 from pyhdf.V import *
 from pyhdf.VS import *
 
+from _dataset import _geospatial
+from metadata import product
 
-class HDF4_geo(object):
+
+class HDF4(_geospatial):
     """
     ARSF HDF4 context manager class.
     """
@@ -32,7 +35,7 @@ class HDF4_geo(object):
         self.vs.end()
         self.hdf.close()
 
-    def get_coords(self, v, vs, fn):
+    def _get_coords(self, v, vs, fn):
         """
         Iterate through vgroup and return a list of coordinates (if existing).
 
@@ -43,20 +46,19 @@ class HDF4_geo(object):
         """
         mappings = {
             "NVlat2": "lat",
-            "NVlng2": "lng",
+            "NVlng2": "lon",
         }
 
         coords = {}
-        coords[fn] = {}
         for k, v in mappings.iteritems():
             ref = vs.find(k)
             vd = vs.attach(ref)
 
-            coords[fn][v] = []
+            coords[v] = []
             while True:
                 try:
                     coord = float(vd.read()[0][0]) / (10**7)
-                    coords[fn][v].append(coord)
+                    coords[v].append(coord)
                 except HDF4Error:  # End of file
                     break
 
@@ -77,10 +79,29 @@ class HDF4_geo(object):
                 vg = self.v.attach(ref)
 
                 if vg._name == "Navigation":
-                    finfo = self.get_coords(self.v, self.vs, self.fname)
+                    geospatial = self._get_coords(self.v, self.vs, self.fname)
                     vg.detach()
-                    return finfo
+                    return geospatial
 
                 vg.detach()
             except HDF4Error:
                 break
+
+    def get_temporal(self):
+        # TODO
+        return None
+
+    def get_properties(self):
+        geospatial = self.get_geospatial()
+        temporal = self.get_temporal()
+        file_level = super(HDF4, self).get_file_level(self.fname)
+        data_format = {
+            "format": "HDF4",
+        }
+
+        props = product.Properties(spatial=geospatial,
+                                   temporal=temporal,
+                                   file_level=file_level,
+                                   data_format=data_format)
+
+        return props
