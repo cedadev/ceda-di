@@ -12,16 +12,22 @@ class Properties(object):
         # TODO document parameters
 
         self.file_level = file_level
-        self.spatial = _geospatial_list_to_wkt(spatial)
+        self.spatial = spatial
         self.temporal = temporal
         self.parameters = parameters
         self.data_format = data_format
 
     def _to_wkt(self, spatial):
+        """
+        Convert lats and lons to a WKT linestring.
+
+        :param dict spatial: A dict with keys 'lat' and 'lon' (as lists)
+        :return: A Python string representing a WKT linestring
+        """
         lats = spatial["lat"]
         lons = spatial["lon"]
 
-        coord_list = []        
+        coord_list = []
         for lat, lon in zip(lats, lons):
             coord_list.append("%f %f" % (lat, lon))
 
@@ -29,11 +35,15 @@ class Properties(object):
         return linestring
 
     def __str__(self):
+        """
+        Format file properties to JSON when coercing object to string.
+        :return: A Python string containing JSON representation of object.
+        """
         properties = {
             "data_format": self.data_format,
             "file": self.file_level,
             "parameters": self.parameters,
-            "spatial": _to_wkt(self.spatial),
+            "spatial": self._to_wkt(self.spatial),
             "temporal": self.temporal,
         }
         return json.dumps(properties, indent=4)
