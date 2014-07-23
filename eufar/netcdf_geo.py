@@ -79,6 +79,10 @@ class NetCDF(_geospatial):
         shape = nc.variables[tm_var].shape
         if len(shape) <= 1:
             tm_list = list(nc.variables[tm_var][:].ravel())
+        elif len(shape) == 2 and shape[0] == 1:
+            # Timestamp units in these files are "since midnight" which is
+            # quite vague... Return blank list until I've implemented it
+            return []
         else:
             # If this is reached, the times are in a strange numpy.ndarray
             # Here, we convert to datetime objects (small loss of precision)
@@ -101,16 +105,19 @@ class NetCDF(_geospatial):
             tm_str = ("seconds since %s-%s-%s 00:00:00 UTC" %  # Continued
                      (nc_date[2], nc_date[1], nc_date[0]))
 
-        try:
             # Try converting the epoch/GPS timestamps to datetime objects here
-            base_time = dt.strptime(tm_str, self.TIME_FORMATS[1])
-            timestamps = [base_time +
-                          timedelta(seconds=float(sec))
-                          for sec in tm_list]
-            return timestamps
-        except ValueError:
-            # I tried :( couldn't work out what times were, return empty list
-            return []
+            for f in self.TIME_FORMATS:
+                try:
+                    base_time = dt.strptime(tm_str, f)
+                    timestamps = [base_time +
+                                  timedelta(seconds=float(sec))
+                                  for sec in tm_list]
+                    return timestamps
+                except:
+                    continue
+
+        # I tried :( couldn't work out what times were, return empty list
+        return []
 
     def _time_from_str_format(self, nc, tm_var):
         """
@@ -177,16 +184,14 @@ class NetCDF(_geospatial):
             alt_var = self._nc_var_from_list(self.ALT_NAMES, netcdf_data)
             alt = netcdf_data.variables[alt_var][:].ravel()[10:-10]
 
-            finfo = {
-                "filename": os.path.basename(self.fpath),
+            geospatial = {
                 "lon": [float(x) for x in lon],
                 "lat": [float(x) for x in lat],
                 "alt": [float(x) for x in alt],
             }
 
-            return finfo
+            return geospatial
         except KeyError as k:
-            tools.nc_dump.dump(netcdf_data)
             raise("\nKeyError: %s (%s)" % (str(k), self.fpath))
 
     def get_properties(self):
@@ -199,17 +204,14 @@ class NetCDF(_geospatial):
                     "start_time": dt.isoformat(timestamps[0]),
                     "end_time": dt.isoformat(timestamps[-1])
                 }
-            except TypeError:
-                print(self.fpath)
-                print(timestamps)
+            except (TypeError, IndexError):
+                temporal = None
 
             # File-level
             file_level = super(NetCDF, self).get_file_level(self.fpath)
 
             # Geospatial
-            geospatial = {
-                "geometry_wkt": self.get_geospatial(netcdf_data)
-            }
+            geospatial = self.get_geospatial(netcdf_data)
 
             # Data format
             data_format = {"format": "NetCDF"}
