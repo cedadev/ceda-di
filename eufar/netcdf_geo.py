@@ -16,7 +16,8 @@ from metadata import product
 class NetCDF(_geospatial):
     TIME_FORMATS = ["seconds since %Y-%m-%d %H:%M:%S %z",
                     "seconds since %Y-%m-%d %H:%M:%S %Z",
-                    "seconds since %Y-%m-%d %H:%M:%S 00:00 %Z"]
+                    "seconds since %Y-%m-%d %H:%M:%S 00:00 %Z",
+                    "seconds since %Y-%m-%d %H:%M:%S 00:00:00 %Z"]
 
     LAT_NAMES = ["GPS_LAT", "LAT_GIN", "pos_lat_gps_25", "pos_lat_gps_1",
                  "pos_lat_airinspp_1", "GPS_LAT_NP", "Lat", "latitude"]
@@ -192,10 +193,15 @@ class NetCDF(_geospatial):
         with Dataset(self.fpath, 'r') as netcdf_data:
             # Timestamps
             timestamps = self.get_time_data(netcdf_data)
-            temporal = {
-                "start_time": dt.isoformat(timestamps[0]),
-                "end_time": dt.isoformat(timestamps[-1])
-            }
+
+            try:
+                temporal = {
+                    "start_time": dt.isoformat(timestamps[0]),
+                    "end_time": dt.isoformat(timestamps[-1])
+                }
+            except TypeError:
+                print(self.fpath)
+                print(timestamps)
 
             # File-level
             file_level = super(NetCDF, self).get_file_level(self.fpath)
