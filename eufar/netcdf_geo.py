@@ -47,8 +47,8 @@ class NetCDF(_geospatial):
         :return str(var_name): The name of the first item from var_list in nc
         """
         for var in nc.variables:
-            search = re.search(regex, var, flags=flags)
-            if search is not None:
+            match = re.match(regex, var, flags=flags)
+            if match is not None:
                 return var
 
     def _nc_var_from_list(self, var_list, nc):
@@ -155,13 +155,15 @@ class NetCDF(_geospatial):
                                                  nc, flags=re.IGNORECASE)
         try:
             datum = nc.variables[tm_var][0]
-        except:
-            print datum
-            exit(1)
+        except KeyError:
+            return []
 
         # If 'datum' is a numpy ndarray then check type of first item
         if isinstance(datum, numpy.ndarray):
-            datum = datum.flat[0]
+            try:
+                datum = datum.flat[0]
+            except AttributeError:
+                return []
 
         # Is time a numeric time format? (epoch, GPS or Julian)
         if isinstance(datum, numpy.float32) or \
