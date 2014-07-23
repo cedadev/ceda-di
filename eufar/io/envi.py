@@ -55,7 +55,6 @@ class EnviFile(object):
         if not os.path.isfile(p):
             p += ext
 
-        print p
         return p
 
     def process_hdr(self):
