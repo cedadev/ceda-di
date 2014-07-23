@@ -60,10 +60,12 @@ class NetCDF(_geospatial):
         :return str(var_name): The name of the first item from var_list in nc
         """
         for var in var_list:
-                if var in nc.variables:
-                    return var
+            if var in nc.variables:
+                return var
 
-        raise AttributeError("Could not find attribute in list: %s", var_list)
+        print self.fpath
+        print ([x for x in nc.variables.iterkeys()], var_list)
+        raise AttributeError("Could not find attribute in list")
 
     def _time_from_num_format(self, nc, tm_var):
         """
