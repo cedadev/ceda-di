@@ -63,8 +63,6 @@ class NetCDF(_geospatial):
             if var in nc.variables:
                 return var
 
-        print self.fpath
-        print ([x for x in nc.variables.iterkeys()], var_list)
         raise AttributeError("Could not find attribute in list")
 
     def _time_from_num_format(self, nc, tm_var):
@@ -155,7 +153,11 @@ class NetCDF(_geospatial):
         # If base_time isn't in expected format, we may have to calculate it
         tm_var = self._get_netcdf_var_from_regex("time",
                                                  nc, flags=re.IGNORECASE)
-        datum = nc.variables[tm_var][0]
+        try:
+            datum = nc.variables[tm_var][0]
+        except:
+            print datum
+            exit(1)
 
         # If 'datum' is a numpy ndarray then check type of first item
         if isinstance(datum, numpy.ndarray):
@@ -193,8 +195,11 @@ class NetCDF(_geospatial):
             }
 
             return geospatial
-        except KeyError as k:
-            raise("\nKeyError: %s (%s)" % (str(k), self.fpath))
+        except (KeyError, AttributeError) as err:
+            print("Error: %s (%s)" % (str(err), self.fpath))
+
+            # Silently fail - file contains no GPS metadata
+            return None
 
     def get_properties(self):
         with Dataset(self.fpath, 'r') as netcdf_data:

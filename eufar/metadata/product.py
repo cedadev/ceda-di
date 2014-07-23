@@ -39,11 +39,15 @@ class Properties(object):
         Format file properties to JSON when coercing object to string.
         :return: A Python string containing JSON representation of object.
         """
+
+        if self.spatial is not None:
+            self.spatial = self._to_wkt(self.spatial)
+
         properties = {
             "data_format": self.data_format,
             "file": self.file_level,
             "parameters": self.parameters,
-            "spatial": self._to_wkt(self.spatial),
+            "spatial": self.spatial,
             "temporal": self.temporal,
         }
         return json.dumps(properties, indent=4)
