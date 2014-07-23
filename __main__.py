@@ -2,21 +2,22 @@ import os
 import sys
 from eufar import envi_geo, netcdf_geo
 
-def write_properties(_geospatial_obj):
-    fname = "out/%s.json" % os.splitext(fname)[0]  # Create JSON path
+def write_properties(fname, _geospatial_obj):
+    fname = os.path.basename(fname)
+    fname = "out/%s.json" % os.path.splitext(fname)[0]  # Create JSON path
     with open(fname, 'w') as j:
         props = str(_geospatial_obj.get_properties())
         j.write(props)
 
 
 def process_bil(path):
-    with eufar.envi_geo.BIL(path) as b:
-        json_fn = write_properties(b)
+    with envi_geo.BIL(path) as b:
+        json_fn = write_properties(path, b)
 
 
 def process_nc(path):
-    with eufar.netcdf_geo.NetCDF(path) as nc:
-        write_properties(nc)
+    with netcdf_geo.NetCDF(path) as nc:
+        write_properties(path, nc)
 
 
 if __name__ == "__main__":
