@@ -1,9 +1,8 @@
 import os
 import sys
-from eufar import envi_geo
+from eufar import envi_geo, netcdf_geo
 
-
-def write_properties(fname, _geospatial_obj):
+def write_properties(_geospatial_obj):
     fname = "out/%s.json" % os.splitext(fname)[0]  # Create JSON path
     with open(fname, 'w') as j:
         props = str(_geospatial_obj.get_properties())
@@ -11,8 +10,13 @@ def write_properties(fname, _geospatial_obj):
 
 
 def process_bil(path):
-    with envi_geo.BIL(path) as b:
-        json_fn = write_properties(f)
+    with eufar.envi_geo.BIL(path) as b:
+        json_fn = write_properties(b)
+
+
+def process_nc(path):
+    with eufar.netcdf_geo.NetCDF(path) as nc:
+        write_properties(nc)
 
 
 if __name__ == "__main__":
@@ -23,11 +27,10 @@ if __name__ == "__main__":
     start_path = "/badc/eufar/data/aircraft/"
     for root, dirs, files in os.walk(start_path, followlinks=True):
         for f in files:
+            path = os.path.join(root, f)
+
             # BIL navigation files
             if f.endswith(".hdr") and "nav" in f and "qual" not in f:
-                path = os.path.join(root, f)
                 process_bil(path)
-
-                file_counter += 1
-                if not (file_counter % 20):
-                    sys.stdout.write("%d files processed\n" % file_counter)
+            if f.endswith(".nc"):
+                process_nc(path)
