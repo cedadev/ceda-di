@@ -1,4 +1,5 @@
 import json
+import os
 
 
 class Properties(object):
@@ -29,9 +30,12 @@ class Properties(object):
 
         coord_list = []
         for lat, lon in zip(lats, lons):
-            coord_list.append("%f %f\n" % (lat, lon))
+            coord_list.append("%f %f" % (lat, lon))
 
-        linestring = "LINESTRING (%s)" % ', '.join(coord_list)
+        sep = ',\n'
+        coord_string = sep.join(coord_list)
+        linestring = "LINESTRING (%s)" % coord_string
+
         return linestring
 
     def __str__(self):
