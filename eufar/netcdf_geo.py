@@ -111,7 +111,7 @@ class NetCDF(_geospatial):
                      (nc_date[2], nc_date[1], nc_date[0]))
         else:
             tm_str = "seconds since 1970-01-01 00:00:00 00:00 UTC"
-            self.logger.error("Unknown timestamp units in %s, assume epoch" %
+            self.logger.info("Unknown timestamp units in %s, assume epoch" %
                               (self.fpath))
 
         # Try converting the epoch/GPS timestamps to datetime objects here
@@ -150,7 +150,7 @@ class NetCDF(_geospatial):
 
         # Raise error if list is exhausted
         self.logger.error("Couldn't match timestamp format: %s" % self.fpath)
-        raise ValueError("Could not match format for time: %s" % tm_list[0])
+        raise ValueError("Couldn't match timestamp format: %s" % tm_list[0])
 
     def get_time_data(self, nc):
         """
@@ -166,15 +166,15 @@ class NetCDF(_geospatial):
         try:
             datum = nc.variables[tm_var][0]
         except KeyError:
-            self.logger.error("No time variable: %s" % self.fpath)
             return []
 
         # If 'datum' is a numpy ndarray then check type of first item
         if isinstance(datum, numpy.ndarray):
             try:
                 datum = datum.flat[0]
-            except AttributeError:
-                self.logger.error("Could not flatten array: %s" % self.fpath)
+            except AttributeError as ae:
+                self.logger.error("Could not flatten arra (%s): %s" %
+                                  (str(ae), self.fpath))
                 return []
 
         # Is time a numeric time format? (epoch, GPS or Julian)
@@ -210,7 +210,7 @@ class NetCDF(_geospatial):
 
             return geospatial
         except (KeyError, AttributeError) as err:
-            self.logger.info("No GPS metadata: %s" % self.fpath)
+            self.logger.info("No GPS metadata     : %s" % self.fpath)
             return None
 
     def get_properties(self):
