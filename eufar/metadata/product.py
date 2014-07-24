@@ -29,7 +29,7 @@ class Properties(object):
 
         coord_list = []
         for lat, lon in zip(lats, lons):
-            coord_list.append("%f %f" % (lat, lon))
+            coord_list.append("%f %f\n" % (lat, lon))
 
         linestring = "LINESTRING (%s)" % ', '.join(coord_list)
         return linestring

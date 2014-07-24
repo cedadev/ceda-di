@@ -65,8 +65,6 @@ class NetCDF(_geospatial):
             if var in nc.variables:
                 return var
 
-        self.logger.error("No variables from '%s' could be found in %s" %
-                     (str(var_list), self.fpath))
         raise AttributeError("Could not find attribute in list")
 
     def _time_from_num_format(self, nc, tm_var):

@@ -35,13 +35,17 @@ def prepare_logging():
 
 
 if __name__ == "__main__":
+    # Stop HDF5 library complaining
+    os.system("export HDF5_DISABLE_VERSION_CHECK=2")
+
+    # Set up logging
     logger = prepare_logging()
     logger.info("Beginning script at %s" % str(datetime.datetime.now()))
 
+    # Make output directory for JSON
     if not os.path.isdir("out"):
         os.mkdir("out")
 
-    file_counter = 0
     start_path = "/badc/eufar/data/aircraft/"
     for root, dirs, files in os.walk(start_path, followlinks=True):
         for f in files:
