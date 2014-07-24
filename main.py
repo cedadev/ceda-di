@@ -1,3 +1,4 @@
+import datetime
 import logging
 import logging.config
 import os
@@ -28,14 +29,14 @@ def prepare_logging():
         os.mkdir("log")
 
     logging.config.fileConfig("logging.conf")
-    logger = logging.getLogger()
+    logger = logging.getLogger("main")
 
     return logger
 
 
 if __name__ == "__main__":
     logger = prepare_logging()
-    logger.info("This is a test hooray")
+    logger.info("Beginning script at %s" % str(datetime.datetime.now()))
 
     if not os.path.isdir("out"):
         os.mkdir("out")

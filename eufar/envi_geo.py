@@ -12,6 +12,7 @@ class ENVI(_geospatial):
         self.unpack_fmt = unpack_fmt
 
     def read(self):
+        logger.error("Someone tried to call read() on the ENVI base class.")
         raise NotImplementedError("Not implemented - this is a base class.")
 
     def _load_data(self):
