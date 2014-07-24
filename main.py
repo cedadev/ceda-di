@@ -58,11 +58,11 @@ if __name__ == "__main__":
         os.mkdir("out")
 
     START_PATH = "/badc/eufar/data/aircraft/"
+    processes = []
     for root, dirs, files in os.walk(START_PATH, followlinks=True):
         for f in files:
             path = os.path.join(root, f)
 
-            processes = []
             if f.endswith(".hdr") and "nav" in f and "qual" not in f:
                 proc = multiprocessing.Process(target=process_bil,
                                                args=(path,))

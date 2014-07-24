@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import datetime
+import json
 import os
 
 import exifread
@@ -25,8 +26,6 @@ class EXIF(_geospatial):
         with open(self.fname, 'rb') as f:
             tags = exifread.process_file(f, details=False, strict=True)
 
-        # Set XML from EXIF file
-        # TODO this may not work perfectly with JPGs
         self.xml = xmltodict.parse(tags["Image ImageDescription"].values)
 
         return self
@@ -42,7 +41,10 @@ class EXIF(_geospatial):
 
         # Traverse XML
         pos = self.xml["Camera_Image"]["Plane_info"]
-        pos = pos["Exterior_orientation"]["Position"]
+        if "Exterior_orientation" in pos:
+            pos = pos["Exterior_orientation"]["Position"]
+        elif "Position" in pos:
+            pos = pos["Position"]
 
         geospatial = {
             "lat": [float(pos["Latitude"])],
