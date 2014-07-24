@@ -18,8 +18,8 @@ class _geospatial(object):
 
         return file_level
 
-        def get_geospatial(self):
-            self.__init__()
+    def get_geospatial(self):
+        self.__init__()
 
     def get_temporal(self):
         self.__init__()

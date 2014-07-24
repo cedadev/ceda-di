@@ -1,12 +1,17 @@
+"""
+Main script to handle processing of EUFAR data.
+"""
 import datetime
 import logging
 import logging.config
+import multiprocessing
 import os
-import sys
-from eufar import envi_geo, netcdf_geo
+
+from eufar import envi_geo, exif_geo, netcdf_geo
 
 
 def write_properties(fname, _geospatial_obj):
+    """Write module properties to an output file."""
     fname = os.path.basename(fname)
     fname = "out/%s.json" % os.path.splitext(fname)[0]  # Create JSON path
     with open(fname, 'w') as j:
@@ -14,45 +19,65 @@ def write_properties(fname, _geospatial_obj):
         j.write(props)
 
 
-def process_bil(path):
-    with envi_geo.BIL(path) as b:
-        json_fn = write_properties(path, b)
+def process_bil(fpath):
+    """Process BIL files."""
+    with envi_geo.BIL(fpath) as bil:
+        write_properties(fpath, bil)
 
 
-def process_nc(path):
-    with netcdf_geo.NetCDF(path) as nc:
-        write_properties(path, nc)
+def process_nc(fpath):
+    """Process NetCDF files."""
+    os.putenv("HDF5_DISABLE_VERSION_CHECK", "2")
+    with netcdf_geo.NetCDF(fpath) as netcdf:
+        write_properties(fpath, netcdf)
+
+
+def process_tiff(fpath):
+    """Process TIFF files."""
+    with exif_geo.EXIF(fpath) as exif:
+        write_properties(fpath, exif)
 
 
 def prepare_logging():
+    """Initial logging setup"""
     if not os.path.isdir("log"):
         os.mkdir("log")
 
     logging.config.fileConfig("logging.conf")
-    logger = logging.getLogger("main")
+    log = logging.getLogger("main")
 
-    return logger
+    return log
 
 
 if __name__ == "__main__":
-    # Stop HDF5 library complaining
-    os.system("export HDF5_DISABLE_VERSION_CHECK=2")
-
     # Set up logging
-    logger = prepare_logging()
-    logger.info("Beginning script at %s" % str(datetime.datetime.now()))
+    LOGGER = prepare_logging()
 
     # Make output directory for JSON
     if not os.path.isdir("out"):
         os.mkdir("out")
 
-    start_path = "/badc/eufar/data/aircraft/"
-    for root, dirs, files in os.walk(start_path, followlinks=True):
+    START_PATH = "/badc/eufar/data/aircraft/"
+    for root, dirs, files in os.walk(START_PATH, followlinks=True):
         for f in files:
             path = os.path.join(root, f)
 
-            # BIL navigation files
+            processes = []
             if f.endswith(".hdr") and "nav" in f and "qual" not in f:
-                process_bil(path)
-            if f.endswith(".nc"):
-                process_nc(path)
+                proc = multiprocessing.Process(target=process_bil,
+                                               args=(path,))
+                processes.append(proc)
+                proc.start()
+            elif f.endswith(".nc"):
+                proc = multiprocessing.Process(target=process_nc,
+                                               args=(path,))
+                processes.append(proc)
+                proc.start()
+            elif f.endswith(".tif"):
+                proc = multiprocessing.Process(target=process_tiff,
+                                               args=(path,))
+                processes.append(proc)
+                proc.start()
+
+    for proc in processes:
+        proc.join()

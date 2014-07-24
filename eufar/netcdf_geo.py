@@ -4,7 +4,6 @@ from datetime import timedelta, datetime as dt
 import json
 import logging
 import numpy
-import os
 import re
 import sys
 import time
@@ -13,6 +12,7 @@ from netCDF4 import Dataset
 
 from _dataset import _geospatial
 from metadata import product
+
 
 class NetCDF(_geospatial):
     TIME_FORMATS = ["seconds since %Y-%m-%d %H:%M:%S %z",
@@ -112,7 +112,7 @@ class NetCDF(_geospatial):
         else:
             tm_str = "seconds since 1970-01-01 00:00:00 00:00 UTC"
             self.logger.info("Unknown timestamp units in %s, assume epoch" %
-                              (self.fpath))
+                             (self.fpath))
 
         # Try converting the epoch/GPS timestamps to datetime objects here
         for f in self.TIME_FORMATS:
