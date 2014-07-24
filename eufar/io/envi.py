@@ -3,6 +3,7 @@
 # Original author: Ben Taylor (benj)
 
 from __future__ import division
+import logging
 import os
 import stat
 import struct

@@ -6,6 +6,7 @@ lib64/
 lib64
 lib/
 local/
+log/
 man/
 out/
 

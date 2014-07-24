@@ -1,6 +1,9 @@
+import logging
+import logging.config
 import os
 import sys
 from eufar import envi_geo, netcdf_geo
+
 
 def write_properties(fname, _geospatial_obj):
     fname = os.path.basename(fname)
@@ -20,7 +23,20 @@ def process_nc(path):
         write_properties(path, nc)
 
 
+def prepare_logging():
+    if not os.path.isdir("log"):
+        os.mkdir("log")
+
+    logging.config.fileConfig("logging.conf")
+    logger = logging.getLogger()
+
+    return logger
+
+
 if __name__ == "__main__":
+    logger = prepare_logging()
+    logger.info("This is a test hooray")
+
     if not os.path.isdir("out"):
         os.mkdir("out")
 
