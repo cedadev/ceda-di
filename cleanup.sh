@@ -1,5 +1,5 @@
 #!/bin/bash
 
-rm log/*
-rm out/*
-find eufar/ -name "*.pyc" -exec rm {} \;
+rm src/log/*
+rm src/out/*
+find src/eufar/ -name "*.pyc" -exec rm {} \;
