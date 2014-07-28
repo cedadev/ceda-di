@@ -1,7 +1,7 @@
 """
 Main script to handle processing of EUFAR data.
 """
-import datetime
+
 import logging
 import logging.config
 import multiprocessing
@@ -79,5 +79,10 @@ if __name__ == "__main__":
                 processes.append(proc)
                 proc.start()
 
+            while len(processes) > 45:
+                p = processes.pop()
+                p.join()
+
+    # End
     for proc in processes:
         proc.join()

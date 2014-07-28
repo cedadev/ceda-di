@@ -1,20 +1,24 @@
+"""
+Adapter layer for SAFIRE/FAAM NetCDF files - acquire geospatial and temporal
+data points from EUFAR NetCDF files.
+"""
 # Adapted from Axel's KML script (axll@faam.ac.uk)
 
 from datetime import timedelta, datetime as dt
-import json
 import logging
 import numpy
 import re
-import sys
-import time
 
 from netCDF4 import Dataset
 
-from _dataset import _geospatial
-from metadata import product
+from eufar._dataset import _geospatial
+from eufar.metadata import product
 
 
 class NetCDF(_geospatial):
+    """
+    Adapter for SAFIRE/FAAM NetCDF data - extract geospatial and temporal data.
+    """
     TIME_FORMATS = ["seconds since %Y-%m-%d %H:%M:%S %z",
                     "seconds since %Y-%m-%d %H:%M:%S %Z",
                     "seconds since %Y-%m-%d %H:%M:%S 00:00 %Z",
@@ -122,7 +126,7 @@ class NetCDF(_geospatial):
                               timedelta(seconds=float(sec))
                               for sec in tm_list]
                 return timestamps
-            except:
+            except ValueError:
                 continue
 
         # Couldn't work out what times were, return empty list
@@ -173,7 +177,7 @@ class NetCDF(_geospatial):
             try:
                 datum = datum.flat[0]
             except AttributeError as ae:
-                self.logger.error("Could not flatten arra (%s): %s" %
+                self.logger.error("Could not flatten array (%s): %s" %
                                   (str(ae), self.fpath))
                 return []
 
@@ -209,7 +213,7 @@ class NetCDF(_geospatial):
             }
 
             return geospatial
-        except (KeyError, AttributeError) as err:
+        except (KeyError, AttributeError):
             self.logger.info("No GPS metadata     : %s" % self.fpath)
             return None
 
