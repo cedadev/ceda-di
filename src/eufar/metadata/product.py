@@ -1,24 +1,48 @@
+"""
+Module for holding and exporting file metadata as JSON documents.
+"""
+
 import json
-import os
 
 
 class Properties(object):
+    """
+    A class to hold, manipulate, and export geospatial metadata at file level.
+    """
     def __init__(self, file_level=None, spatial=None,
-                 temporal=None, parameters=None, data_format=None):
+                 temporal=None, data_format=None, **kwargs):
         """
-        Construct a 'eufar.metadata.Properties' object with data
-        conforming to Steve Donegan's FatCat JSON metadata structure.
+        Construct a 'eufar.metadata.Properties' ready to export as JSON or dict
         (see "doc/schema.json")
+
+        :param dict file_level: File-level information about file
+        :param dict spatial: Spatial information about file
+        :param dict temporal: Temporal information about file
+        :param dict data_format: Data format information about file
+        :param **kwargs: Key-value pairs of any extra metadata describing file.
         """
-        # TODO document parameters
 
         self.file_level = file_level
         self.spatial = spatial
         self.temporal = temporal
-        self.parameters = parameters
         self.data_format = data_format
 
-    def _to_wkt(self, spatial):
+        # Set other misc metadata
+        self.parameters = kwargs["parameters"]
+        del kwargs["parameters"]
+        self.misc = kwargs
+
+        self.properties = {
+            "data_format": self.data_format,
+            "file": self.file_level,
+            "parameters": self.parameters,
+            "spatial": self.spatial,
+            "temporal": self.temporal,
+            "misc": self.misc,
+        }
+
+    @staticmethod
+    def _to_wkt(spatial):
         """
         Convert lats and lons to a WKT linestring.
 
@@ -41,17 +65,27 @@ class Properties(object):
     def __str__(self):
         """
         Format file properties to JSON when coercing object to string.
+
         :return: A Python string containing JSON representation of object.
         """
 
         if self.spatial is not None:
             self.spatial = self._to_wkt(self.spatial)
 
-        properties = {
-            "data_format": self.data_format,
-            "file": self.file_level,
-            "parameters": self.parameters,
-            "spatial": self.spatial,
-            "temporal": self.temporal,
-        }
-        return json.dumps(properties, indent=4)
+        return json.dumps(self.properties, indent=4)
+
+    def as_json(self):
+        """
+        Return metadata as JSON string.
+
+        :return str: JSON document describing metadata.
+        """
+        return self.__str__()
+
+    def as_dict(self):
+        """
+        Return metadata as dict object.
+
+        :return dict: Dictionary describing metadata
+        """
+        return self.properties

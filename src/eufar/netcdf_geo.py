@@ -1,8 +1,10 @@
 """
 Adapter layer for SAFIRE/FAAM NetCDF files - acquire geospatial and temporal
 data points from EUFAR NetCDF files.
+
+Adapted from Axel's KML script <axll@faam.ac.uk>
+@author Charles Newey <charles.newey@stfc.ac.uk>
 """
-# Adapted from Axel's KML script (axll@faam.ac.uk)
 
 from datetime import timedelta, datetime as dt
 import logging
