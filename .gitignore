@@ -11,3 +11,4 @@ man/
 out/
 
 *.pyc
+*.rst
