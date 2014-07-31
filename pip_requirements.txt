@@ -1,3 +1,4 @@
+astroid==1.1.1
 backports.ssl-match-hostname==3.4.0.2
 Cython==0.20.2
 docutils==0.12
@@ -5,6 +6,7 @@ ExifRead==1.4.2
 filemagic==1.6
 h5py==2.3.1
 Jinja2==2.7.3
+logilab-common==0.62.0
 MarkupSafe==0.23
 matplotlib==1.3.1
 mglob==0.4
@@ -13,6 +15,7 @@ nose==1.3.3
 numpy==1.8.0
 Pygments==1.6
 pyhdf==0.8.3
+pylint==1.2.1
 pyparsing==2.0.2
 python-dateutil==2.2
 scipy==0.14.0
