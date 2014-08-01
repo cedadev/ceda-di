@@ -7,7 +7,7 @@ import logging.config
 import multiprocessing
 import os
 
-from eufar import envi_geo, exif_geo, netcdf_geo
+from eufar import envi_geo, exif_geo, hdf4_geo, netcdf_geo
 
 
 def write_properties(fname, _geospatial_obj):
@@ -23,6 +23,12 @@ def process_bil(fpath):
     """Process BIL files."""
     with envi_geo.BIL(fpath) as bil:
         write_properties(fpath, bil)
+        
+
+def process_hdf4(fpath):
+    """Process HDF4 files."""
+    with hdf4_geo.HDF4(fpath) as hdf:
+        write_properties(fpath, hdf)
 
 
 def process_nc(fpath):
@@ -75,6 +81,11 @@ if __name__ == "__main__":
                 proc.start()
             elif f.endswith(".tif"):
                 proc = multiprocessing.Process(target=process_tiff,
+                                               args=(path,))
+                processes.append(proc)
+                proc.start()
+            elif f.endswith(".hdf"):
+                proc = multiprocessing.Process(target=process_hdf4,
                                                args=(path,))
                 processes.append(proc)
                 proc.start()

@@ -21,6 +21,7 @@ class NetCDF(_geospatial):
     """
     Adapter for SAFIRE/FAAM NetCDF data - extract geospatial and temporal data.
     """
+
     TIME_FORMATS = ["seconds since %Y-%m-%d %H:%M:%S %z",
                     "seconds since %Y-%m-%d %H:%M:%S %Z",
                     "seconds since %Y-%m-%d %H:%M:%S 00:00 %Z",
