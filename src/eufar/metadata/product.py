@@ -28,14 +28,15 @@ class Properties(object):
         self.data_format = data_format
 
         # Set other misc metadata
-        self.parameters = kwargs["parameters"]
-        del kwargs["parameters"]
+        if "parameters" in kwargs:
+            self.parameters = kwargs["parameters"]
+            del kwargs["parameters"]
+
         self.misc = kwargs
 
         self.properties = {
             "data_format": self.data_format,
             "file": self.file_level,
-            "parameters": self.parameters,
             "spatial": self.spatial,
             "temporal": self.temporal,
             "misc": self.misc,
