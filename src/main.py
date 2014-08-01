@@ -10,10 +10,19 @@ import os
 from eufar import envi_geo, exif_geo, hdf4_geo, netcdf_geo
 
 
+BASE_DIR = "/work/scratch/ccnewey/arsf-geo-map/"
+LOG_SUFFIX = "log/"
+OUTPUT_SUFFIX = "out/"
+
+LOGPATH = os.path.join(BASE_DIR, LOG_SUFFIX)
+OUTPATH = os.path.join(BASE_DIR, OUTPUT_SUFFIX)
 def write_properties(fname, _geospatial_obj):
     """Write module properties to an output file."""
     fname = os.path.basename(fname)
-    fname = "out/%s.json" % os.path.splitext(fname)[0]  # Create JSON path
+
+    # Construct JSON path
+    fname = "%s/%s.json" % (OUTPATH, os.path.splitext(fname)[0])
+
     with open(fname, 'w') as j:
         props = str(_geospatial_obj.get_properties())
         j.write(props)
@@ -46,8 +55,8 @@ def process_tiff(fpath):
 
 def prepare_logging():
     """Initial logging setup"""
-    if not os.path.isdir("log"):
-        os.mkdir("log")
+    if not os.path.isdir(LOGPATH):
+        os.makedirs(LOGPATH)
 
     logging.config.fileConfig("logging.conf")
     log = logging.getLogger("main")
@@ -60,8 +69,8 @@ if __name__ == "__main__":
     LOGGER = prepare_logging()
 
     # Make output directory for JSON
-    if not os.path.isdir("out"):
-        os.mkdir("out")
+    if not os.path.isdir(OUTPATH):
+        os.makedirs(OUTPATH)
 
     START_PATH = "/badc/eufar/data/aircraft/"
     processes = []
