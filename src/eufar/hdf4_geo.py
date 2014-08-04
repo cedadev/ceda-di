@@ -103,21 +103,21 @@ class HDF4(_geospatial):
         # Convert date from list of integers to string (because HDF is weird)
         timestamps["date"] = ''.join([chr(x) for x in timestamps["date"]
                                       if x != 0])
-        return timestamps
+        return self._parse_timestamps(timestamps)
 
-    def _parse_timestamp(self, tm_dict):
+    def _parse_timestamps(self, tm_dict):
         """
         Parse start and end timestamps from an HDF4 file.
 
         :param dict tm_dict: The timestamp to be parsed
         """
-        st_base = ("%s %s", tm_dict["date"], tm_dict["start_time"])
-        et_base = ("%s %s", tm_dict["date"], tm_dict["end_time"])
+        st_base = ("%s %s" % (tm_dict["date"], tm_dict["start_time"][0]))
+        et_base = ("%s %s" % (tm_dict["date"], tm_dict["end_time"][0]))
 
-        start_time = datetime.datetime.strptime(st_base, "%d/%m/%Y %H%M%S")
-        end_time = datetime.datetime.strptime(et_base, "%d/%m/%Y %H%M%S")
-        return {"start_time": start_time,
-                "end_time": end_time}
+        start_time = datetime.datetime.strptime(st_base, "%d/%m/%y %H%M%S")
+        end_time = datetime.datetime.strptime(et_base, "%d/%m/%y %H%M%S")
+        return {"start_time": start_time.isoformat(),
+                "end_time": end_time.isoformat()}
 
     def get_geospatial(self):
         """
