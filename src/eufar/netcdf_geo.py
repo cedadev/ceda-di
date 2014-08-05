@@ -22,7 +22,7 @@ class NetCDF(_geospatial):
     """
     Adapter for SAFIRE/FAAM NetCDF data - extract geospatial and temporal data.
     """
-
+    
     TIME_FORMATS = ["seconds since %Y-%m-%d %H:%M:%S %z",
                     "seconds since %Y-%m-%d %H:%M:%S %Z",
                     "seconds since %Y-%m-%d %H:%M:%S 00:00 %Z",
@@ -44,24 +44,25 @@ class NetCDF(_geospatial):
 
     def __enter__(self):
         return self
-
+ 
     def __exit__(self, *args):
         pass
 
     def get_parameters(self, nc):
         """
         :param netCDF4.Dataset nc: NetCDF4 dataset to get variable data from
+        :return dict: Dictionary containing name variations 
+                      (standard name, long name, etc) and units
         """
-        """
-        Required fields
-        name
-        long_name
-        long_name_fr
-        standard_name
-        units
-        """
-        pass
+        var_dict = {}
+        for var in nc.variables:
+            var_dict[var] = {}
+            for attr in nc.variables[var].ncattrs():
+                if "name" in attr or "units" in attr:
+                    var_dict[var][attr] = nc.variables[var][attr]
 
+        return var_dict
+            
     def _get_netcdf_var_from_regex(self, regex, nc, flags=None):
         """
         Return the first matching variable from 'nc', that matches 'regex'.
@@ -256,10 +257,14 @@ class NetCDF(_geospatial):
             # Data format
             data_format = {"format": "NetCDF"}
 
+            # Parameters
+            parameters = self.get_parameters(netcdf_data)
+
             # Create properties object
             props = product.Properties(temporal=temporal,
                                        file_level=file_level,
                                        spatial=geospatial,
-                                       data_format=data_format)
+                                       data_format=data_format,
+                                       parameters=parameters)
 
             return props
