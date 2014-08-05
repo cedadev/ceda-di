@@ -7,6 +7,7 @@ from _dataset import _geospatial
 
 class ENVI(_geospatial):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
+        self.logger = logging.logger()
         self.b = None
         self.extension = None
         self.header_path = header_path
@@ -14,17 +15,28 @@ class ENVI(_geospatial):
         self.unpack_fmt = unpack_fmt
 
     def read(self):
-        logger = logging.getLogger()
-        logger.error("Someone tried to call read() on the ENVI base class.")
+        """
+        This is overridden by child classes - not a working method.
+        """
+        self.logger.error("read() was called on the ENVI base class.")
         raise NotImplementedError("Not implemented - this is a base class.")
 
     def _load_data(self):
+        """
+        Load data from the binary file into a class attribute "data"
+        """
         if not hasattr(self, "data"):
-            self.data = self.b.read()
+            data = self.b.read()
+            self.data = {
+                "time": data[0],
+                "lat": data[1],
+                "lon": data[2],
+            }
 
     def get_geospatial(self):
         """
-        :return dict: A dict containing geospatial and temporal information
+        Read geospatial data parsed from binary file
+        :return dict: A dict containing geospatial information
         """
 
         self._load_data()
@@ -49,6 +61,10 @@ class ENVI(_geospatial):
         return temporal
 
     def get_data_format(self):
+        """
+        Return file format information
+        :return dict: A dict containing file format information
+        """
         data_format = {
             "format": self.data_format,
         }
@@ -56,6 +72,12 @@ class ENVI(_geospatial):
         return data_format
 
     def get_properties(self):
+        """
+        Return a metadata.product.Properties object describing
+        the file's metadata.
+
+        :return metadata.product.Properties: Metadata
+        """
         file_level = super(ENVI, self).get_file_level(self.b.path)
         prop = product.Properties(file_level=file_level,
                                   temporal=self.get_temporal(),
@@ -66,6 +88,10 @@ class ENVI(_geospatial):
 
 
 class BIL(ENVI):
+    """
+    Sub-class of ENVI that uses the io.envi.BilFile class to read
+    binary data from BIL files.
+    """
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
         super(BIL, self).__init__(header_path, path, unpack_fmt)
         self.extension = ".bil"
@@ -89,6 +115,10 @@ class BIL(ENVI):
 
 
 class BSQ(ENVI):
+    """
+    Sub-class of ENVI that uses the io.envi.BsqFile class to read
+    binary data from BSQ files.
+    """
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
         super(BSQ, self).__init__(header_path, path, unpack_fmt)
         self.extension = ".bsq"
