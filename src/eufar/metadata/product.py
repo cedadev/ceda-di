@@ -23,9 +23,11 @@ class Properties(object):
         """
 
         self.file_level = file_level
-        self.spatial = spatial
         self.temporal = temporal
         self.data_format = data_format
+        self.spatial = spatial
+        if self.spatial is not None:
+            self.spatial = self._to_wkt(self.spatial)
 
         # Set other misc metadata
         if "parameters" in kwargs:
@@ -57,7 +59,7 @@ class Properties(object):
         for lat, lon in zip(lats, lons):
             coord_list.append("%f %f" % (lat, lon))
 
-        sep = ',\n'
+        sep = ", "
         coord_string = sep.join(coord_list)
         linestring = "LINESTRING (%s)" % coord_string
 
@@ -69,10 +71,6 @@ class Properties(object):
 
         :return: A Python string containing JSON representation of object.
         """
-
-        if self.spatial is not None:
-            self.spatial = self._to_wkt(self.spatial)
-
         return json.dumps(self.properties, indent=4)
 
     def as_json(self):
