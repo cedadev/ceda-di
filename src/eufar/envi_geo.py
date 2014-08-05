@@ -1,3 +1,5 @@
+import logging
+
 from io import envi
 from metadata import product
 from _dataset import _geospatial
@@ -12,6 +14,7 @@ class ENVI(_geospatial):
         self.unpack_fmt = unpack_fmt
 
     def read(self):
+        logger = logging.getLogger()
         logger.error("Someone tried to call read() on the ENVI base class.")
         raise NotImplementedError("Not implemented - this is a base class.")
 
@@ -57,7 +60,8 @@ class ENVI(_geospatial):
         prop = product.Properties(file_level=file_level,
                                   temporal=self.get_temporal(),
                                   data_format=self.get_data_format(),
-                                  spatial=self.get_geospatial())
+                                  spatial=self.get_geospatial(),
+                                  parameters=self.parameters)
         return prop
 
 
@@ -79,6 +83,7 @@ class BIL(ENVI):
             self.b = envi.BilFile(header_path=self.header_path,
                                   path=self.path,
                                   unpack_fmt=self.unpack_fmt)
+            self.parameters = self.b.hdr
             self.data = self.b.read()
         return self.data
 
@@ -101,5 +106,6 @@ class BSQ(ENVI):
             self.b = envi.BsqFile(header_path=self.header_path,
                                   path=self.path,
                                   unpack_fmt=self.unpack_fmt)
+            self.parameters = self.b.hdr
             self.data = self.b.read()
         return self.data
