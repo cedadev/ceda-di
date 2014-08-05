@@ -6,7 +6,8 @@ Adapted from Axel's KML script <axll@faam.ac.uk>
 @author Charles Newey <charles.newey@stfc.ac.uk>
 """
 
-from datetime import timedelta, datetime as dt
+from datetime import timedelta
+from datetime import datetime as dt
 import logging
 import numpy
 import re
@@ -47,6 +48,20 @@ class NetCDF(_geospatial):
     def __exit__(self, *args):
         pass
 
+    def get_parameters(self, nc):
+        """
+        :param netCDF4.Dataset nc: NetCDF4 dataset to get variable data from
+        """
+        """
+        Required fields
+        name
+        long_name
+        long_name_fr
+        standard_name
+        units
+        """
+        pass
+
     def _get_netcdf_var_from_regex(self, regex, nc, flags=None):
         """
         Return the first matching variable from 'nc', that matches 'regex'.
@@ -68,6 +83,7 @@ class NetCDF(_geospatial):
         :param netCDF4.Dataset nc: NetCDF4 dataset to search for variables in
         :return str(var_name): The name of the first item from var_list in nc
         """
+        varnames = []
         for var in var_list:
             if var in nc.variables:
                 return var
@@ -83,8 +99,6 @@ class NetCDF(_geospatial):
         :param str tm_var: Variable name for "time" in nc
         :return list(datetime.datetime): List of datetime objects
         """
-        # TODO Julian fractional time
-
         shape = nc.variables[tm_var].shape
         if len(shape) <= 1:
             tm_list = list(nc.variables[tm_var][:].ravel())
@@ -102,7 +116,7 @@ class NetCDF(_geospatial):
                 time = []
                 for j in xrange(0, shape[0]):
                     time.append(int(times[i + j]))
-                tm_list.append(dt(*time))
+                tm_list.append(dt(*time))  # Note: *args magic here
 
             return tm_list
 
@@ -122,9 +136,9 @@ class NetCDF(_geospatial):
                              (self.fpath))
 
         # Try converting the epoch/GPS timestamps to datetime objects here
-        for f in self.TIME_FORMATS:
+        for t_format in self.TIME_FORMATS:
             try:
-                base_time = dt.strptime(tm_str, f)
+                base_time = dt.strptime(tm_str, t_format)
                 timestamps = [base_time +
                               timedelta(seconds=float(sec))
                               for sec in tm_list]
@@ -179,9 +193,9 @@ class NetCDF(_geospatial):
         if isinstance(datum, numpy.ndarray):
             try:
                 datum = datum.flat[0]
-            except AttributeError as ae:
+            except AttributeError as attrib:
                 self.logger.error("Could not flatten array (%s): %s" %
-                                  (str(ae), self.fpath))
+                                  (str(attrib), self.fpath))
                 return []
 
         # Is time a numeric time format? (epoch, GPS or Julian)
@@ -198,7 +212,6 @@ class NetCDF(_geospatial):
         Open specified NetCDF file and extract lat/lon/alt/timestamp data.
         :return dict: Dict with lat/lon/alt and timestamp lists for each file
         """
-
         try:
             lon_var = self._nc_var_from_list(self.LON_NAMES, netcdf_data)
             lon = netcdf_data.variables[lon_var][:].ravel()[10:-10]
