@@ -10,7 +10,8 @@ class Properties(object):
     A class to hold, manipulate, and export geospatial metadata at file level.
     """
     def __init__(self, file_level=None, spatial=None,
-                 temporal=None, data_format=None, **kwargs):
+                 temporal=None, data_format=None, parameters=None,
+                 **kwargs):
         """
         Construct a 'eufar.metadata.Properties' ready to export as JSON or dict
         (see "doc/schema.json")
@@ -25,17 +26,12 @@ class Properties(object):
         self.file_level = file_level
         self.temporal = temporal
         self.data_format = data_format
+        self.parameters = parameters
         self.spatial = spatial
         if self.spatial is not None:
             self.spatial = self._to_wkt(self.spatial)
 
-        # Set other misc metadata
-        if "parameters" in kwargs:
-            self.parameters = kwargs["parameters"]
-            del kwargs["parameters"]
-
         self.misc = kwargs
-
         self.properties = {
             "data_format": self.data_format,
             "file": self.file_level,
