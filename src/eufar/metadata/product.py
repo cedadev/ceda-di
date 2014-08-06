@@ -35,9 +35,10 @@ class Properties(object):
         self.properties = {
             "data_format": self.data_format,
             "file": self.file_level,
+            "misc": self.misc,
+            "parameters": self.parameters,
             "spatial": self.spatial,
             "temporal": self.temporal,
-            "misc": self.misc,
         }
 
     @staticmethod
@@ -67,7 +68,7 @@ class Properties(object):
 
         :return: A Python string containing JSON representation of object.
         """
-        return json.dumps(self.properties, indent=4)
+        return json.dumps(self.properties, indent=4, default=repr)
 
     def as_json(self):
         """

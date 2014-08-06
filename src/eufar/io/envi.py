@@ -80,6 +80,9 @@ class EnviFile(object):
                     split_ln[0]: split_ln[1]
                 })
 
+        if "band names" in hdr:
+            hdr["band names"] = hdr["band names"].split(", ")
+
         return hdr
 
     def calc_from_xy(self):

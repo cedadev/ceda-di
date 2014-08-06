@@ -7,7 +7,7 @@ from _dataset import _geospatial
 
 class ENVI(_geospatial):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
-        self.logger = logging.logger()
+        self.logger = logging.getLogger()
         self.b = None
         self.extension = None
         self.header_path = header_path
@@ -79,6 +79,10 @@ class ENVI(_geospatial):
         :return metadata.product.Properties: Metadata
         """
         file_level = super(ENVI, self).get_file_level(self.b.path)
+
+        if "band names" in self.parameters:
+            self.parameters = self.parameters["band names"]
+
         prop = product.Properties(file_level=file_level,
                                   temporal=self.get_temporal(),
                                   data_format=self.get_data_format(),
