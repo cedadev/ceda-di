@@ -1,4 +1,7 @@
-#! /usr/bin/env python
+"""
+Module containing classes to read and export XML metadata embedded in GeoTIFF
+files using the EXIF standard.
+"""
 
 import datetime
 import json
@@ -12,11 +15,16 @@ from metadata import product
 
 
 class EXIF(_geospatial):
+    """
+    Class that handles extraction and export of EXIF metadata from GeoTIFF
+    image files.
+    """
     def __init__(self, fname):
         """
         :param str fname: File name to construct EXIF_geo object from.
         """
         self.fname = fname
+        self.xml = None
 
     def __enter__(self):
         """
@@ -35,8 +43,8 @@ class EXIF(_geospatial):
 
     def get_geospatial(self):
         """
-        Return a dictionary containing metadata and geospatial information.
-        :return dict: Dict containing metadata and geospatial information.
+        Return a dictionary containing geospatial extent metadata.
+        :return dict: Dictionary containing geospatial extent metadata.
         """
 
         # Traverse XML
@@ -55,6 +63,10 @@ class EXIF(_geospatial):
         return geospatial
 
     def get_temporal(self):
+        """
+        Return a dictionary containing temporal extent metadata
+        :return dict: Dictionary containing temporal extent metadata
+        """
         proj = self.xml["Camera_Image"]["Project_info"]
 
         year = int(proj["Year"])
@@ -78,6 +90,11 @@ class EXIF(_geospatial):
         return temporal
 
     def get_properties(self):
+        """
+        Return a eufar.metadata.product.Properties object populated with the
+        file's metadata.
+        :return Properties: A eufar.metadata.product.Properties object
+        """
         file_level = super(EXIF, self).get_file_level(self.fname)
         geospatial = self.get_geospatial()
         temporal = self.get_temporal()
