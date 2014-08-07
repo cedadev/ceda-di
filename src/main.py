@@ -2,6 +2,7 @@
 Main script to handle processing of EUFAR data.
 """
 
+import datetime
 import logging
 import logging.config
 import multiprocessing
@@ -72,37 +73,47 @@ if __name__ == "__main__":
     if not os.path.isdir(OUTPATH):
         os.makedirs(OUTPATH)
 
-    START_PATH = "/badc/eufar/data/aircraft/"
+    START_TIME = datetime.datetime.now()
+    LOGGER.info("Metadata extraction started at: %s" % START_TIME.isoformat())
+
+    START_PATH = "/badc/eufar/data/projects/"
     processes = []
     for root, dirs, files in os.walk(START_PATH, followlinks=True):
         for f in files:
             path = os.path.join(root, f)
 
-            if f.endswith(".hdr") and "nav" in f and "qual" not in f:
-                proc = multiprocessing.Process(target=process_bil,
+            if "raw" not in path:
+                if f.endswith("_nav_post_processed.bil.hdr"):
+                    proc = multiprocessing.Process(target=process_bil,
                                                args=(path,))
-                processes.append(proc)
-                proc.start()
-            elif f.endswith(".nc"):
-                proc = multiprocessing.Process(target=process_nc,
+                    processes.append(proc)
+                    proc.start()
+                elif f.endswith(".nc"):
+                    proc = multiprocessing.Process(target=process_nc,
                                                args=(path,))
-                processes.append(proc)
-                proc.start()
-            elif f.endswith(".tif"):
-                proc = multiprocessing.Process(target=process_tiff,
+                    processes.append(proc)
+                    proc.start()
+                elif f.endswith(".tif"):
+                    proc = multiprocessing.Process(target=process_tiff,
                                                args=(path,))
-                processes.append(proc)
-                proc.start()
-            elif f.endswith(".hdf"):
-                proc = multiprocessing.Process(target=process_hdf4,
+                    processes.append(proc)
+                    proc.start()
+                elif f.endswith(".hdf"):
+                    proc = multiprocessing.Process(target=process_hdf4,
                                                args=(path,))
-                processes.append(proc)
-                proc.start()
+                    processes.append(proc)
+                    proc.start()
 
-            while len(processes) > 45:
+            while len(processes) > 8:
                 p = processes.pop()
                 p.join()
 
     # End
     for proc in processes:
         proc.join()
+
+    END_TIME = datetime.datetime.now()
+    LOGGER.info("Metadata extraction completed at: %s" % END_TIME.isoformat())
+    LOGGER.info("Start: %s, End: %s, Total: %s" % (START_TIME.isoformat(),
+                                                   END_TIME.isoformat(),
+                                                   (END_TIME - START_TIME)))
