@@ -1,6 +1,11 @@
-# Taken and adapted from:
-# arsf-dan.nerc.ac.uk/trac/attachment/ticket/287/data_handler.py
-# Original author: Ben Taylor (benj)
+"""
+Interface for ENVI BIL and BSQ files (reading packed binary data)
+Used by envi_geo in eufar module
+
+Taken and adapted from:
+arsf-dan.nerc.ac.uk/trac/attachment/ticket/287/data_handler.py
+Original author: Ben Taylor (benj)
+"""
 
 from __future__ import division
 import logging
@@ -11,9 +16,9 @@ import struct
 
 class EnviFile(object):
     """
-    x: Number of bands
-    y: Number of lines
-    z: Pixels per line
+    Superclass for BilFile and BsqFile.
+    Contains generic read() method that subclasses use to unpack binary data
+    in the correct order.
     """
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
         """
@@ -22,6 +27,7 @@ class EnviFile(object):
         :param str unpack_fmt: Format string describing structure of data.
                                Default: "<d" - little-endian, double precision
         """
+        self.logger = logging.getLogger()
         self.hdr_path = header_path
 
         if path is not None:
@@ -52,6 +58,14 @@ class EnviFile(object):
         return num_bytes
 
     def get_path(self, path, ext):
+        """
+        Given the path of an ENVI header file, try to guess the path of the
+        ENVI binary and return it.
+
+        :param path: Path to the BIL header file
+        :param ext: Extension of the binary data file to read
+        :return str: The path of the BIL data file
+        """
         p = os.path.splitext(path)[0]
         if not os.path.isfile(p):
             p += ext
@@ -102,7 +116,12 @@ class EnviFile(object):
 
     def read(self, x_size, y_size, z_size):
         """
-        See class docstring for x/y/z mappings.
+        Read an ENVI binary file incrementally, returning arrays containing
+        binary data.
+
+        :param x_size: Number of bands (BIL) || Number of lines (BSQ)
+        :param y_size: Number of lines (BIL) || Number of bands (BSQ)
+        :param z_size: Pixels per line
         """
         filename = self.path
 
@@ -119,7 +138,7 @@ class EnviFile(object):
         pixperline = int(self.hdr["pixperline"])
         checknum = int((((filesize / bands) /
                        lines) / bytesperpix) / pixperline)
-        if (checknum != 1):
+        if checknum != 1:
             raise ValueError("File size and supplied attributes do not match")
 
         with open(filename, 'rb') as envi:
@@ -136,7 +155,7 @@ class EnviFile(object):
                         datum = envi.read(bytesperpix)
 
                         # If we get a blank string then we hit EOF unexpectedly
-                        if (datum == ""):
+                        if datum == "":
                             raise EOFError("Unexpected EOF :(")
 
                         # If everything worked, unpack the binary value
@@ -148,6 +167,10 @@ class EnviFile(object):
 
 
 class BilFile(EnviFile):
+    """
+    Child class of EnviFile.
+    Provides correct wrappers of read() methods for reading BIL files in order.
+    """
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
         """
         Call superclass constructor with appropriate parameters.
@@ -174,6 +197,10 @@ class BilFile(EnviFile):
 
 
 class BsqFile(EnviFile):
+    """
+    Child class of EnviFile.
+    Provides correct wrappers of read() methods for reading BSQ files in order.
+    """
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
         """
         Call superclass constructor with appropriate parameters.
