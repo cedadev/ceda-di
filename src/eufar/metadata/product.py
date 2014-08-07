@@ -2,6 +2,7 @@
 Module for holding and exporting file metadata as JSON documents.
 """
 
+from __future__ import division
 import json
 
 
@@ -52,9 +53,13 @@ class Properties(object):
         lats = spatial["lat"]
         lons = spatial["lon"]
 
-        coord_list = []
+        coord_list = set()
         for lat, lon in zip(lats, lons):
-            coord_list.append("%f %f" % (lat, lon))
+            coord_list.add("%f %f" % (lat, lon))
+
+        if len(coord_list) != 0:
+            diff = ((len(coord_list) - len(lats)) / float(len(lats))) * 100
+            print diff
 
         sep = ", "
         coord_string = sep.join(coord_list)
