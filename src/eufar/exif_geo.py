@@ -4,11 +4,12 @@ files using the EXIF standard.
 """
 
 import datetime
-import json
+import logging
 import os
 
 import exifread
 import xmltodict
+from xml.parsers.expat import ExpatError
 
 from _dataset import _geospatial
 from metadata import product
@@ -23,22 +24,29 @@ class EXIF(_geospatial):
         """
         :param str fname: File name to construct EXIF_geo object from.
         """
+        self.logger = logging.getLogger()
         self.fname = fname
         self.xml = None
 
     def __enter__(self):
         """
-        Context manager helper method.
+        Context manager entry method (e.g. "with" statement)
         :return self:
         """
-        with open(self.fname, 'rb') as f:
-            tags = exifread.process_file(f, details=False, strict=True)
 
-        self.xml = xmltodict.parse(tags["Image ImageDescription"].values)
+        try:
+            with open(self.fname, 'rb') as exif:
+                tags = exifread.process_file(exif, details=False, strict=True)
+            self.xml = xmltodict.parse(tags["Image ImageDescription"].values)
+        except (IOError, KeyError, ExpatError):
+            self.logger.warn("Could not parse XML from EXIF: %s" % self.fname)
 
         return self
 
     def __exit__(self, *args):
+        """
+        Context manager exit method (e.g. "with" statement)
+        """
         pass
 
     def get_geospatial(self):
@@ -93,14 +101,21 @@ class EXIF(_geospatial):
         """
         Return a eufar.metadata.product.Properties object populated with the
         file's metadata.
-        :return Properties: A eufar.metadata.product.Properties object
+        :return props: A eufar.metadata.product.Properties object
         """
         file_level = super(EXIF, self).get_file_level(self.fname)
-        geospatial = self.get_geospatial()
-        temporal = self.get_temporal()
         data_format = {
             "format": os.path.splitext(self.fname)[1][1:]
         }
+
+        try:
+            geospatial = self.get_geospatial()
+            temporal = self.get_temporal()
+        except KeyError:
+            self.logger.warning("Could not extract metadata from EXIF XML: %s"
+                                % self.fname)
+            temporal = None
+            geospatial = None
 
         props = product.Properties(file_level=file_level,
                                    spatial=geospatial,

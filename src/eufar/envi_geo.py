@@ -1,3 +1,9 @@
+"""
+Interface for reading data from ENVI BSQ/BIL packed binary files.
+Also contains methods for extracting metadata (geospatial/temporal).
+"""
+
+
 import logging
 
 from io import envi
@@ -8,8 +14,11 @@ from _dataset import _geospatial
 class ENVI(_geospatial):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
         self.logger = logging.getLogger()
-        self.b = None
-        self.extension = None
+        self.b = None  # Overridden by child classes
+        self.data = None  # Overridden by child classes
+        self.data_format = None  # Overridden by child classes
+        self.extension = None  # Overridden by child classes
+        self.parameters = None  # Overridden by child classes
         self.header_path = header_path
         self.path = path
         self.unpack_fmt = unpack_fmt

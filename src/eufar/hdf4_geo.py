@@ -52,8 +52,8 @@ class HDF4(_geospatial):
 
         :param HDF4.V.v v: VGroup object
         :param HDF4.V.vs vs: VData object
-        :param str fn: Filename of the object
-        :return dict: Dict containing geospatial and temporal information.
+        :param str fn: Path to the data file
+        :return dict: Dict containing geospatial information.
         """
         mappings = {
             "NVlat2": "lat",
@@ -79,6 +79,10 @@ class HDF4(_geospatial):
     def _get_temporal(self, v, vs, fn):
         """
         Returns start and end timestamps (if existing)
+        :param HDF4.V.v v: VGroup object
+        :param HDF4.V.vs vs: VData object
+        :param str fn: Path to the data file
+        :return dict: Dict containing temporal information.
         """
         mappings = {
             "MIdate": "date",
@@ -100,16 +104,22 @@ class HDF4(_geospatial):
 
             vd.detach()
 
-        # Convert date from list of integers to string (because HDF is weird)
-        timestamps["date"] = ''.join([chr(x) for x in timestamps["date"]
-                                      if x != 0])
+        # This list comprehension basically converts from a list of integers
+        # into a list of chars and joins them together to make strings
+        # ...
+        # If unclear - HDF text data comes out as a list of integers, e.g.:
+        # 72 101 108 108 111 32 119 111 114 108 100 (this means "Hello world")
+        # Those "char" numbers get converted to strings with this snippet.
+        dates = [chr(x) for x in timestamps["date"] if x != 0]
+        timestamps["date"] = ''.join(dates)
+
         return self._parse_timestamps(timestamps)
 
     def _parse_timestamps(self, tm_dict):
         """
         Parse start and end timestamps from an HDF4 file.
-
         :param dict tm_dict: The timestamp to be parsed
+        :return dict: Dict containing start and end timestamps
         """
         st_base = ("%s %s" % (tm_dict["date"], tm_dict["start_time"][0]))
         et_base = ("%s %s" % (tm_dict["date"], tm_dict["end_time"][0]))
@@ -123,7 +133,6 @@ class HDF4(_geospatial):
         """
         Search through HDF4 file, returning a list of coordinates from the
         'Navigation' vgroup (if it exists).
-
         :return dict: Dict containing geospatial information.
         """
         ref = -1
@@ -149,6 +158,7 @@ class HDF4(_geospatial):
         """
         Search through HDF4 file, returning timestamps from the 'Mission'
         vgroup (if it exists)
+        :return list: List containing temporal metadata
         """
         ref = -1
         while True:
@@ -171,9 +181,9 @@ class HDF4(_geospatial):
 
     def get_properties(self):
         """
-        :return eufar.metadata.properties.Properties: Metadata object
         Returns eufar.metadata.properties.Properties object
         containing geospatial and temporal metadata from file.
+        :return eufar.metadata.properties.Properties: Metadata object
         """
         geospatial = self.get_geospatial()
         temporal = self.get_temporal()

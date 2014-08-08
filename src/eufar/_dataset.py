@@ -1,3 +1,8 @@
+"""
+Base class used as interface for providing file-level metadata from geospatial
+and temporal metadata files.
+"""
+
 import os
 
 

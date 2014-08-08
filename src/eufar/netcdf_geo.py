@@ -103,13 +103,13 @@ class NetCDF(_geospatial):
         if len(shape) <= 1:
             tm_list = list(nc.variables[tm_var][:].ravel())
         elif len(shape) == 2 and shape[0] == 1:
-            # Timestamp units in these files are "since midnight" which is
-            # quite vague... Return blank list until I've implemented it
+            # Timestamp units in these files are "since midnight" and they are
+            # quite difficult to parse. Return a blank list.
             self.logger.info("Timestamp format too vague: %s" % self.fpath)
             return []
         else:
-            # If this is reached, the times are in a strange numpy.ndarray
-            # Here, we convert to datetime objects (small loss of precision)
+            # If this is reached, the times are in a numpy.ndarray
+            # Convert them to "datetime" (but with a small loss of precision)
             times = list(nc.variables[tm_var][:].ravel(order='F'))
             tm_list = []
             for i in xrange(0, len(times), shape[0]):
@@ -121,9 +121,10 @@ class NetCDF(_geospatial):
             return tm_list
 
         if hasattr(nc.variables[tm_var], "units"):
-            # Try to parse from epoch time
+            # Try to parse from epoch-style timestamp
             tm_str = nc.variables[tm_var].units
         elif hasattr(nc.variables[tm_var], "Units"):
+            # Try to parse from epoch-style timestamp
             tm_str = nc.variables[tm_var].Units
         elif hasattr(nc, "date"):
             # Try to parse from GPS time
@@ -169,7 +170,9 @@ class NetCDF(_geospatial):
                 # Variable isn't in the format we tried, try next alternative
                 continue
 
-        # Raise error if list is exhausted
+        # This code (with an ideal metadata file) would not be reached.
+        # Basically we couldn't find a useful timestamp format from the list,
+        # so we raise and log the error.
         self.logger.error("Couldn't match timestamp format: %s" % self.fpath)
         raise ValueError("Couldn't match timestamp format: %s" % tm_list[0])
 
@@ -234,6 +237,11 @@ class NetCDF(_geospatial):
             return None
 
     def get_properties(self):
+        """
+        Return a eufar.metadata.product.Properties object populated with the
+        NetCDF file's metadata.
+        :return properties: eufar.metadata.product.Properties with metadata
+        """
         with Dataset(self.fpath, 'r') as netcdf_data:
             # Timestamps
             timestamps = self.get_time_data(netcdf_data)
