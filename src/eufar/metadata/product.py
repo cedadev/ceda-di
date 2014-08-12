@@ -57,10 +57,6 @@ class Properties(object):
         for lat, lon in zip(lats, lons):
             coord_list.add("%f %f" % (lat, lon))
 
-        if len(coord_list) != 0:
-            diff = ((len(coord_list) - len(lats)) / float(len(lats))) * 100
-            print diff
-
         sep = ", "
         coord_string = sep.join(coord_list)
         linestring = "LINESTRING (%s)" % coord_string
