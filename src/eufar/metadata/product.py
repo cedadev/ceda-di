@@ -21,7 +21,7 @@ class Properties(object):
         :param dict spatial: Spatial information about file
         :param dict temporal: Temporal information about file
         :param dict data_format: Data format information about file
-        :param **kwargs: Key-value pairs of any extra metadata describing file.
+        :param **kwargs: Key-value pairs of any extra relevant metadata.
         """
 
         self.file_level = file_level
@@ -30,7 +30,7 @@ class Properties(object):
         self.parameters = parameters
         self.spatial = spatial
         if self.spatial is not None:
-            self.spatial = self._to_wkt(self.spatial)
+            self.spatial = self._to_geojson(self.spatial)
 
         self.misc = kwargs
         self.properties = {
@@ -41,6 +41,37 @@ class Properties(object):
             "spatial": self.spatial,
             "temporal": self.temporal,
         }
+
+    def _gen_bbox(self, spatial):
+        """
+        Generate and return a bounding box for the given geospatial data.
+        :param dict spatial: Dictionary with "lat" and "lon" keys w/coordinates
+        :return list bbox: A bounding-box list formatted in the GeoJSON style
+        """
+        lons = spatial["lon"]
+        lats = spatial["lat"]
+
+        lon_lo, lon_hi = self._get_hi_lo(lons)
+        lat_lo, lat_hi = self._get_hi_lo(lats)
+
+        return [lon_lo, lat_lo, lon_hi, lat_hi]
+
+    @staticmethod
+    def _get_hi_lo(item_list):
+        """
+        Return a tuple containing the (highest, lowest) values in the list.
+        :param list item_list: List of comparable data items
+        :return tuple: Tuple of (highest, lowest values in the list)
+        """
+        high = item_list[0]
+        low = item_list[0]
+        for item in item_list:
+            if item > high:
+                high = item
+            elif item < low:
+                low = item
+
+        return (high, low)
 
     @staticmethod
     def _to_wkt(spatial):
@@ -62,6 +93,29 @@ class Properties(object):
         linestring = "LINESTRING (%s)" % coord_string
 
         return linestring
+
+    def _to_geojson(self, spatial):
+        """
+        Convert lats and lons to a GeoJSON-compatible type.
+
+        :param dict spatial: A dict with keys 'lat' and 'lon' (as lists)
+        :return: A Python dict representing a GeoJSON-compatible coord array
+        """
+        lats = spatial["lat"]
+        lons = spatial["lon"]
+
+        coord_list = set()
+        for lat, lon in zip(lats, lons):
+            coord_list.add([lon, lat])
+
+        geojson = {}
+        geojson["geometries"] = {
+            "type": "LineString",
+            "bbox": self._gen_bbox(spatial),
+            "coordinates": list(coord_list)
+        }
+
+        return geojson
 
     def __str__(self):
         """
