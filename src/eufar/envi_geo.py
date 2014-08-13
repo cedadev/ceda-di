@@ -3,7 +3,6 @@ Interface for reading data from ENVI BSQ/BIL packed binary files.
 Also contains methods for extracting metadata (geospatial/temporal).
 """
 
-
 import logging
 
 from io import envi
@@ -23,32 +22,19 @@ class ENVI(_geospatial):
         self.path = path
         self.unpack_fmt = unpack_fmt
 
-    def read(self):
-        """
-        This is overridden by child classes - not a working method.
-        """
-        self.logger.error("read() was called on the ENVI base class.")
-        raise NotImplementedError("Not implemented - this is a base class.")
-
     def _load_data(self):
         """
         Load data from the binary file into a class attribute "data"
         """
-        if not hasattr(self, "data"):
-            data = self.b.read()
-            self.data = {
-                "time": data[0],
-                "lat": data[1],
-                "lon": data[2],
-            }
+        if self.data is None:
+            self.parameters = self.b.hdr
+            self.data = self.b.read()
 
     def get_geospatial(self):
         """
         Read geospatial data parsed from binary file
         :return dict: A dict containing geospatial information
         """
-
-        self._load_data()
         spatial = {
             "lat": self.data[1],
             "lon": self.data[2],
@@ -61,7 +47,6 @@ class ENVI(_geospatial):
         return spatial
 
     def get_temporal(self):
-        self._load_data()
         temporal = {
             "start_time": self.data[0][0],
             "end_time": self.data[0][-1],
@@ -87,8 +72,9 @@ class ENVI(_geospatial):
 
         :return metadata.product.Properties: Metadata
         """
-        file_level = super(ENVI, self).get_file_level(self.b.path)
+        file_level = super(ENVI, self).get_file_level(self.path)
 
+        self._load_data()
         if "band names" in self.parameters:
             self.parameters = self.parameters["band names"]
 
@@ -110,6 +96,12 @@ class BIL(ENVI):
         self.extension = ".bil"
         self.data_format = "ENVI BIL (Band Interleaved by Line)"
 
+        # Construct file access object
+        self.b = envi.BilFile(header_path=self.header_path,
+                              path=self.path,
+                              unpack_fmt=self.unpack_fmt)
+        self.path = self.b.path
+
     def __enter__(self):
         self.read()
         return self
@@ -118,12 +110,7 @@ class BIL(ENVI):
         pass
 
     def read(self):
-        if not hasattr(self, "data"):
-            self.b = envi.BilFile(header_path=self.header_path,
-                                  path=self.path,
-                                  unpack_fmt=self.unpack_fmt)
-            self.parameters = self.b.hdr
-            self.data = self.b.read()
+        self._load_data()
         return self.data
 
 
@@ -137,6 +124,12 @@ class BSQ(ENVI):
         self.extension = ".bsq"
         self.data_format = "ENVI BSQ (Band Sequential)"
 
+        # Construct file access object
+        self.b = envi.BsqFile(header_path=self.header_path,
+                              path=self.path,
+                              unpack_fmt=self.unpack_fmt)
+        self.path = self.b.path
+
     def __enter__(self):
         self.data = self.read()
         return self
@@ -145,10 +138,5 @@ class BSQ(ENVI):
         pass
 
     def read(self):
-        if not hasattr(self, "data"):
-            self.b = envi.BsqFile(header_path=self.header_path,
-                                  path=self.path,
-                                  unpack_fmt=self.unpack_fmt)
-            self.parameters = self.b.hdr
-            self.data = self.b.read()
+        self._load_data()
         return self.data

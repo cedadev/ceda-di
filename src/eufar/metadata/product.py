@@ -51,13 +51,13 @@ class Properties(object):
         lons = spatial["lon"]
         lats = spatial["lat"]
 
-        lon_lo, lon_hi = self._get_hi_lo(lons)
-        lat_lo, lat_hi = self._get_hi_lo(lats)
+        lon_lo, lon_hi = self._get_min_max(lons)
+        lat_lo, lat_hi = self._get_min_max(lats)
 
         return [lon_lo, lat_lo, lon_hi, lat_hi]
 
     @staticmethod
-    def _get_hi_lo(item_list):
+    def _get_min_max(item_list):
         """
         Return a tuple containing the (highest, lowest) values in the list.
         :param list item_list: List of comparable data items
@@ -66,13 +66,8 @@ class Properties(object):
         if len(item_list) < 1:
             return (None, None)
 
-        high = item_list[0]
-        low = item_list[0]
-        for item in item_list:
-            if item > high:
-                high = item
-            elif item < low:
-                low = item
+        high = max(item_list)
+        low = min(item_list)
 
         return (high, low)
 
