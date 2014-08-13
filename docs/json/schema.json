@@ -15,10 +15,13 @@
         "spatial": {
             "description": "Spatial data extracted from the data file",
             "geometries": {
-                "description": "Spatial information provided in WKT format",
-                "reference": "string",
-                "aggregation": "boolean",
-                "geometry_wkt": "string",
+                "description": "Spatial information provided in GeoJSON format",
+                "type": "LineString",
+                "coordinates": [
+					[lon, lat],
+					[lon2, lat2],
+				],
+				"bbox": [lon, lat, lon2, lat2]
             },
             "identifier": {
                 "description": "Information on spatial identifiers associated with the data file",
@@ -35,9 +38,6 @@
             "description": "Start and end date time information associated with the file",
             "start_time": "string",
             "end_time": "string",
-            "time_step": "string",
-            "time_unit": "string",
-            "aggregation":  "boolean",
         },
         "parameters": {
             "type": "array",
