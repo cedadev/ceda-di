@@ -63,6 +63,9 @@ class Properties(object):
         :param list item_list: List of comparable data items
         :return tuple: Tuple of (highest, lowest values in the list)
         """
+        if len(item_list) < 1:
+            return (None, None)
+
         high = item_list[0]
         low = item_list[0]
         for item in item_list:
@@ -106,7 +109,7 @@ class Properties(object):
 
         coord_list = set()
         for lat, lon in zip(lats, lons):
-            coord_list.add([lon, lat])
+            coord_list.add((lon, lat))
 
         geojson = {}
         geojson["geometries"] = {
