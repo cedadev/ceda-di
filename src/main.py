@@ -33,7 +33,7 @@ def process_bil(fpath):
     """Process BIL files."""
     with envi_geo.BIL(fpath) as bil:
         write_properties(fpath, bil)
-        
+
 
 def process_hdf4(fpath):
     """Process HDF4 files."""
@@ -105,8 +105,9 @@ if __name__ == "__main__":
                     proc.start()
 
             while len(processes) > 8:
-                p = processes.pop()
-                p.join()
+                for p in processes:
+                    if p.exitcode is not None:
+                        processes.remove(p)
 
     # End
     for proc in processes:
