@@ -104,7 +104,7 @@ if __name__ == "__main__":
                     processes.append(proc)
                     proc.start()
 
-            while len(processes) > 8:
+            while len(processes) > 23:
                 for p in processes:
                     if p.exitcode is not None:
                         processes.remove(p)

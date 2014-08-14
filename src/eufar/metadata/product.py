@@ -4,6 +4,7 @@ Module for holding and exporting file metadata as JSON documents.
 
 from __future__ import division
 import json
+import logging
 from pyhull.convex_hull import qconvex
 
 
@@ -22,8 +23,11 @@ class Properties(object):
         :param dict spatial: Spatial information about file
         :param dict temporal: Temporal information about file
         :param dict data_format: Data format information about file
+        :param list parameters: Parameter objects in list
         :param **kwargs: Key-value pairs of any extra relevant metadata.
         """
+
+        self.logger = logging.getLogger()
 
         self.file_level = file_level
         self.temporal = temporal
@@ -121,7 +125,11 @@ class Properties(object):
                 new_hull = []
                 for point in hull[2:]:
                     pt = point.split(" ")
-                    new_hull.append((float(pt[0]), float(pt[1])))
+                    try:
+                        new_hull.append((float(pt[0]), float(pt[1])))
+                    except ValueError as ve:
+                        self.logger.error("Cannot convert to float: (%s) [%s]",
+                                          ve, str(pt))
                 geojson["hull"] = new_hull
 
             return geojson
@@ -150,3 +158,13 @@ class Properties(object):
         :return dict: Dictionary describing metadata
         """
         return self.properties
+
+
+class Parameter(object):
+    def __init__(self, name, cf_std_name=None, **kwargs):
+        self.name = name
+        self.cf_std_name = cf_std_name
+
+        # Other arbitrary arguments
+        for k, v in kwargs:
+            setattr(self, k, v)
