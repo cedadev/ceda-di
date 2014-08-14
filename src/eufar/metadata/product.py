@@ -4,6 +4,7 @@ Module for holding and exporting file metadata as JSON documents.
 
 from __future__ import division
 import json
+from pyhull.convex_hull import qconvex
 
 
 class Properties(object):
@@ -102,18 +103,29 @@ class Properties(object):
         lats = spatial["lat"]
         lons = spatial["lon"]
 
-        coord_list = set()
-        for lat, lon in zip(lats, lons):
-            coord_list.add((lon, lat))
+        if len(lats) > 0 and len(lons) > 0:
+            geojson = {}
+            coord_set = set()
+            for lat, lon in zip(lats, lons):
+                coord_set.add((lon, lat))
 
-        geojson = {}
-        geojson["geometries"] = {
-            "type": "LineString",
-            "bbox": self._gen_bbox(spatial),
-            "coordinates": list(coord_list)
-        }
+            coord_list = list(coord_set)
+            geojson["geometries"] = {
+                "type": "LineString",
+                "bbox": self._gen_bbox(spatial),
+                "coordinates": coord_list,
+            }
 
-        return geojson
+            if len(coord_list) > 3:
+                hull = qconvex('p', coord_list)
+                new_hull = []
+                for point in hull[2:]:
+                    pt = point.split(" ")
+                    new_hull.append((float(pt[0]), float(pt[1])))
+                geojson["hull"] = new_hull
+
+            return geojson
+        return None
 
     def __str__(self):
         """
@@ -121,7 +133,7 @@ class Properties(object):
 
         :return: A Python string containing JSON representation of object.
         """
-        return json.dumps(self.properties, indent=4, default=repr)
+        return json.dumps(self.properties, default=repr)
 
     def as_json(self):
         """
