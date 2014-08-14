@@ -7,6 +7,7 @@ import logging
 import logging.config
 import multiprocessing
 import os
+import sys
 
 from eufar import envi_geo, exif_geo, hdf4_geo, netcdf_geo
 
@@ -66,6 +67,9 @@ def prepare_logging():
 
 
 if __name__ == "__main__":
+    # Cores
+    NUMCORES = int(sys.argv[1])
+
     # Set up logging
     LOGGER = prepare_logging()
 
@@ -104,7 +108,7 @@ if __name__ == "__main__":
                     processes.append(proc)
                     proc.start()
 
-            while len(processes) > 23:
+            while len(processes) > NUMCORES:
                 for p in processes:
                     if p.exitcode is not None:
                         processes.remove(p)
