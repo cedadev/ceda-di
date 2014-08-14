@@ -124,8 +124,15 @@ class HDF4(_geospatial):
         st_base = ("%s %s" % (tm_dict["date"], tm_dict["start_time"][0]))
         et_base = ("%s %s" % (tm_dict["date"], tm_dict["end_time"][0]))
 
-        start_time = datetime.datetime.strptime(st_base, "%d/%m/%y %H%M%S")
-        end_time = datetime.datetime.strptime(et_base, "%d/%m/%y %H%M%S")
+        for t_format in ["%d/%m/%y %H%M%S", "%d/%m/%Y %H%M%S"]:
+            try:
+                start_time = datetime.datetime.strptime(st_base, t_format)
+                end_time = datetime.datetime.strptime(et_base, t_format)
+            except ValueError:
+                # ValueError will be raised if strptime format doesn't match
+                # the actual timestamp - so just try the next strptime format
+                continue
+
         return {"start_time": start_time.isoformat(),
                 "end_time": end_time.isoformat()}
 
