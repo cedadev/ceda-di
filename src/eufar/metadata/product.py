@@ -33,6 +33,8 @@ class Properties(object):
         self.temporal = temporal
         self.data_format = data_format
         self.parameters = parameters
+        if parameters is not None:
+            self.parameters = [str(p) for p in parameters]
         self.spatial = spatial
         if self.spatial is not None:
             self.spatial = self._to_geojson(self.spatial)
@@ -161,10 +163,21 @@ class Properties(object):
 
 
 class Parameter(object):
-    def __init__(self, name, cf_std_name=None, **kwargs):
+    """
+    Placeholder/wrapper class for metadata parameters
+    :param str name: Name of variable/parameter
+    :param dict other_params: Optional - Dict containing other param metadata
+    """
+    def __init__(self, name, other_params=None):
         self.name = name
-        self.cf_std_name = cf_std_name
 
         # Other arbitrary arguments
-        for k, v in kwargs:
-            setattr(self, k, v)
+        if other_params:
+            for k, v in other_params.iteritems():
+                setattr(self, k, v)
+
+    def as_dict(self):
+        return self.__dict__
+
+    def __str__(self):
+        return str(self.__dict__)

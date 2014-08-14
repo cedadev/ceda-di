@@ -54,13 +54,12 @@ class NetCDF(_geospatial):
         :return dict: Dictionary containing name variations
                       (standard name, long name, etc) and units
         """
-        var_dict = {}
+        params = []
         for v_name, v_data in nc.variables.iteritems():
-            var_dict[v_name] = {}
-            for key, value in v_data.__dict__.iteritems():
-                var_dict[v_name][key] = value
+            param = product.Parameter(v_name, v_data.__dict__)
+            params.append(param)
 
-        return var_dict
+        return params
 
     def _get_netcdf_var_from_regex(self, regex, nc, flags=None):
         """

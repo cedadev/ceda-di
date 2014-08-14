@@ -30,6 +30,15 @@ class ENVI(_geospatial):
             self.parameters = self.b.hdr
             self.data = self.b.read()
 
+    def get_parameters(self):
+        """
+        Return a list of Parameter objects containing parameter information.
+        """
+        params = []
+        for p_name in self.parameters:
+            param = product.Parameter(p_name)
+        params.append(param)
+
     def get_geospatial(self):
         """
         Read geospatial data parsed from binary file
@@ -82,7 +91,7 @@ class ENVI(_geospatial):
                                   temporal=self.get_temporal(),
                                   data_format=self.get_data_format(),
                                   spatial=self.get_geospatial(),
-                                  parameters=self.parameters)
+                                  parameters=self.get_parameters())
         return prop
 
 
