@@ -1,0 +1,31 @@
+{
+  "sort": [
+    {
+      "temporal.start_time": {
+        "order": "desc"
+      }
+    }
+  ],
+  "_source": {
+    "include": [
+      "temporal",
+      "file"
+    ]
+  },
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "temporal.start_time": {
+              "from": "2001-01-01",
+              "to": "2014-07-30"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "from": 0,
+  "size": 10
+}

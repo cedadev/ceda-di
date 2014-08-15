@@ -32,9 +32,12 @@ class Properties(object):
         self.file_level = file_level
         self.temporal = temporal
         self.data_format = data_format
-        self.parameters = parameters
+
         if parameters is not None:
             self.parameters = [str(p) for p in parameters]
+        else:
+            self.parameters = parameters
+
         self.spatial = spatial
         if self.spatial is not None:
             self.spatial = self._to_geojson(self.spatial)
@@ -53,7 +56,7 @@ class Properties(object):
         """
         Generate and return a bounding box for the given geospatial data.
         :param dict spatial: Dictionary with "lat" and "lon" keys w/coordinates
-        :return list bbox: A bounding-box list formatted in the GeoJSON style
+        :return dict bbox: A bounding-box formatted in the GeoJSON style
         """
         lons = spatial["lon"]
         lats = spatial["lat"]
@@ -61,7 +64,39 @@ class Properties(object):
         lon_lo, lon_hi = self._get_min_max(lons)
         lat_lo, lat_hi = self._get_min_max(lats)
 
-        return [lon_lo, lat_lo, lon_hi, lat_hi]
+        bbox = {
+            "type": "MultiPoint",
+            "coordinates": [[lon_lo, lat_lo],
+                            [lon_lo, lat_hi],
+                            [lon_hi, lat_lo],
+                            [lon_hi, lat_hi]]
+        }
+
+        return bbox
+
+    def _gen_hull(self, coord_list):
+        """
+        Generate and return a convex hull for the given geospatial data.
+        :param list coord_list: Normalised and uniquified set of coordinates
+        :return dict chul: A convex hull formatted in the GeoJSON style
+        """
+
+        chull = {
+            "type": "Polygon"
+        }
+
+        qhull_output = qconvex('p', coord_list)
+        hull_coords = []
+        for point in qhull_output[2:]:
+            coords = point.split(" ")
+            try:
+                hull_coords.append((float(coords[0]), float(coords[1])))
+            except ValueError as val:
+                self.logger.error("Cannot convert to float: (%s) [%s]",
+                                  val, str(coords))
+
+        chull["coordinates"] = hull_coords
+        return chull
 
     @staticmethod
     def _get_min_max(item_list):
@@ -117,22 +152,12 @@ class Properties(object):
 
             coord_list = list(coord_set)
             geojson["geometries"] = {
-                "type": "LineString",
-                "bbox": self._gen_bbox(spatial),
                 "coordinates": coord_list,
             }
 
             if len(coord_list) > 3:
-                hull = qconvex('p', coord_list)
-                new_hull = []
-                for point in hull[2:]:
-                    pt = point.split(" ")
-                    try:
-                        new_hull.append((float(pt[0]), float(pt[1])))
-                    except ValueError as ve:
-                        self.logger.error("Cannot convert to float: (%s) [%s]",
-                                          ve, str(pt))
-                geojson["hull"] = new_hull
+                geojson["geometries"]["hull"] = self._gen_hull(coord_list)
+                geojson["geometries"]["bbox"] = self._gen_bbox(spatial)
 
             return geojson
         return None

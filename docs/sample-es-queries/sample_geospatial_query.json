@@ -1,0 +1,26 @@
+{
+  "sort": [
+    {
+      "temporal.start_time": {
+        "order": "desc"
+      }
+    }
+  ],
+  "_source": {
+    "include": [
+      "temporal",
+      "file",
+      "spatial.geometries.bbox"
+    ]
+  },
+  "filter": {
+    "geo_shape": {
+      "bbox": {
+        "shape": {
+          "type": "envelope",
+          "coordinates" : [[5, 60], [-5, 40]]
+        }
+      }
+    }
+  }
+}

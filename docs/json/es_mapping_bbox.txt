@@ -1,0 +1,70 @@
+{
+  "eufar": {
+    "properties": {
+      "data_format": {
+        "properties": {
+          "format": {
+            "type": "string"
+          }
+        }
+      },
+      "file": {
+        "properties": {
+          "filename": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "size": {
+            "type": "long"
+          }
+        }
+      },
+      "misc": {
+        "type": "object"
+      },
+      "parameters": {
+        "type": "string"
+      },
+      "spatial": {
+        "properties": {
+          "geometries": {
+            "properties": {
+              "bbox": {
+                "type": "geo_shape",
+                "tree": "quadtree",
+                "precision": "50m"
+              },
+              "coordinates": {
+                "type": "double"
+              },
+              "hull": {
+                "properties": {
+                  "coordinates": {
+                    "type": "double"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "temporal": {
+        "properties": {
+          "end_time": {
+            "type": "date",
+            "format": "dateOptionalTime"
+          },
+          "start_time": {
+            "type": "date",
+            "format": "dateOptionalTime"
+          }
+        }
+      }
+    }
+  }
+}
