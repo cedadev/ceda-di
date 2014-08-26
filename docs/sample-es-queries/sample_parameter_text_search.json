@@ -1,0 +1,15 @@
+{
+  "query": {
+    "query_string": {
+      "query": "alt*"
+    }
+  },
+  "_source": {
+    "include": [
+      "temporal",
+      "file",
+      "parameters"
+    ]
+  },
+  "size": 0
+}
