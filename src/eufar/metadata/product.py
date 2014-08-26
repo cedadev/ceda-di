@@ -34,9 +34,9 @@ class Properties(object):
         self.data_format = data_format
 
         if parameters is not None:
-            self.parameters = [str(p) for p in parameters]
+            self.parameters = [p.__dict__ for p in parameters]
         else:
-            self.parameters = parameters
+            self.parameters = None
 
         self.spatial = spatial
         if self.spatial is not None:
@@ -200,9 +200,3 @@ class Parameter(object):
         if other_params:
             for k, v in other_params.iteritems():
                 setattr(self, k, v)
-
-    def as_dict(self):
-        return self.__dict__
-
-    def __str__(self):
-        return str(self.__dict__)
