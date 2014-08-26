@@ -24,9 +24,6 @@
       "misc": {
         "type": "object"
       },
-      "parameters": {
-        "type": "string"
-      },
       "spatial": {
         "properties": {
           "geometries": {
