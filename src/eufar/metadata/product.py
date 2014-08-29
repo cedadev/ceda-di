@@ -34,7 +34,7 @@ class Properties(object):
         self.data_format = data_format
 
         if parameters is not None:
-            self.parameters = [p.__dict__ for p in parameters]
+            self.parameters = [p.get() for p in parameters]
         else:
             self.parameters = None
 
@@ -194,9 +194,25 @@ class Parameter(object):
     :param dict other_params: Optional - Dict containing other param metadata
     """
     def __init__(self, name, other_params=None):
+        self.items = []
         self.name = name
 
         # Other arbitrary arguments
         if other_params:
-            for k, v in other_params.iteritems():
-                setattr(self, k, v)
+            for key, value in other_params.iteritems():
+                self.items.append(self.make_param_item(key, value))
+
+    @staticmethod
+    def make_param_item(name, value):
+        """
+        Convert a name/value pair to dictionary (for better indexing in ES)
+        :param str name: Name of the parameter item (e.g. "long_name_fr", etc)
+        :param str value: Value of the parameter item (e.g. "Radiance")
+        :return dict: Dict containing name:value information
+        """
+        return {"name": name,
+                "value": value}
+
+    def get(self):
+        """Return the list of parameter items"""
+        return self.items
