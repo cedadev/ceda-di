@@ -21,7 +21,8 @@
 					[lon, lat],
 					[lon2, lat2],
 				],
-				"bbox": [lon, lat, lon2, lat2]
+				"bbox": [lon, lat, lon2, lat2],
+				"hull": [lat, lon, lat2, lon2]
             },
             "identifier": {
                 "description": "Information on spatial identifiers associated with the data file",
