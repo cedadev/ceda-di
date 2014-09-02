@@ -1,0 +1,25 @@
+{
+    "_option": "outputpath: main output directory",
+    "outputpath": "out/",
+
+    "_option": "logpath: log dir path, relative to 'outputpath'",
+    "logpath": "log/",
+    "_option": "logfile: log file path, relative to 'logpath'",
+    "logfile": "arsf-geo-map.log",
+
+    "_option": "jsonpath: directory for JSON metadata, relative to 'outputpath'",
+    "jsonpath": "json/",
+
+    "_option": "datapath: data input path (where to extract metadata from)",
+    "datapath": "../test/data",
+
+    "_option": "numcores: number of processes to use in parallel",
+    "numcores": 23,
+
+    "_option": "logging: options for the 'logging' module",
+    "_ref": "(see: https://docs.python.org/2/library/logging.html)",
+    "logging": {
+        "_option": "format: log entry format string",
+        "format": "[%(levelname)s] (%(name)s) %(message)s"
+    }
+}
