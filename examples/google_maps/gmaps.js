@@ -1,10 +1,10 @@
-// Consntants
+// Constants
 var es_url = "http://fatcat-test.jc.rl.ac.uk:9200/badc/eufar/_search";
 
 // Initialise map
 var map = new google.maps.Map(document.getElementById('map'), {
     mapTypeId: google.maps.MapTypeId.TERRAIN,
-    zoom: 7
+    zoom: 6
 });
 
 // Array function
@@ -17,22 +17,19 @@ function is_in(array, item) {
     return false;
 }
 
-// Centre on London
-var address = "Nordvest-Spitsbergen National Park"
+// Centre the map on Hungary (because there's lots of data there)
+var address = "Lake Balaton, Hungary"
 var geocoder = new google.maps.Geocoder();
 geocoder.geocode(
-    {'address': address},
+    {
+        "address": address
+    },
     function(results, status) {
-        if(status == google.maps.GeocoderStatus.OK) {
-            new google.maps.Marker({
-                map: map,
-                position: results[0].geometry.location
-            });
-        map.setCenter(results[0].geometry.location);
-        }
+            map.setCenter(results[0].geometry.location);
     }
 );
 
+// Creates an ES geo_shape filter query based on a bounding box
 function create_es_request(bbox, offset) {
     temp_ne = bbox.getNorthEast();
     temp_sw = bbox.getSouthWest();
@@ -63,12 +60,13 @@ function create_es_request(bbox, offset) {
                 }
             }
         },
-        "size": 12
+        "size": 15
     };
 
     return request;
 };
 
+// Construct a google.maps.Polygon object from a bounding box
 function construct_polygon(bbox) {
     // Construct bounding box polygon
     vertices = [];
@@ -89,7 +87,8 @@ function construct_polygon(bbox) {
     return polygon
 }
 
-// Construct an info window from ElasticSearch hit
+// Construct an info window from an ElasticSearch hit
+// containing some useful metadata
 function construct_info_window(hit) {
     content = "<section><p><strong>Filename: </strong>" +
               hit.file.filename + "</p>"
@@ -111,7 +110,7 @@ function construct_info_window(hit) {
     return info;
 }
 
-// Function to search ES for data
+// Search ES for data (and display received data asynchronously)
 var polygons = []
 var info_windows = []
 function search_es_bbox(bbox) {
@@ -131,14 +130,17 @@ function search_es_bbox(bbox) {
 
                     // Construct and display polygon
                     polygon = construct_polygon(bbox);
-                    polygons.push(polygon);
                     polygon.setMap(map);
+                    polygons.push(polygon);
 
                     // Add info window
                     iw = construct_info_window(hits[i]._source);
                     info_windows.push(iw);
                 }
 
+                // Add a listener to the constructed Polygon that closes all
+                // InfoWindows, then opens a new one corresponding to the
+                // polygon that was clicked
                 for (i in info_windows) {
                     google.maps.event.addListener(
                         polygons[i], 'click',
@@ -158,29 +160,33 @@ function search_es_bbox(bbox) {
     }
 }
 
+// Add a listener to make an ES data request when the map bounds change
 function add_bounds_changed_listener(map) {
-    // Add event listener to map
-    google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
-        for (p in polygons) {
-            polygons[p].setMap(null);
+    google.maps.event.addListenerOnce(map, 'bounds_changed',
+        function() {
+            // Clean up old polygons and info windows
+            for (p in polygons) {
+                polygons[p].setMap(null);
+            }
+
+            for (i in info_windows) {
+                info_windows[i].close();
+            }
+
+            polygons = [];
+            info_windows = []
+
+            // Make ES request
+            bounds = map.getBounds();
+            search_es_bbox(bounds);
+
+            // Rate-limit requests to ES to 1 per second
+            window.setTimeout(function () {
+                add_bounds_changed_listener(map)
+            }, 1000);
         }
-
-        for (i in info_windows) {
-            info_windows[i].close();
-        }
-
-        // Empty old arrays
-        polygons = [];
-        info_windows = []
-
-        // Make ES request for geo data
-        bounds = map.getBounds();
-        search_es_bbox(bounds);
-
-        // Rate-limit requests to ES to 1 every second
-        window.setTimeout(function () {
-            add_bounds_changed_listener(map)
-        }, 1000);
-    });
+    );
 }
+
+// Start the main "bounds_changed" listener loop
 add_bounds_changed_listener(map);
