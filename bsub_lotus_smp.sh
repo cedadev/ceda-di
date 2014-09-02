@@ -8,4 +8,4 @@
 cd ~ccnewey/arsf-geo-map
 source bin/activate
 cd ~ccnewey/arsf-geo-map/src
-python main.py 24
+python main.py
