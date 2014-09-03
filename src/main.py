@@ -69,7 +69,9 @@ def prepare_logging(conf):
     if not os.path.isdir(conf["logpath"]):
         os.makedirs(conf["logpath"])
 
-    fname = os.path.join(conf["logpath"], conf["logfile"])
+    fname = os.path.join(conf["outputpath"],
+                         conf["logpath"],
+                         conf["logfile"])
     logging_config = {
         "filename": fname,
         "format": conf["logging"]["format"],
