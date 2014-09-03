@@ -155,9 +155,9 @@ class Properties(object):
                 "coordinates": coord_list,
             }
 
+            geojson["geometries"]["bbox"] = self._gen_bbox(spatial)
             if len(coord_list) > 3:
                 geojson["geometries"]["hull"] = self._gen_hull(coord_list)
-                geojson["geometries"]["bbox"] = self._gen_bbox(spatial)
 
             return geojson
         return None
