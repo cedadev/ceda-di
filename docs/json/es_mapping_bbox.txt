@@ -11,10 +11,12 @@
       "file": {
         "properties": {
           "filename": {
-            "type": "string"
+            "type": "string",
+            "analyzer": "simple"
           },
           "path": {
-            "type": "string"
+            "type": "string",
+            "analyzer": "simple"
           },
           "size": {
             "type": "long"
