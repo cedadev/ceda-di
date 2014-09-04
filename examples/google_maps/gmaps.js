@@ -1,13 +1,136 @@
-// Constants
+/*---------------------------- Setup ----------------------------*/
+// Set up constants
 var es_url = "http://fatcat-test.jc.rl.ac.uk:9200/badc/eufar/_search";
-
-// Initialise map
+var geocoder = new google.maps.Geocoder();
 var map = new google.maps.Map(document.getElementById('map'), {
     mapTypeId: google.maps.MapTypeId.TERRAIN,
     zoom: 6
 });
 
-// Array function
+// Centre the map on Hungary initially
+geocoder.geocode(
+    {
+        "address": "Lake Balaton, Hungary"
+    },
+    function(results, status) {
+        if (status === "OK") {
+            map.setCenter(results[0].geometry.location);
+        }
+    }
+);
+
+var polygons = [] // Array of polygon shapes drawn from ES requests
+var info_windows = [] // Array of InfoWindows (one for each polygon)
+
+// Additional filter parameters
+var additional_filter_params = null;
+
+// Set up lcoation 'search' button
+$("#location_search").click(
+    function () {
+        loc = $("#location").val()
+        if (loc === "") {
+            alert("Please enter a value into the 'Location' box.");
+        } else {
+            geocoder.geocode({
+                "address": loc,
+            },
+            function(results, status) {
+                if (status === "OK") {
+                    new_centre = results[0].geometry.location;
+                    // Centre map on new location
+                    map.panTo(new_centre);
+                } else {
+                    alert("Could not find '" + loc + "'");
+                }
+            });
+        }
+    }
+);
+
+// Clears all input values
+$("#clearfil").click(
+    function () {
+        additional_filter_params = null;
+
+        $("#param").val("");
+        $("#start_time").val("");
+        $("#end_time").val("");
+
+        // Make ES request
+        bounds = map.getBounds();
+        search_es_bbox(bounds);
+
+    }
+);
+
+// Constructs query filters from input values
+$("#applyfil").click(
+    function () {
+        additional_filter_params = [];
+
+        param = $("#param").val();
+        param_query = {};
+        if (param.length !== 0) {
+            param_query = {
+                "match": {
+                    "eufar.file.path": param
+                }
+            }
+            additional_filter_params.push(param_query);
+        }
+
+        time_queries = {};
+
+        start_time = $("#start_time").val();
+        start_time_query = {};
+        if (start_time.length !== 0) {
+            start_time_query = {
+                "range": {
+                    "temporal.start_time": {
+                        "from": start_time
+                    }
+                }
+            }
+        }
+
+        end_time = $("#end_time").val();
+        end_time_query = {};
+        if (end_time.length !== 0) {
+            end_time_query = {
+                "range": {
+                    "temporal.start_time": {
+                        "to": end_time
+                    }
+                }
+            }
+        }
+
+        if (start_time_query !== {}) {
+            $.extend(true, time_queries, start_time_query);
+        }
+
+        if (end_time_query !== {}) {
+           $.extend(true, time_queries, end_time_query);
+        }
+
+        if (time_queries !== {}) {
+            additional_filter_params.push(time_queries);
+        }
+        
+        // Make ES request
+        bounds = map.getBounds();
+        search_es_bbox(bounds);
+
+    }
+);
+
+
+
+
+/*---------------------------- Functions ----------------------------*/
+
+// Checks if a given item is in an array
 function is_in(array, item) {
     for (i = 0; i < array.length; i++) {
         if (i === array[i]) {
@@ -17,24 +140,12 @@ function is_in(array, item) {
     return false;
 }
 
-// Centre the map on Hungary (because there's lots of data there)
-var address = "Lake Balaton, Hungary"
-var geocoder = new google.maps.Geocoder();
-geocoder.geocode(
-    {
-        "address": address
-    },
-    function(results, status) {
-            map.setCenter(results[0].geometry.location);
-    }
-);
-
 // Creates an ES geo_shape filter query based on a bounding box
 function create_es_request(bbox, offset) {
     temp_ne = bbox.getNorthEast();
     temp_sw = bbox.getSouthWest();
 
-    // Build search extent using lng/lat and opposite corners
+    // Build search extent using NW/SE and lng/lat format
     nw = [temp_sw.lng().toString(),
           temp_ne.lat().toString()];
     se = [temp_ne.lng().toString(),
@@ -51,24 +162,36 @@ function create_es_request(bbox, offset) {
             ]
         },
         "query": {
-            "geo_shape": {
-                "bbox": {
-                    "shape": {
-                        "type": "envelope",
-                        "coordinates": [nw, se]
+            "bool": {
+                "must": [
+                    {
+                        "geo_shape": {
+                            "bbox": {
+                                "shape": {
+                                    "type": "envelope",
+                                    "coordinates": [nw, se]
+                                }
+                            }
+                        }
                     }
-                }
+                ]
             }
         },
         "size": 15
     };
+
+    // Add any extra user-defined filters
+    if (additional_filter_params !== null) {
+        for (i in additional_filter_params) {
+            request.query.bool.must.push(additional_filter_params[i]);
+        }
+    }
 
     return request;
 };
 
 // Construct a google.maps.Polygon object from a bounding box
 function construct_polygon(bbox) {
-    // Construct bounding box polygon
     vertices = [];
     vertices.push(new google.maps.LatLng(bbox[0][1], bbox[0][0]));
     vertices.push(new google.maps.LatLng(bbox[1][1], bbox[1][0]));
@@ -87,8 +210,7 @@ function construct_polygon(bbox) {
     return polygon
 }
 
-// Construct an info window from an ElasticSearch hit
-// containing some useful metadata
+// Construct an InfoWindow from a search hit, containing useful info
 function construct_info_window(hit) {
     content = "<section><p><strong>Filename: </strong>" +
               hit.file.filename + "</p>"
@@ -111,18 +233,25 @@ function construct_info_window(hit) {
 }
 
 // Search ES for data (and display received data asynchronously)
-var polygons = []
-var info_windows = []
 function search_es_bbox(bbox) {
+    // Create and send request
     xhr = new XMLHttpRequest();
     xhr.open("POST", es_url, true);
-    xhr.send(JSON.stringify(create_es_request(bbox)));
+
+    request = create_es_request(bbox);
+    console.log(JSON.stringify(request, null, "    "));
+    xhr.send(JSON.stringify(request));
 
     // Handle the response
     xhr.onload = function (e) {
         if (xhr.readyState === 4) {
             response = JSON.parse(xhr.responseText);
+            console.log(JSON.stringify(response, null, "    "));
             if (response.hits) {
+                // Update "number of hits" field in sidebar
+                $("#numresults").html(response.hits.total);
+
+                // Loop through each hit, drawing as necessary
                 hits = response.hits.hits;
                 for (i in hits) {
                     hit = hits[i]._source;
@@ -138,9 +267,9 @@ function search_es_bbox(bbox) {
                     info_windows.push(iw);
                 }
 
-                // Add a listener to the constructed Polygon that closes all
-                // InfoWindows, then opens a new one corresponding to the
-                // polygon that was clicked
+                // Add a listener function to polygon that opens a new
+                // InfoWindow on top of the polygon that was clicked
+                // (closes all other InfoWindows first)
                 for (i in info_windows) {
                     google.maps.event.addListener(
                         polygons[i], 'click',
@@ -174,11 +303,19 @@ function add_bounds_changed_listener(map) {
             }
 
             polygons = [];
-            info_windows = []
+            info_windows = [];
 
             // Make ES request
             bounds = map.getBounds();
             search_es_bbox(bounds);
+
+            // Update bounding coordinates on sidebar
+            $("#ge_northeast").html(
+                bounds.getNorthEast().toUrlValue(3).replace(",", ", ")
+            );
+            $("#ge_southwest").html(
+                bounds.getSouthWest().toUrlValue(3).replace(",", ", ")
+            );
 
             // Rate-limit requests to ES to 1 per second
             window.setTimeout(function () {

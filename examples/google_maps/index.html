@@ -6,15 +6,88 @@
    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
    <script src="http://maps.google.com/maps/api/js?sensor=false"
            type="text/javascript"></script>
-   <style type="text/css">
-     html { height: 100% }
-     body { height: 100%; margin: 0px; padding: 0px }
-     #map { height: 100% }
-   </style>
+
+   <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css" type="text/css" />
+   <link rel="stylesheet" href="./datepicker/css/datepicker3.css" type="text/css" />
+   <link rel="stylesheet" href="./index.css" type"text/css" />
 </head>
 <body>
-   <div id="map"></div>
+   <div id="main">
+      <div id="sidebar">
+         <div id="filter">
+            <form class="form-horizontal">
+            <fieldset>
+               <legend>Search for Location</legend>
+               <div class="form-group">
+                 <label class="control-label" for="param">Location</label>
+                 <div class="controls">
+                   <input id="location" name="location" placeholder="e.g. Lake Balaton, Hungary" class="form-control input-md" type="text">
+                 </div>
+               </div>
 
+               <div class="form-group text-center buffer10">
+                  <div class="controls">
+                     <button type="button" id="location_search" class="btn btn-primary">Search</button>
+                  </div>
+               </div>
+            </fieldset>
+            </form>
+
+            <form class="form-horizontal buffer30">
+            <fieldset>
+               <legend>Filter Results</legend>
+               <div class="form-group">
+                 <label class="control-label" for="param">File Path Filter</label>
+                 <div class="controls">
+                   <input id="param" name="param" placeholder="e.g. /badc/eufar/..." class="form-control input-md" type="text">
+                 </div>
+               </div>
+
+               <div class="form-group" id="daterange">
+                  <label class="control-label" for="datepicker">Date Range Filter</label>
+                  <div class="input-daterange input-group" id="datepicker">
+                     <input id="start_time" type="text" class="input-sm form-control" name="start" />
+                     <span class="input-group-addon">to</span>
+                     <input id="end_time" type="text" class="input-sm form-control" name="end" />
+                  </div>
+               </div>
+
+               <div class="form-group text-center buffer10">
+                  <div class="controls buffer10">
+                     <button type="button" id="applyfil" class="btn btn-success">Apply Filters</button>
+                     <button type="button" id="clearfil" class="btn btn-danger">Clear Filters</button>
+                  </div>
+               </div>
+
+            </fieldset>
+            </form>
+
+            <div class="form-group buffer30">
+               <legend class="buffer30">Search info</legend>
+               <p class="form-group row">
+                  <strong><span id="numresults">0</span></strong> hits with current selection.
+               </p>
+
+               <div class="form-group row buffer10">
+                  <p><strong>Northeast:</strong> <span id="ge_northeast">123.123, 456.456</span></p>
+                  <p><strong>Southwest:</strong> <span id="ge_southwest">123.123, 456.456</span></p>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div id="map"></div>
+   </div>
+
+   <script src="./bootstrap/js/jquery-2.1.1.min.js"></script>
+   <script src="./bootstrap/js/bootstrap.min.js"></script>
+   <script src="./datepicker/js/bootstrap-datepicker.js"></script>
    <script src="./gmaps.js" type="text/javascript"></script>
+   <script type="text/javascript">
+      var datepicker = $("#daterange .input-daterange").datepicker({
+         autoclose: true,
+         format: "yyyy-mm-dd",
+         startView: 2,
+      });
+   </script>
 </body>
 </html>
