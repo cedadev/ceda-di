@@ -1,0 +1,19 @@
+# This is the default ansible 'hosts' file.
+#
+# It should live in /etc/ansible/hosts.
+
+[es-masters]
+fatcat-test.jc.rl.ac.uk
+
+[es-masters:vars]
+master=true
+
+[es-slaves]
+non-existent-machine.jc.rl.ac.uk
+
+[es:children]
+es-masters
+es-slaves
+
+[es:vars]
+master=false
