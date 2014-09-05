@@ -57,10 +57,7 @@ $("#clearfil").click(
         $("#start_time").val("");
         $("#end_time").val("");
 
-        // Make ES request
-        bounds = map.getBounds();
-        search_es_bbox(bounds);
-
+        redraw_map();
     }
 );
 
@@ -79,8 +76,6 @@ $("#applyfil").click(
             }
             additional_filter_params.push(param_query);
         }
-
-        time_queries = {};
 
         start_time = $("#start_time").val();
         start_time_query = {};
@@ -106,6 +101,8 @@ $("#applyfil").click(
             }
         }
 
+        // Combine time restrictions into single filter
+        time_queries = {};
         if (start_time_query !== {}) {
             $.extend(true, time_queries, start_time_query);
         }
@@ -114,14 +111,12 @@ $("#applyfil").click(
            $.extend(true, time_queries, end_time_query);
         }
 
+        // Add time filter to list of search criteria
         if (time_queries !== {}) {
             additional_filter_params.push(time_queries);
         }
         
-        // Make ES request
-        bounds = map.getBounds();
-        search_es_bbox(bounds);
-
+        redraw_map();
     }
 );
 
@@ -239,14 +234,12 @@ function search_es_bbox(bbox) {
     xhr.open("POST", es_url, true);
 
     request = create_es_request(bbox);
-    console.log(JSON.stringify(request, null, "    "));
     xhr.send(JSON.stringify(request));
 
     // Handle the response
     xhr.onload = function (e) {
         if (xhr.readyState === 4) {
             response = JSON.parse(xhr.responseText);
-            console.log(JSON.stringify(response, null, "    "));
             if (response.hits) {
                 // Update "number of hits" field in sidebar
                 $("#numresults").html(response.hits.total);
@@ -289,38 +282,43 @@ function search_es_bbox(bbox) {
     }
 }
 
+function redraw_map() {
+    // Clean up old polygons and info windows
+    for (p in polygons) {
+        polygons[p].setMap(null);
+    }
+
+    for (i in info_windows) {
+        info_windows[i].close();
+    }
+
+    polygons = [];
+    info_windows = [];
+
+    // Make ES request
+    bounds = map.getBounds();
+    search_es_bbox(bounds);
+
+    // Update bounding coordinates on sidebar
+    $("#ge_northeast").html(
+        bounds.getNorthEast().toUrlValue(3).replace(",", ", ")
+    );
+    $("#ge_southwest").html(
+        bounds.getSouthWest().toUrlValue(3).replace(",", ", ")
+    );
+
+    // Rate-limit requests to ES to 1 per second
+    window.setTimeout(function () {
+        add_bounds_changed_listener(map)
+    }, 1000);
+}
+
+
 // Add a listener to make an ES data request when the map bounds change
 function add_bounds_changed_listener(map) {
     google.maps.event.addListenerOnce(map, 'bounds_changed',
         function() {
-            // Clean up old polygons and info windows
-            for (p in polygons) {
-                polygons[p].setMap(null);
-            }
-
-            for (i in info_windows) {
-                info_windows[i].close();
-            }
-
-            polygons = [];
-            info_windows = [];
-
-            // Make ES request
-            bounds = map.getBounds();
-            search_es_bbox(bounds);
-
-            // Update bounding coordinates on sidebar
-            $("#ge_northeast").html(
-                bounds.getNorthEast().toUrlValue(3).replace(",", ", ")
-            );
-            $("#ge_southwest").html(
-                bounds.getSouthWest().toUrlValue(3).replace(",", ", ")
-            );
-
-            // Rate-limit requests to ES to 1 per second
-            window.setTimeout(function () {
-                add_bounds_changed_listener(map)
-            }, 1000);
+            redraw_map();
         }
     );
 }
