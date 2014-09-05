@@ -28,99 +28,34 @@ var additional_filter_params = null;
 // Set up lcoation 'search' button
 $("#location_search").click(
     function () {
-        loc = $("#location").val()
-        if (loc === "") {
-            alert("Please enter a value into the 'Location' box.");
-        } else {
-            geocoder.geocode({
-                "address": loc,
-            },
-            function(results, status) {
-                if (status === "OK") {
-                    new_centre = results[0].geometry.location;
-                    // Centre map on new location
-                    map.panTo(new_centre);
-                } else {
-                    alert("Could not find '" + loc + "'");
-                }
-            });
-        }
+        location_search();
     }
 );
 
 // Clears all input values
 $("#clearfil").click(
     function () {
-        additional_filter_params = null;
-
-        $("#param").val("");
-        $("#start_time").val("");
-        $("#end_time").val("");
-
-        redraw_map();
+        clear_filters();
     }
 );
 
 // Constructs query filters from input values
 $("#applyfil").click(
     function () {
-        additional_filter_params = [];
-
-        param = $("#param").val();
-        param_query = {};
-        if (param.length !== 0) {
-            param_query = {
-                "match": {
-                    "eufar.file.path": param
-                }
-            }
-            additional_filter_params.push(param_query);
-        }
-
-        start_time = $("#start_time").val();
-        start_time_query = {};
-        if (start_time.length !== 0) {
-            start_time_query = {
-                "range": {
-                    "temporal.start_time": {
-                        "from": start_time
-                    }
-                }
-            }
-        }
-
-        end_time = $("#end_time").val();
-        end_time_query = {};
-        if (end_time.length !== 0) {
-            end_time_query = {
-                "range": {
-                    "temporal.start_time": {
-                        "to": end_time
-                    }
-                }
-            }
-        }
-
-        // Combine time restrictions into single filter
-        time_queries = {};
-        if (start_time_query !== {}) {
-            $.extend(true, time_queries, start_time_query);
-        }
-
-        if (end_time_query !== {}) {
-           $.extend(true, time_queries, end_time_query);
-        }
-
-        // Add time filter to list of search criteria
-        if (time_queries !== {}) {
-            additional_filter_params.push(time_queries);
-        }
-        
-        redraw_map();
+        apply_filters();
     }
 );
 
-
+// Override submission on 'enter'
+$("#location").keypress(
+    function (e) {
+        charcode = e.charCode || e.keyCode || e.which;
+        if (charcode == 13) {
+            location_search();
+            return false;
+        }
+    }
+);
 
 
 /*---------------------------- Functions ----------------------------*/
@@ -133,6 +68,95 @@ function is_in(array, item) {
         }
     }
     return false;
+}
+
+//
+function location_search() {
+    loc = $("#location").val()
+    if (loc === "") {
+        alert("Please enter a value into the 'Location' box.");
+    } else {
+        geocoder.geocode({
+            "address": loc,
+        },
+        function(results, status) {
+            if (status === "OK") {
+                new_centre = results[0].geometry.location;
+                // Centre map on new location
+                map.panTo(new_centre);
+            } else {
+                alert("Could not find '" + loc + "'");
+            }
+        });
+    }
+}
+
+// Clears additional filters from ES request
+function clear_filters() {
+    additional_filter_params = null;
+
+    $("#param").val("");
+    $("#start_time").val("");
+    $("#end_time").val("");
+
+    redraw_map();
+}
+
+// Applies additional filters to ES request
+function apply_filters() {
+    additional_filter_params = [];
+
+    param_query = {};
+    param = $("#param").val();
+    if (param.length > 0) {
+        param_query = {
+            "match": {
+                "eufar.file.path": param
+            }
+        }
+        additional_filter_params.push(param_query);
+    }
+
+    start_time_query = {};
+    start_time = $("#start_time").val();
+    if (start_time.length > 0) {
+        start_time_query = {
+            "range": {
+                "temporal.start_time": {
+                    "from": start_time
+                }
+            }
+        }
+    }
+
+    end_time_query = {};
+    end_time = $("#end_time").val();
+    if (end_time.length > 0) {
+        end_time_query = {
+            "range": {
+                "temporal.start_time": {
+                    "to": end_time
+                }
+            }
+        }
+    }
+
+    // Combine time restrictions into single filter
+    time_queries = {};
+    if (! $.isEmptyObject(start_time_query)) {
+        $.extend(true, time_queries, start_time_query);
+    }
+
+    if (! $.isEmptyObject(end_time_query)) {
+       $.extend(true, time_queries, end_time_query);
+    }
+
+    // Add time filter to list of search criteria
+    if (! $.isEmptyObject(time_queries)) {
+        additional_filter_params.push(time_queries);
+    }
+    
+    redraw_map();
 }
 
 // Creates an ES geo_shape filter query based on a bounding box
@@ -240,6 +264,7 @@ function search_es_bbox(bbox) {
     xhr.onload = function (e) {
         if (xhr.readyState === 4) {
             response = JSON.parse(xhr.responseText);
+
             if (response.hits) {
                 // Update "number of hits" field in sidebar
                 $("#numresults").html(response.hits.total);
@@ -282,6 +307,7 @@ function search_es_bbox(bbox) {
     }
 }
 
+// Redraw the map (inc. polygons, etc)
 function redraw_map() {
     // Clean up old polygons and info windows
     for (p in polygons) {
