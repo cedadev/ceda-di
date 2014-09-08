@@ -12,14 +12,14 @@ class Properties(object):
     """
     A class to hold, manipulate, and export geospatial metadata at file level.
     """
-    def __init__(self, file_level=None, spatial=None,
+    def __init__(self, filesystem=None, spatial=None,
                  temporal=None, data_format=None, parameters=None,
                  **kwargs):
         """
         Construct a 'eufar.metadata.Properties' ready to export as JSON or dict
         (see "doc/schema.json")
 
-        :param dict file_level: File-level information about file
+        :param dict filesystem: Filesystem information about file
         :param dict spatial: Spatial information about file
         :param dict temporal: Temporal information about file
         :param dict data_format: Data format information about file
@@ -29,7 +29,7 @@ class Properties(object):
 
         self.logger = logging.getLogger()
 
-        self.file_level = file_level
+        self.filesystem = filesystem
         self.temporal = temporal
         self.data_format = data_format
 
@@ -45,7 +45,7 @@ class Properties(object):
         self.misc = kwargs
         self.properties = {
             "data_format": self.data_format,
-            "file": self.file_level,
+            "file": self.filesystem,
             "misc": self.misc,
             "parameters": self.parameters,
             "spatial": self.spatial,
