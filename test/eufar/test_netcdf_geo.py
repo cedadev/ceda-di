@@ -19,7 +19,7 @@ class TestNetCDF(unittest.TestCase):
         self.netcdf = netcdf_geo.NetCDF(path)
 
     def test_get_netcdf_var_from_regex(self):
-
+        pass
 
     def test_nc_var_from_list(self):
         pass
