@@ -194,14 +194,14 @@ class HDF4(_geospatial):
         """
         geospatial = self.get_geospatial()
         temporal = self.get_temporal()
-        file_level = super(HDF4, self).get_file_level(self.fname)
+        filesystem = super(HDF4, self).get_filesystem(self.fname)
         data_format = {
             "format": "HDF4",
         }
 
         props = product.Properties(spatial=geospatial,
                                    temporal=temporal,
-                                   file_level=file_level,
+                                   filesystem=filesystem,
                                    data_format=data_format)
 
         return props

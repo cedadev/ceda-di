@@ -81,13 +81,13 @@ class ENVI(_geospatial):
 
         :return metadata.product.Properties: Metadata
         """
-        file_level = super(ENVI, self).get_file_level(self.path)
+        filesystem = super(ENVI, self).get_filesystem(self.path)
 
         self._load_data()
         if "band names" in self.parameters:
             self.parameters = self.parameters["band names"]
 
-        prop = product.Properties(file_level=file_level,
+        prop = product.Properties(filesystem=filesystem,
                                   temporal=self.get_temporal(),
                                   data_format=self.get_data_format(),
                                   spatial=self.get_geospatial(),

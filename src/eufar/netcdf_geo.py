@@ -254,8 +254,8 @@ class NetCDF(_geospatial):
                 self.logger.info("No temporal metadata: %s" % self.fpath)
                 temporal = None
 
-            # File-level
-            file_level = super(NetCDF, self).get_file_level(self.fpath)
+            # Filesystem
+            filesystem = super(NetCDF, self).get_filesystem(self.fpath)
 
             # Geospatial
             geospatial = self.get_geospatial(netcdf_data)
@@ -268,7 +268,7 @@ class NetCDF(_geospatial):
 
             # Create properties object
             props = product.Properties(temporal=temporal,
-                                       file_level=file_level,
+                                       filesystem=filesystem,
                                        spatial=geospatial,
                                        data_format=data_format,
                                        parameters=parameters)

@@ -103,7 +103,7 @@ class EXIF(_geospatial):
         file's metadata.
         :return props: A eufar.metadata.product.Properties object
         """
-        file_level = super(EXIF, self).get_file_level(self.fname)
+        filesystem = super(EXIF, self).get_filesystem(self.fname)
         data_format = {
             "format": os.path.splitext(self.fname)[1][1:]
         }
@@ -117,7 +117,7 @@ class EXIF(_geospatial):
             temporal = None
             geospatial = None
 
-        props = product.Properties(file_level=file_level,
+        props = product.Properties(filesystem=filesystem,
                                    spatial=geospatial,
                                    temporal=temporal,
                                    data_format=data_format)

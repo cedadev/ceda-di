@@ -11,15 +11,15 @@ class _geospatial(object):
         self.unimpl_base_class()
 
     @staticmethod
-    def get_file_level(fpath):
+    def get_filesystem(fpath):
         """Returns a dict containing filesystem information"""
-        file_level = {
+        filesystem = {
             "filename": os.path.basename(fpath),
             "path": fpath,
             "size": os.stat(fpath).st_size,
         }
 
-        return file_level
+        return file_system
 
     def get_geospatial(self):
         """Returns a dict containing geospatial information"""
