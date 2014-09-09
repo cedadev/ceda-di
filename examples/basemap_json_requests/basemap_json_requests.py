@@ -46,4 +46,4 @@ if r.status_code == 200:
 
             m.plot(xs, ys, lw=0.5, latlon=True)
 
-            plt.savefig("out.png", dpi=320, bbox_inches='tight')
+    plt.savefig("out.png", dpi=320, bbox_inches='tight')
