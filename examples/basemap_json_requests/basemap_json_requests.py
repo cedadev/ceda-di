@@ -21,6 +21,17 @@ r = requests.get("http://fatcat-test.jc.rl.ac.uk:9200/badc/eufar/_search", data=
 if r.status_code == 200:
     resp = json.loads(r.content)
 
+    m = Basemap(projection='gall',
+                resolution='f',
+                llcrnrlon=(-180.0),
+                llcrnrlat=(-90.0),
+                urcrnrlon=(180.0),
+                urcrnrlat=(90.0))
+
+    m.drawcoastlines()
+    m.fillcontinents(color='coral',lake_color='aqua')
+    m.drawmapboundary(fill_color='aqua')
+
     for hit in resp["hits"]["hits"]:
         data = hit["_source"]
 
@@ -32,17 +43,6 @@ if r.status_code == 200:
 
             maxy = max(ys)
             miny = min(ys)
-
-            m = Basemap(projection='gall',
-                        resolution='f',
-                        llcrnrlon=(minx - 1),
-                        llcrnrlat=(miny - 1),
-                        urcrnrlon=(maxx + 1),
-                        urcrnrlat=(maxy + 1))
-
-            m.drawcoastlines()
-            m.fillcontinents(color='coral',lake_color='aqua')
-            m.drawmapboundary(fill_color='aqua')
 
             m.plot(xs, ys, lw=0.5, latlon=True)
 
