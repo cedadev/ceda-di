@@ -34,7 +34,7 @@ if r.status_code == 200:
             miny = min(ys)
 
             m = Basemap(projection='gall',
-                        resolution='c',
+                        resolution='f',
                         llcrnrlon=(minx - 1),
                         llcrnrlat=(miny - 1),
                         urcrnrlon=(maxx + 1),
