@@ -25,7 +25,7 @@ var info_windows = [] // Array of InfoWindows (one for each polygon)
 // Additional filter parameters
 var additional_filter_params = null;
 
-// Set up lcoation 'search' button
+// Set up location 'search' button
 $("#location_search").click(
     function () {
         location_search();
@@ -46,7 +46,7 @@ $("#applyfil").click(
     }
 );
 
-// Override submission on 'enter'
+// Override location form submission on 'enter'
 $("#location").keypress(
     function (e) {
         charcode = e.charCode || e.keyCode || e.which;
@@ -70,7 +70,7 @@ function is_in(array, item) {
     return false;
 }
 
-//
+// Location search
 function location_search() {
     loc = $("#location").val()
     if (loc === "") {
@@ -96,6 +96,7 @@ function clear_filters() {
     additional_filter_params = null;
 
     $("#param").val("");
+    $("#fpath").val("");
     $("#start_time").val("");
     $("#end_time").val("");
 
@@ -106,17 +107,31 @@ function clear_filters() {
 function apply_filters() {
     additional_filter_params = [];
 
+    // File path text search
+    fpath_query = {};
+    fpq = $("#fpath").val();
+    if (fpq.length > 0) {
+        fpath_query = {
+            "match": {
+                "eufar.file.path": fpq
+            }
+        }
+        additional_filter_params.push(fpath_query);
+    }
+
+    // Parameter text search
     param_query = {};
     param = $("#param").val();
     if (param.length > 0) {
         param_query = {
             "match": {
-                "eufar.file.path": param
+                "eufar.parameters.value": param
             }
         }
         additional_filter_params.push(param_query);
     }
 
+    // Time range
     start_time_query = {};
     start_time = $("#start_time").val();
     if (start_time.length > 0) {
@@ -155,7 +170,6 @@ function apply_filters() {
     if (! $.isEmptyObject(time_queries)) {
         additional_filter_params.push(time_queries);
     }
-    
     redraw_map();
 }
 
@@ -260,11 +274,14 @@ function search_es_bbox(bbox) {
     request = create_es_request(bbox);
     xhr.send(JSON.stringify(request));
 
+    $("#loading").show();
+
     // Handle the response
     xhr.onload = function (e) {
         if (xhr.readyState === 4) {
-            response = JSON.parse(xhr.responseText);
+            $("#loading").hide();
 
+            response = JSON.parse(xhr.responseText);
             if (response.hits) {
                 // Update "number of hits" field in sidebar
                 $("#numresults").html(response.hits.total);
