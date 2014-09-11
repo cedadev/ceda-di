@@ -1,5 +1,8 @@
 {
   "eufar": {
+    "_all": {
+        "enabled": true
+    },
     "properties": {
       "data_format": {
         "properties": {
@@ -36,12 +39,18 @@
                 "precision": "50m"
               },
               "coordinates": {
-                "type": "double"
+                "type": "double",
+                "enabled": false,
+                "include_in_all" : false,
+                "index": "no"
               },
               "hull": {
                 "properties": {
                   "coordinates": {
-                    "type": "double"
+                    "type": "double",
+                    "enabled": false,
+                    "include_in_all" : false,
+                    "index": "no"
                   },
                   "type": {
                     "type": "string"

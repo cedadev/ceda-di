@@ -107,28 +107,16 @@ function clear_filters() {
 function apply_filters() {
     additional_filter_params = [];
 
-    // File path text search
-    fpath_query = {};
-    fpq = $("#fpath").val();
-    if (fpq.length > 0) {
-        fpath_query = {
-            "match": {
-                "eufar.file.path": fpq
+    // Free text search
+    ftext_filt = {};
+    ftq = $("#fpath").val();
+    if (ftq.length > 0) {
+        ftext_filt = {
+            "term": {
+                "eufar.file.path": ftq
             }
         }
-        additional_filter_params.push(fpath_query);
-    }
-
-    // Parameter text search
-    param_query = {};
-    param = $("#param").val();
-    if (param.length > 0) {
-        param_query = {
-            "match": {
-                "eufar.parameters.value": param
-            }
-        }
-        additional_filter_params.push(param_query);
+        additional_filter_params.push(ftext_filt);
     }
 
     // Time range
@@ -194,7 +182,7 @@ function create_es_request(bbox, offset) {
                 "temporal"
             ]
         },
-        "query": {
+        "filter": {
             "bool": {
                 "must": [
                     {
@@ -207,16 +195,23 @@ function create_es_request(bbox, offset) {
                             }
                         }
                     }
+                ],
+                "must_not": [
+                    {
+                        "missing": {
+                            "field": "eufar.spatial.geometries.hull.type",
+                        }
+                    }
                 ]
             }
         },
-        "size": 15
+        "size": 10
     };
 
     // Add any extra user-defined filters
     if (additional_filter_params !== null) {
         for (i in additional_filter_params) {
-            request.query.bool.must.push(additional_filter_params[i]);
+            request.filter.bool.must.push(additional_filter_params[i]);
         }
     }
 
@@ -265,6 +260,40 @@ function construct_info_window(hit) {
     return info;
 }
 
+function draw_polygons(hits) {
+    for (i in hits) {
+        hit = hits[i]._source;
+        bbox = hit.spatial.geometries.bbox.coordinates;
+
+        // Construct and display polygon
+        polygon = construct_polygon(bbox);
+        polygon.setMap(map);
+        polygons.push(polygon);
+
+        // Add info window
+        iw = construct_info_window(hits[i]._source);
+        info_windows.push(iw);
+    }
+
+    // Add a listener function to polygon that opens a new
+    // InfoWindow on top of the polygon that was clicked
+    // (closes all other InfoWindows first)
+    for (i in info_windows) {
+        google.maps.event.addListener(
+            polygons[i], 'click',
+            (function(i, e) {
+                return function(e) {
+                    for (j in info_windows) {
+                        info_windows[j].close()
+                    }
+                    info_windows[i].open(map, null);
+                    info_windows[i].setPosition(e.latLng);
+                }
+            })(i)
+        );
+    }
+}
+
 // Search ES for data (and display received data asynchronously)
 function search_es_bbox(bbox) {
     // Create and send request
@@ -288,37 +317,7 @@ function search_es_bbox(bbox) {
 
                 // Loop through each hit, drawing as necessary
                 hits = response.hits.hits;
-                for (i in hits) {
-                    hit = hits[i]._source;
-                    bbox = hit.spatial.geometries.bbox.coordinates;
-
-                    // Construct and display polygon
-                    polygon = construct_polygon(bbox);
-                    polygon.setMap(map);
-                    polygons.push(polygon);
-
-                    // Add info window
-                    iw = construct_info_window(hits[i]._source);
-                    info_windows.push(iw);
-                }
-
-                // Add a listener function to polygon that opens a new
-                // InfoWindow on top of the polygon that was clicked
-                // (closes all other InfoWindows first)
-                for (i in info_windows) {
-                    google.maps.event.addListener(
-                        polygons[i], 'click',
-                        (function(i, e) {
-                            return function(e) {
-                                for (j in info_windows) {
-                                    info_windows[j].close()
-                                }
-                                info_windows[i].open(map, null);
-                                info_windows[i].setPosition(e.latLng);
-                            }
-                        })(i)
-                    );
-                }
+                draw_polygons(hits);
             }
         }
     }
