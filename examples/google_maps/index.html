@@ -39,7 +39,7 @@
                <div class="form-group">
                  <label class="control-label" for="param">Full Text Filter</label>
                  <div class="controls">
-                   <input id="param" name="param" placeholder="Any text query, e.g. 'velocity', 'safire', etc" class="form-control input-md" type="text">
+                   <input id="ftext" name="ftext" placeholder="Any text query, e.g. 'velocity', 'safire', etc" class="form-control input-md" type="text">
                  </div>
                </div>
 
@@ -67,6 +67,10 @@
               <legend class="buffer30">Search info</legend>
               <p class="form-group row">
                 <strong><span id="numresults">0</span></strong> hits with current selection.
+              </p>
+
+              <p class="form-group row">
+                <strong><span id="resptime">0</span></strong> milliseconds for response.
               </p>
 
               <div class="form-group row buffer10">

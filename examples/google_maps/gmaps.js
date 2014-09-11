@@ -95,8 +95,7 @@ function location_search() {
 function clear_filters() {
     additional_filter_params = null;
 
-    $("#param").val("");
-    $("#fpath").val("");
+    $("#ftext").val("");
     $("#start_time").val("");
     $("#end_time").val("");
 
@@ -109,11 +108,11 @@ function apply_filters() {
 
     // Free text search
     ftext_filt = {};
-    ftq = $("#fpath").val();
+    ftq = $("#ftext").val();
     if (ftq.length > 0) {
         ftext_filt = {
             "term": {
-                "eufar.file.path": ftq
+                "_all": ftq
             }
         }
         additional_filter_params.push(ftext_filt);
@@ -205,7 +204,7 @@ function create_es_request(bbox, offset) {
                 ]
             }
         },
-        "size": 10
+        "size": 20
     };
 
     // Add any extra user-defined filters
@@ -312,6 +311,7 @@ function search_es_bbox(bbox) {
 
             response = JSON.parse(xhr.responseText);
             if (response.hits) {
+                $("#resptime").html(response.took);
                 // Update "number of hits" field in sidebar
                 $("#numresults").html(response.hits.total);
 
