@@ -256,7 +256,7 @@ function construct_info_window(hit) {
                    
     if (hit.data_format.format === "NetCDF") {
         content += "<p><a href=\"" + wps_url + hit.file.path + 
-                       "\">Plot time-series</a></p>"
+                       "\" target=\"_blank\">Plot time-series</a></p>"
     }
     
     content += "</section>"
