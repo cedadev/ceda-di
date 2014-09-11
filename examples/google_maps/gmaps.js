@@ -1,6 +1,7 @@
 /*---------------------------- Setup ----------------------------*/
 // Set up constants
 var es_url = "http://fatcat-test.jc.rl.ac.uk:9200/badc/eufar/_search";
+var wps_url = "http://ceda-wps2.badc.rl.ac.uk:8080/submit/form?proc_id=PlotTimeSeries&FilePath="
 var geocoder = new google.maps.Geocoder();
 var map = new google.maps.Map(document.getElementById('map'), {
     mapTypeId: google.maps.MapTypeId.TERRAIN,
@@ -188,6 +189,7 @@ function create_es_request(bbox, offset) {
     request = {
         "_source": {
             "include": [
+                "data_format.format",
                 "file.filename",
                 "file.path",
                 "spatial.geometries.bbox",
@@ -256,8 +258,15 @@ function construct_info_window(hit) {
     }
 
     content += "<p><a href=\"http://badc.nerc.ac.uk/browse" +
-               hit.file.path + "\">Get data</a></p></section>"
-
+                   hit.file.path + "\">Get data</a></p>"
+                   
+    if (hit.data_format.format === "NetCDF") {
+        content += "<p><a href=\"" + wps_url + hit.file.path + 
+                       "\">Plot time-series</a></p>"
+    }
+    
+    content += "</section>"
+    
     info = new google.maps.InfoWindow({
         content: content
     });
