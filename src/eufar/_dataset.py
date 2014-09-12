@@ -19,7 +19,7 @@ class _geospatial(object):
             "size": os.stat(fpath).st_size,
         }
 
-        return file_system
+        return filesystem
 
     def get_geospatial(self):
         """Returns a dict containing geospatial information"""
