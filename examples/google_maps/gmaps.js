@@ -185,6 +185,7 @@ function create_es_request(bbox, offset) {
         },
         "filter": {
             "bool": {
+                "_cache": true,
                 "must": [
                     {
                         "geo_shape": {
