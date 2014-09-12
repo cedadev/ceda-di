@@ -1,5 +1,12 @@
 {
   "eufar": {
+    "_source": {
+        "excludes": [
+            "spatial.geometries.coordinates",
+            "spatial.geometries.hull"
+            ]
+        }
+    },
     "_all": {
         "enabled": true
     },
