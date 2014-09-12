@@ -42,7 +42,8 @@
                 "type": "double",
                 "enabled": false,
                 "include_in_all" : false,
-                "index": "no"
+                "index": "no",
+                "store": no
               },
               "hull": {
                 "properties": {
@@ -50,7 +51,8 @@
                     "type": "double",
                     "enabled": false,
                     "include_in_all" : false,
-                    "index": "no"
+                    "index": "no",
+                    "store": "no"
                   },
                   "type": {
                     "type": "string"
