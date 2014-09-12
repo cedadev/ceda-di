@@ -7,7 +7,8 @@
       "data_format": {
         "properties": {
           "format": {
-            "type": "string"
+            "type": "string",
+            "store": "yes"
           }
         }
       },
@@ -15,11 +16,13 @@
         "properties": {
           "filename": {
             "type": "string",
-            "analyzer": "simple"
+            "analyzer": "simple",
+            "store": "yes"
           },
           "path": {
             "type": "string",
-            "analyzer": "simple"
+            "analyzer": "simple",
+            "store": "yes"
           },
           "size": {
             "type": "long"
@@ -36,14 +39,15 @@
               "bbox": {
                 "type": "geo_shape",
                 "tree": "quadtree",
-                "precision": "50m"
+                "precision": "50m",
+                "store": "yes"
               },
               "coordinates": {
                 "type": "double",
                 "enabled": false,
                 "include_in_all" : false,
                 "index": "no",
-                "store": no
+                "store": "no"
               },
               "hull": {
                 "properties": {
@@ -67,11 +71,13 @@
         "properties": {
           "end_time": {
             "type": "date",
-            "format": "dateOptionalTime"
+            "format": "dateOptionalTime",
+            "store": "yes"
           },
           "start_time": {
             "type": "date",
-            "format": "dateOptionalTime"
+            "format": "dateOptionalTime",
+            "store": "yes"
           }
         }
       }
