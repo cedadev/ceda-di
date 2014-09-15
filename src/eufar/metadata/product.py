@@ -52,6 +52,28 @@ class Properties(object):
             "temporal": self.temporal,
         }
 
+    @staticmethod
+    def valid_lat(num):
+        """
+        Return true if 'num' is a valid latitude.
+        :param float num: Number to test
+        :return: True if 'num' is valid, else False
+        """
+        if num < 0 or num > 90:
+            return False
+        return True
+
+    @staticmethod
+    def valid_lon(num):
+        """
+        Return true if 'num' is a valid longitude.
+        :param float num: Number to test
+        :return: True if 'num' is valid, else False
+        """
+        if num < -180 or num > 180:
+            return False
+        return True
+
     def _gen_bbox(self, spatial):
         """
         Generate and return a bounding box for the given geospatial data.
@@ -61,8 +83,8 @@ class Properties(object):
         lons = spatial["lon"]
         lats = spatial["lat"]
 
-        lon_lo, lon_hi = self._get_min_max(lons)
-        lat_lo, lat_hi = self._get_min_max(lats)
+        lon_lo, lon_hi = self._get_min_max(lons, filter_func=self.valid_lon)
+        lat_lo, lat_hi = self._get_min_max(lats, filter_func=self.valid_lat)
 
         bbox = {
             "type": "MultiPoint",
@@ -99,14 +121,19 @@ class Properties(object):
         return chull
 
     @staticmethod
-    def _get_min_max(item_list):
+    def _get_min_max(item_list, filter_func=None):
         """
         Return a tuple containing the (highest, lowest) values in the list.
         :param list item_list: List of comparable data items
+        :param function filter_func: Function that returns True for good values
         :return tuple: Tuple of (highest, lowest values in the list)
         """
         if len(item_list) < 1:
             return (None, None)
+
+        # Filter out ignore_value (useful for _FillValue, etc)
+        if filter_func is not None:
+            item_list = [i for i in item_list if filter_func(i)]
 
         high = max(item_list)
         low = min(item_list)
@@ -200,8 +227,8 @@ class Parameter(object):
         # Other arbitrary arguments
         if other_params:
             for key, value in other_params.iteritems():
-                self.items.append(self.make_param_item(key,
-                                                       unicode(value).strip()))
+                self.items.append(self.make_param_item(key.strip(),
+                                                       value.strip()))
 
     @staticmethod
     def make_param_item(name, value):
