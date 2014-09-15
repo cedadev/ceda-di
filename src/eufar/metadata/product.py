@@ -228,7 +228,7 @@ class Parameter(object):
         if other_params:
             for key, value in other_params.iteritems():
                 self.items.append(self.make_param_item(key.strip(),
-                                                       value.strip()))
+                                                       unicode(value).strip()))
 
     @staticmethod
     def make_param_item(name, value):
