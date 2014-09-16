@@ -225,10 +225,24 @@ class NetCDF(_geospatial):
             alt = netcdf_data.variables[alt_var][:].ravel()[10:-10]
 
             geospatial = {
-                "lon": [float(x) for x in lon],
-                "lat": [float(x) for x in lat],
-                "alt": [float(x) for x in alt],
+                "lon": [],
+                "lat": [],
+                "alt": []
             }
+
+            # Add coordinates into dict structure
+            # but filter out all '0' coordinates, as these result from
+            # a misconfigured '_FillValue' in the NetCDF files
+            for i in xrange(0, len(lon)):
+                if lon[i] == 0 or lat[i] == 0 or alt[i] == 0:
+                    continue
+
+                try:
+                    geospatial["lon"].append(float(lon[i]))
+                    geospatial["lat"].append(float(lat[i]))
+                    geospatial["alt"].append(float(alt[i]))
+                except IndexError:
+                    break
 
             return geospatial
         except (KeyError, AttributeError):
