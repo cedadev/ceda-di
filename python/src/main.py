@@ -23,8 +23,20 @@ def get_config(fname="config/eufar.json"):
         with open(fname, "r") as f:
             return json.load(f)
     except IOError as ioe:
-        sys.stderr.write("ERR: can't read config.\n\t%s\n" % str(ioe))
+        sys.stderr.write("ERR: can't read config.\n%s\n" % str(ioe))
         exit(1)
+
+
+def make_dirs(conf):
+    """Make all necessary directories."""
+
+    json_out = os.path.join(conf["outputpath"], conf["jsonpath"])
+    if not os.path.isdir(json_out):
+        os.makedirs(json_out)
+
+    log_out = os.path.join(conf["outputpath"], conf["logpath"])
+    if not os.path.isdir(log_out):
+        os.makedirs(log_out)
 
 
 def write_properties(fname, _geospatial_obj):
@@ -64,10 +76,22 @@ def process_tiff(fpath):
         write_properties(fpath, exif)
 
 
+def process_file((base, fname)):
+    """Process a data file."""
+    fpath = os.path.join(base, fname)
+    if "raw" not in fpath:
+        if fname.endswith("_nav_post_processed.bil.hdr"):
+            process_bil(fpath)
+        elif fname.endswith(".nc"):
+            process_nc(fpath)
+        elif fname.endswith(".tif"):
+            process_tiff(fpath)
+        elif fname.endswith(".hdf"):
+            process_hdf4(fpath)
+
+
 def prepare_logging(conf):
     """Initial logging setup"""
-    if not os.path.isdir(conf["logpath"]):
-        os.makedirs(conf["logpath"])
 
     fname = os.path.join(conf["outputpath"],
                          conf["logpath"],
@@ -83,68 +107,43 @@ def prepare_logging(conf):
 
     return log
 
+
 jsonpath = ""
 if __name__ == "__main__":
-    # Config
     if len(sys.argv) > 1:
         config = get_config(sys.argv[1])
     else:
         config = get_config()
-
-    # File paths
+        
+    # Read useful sections from config
     try:
+        make_dirs(config)
         logger = prepare_logging(config)
         numcores = config["numcores"]
         datapath = config["datapath"]
         outpath = config["outputpath"]
         jsonpath = os.path.join(outpath, config["jsonpath"])
-
-        if not os.path.isdir(jsonpath):
-            os.makedirs(jsonpath)
     except KeyError as k:
-        sys.stderr.write("Missing configuration option: %s" % str(k))
+        sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
 
+    # Log beginning of processing
     start = datetime.datetime.now()
     logger.info("Metadata extraction started at: %s", start.isoformat())
-    processes = []
+
+    # Build list of file paths
+    data_files = []
     for root, dirs, files in os.walk(datapath, followlinks=True):
         for f in files:
-            path = os.path.join(root, f)
+            data_files.append((root, f))
 
-            if "raw" not in path:
-                if f.endswith("_nav_post_processed.bil.hdr"):
-                    proc = multiprocessing.Process(target=process_bil,
-                                                   args=(path,))
-                    processes.append(proc)
-                    proc.start()
-                elif f.endswith(".nc"):
-                    proc = multiprocessing.Process(target=process_nc,
-                                                   args=(path,))
-                    processes.append(proc)
-                    proc.start()
-                elif f.endswith(".tif"):
-                    proc = multiprocessing.Process(target=process_tiff,
-                                                   args=(path,))
-                    processes.append(proc)
-                    proc.start()
-                elif f.endswith(".hdf"):
-                    proc = multiprocessing.Process(target=process_hdf4,
-                                                   args=(path,))
-                    processes.append(proc)
-                    proc.start()
+    # Process files
+    pool = multiprocessing.Pool(numcores)
+    pool.map_async(process_file, data_files)
+    pool.close()
+    pool.join()
 
-            while len(processes) > numcores:
-                for p in processes:
-                    if p.exitcode is not None:
-                        processes.remove(p)
-
-    # End
-    for proc in processes:
-        proc.join()
-
+    # Log end of processing
     end = datetime.datetime.now()
     logger.info("Metadata extraction completed at: %s", end.isoformat())
     logger.info("Start: %s, End: %s, Total: %s",
-                start.isoformat(),
-                end.isoformat(),
-                end - start)
+                start.isoformat(), end.isoformat(), end - start)
