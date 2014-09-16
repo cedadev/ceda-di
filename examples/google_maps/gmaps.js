@@ -199,13 +199,13 @@ function create_es_request(bbox, offset) {
                 ]
             }
         },
-        "size": 20
+        "size": 50
     };
 
     // Add any extra user-defined filters
     if (additional_filter_params !== null) {
         for (i in additional_filter_params) {
-            request.filter.bool.must.push(additional_filter_params[i]);
+            request.filter.and.must.unshift(additional_filter_params[i]);
         }
     }
 
