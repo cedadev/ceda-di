@@ -184,8 +184,7 @@ function create_es_request(bbox, offset) {
             ]
         },
         "filter": {
-            "bool": {
-                "_cache": true,
+            "and": {
                 "must": [
                     {
                         "geo_shape": {
@@ -195,13 +194,6 @@ function create_es_request(bbox, offset) {
                                     "coordinates": [nw, se]
                                 }
                             }
-                        }
-                    }
-                ],
-                "must_not": [
-                    {
-                        "missing": {
-                            "field": "eufar.spatial.geometries.hull.type",
                         }
                     }
                 ]
@@ -362,7 +354,7 @@ function redraw_map() {
     // Rate-limit requests to ES to 1 per second
     window.setTimeout(function () {
         add_bounds_changed_listener(map)
-    }, 1000);
+    }, 500);
 }
 
 
