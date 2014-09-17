@@ -12,7 +12,7 @@ from _dataset import _geospatial
 
 class ENVI(_geospatial):
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger(__name__)
         self.b = None  # Overridden by child classes
         self.data = None  # Overridden by child classes
         self.data_format = None  # Overridden by child classes
