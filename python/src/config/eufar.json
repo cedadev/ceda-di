@@ -1,6 +1,6 @@
 {
     "_option": "outputpath: main output directory",
-    "outputpath": "out/",
+    "outputpath": "/work/scratch/ccnewey/arsf-geo-map/",
 
     "_option": "logpath: log dir path, relative to 'outputpath'",
     "logpath": "log/",
@@ -11,10 +11,10 @@
     "jsonpath": "json/",
 
     "_option": "datapath: data input path (where to extract metadata from)",
-    "datapath": "../test/data",
+    "datapath": "/badc/eufar/data/projects",
 
     "_option": "numcores: number of processes to use in parallel",
-    "numcores": 23,
+    "numcores": 3,
 
     "_option": "logging: options for the 'logging' module",
     "_ref": "(see: https://docs.python.org/2/library/logging.html)",

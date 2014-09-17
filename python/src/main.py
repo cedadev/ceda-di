@@ -136,11 +136,12 @@ if __name__ == "__main__":
         for f in files:
             data_files.append((root, f))
 
-    # Process files
-    pool = multiprocessing.Pool(numcores)
-    pool.map_async(process_file, data_files)
-    pool.close()
-    pool.join()
+    if len(data_files) > 0:
+        # Process files
+        pool = multiprocessing.Pool(numcores)
+        pool.map(process_file, data_files)
+        pool.close()
+        pool.join()
 
     # Log end of processing
     end = datetime.datetime.now()
