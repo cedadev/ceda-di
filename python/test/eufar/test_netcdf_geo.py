@@ -5,6 +5,8 @@ Test module for eufar.netcdf_geo
 import os
 import unittest
 
+
+from netCDF4 import Dataset
 from eufar import netcdf_geo
 
 
