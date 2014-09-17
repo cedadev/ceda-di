@@ -27,7 +27,7 @@ class Properties(object):
         :param **kwargs: Key-value pairs of any extra relevant metadata.
         """
 
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger(__name__)
 
         self.filesystem = filesystem
         self.temporal = temporal

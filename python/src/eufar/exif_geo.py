@@ -24,7 +24,7 @@ class EXIF(_geospatial):
         """
         :param str fname: File name to construct EXIF_geo object from.
         """
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger(__name__)
         self.fname = fname
         self.xml = None
 

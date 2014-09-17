@@ -27,7 +27,7 @@ class EnviFile(object):
         :param str unpack_fmt: Format string describing structure of data.
                                Default: "<d" - little-endian, double precision
         """
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger(__name__)
         self.hdr_path = header_path
 
         if path is not None:
