@@ -13,7 +13,6 @@ import numpy
 import re
 
 from netCDF4 import Dataset
-
 from eufar._dataset import _geospatial
 from eufar.metadata import product
 
