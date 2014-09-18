@@ -39,8 +39,15 @@ class TestEXIF(unittest.TestCase):
                 "alt": [9.876]
             }
 
+            exif_file.xml = {}
+            self.assertRaises(KeyError, exif_file.get_temporal)
+
     def test_get_temporal(self):
         with EXIF(self.path) as exif_file:
             exif_file.xml = self.xml
-            s_time = exif_file.get_temporal()["start_time"]
-            assert s_time == "1901-01-05T00:00:01"
+            time_dict = exif_file.get_temporal()
+            assert time_dict["start_time"] == "1901-01-05T00:00:01"
+            assert time_dict["end_time"] == time_dict["start_time"]
+
+            exif_file.xml = {}
+            self.assertRaises(KeyError, exif_file.get_temporal)
