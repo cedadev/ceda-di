@@ -60,7 +60,7 @@ class NetCDF(_geospatial):
 
         return params
 
-    def _get_netcdf_var_from_regex(self, regex, nc, flags=None):
+    def _nc_var_from_regex(self, regex, nc, flags=None):
         """
         Return the first matching variable from 'nc', that matches 'regex'.
 
@@ -183,8 +183,8 @@ class NetCDF(_geospatial):
         :return list(datetime.datetime): List of datetime objects
         """
         # If base_time isn't in expected format, we may have to calculate it
-        tm_var = self._get_netcdf_var_from_regex("time",
-                                                 nc, flags=re.IGNORECASE)
+        tm_var = self._nc_var_from_regex("time",
+                                         nc, flags=re.IGNORECASE)
         try:
             datum = nc.variables[tm_var][0]
         except KeyError:
