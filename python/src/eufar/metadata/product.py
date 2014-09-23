@@ -59,7 +59,7 @@ class Properties(object):
         :param float num: Number to test
         :return: True if 'num' is valid, else False
         """
-        if num < 0 or num > 90:
+        if num < -90 or num > 90:
             return False
         return True
 
@@ -138,7 +138,7 @@ class Properties(object):
         high = max(item_list)
         low = min(item_list)
 
-        return (high, low)
+        return (low, high)
 
     @staticmethod
     def _to_wkt(spatial):
@@ -227,8 +227,8 @@ class Parameter(object):
         # Other arbitrary arguments
         if other_params:
             for key, value in other_params.iteritems():
-                self.items.append(self.make_param_item(key.strip(),
-                                                       unicode(value).strip()))
+                self.items.append(
+                    self.make_param_item(key.strip(), unicode(value).strip()))
 
     @staticmethod
     def make_param_item(name, value):
