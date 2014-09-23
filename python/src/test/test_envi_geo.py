@@ -4,6 +4,8 @@ Test module for eufar.envi_geo
 
 import unittest
 
+from eufar.envi_geo import BIL
+from eufar.envi_geo import BSQ
 from eufar.envi_geo import ENVI
 from eufar.metadata.product import Parameter
 
@@ -24,20 +26,21 @@ class TestENVI(unittest.TestCase):
     """Test class for eufar.exif_geo.EXIF"""
     def setUp(self):
         self.path = "/path/to/some/file"
-        self.envi_stub = ENVIStub(path=self.path,
-                                  velocity="unladen_swallow",
+        self.envi_stub = ENVIStub(velocity="unladen_swallow",
                                   spam="spammity_spam")
 
     def test_get_parameters(self):
-        envi = ENVI(self.path, path=self.path)
+        envi = ENVI(self.path)
         envi.b = self.envi_stub
         envi._load_data()
 
         assert envi.get_parameters()[0].__dict__ == \
                     Parameter("velocity").__dict__
+        assert envi.get_parameters()[1].__dict__ == \
+                    Parameter("spam").__dict__
 
     def test_get_geospatial(self):
-        envi = ENVI(self.path, path=self.path)
+        envi = ENVI(self.path)
         envi.b = self.envi_stub
         envi._load_data()
 
@@ -53,3 +56,11 @@ class TestENVI(unittest.TestCase):
         temporal = envi.get_temporal()
         assert temporal["start_time"] == "start_time"
         assert temporal["end_time"] == "end_time"
+
+    def test_bil_get_data_format(self):
+        bil = BIL(self.path)
+        assert bil.get_data_format() == "ENVI BIL (Band Interleaved by Line)"
+
+    def test_bsq_get_data_format(self):
+        bsq = BSQ(self.path)
+        assert bsq.get_data_format() == "ENVI BSQ (Band Sequential)"
