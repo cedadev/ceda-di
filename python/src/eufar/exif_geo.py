@@ -80,8 +80,9 @@ class EXIF(_geospatial):
         year = int(proj["Year"])
         epoch = datetime.datetime(year=year, month=1, day=1)
 
-        jul_day = int(proj["Flight_day_of_year"]) - 5  # Correction
-        secs = float(proj["GPStime_of_week"])
+        # The "-5" below adjusts the Julian Day to work with GPS time
+        jul_day = int(proj["Flight_day_of_year"]) - 1
+        secs = float(proj["GPStime_of_week"]) % 86400
         seconds = int(secs)
         milliseconds = (secs-seconds)
 

@@ -36,8 +36,9 @@ class ENVI(_geospatial):
         """
         params = []
         for p_name in self.parameters:
-            param = product.Parameter(p_name)
-        params.append(param)
+            params.append(product.Parameter(p_name))
+
+        return params
 
     def get_geospatial(self):
         """
