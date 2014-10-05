@@ -109,7 +109,8 @@ def prepare_logging(conf):
 
 
 jsonpath = ""
-if __name__ == "__main__":
+
+def main():
     if len(sys.argv) > 1:
         config = get_config(sys.argv[1])
     else:
@@ -148,3 +149,7 @@ if __name__ == "__main__":
     logger.info("Metadata extraction completed at: %s", end.isoformat())
     logger.info("Start: %s, End: %s, Total: %s",
                 start.isoformat(), end.isoformat(), end - start)
+
+
+if __name__ == "__main__":
+    main()

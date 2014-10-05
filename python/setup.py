@@ -42,6 +42,9 @@ setup(name='ceda-di',
       #],
       
       entry_points= {
+          'console_scripts': [
+              'ceda-di = ceda_di.main:main',
+          ],
         },
       #test_suite='nose.collector',
       )
