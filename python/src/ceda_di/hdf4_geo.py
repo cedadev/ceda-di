@@ -188,9 +188,9 @@ class HDF4(_geospatial):
 
     def get_properties(self):
         """
-        Returns eufar.metadata.properties.Properties object
+        Returns ceda_di.metadata.properties.Properties object
         containing geospatial and temporal metadata from file.
-        :return eufar.metadata.properties.Properties: Metadata object
+        :return ceda_di.metadata.properties.Properties: Metadata object
         """
         geospatial = self.get_geospatial()
         temporal = self.get_temporal()

@@ -14,8 +14,8 @@ import re
 
 from netCDF4 import Dataset
 
-from eufar._dataset import _geospatial
-from eufar.metadata import product
+from ceda_di._dataset import _geospatial
+from ceda_di.metadata import product
 
 
 class NetCDF(_geospatial):
@@ -251,9 +251,9 @@ class NetCDF(_geospatial):
 
     def get_properties(self):
         """
-        Return a eufar.metadata.product.Properties object populated with the
+        Return a ceda_di.metadata.product.Properties object populated with the
         NetCDF file's metadata.
-        :return properties: eufar.metadata.product.Properties with metadata
+        :return properties: ceda_di.metadata.product.Properties with metadata
         """
         with Dataset(self.fpath, 'r') as netcdf_data:
             # Timestamps
