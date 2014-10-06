@@ -16,7 +16,7 @@ class Properties(object):
                  temporal=None, data_format=None, parameters=None,
                  **kwargs):
         """
-        Construct a 'eufar.metadata.Properties' ready to export as JSON or dict
+        Construct a 'ceda_di.metadata.Properties' ready to export as JSON or dict
         (see "doc/schema.json")
 
         :param dict filesystem: Filesystem information about file
