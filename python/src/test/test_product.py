@@ -1,10 +1,10 @@
 """
-Test module for eufar.metadata.product
+Test module for ceda_di.metadata.product
 """
 
 import unittest
 
-from eufar.metadata.product import Properties, Parameter
+from ceda_di.metadata.product import Properties, Parameter
 
 class TestProperties(unittest.TestCase):
     def setUp(self):

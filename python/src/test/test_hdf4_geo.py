@@ -4,7 +4,7 @@ Test module for hdf4_geo
 
 import unittest
 from pyhdf.error import HDF4Error
-from eufar.hdf4_geo import HDF4
+from ceda_di.hdf4_geo import HDF4
 
 
 class StubAttachedVData(object):

@@ -1,16 +1,16 @@
 """
-Test module for eufar.netcdf_geo
+Test module for ceda_di.netcdf_geo
 """
 
 import re
 import unittest
 
-from eufar.netcdf_geo import NetCDF
-from eufar.metadata.product import Parameter
+from ceda_di.netcdf_geo import NetCDF
+from ceda_di.metadata.product import Parameter
 
 class TestNetCDF(unittest.TestCase):
     """
-    Test class for eufar.netcdf_geo.NetCDF
+    Test class for ceda_di.netcdf_geo.NetCDF
     """
     def setUp(self):
         self.path = "/path/to/some/file"

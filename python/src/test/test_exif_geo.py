@@ -1,13 +1,13 @@
 """
-Test module for eufar.exif_geo
+Test module for ceda_di.exif_geo
 """
 
 import unittest
 
-from eufar.exif_geo import EXIF
+from ceda_di.exif_geo import EXIF
 
 class TestEXIF(unittest.TestCase):
-    """Test class for eufar.exif_geo.EXIF"""
+    """Test class for ceda_di.exif_geo.EXIF"""
     def setUp(self):
         self.path = "/path/to/some/file"
         self.xml = {
