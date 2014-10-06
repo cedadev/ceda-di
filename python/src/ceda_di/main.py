@@ -1,5 +1,5 @@
 """
-Main script to handle processing of EUFAR data.
+Main script to handle processing of CEDA Data Index data.
 """
 
 import datetime
@@ -10,10 +10,10 @@ import multiprocessing
 import os
 import sys
 
-from eufar import envi_geo, exif_geo, hdf4_geo, netcdf_geo
+from ceda_di import envi_geo, exif_geo, hdf4_geo, netcdf_geo
 
 
-def get_config(fname="config/eufar.json"):
+def get_config(fname="config/ceda_di.json"):
     """
     Reads the configuration file into a dictionary
     :param fname: Path to the JSON configuration file
@@ -109,7 +109,8 @@ def prepare_logging(conf):
 
 
 jsonpath = ""
-if __name__ == "__main__":
+
+def main():
     if len(sys.argv) > 1:
         config = get_config(sys.argv[1])
     else:
@@ -148,3 +149,7 @@ if __name__ == "__main__":
     logger.info("Metadata extraction completed at: %s", end.isoformat())
     logger.info("Start: %s, End: %s, Total: %s",
                 start.isoformat(), end.isoformat(), end - start)
+
+
+if __name__ == "__main__":
+    main()
