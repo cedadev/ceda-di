@@ -1,11 +1,11 @@
 {
     "_option": "outputpath: main output directory",
-    "outputpath": "/work/scratch/ccnewey/arsf-geo-map/",
+    "outputpath": "/work/scratch/ccnewey/ceda-di/",
 
     "_option": "logpath: log dir path, relative to 'outputpath'",
     "logpath": "log/",
     "_option": "logfile: log file path, relative to 'logpath'",
-    "logfile": "arsf-geo-map.log",
+    "logfile": "ceda-di.log",
 
     "_option": "jsonpath: directory for JSON metadata, relative to 'outputpath'",
     "jsonpath": "json/",

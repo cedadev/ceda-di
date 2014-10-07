@@ -1,8 +1,8 @@
-arsf-geo-map
-============
+ceda-di
+=======
 
 Python backend for extracting geospatial and temporal extent information
-from various EUFAR data formats, including:
+from various scientific data formats, including:
 
 * ENVI BIL
 * ENVI BSQ
