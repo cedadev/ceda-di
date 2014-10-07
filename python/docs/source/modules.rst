@@ -2,9 +2,9 @@ Module listing
 ==============
 
 .. toctree::
-    eufar
+    ceda_di
     
-.. automodule:: eufar
+.. automodule:: ceda_di
     :members:
     :inherited-members:
     :private-members:

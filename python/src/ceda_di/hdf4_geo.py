@@ -15,8 +15,7 @@ from metadata import product
 
 class HDF4(_geospatial):
     """
-
-    ARSF/EUFAR metadata HDF4 context manager class.
+    HDF4 context manager class.
     """
     hdf = None
     vs = None
@@ -47,10 +46,11 @@ class HDF4(_geospatial):
         self.vs.end()
         self.hdf.close()
 
-    def _get_coords(self, vs, fn):
+    def _get_coords(self, v, vs, fn):
         """
         Iterate through vgroup and return a list of coordinates (if existing).
 
+        :param HDF4.V.v v: VGroup object
         :param HDF4.V.vs vs: VData object
         :param str fn: Path to the data file
         :return dict: Dict containing geospatial information.
@@ -76,9 +76,10 @@ class HDF4(_geospatial):
             vd.detach()
         return coords
 
-    def _get_temporal(self, vs, fn):
+    def _get_temporal(self, v, vs, fn):
         """
         Returns start and end timestamps (if existing)
+        :param HDF4.V.v v: VGroup object
         :param HDF4.V.vs vs: VData object
         :param str fn: Path to the data file
         :return dict: Dict containing temporal information.
@@ -97,14 +98,13 @@ class HDF4(_geospatial):
             timestamps[v] = []
             while True:
                 try:
-                    i = vd.read()[0]
-                    timestamps[v].append(i[0])
+                    timestamps[v].append(vd.read()[0][0])
                 except HDF4Error:  # EOF
                     break
 
             vd.detach()
 
-        # This snippet basically converts from a list of integers
+        # This list comprehension basically converts from a list of integers
         # into a list of chars and joins them together to make strings
         # ...
         # If unclear - HDF text data comes out as a list of integers, e.g.:
@@ -133,10 +133,8 @@ class HDF4(_geospatial):
                 # the actual timestamp - so just try the next strptime format
                 continue
 
-        return {
-            "start_time": start_time.isoformat(),
-            "end_time": end_time.isoformat()
-        }
+        return {"start_time": start_time.isoformat(),
+                "end_time": end_time.isoformat()}
 
     def get_geospatial(self):
         """
@@ -151,7 +149,7 @@ class HDF4(_geospatial):
                 vg = self.v.attach(ref)
 
                 if vg._name == "Navigation":
-                    geospatial = self._get_coords(self.vs, self.fname)
+                    geospatial = self._get_coords(self.v, self.vs, self.fname)
                     vg.detach()
                     return geospatial
 
@@ -176,7 +174,7 @@ class HDF4(_geospatial):
                 vg = self.v.attach(ref)
 
                 if vg._name == "Mission":
-                    temporal = self._get_temporal(self.vs, self.fname)
+                    temporal = self._get_temporal(self.v, self.vs, self.fname)
                     vg.detach()
                     return temporal
 

@@ -100,9 +100,9 @@ class EXIF(_geospatial):
 
     def get_properties(self):
         """
-        Return a eufar.metadata.product.Properties object populated with the
+        Return a ceda_di.metadata.product.Properties object populated with the
         file's metadata.
-        :return props: A eufar.metadata.product.Properties object
+        :return props: A ceda_di.metadata.product.Properties object
         """
         filesystem = super(EXIF, self).get_filesystem(self.fname)
         data_format = {

@@ -38,7 +38,7 @@ class _geospatial(object):
         """Throws relevant NotImplementedError."""
         exception = \
             "\"_geospatial\" is an abstract base class and is intended" + \
-            "to be used as an OO interface for EUFAR data files ONLY."
+            "to be used as an interface ONLY."
 
         raise NotImplementedError(exception)
 
