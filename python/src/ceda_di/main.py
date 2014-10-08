@@ -139,10 +139,23 @@ class Main(object):
 
         if len(data_files) > 0:
             # Process files
-            pool = multiprocessing.Pool(self.numcores)
-            pool.map(self.process_file, data_files)
-            pool.close()
-            pool.join()
+            pool = []
+
+            for f in data_files:
+                path = os.path.join(*f)
+                if "raw" not in path:
+                    p = multiprocessing.Process(target=self.process_file,
+                                                args=(path,))
+                    pool.append(p)
+                    p.start()
+
+            while len(pool) >= self.numcores:
+                for p in pool:
+                    if p.exitcode is not None:
+                        pool.remove(p)
+
+        for p in pool:
+            p.join()
 
         # Log end of processing
         end = datetime.datetime.now()
