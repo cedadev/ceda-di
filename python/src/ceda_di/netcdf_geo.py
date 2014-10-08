@@ -14,8 +14,8 @@ import re
 
 from netCDF4 import Dataset
 
-from ceda_di._dataset import _geospatial
-from ceda_di.metadata import product
+from _dataset import _geospatial
+from metadata import product
 
 
 class NetCDF(_geospatial):
