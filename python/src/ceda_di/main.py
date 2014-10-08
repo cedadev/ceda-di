@@ -106,6 +106,9 @@ class Main(object):
         Instantiate a handler for a file and extract metadata.
         """
         handler = self.handler_factory.get(filename)
+        if handler is None:
+            return None
+
         with handler as hand:
             self.write_properties(filename, hand)
 
