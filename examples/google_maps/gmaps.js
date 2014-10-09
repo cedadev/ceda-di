@@ -3,64 +3,20 @@
 
 /*---------------------------- Setup ----------------------------*/
 // Set up constants
+var polygons = []; // Array of polygon shapes drawn from ES requests
+var info_windows = []; // Array of InfoWindows (one for each polygon)
+var additional_filter_params = null; // Additional filter parameters
+
 var es_url = "http://fatcat-test.jc.rl.ac.uk:9200/badc/eufar/_search";
 var wps_url = "http://ceda-wps2.badc.rl.ac.uk:8080/submit/form?proc_id=PlotTimeSeries&FilePath=";
 var geocoder = new google.maps.Geocoder();
-var map = new google.maps.Map(document.getElementById('map'), {
-    mapTypeId: google.maps.MapTypeId.TERRAIN,
-    zoom: 6
-});
-
-// Centre the map on Hungary initially
-geocoder.geocode(
+var map = new google.maps.Map(
+    document.getElementById('map'),
     {
-        "address": "Lake Balaton, Hungary"
-    },
-    function (results, status) {
-        if (status === "OK") {
-            map.setCenter(results[0].geometry.location);
-        }
+        mapTypeId: google.maps.MapTypeId.TERRAIN,
+        zoom: 6
     }
 );
-
-var polygons = []; // Array of polygon shapes drawn from ES requests
-var info_windows = []; // Array of InfoWindows (one for each polygon)
-
-// Additional filter parameters
-var additional_filter_params = null;
-
-// Set up location 'search' button
-$("#location_search").click(
-    function () {
-        location_search();
-    }
-);
-
-// Clears all input values
-$("#clearfil").click(
-    function () {
-        clear_filters();
-    }
-);
-
-// Constructs query filters from input values
-$("#applyfil").click(
-    function () {
-        apply_filters();
-    }
-);
-
-// Override location form submission on 'enter'
-$("#location").keypress(
-    function (e) {
-        var charcode = e.charCode || e.keyCode || e.which;
-        if (charcode === 13) {
-            location_search();
-            return false;
-        }
-    }
-);
-
 
 /*---------------------------- Functions ----------------------------*/
 
@@ -314,13 +270,9 @@ function search_es_bbox(bbox) {
     request = create_es_request(bbox);
     xhr.send(JSON.stringify(request));
 
-    $("#loading").show();
-
     // Handle the response
     xhr.onload = function (e) {
         if (xhr.readyState === 4) {
-            $("#loading").hide();
-
             response = JSON.parse(xhr.responseText);
             if (response.hits) {
                 $("#resptime").html(response.took);
@@ -376,5 +328,145 @@ function add_bounds_changed_listener(map) {
     });
 }
 
+function draw_histogram(response) {
+    var i, data, keys, buckets, key;
+    
+    data = [];
+    keys = [];
+    buckets = response.aggregations.times.buckets;
+    
+    for (i = 0; i < buckets.length; i += 1) {
+        data.push(buckets[i].doc_count);
+        key = buckets[i].key_as_string.split("T")[0];
+        if (i === 0) {
+            keys.push("Unknown Date");
+        } else {
+            keys.push("Week beginning " + key);
+        }
+    }
+    
+    $("#histogram").highcharts({
+        chart: {
+            type: "column",
+            height: 200
+        },
+        title: {
+            size: "8px",
+            text: "Documents by Date"
+        },
+        xAxis: {
+            categories: keys,
+            labels: {
+                enabled: false
+            }
+        },
+        yAxis: {
+            min: 1,
+            type: "logarithmic",
+            minorTickInterval: 0.5,
+            tickInterval: 0.5,
+            title: {
+                text: "Documents"
+            }
+        },
+        series: [
+            {
+                showInLegend: false,
+                name: "Files",
+                data: data
+            }
+        ],
+        plotOptions: {
+            column: {
+                pointPadding: 0,
+                borderWidth: 1,
+                groupPadding: 0,
+                shadow: false
+            }
+        }
+    });
+}
+
+function request_histogram() {
+    var xhr, request, response;
+    
+    request = {
+        "_source": {
+            "include": []
+        },
+        "aggs": {
+            "times": {
+                "date_histogram": {
+                    "field": "start_time",
+                    "interval": "week"
+                }
+            }
+        },
+        "size": 0
+    };
+    
+    // Create and send request
+    xhr = new XMLHttpRequest();
+    xhr.open("POST", es_url, true);
+    xhr.send(JSON.stringify(request));
+
+    // Handle the response
+    xhr.onload = function (e) {
+        if (xhr.readyState === 4) {
+            response = JSON.parse(xhr.responseText);
+            draw_histogram(response);
+        }
+    };
+}
+
 // Start the main "bounds_changed" listener loop
-add_bounds_changed_listener(map);
+window.onload = function () {
+    // Draw histogram
+    var resp = request_histogram();
+    
+    // Centre the map on Hungary initially
+    geocoder.geocode(
+        {
+            "address": "Lake Balaton, Hungary"
+        },
+        function (results, status) {
+            if (status === "OK") {
+                map.setCenter(results[0].geometry.location);
+            }
+        }
+    );
+
+    // Set up location 'search' button
+    $("#location_search").click(
+        function () {
+            location_search();
+        }
+    );
+
+    // Clears all input values
+    $("#clearfil").click(
+        function () {
+            clear_filters();
+        }
+    );
+
+    // Constructs query filters from input values
+    $("#applyfil").click(
+        function () {
+            apply_filters();
+        }
+    );
+
+    // Override location form submission on 'enter'
+    $("#location").keypress(
+        function (e) {
+            var charcode = e.charCode || e.keyCode || e.which;
+            if (charcode === 13) {
+                location_search();
+                return false;
+            }
+        }
+    );
+
+    add_bounds_changed_listener(map);
+};
