@@ -1,7 +1,10 @@
+/*jslint browser: true, devel: true, sloppy: true*/
+/*global google, $ */
+
 /*---------------------------- Setup ----------------------------*/
 // Set up constants
 var es_url = "http://fatcat-test.jc.rl.ac.uk:9200/badc/eufar/_search";
-var wps_url = "http://ceda-wps2.badc.rl.ac.uk:8080/submit/form?proc_id=PlotTimeSeries&FilePath="
+var wps_url = "http://ceda-wps2.badc.rl.ac.uk:8080/submit/form?proc_id=PlotTimeSeries&FilePath=";
 var geocoder = new google.maps.Geocoder();
 var map = new google.maps.Map(document.getElementById('map'), {
     mapTypeId: google.maps.MapTypeId.TERRAIN,
@@ -13,15 +16,15 @@ geocoder.geocode(
     {
         "address": "Lake Balaton, Hungary"
     },
-    function(results, status) {
+    function (results, status) {
         if (status === "OK") {
             map.setCenter(results[0].geometry.location);
         }
     }
 );
 
-var polygons = [] // Array of polygon shapes drawn from ES requests
-var info_windows = [] // Array of InfoWindows (one for each polygon)
+var polygons = []; // Array of polygon shapes drawn from ES requests
+var info_windows = []; // Array of InfoWindows (one for each polygon)
 
 // Additional filter parameters
 var additional_filter_params = null;
@@ -50,8 +53,8 @@ $("#applyfil").click(
 // Override location form submission on 'enter'
 $("#location").keypress(
     function (e) {
-        charcode = e.charCode || e.keyCode || e.which;
-        if (charcode == 13) {
+        var charcode = e.charCode || e.keyCode || e.which;
+        if (charcode === 13) {
             location_search();
             return false;
         }
@@ -63,7 +66,8 @@ $("#location").keypress(
 
 // Checks if a given item is in an array
 function is_in(array, item) {
-    for (i = 0; i < array.length; i++) {
+    var i;
+    for (i = 0; i < array.length; i += 1) {
         if (i === array[i]) {
             return true;
         }
@@ -73,41 +77,43 @@ function is_in(array, item) {
 
 // Location search
 function location_search() {
-    loc = $("#location").val()
+    var loc = $("#location").val();
     if (loc === "") {
         alert("Please enter a value into the 'Location' box.");
     } else {
         geocoder.geocode({
-            "address": loc,
+            "address": loc
         },
-        function(results, status) {
-            if (status === "OK") {
-                new_centre = results[0].geometry.location;
-                // Centre map on new location
-                map.panTo(new_centre);
-            } else {
-                alert("Could not find '" + loc + "'");
-            }
-        });
+            function (results, status) {
+                if (status === "OK") {
+                    var new_centre = results[0].geometry.location;
+                    // Centre map on new location
+                    map.panTo(new_centre);
+                } else {
+                    alert("Could not find '" + loc + "'");
+                }
+            });
     }
 }
 
 // Clears additional filters from ES request
 function clear_filters() {
     additional_filter_params = null;
-
     $("#ftext").val("");
     $("#start_time").val("");
     $("#end_time").val("");
-
     redraw_map();
 }
 
 // Applies additional filters to ES request
 function apply_filters() {
-    additional_filter_params = [];
-
+    var ftext_filt, ftq,
+        start_time_query, start_time,
+        end_time_query, end_time,
+        time_queries;
+    
     // Free text search
+    additional_filter_params = [];
     ftext_filt = {};
     ftq = $("#ftext").val();
     if (ftq.length > 0) {
@@ -115,7 +121,7 @@ function apply_filters() {
             "term": {
                 "_all": ftq
             }
-        }
+        };
         additional_filter_params.push(ftext_filt);
     }
 
@@ -129,7 +135,7 @@ function apply_filters() {
                     "from": start_time
                 }
             }
-        }
+        };
     }
 
     end_time_query = {};
@@ -141,21 +147,21 @@ function apply_filters() {
                     "to": end_time
                 }
             }
-        }
+        };
     }
 
     // Combine time restrictions into single filter
     time_queries = {};
-    if (! $.isEmptyObject(start_time_query)) {
+    if (!$.isEmptyObject(start_time_query)) {
         $.extend(true, time_queries, start_time_query);
     }
 
-    if (! $.isEmptyObject(end_time_query)) {
-       $.extend(true, time_queries, end_time_query);
+    if (!$.isEmptyObject(end_time_query)) {
+        $.extend(true, time_queries, end_time_query);
     }
 
     // Add time filter to list of search criteria
-    if (! $.isEmptyObject(time_queries)) {
+    if (!$.isEmptyObject(time_queries)) {
         additional_filter_params.push(time_queries);
     }
     redraw_map();
@@ -163,6 +169,8 @@ function apply_filters() {
 
 // Creates an ES geo_shape filter query based on a bounding box
 function create_es_request(bbox, offset) {
+    var temp_ne, temp_sw, nw, se, request, i;
+    
     temp_ne = bbox.getNorthEast();
     temp_sw = bbox.getSouthWest();
 
@@ -204,16 +212,17 @@ function create_es_request(bbox, offset) {
 
     // Add any extra user-defined filters
     if (additional_filter_params !== null) {
-        for (i in additional_filter_params) {
+        for (i = 0; i < additional_filter_params.length; i += 1) {
             request.filter.and.must.unshift(additional_filter_params[i]);
         }
     }
-
     return request;
-};
+}
 
 // Construct a google.maps.Polygon object from a bounding box
 function construct_polygon(bbox) {
+    var vertices, polygon;
+    
     vertices = [];
     vertices.push(new google.maps.LatLng(bbox[0][1], bbox[0][0]));
     vertices.push(new google.maps.LatLng(bbox[1][1], bbox[1][0]));
@@ -228,31 +237,31 @@ function construct_polygon(bbox) {
         fillColor: "#FF0000",
         fillOpacity: 0.1
     });
-
-    return polygon
+    return polygon;
 }
 
 // Construct an InfoWindow from a search hit, containing useful info
 function construct_info_window(hit) {
-    content = "<section><p><strong>Filename: </strong>" +
-              hit.file.filename + "</p>"
+    var content, info;
+    
+    content = "<section><p><strong>Filename: </strong>" + hit.file.filename + "</p>";
 
     if (hit.temporal) {
         content += "<p><strong>Start Time: </strong>" +
                     hit.temporal.start_time + "</p>" +
                     "<p><strong>End Time: </strong>" +
-                    hit.temporal.end_time + "</p>"
+                    hit.temporal.end_time + "</p>";
     }
 
     content += "<p><a href=\"http://badc.nerc.ac.uk/browse" +
-                   hit.file.path + "\">Get data</a></p>"
+                   hit.file.path + "\">Get data</a></p>";
                    
     if (hit.data_format.format === "NetCDF") {
-        content += "<p><a href=\"" + wps_url + hit.file.path + 
-                       "\" target=\"_blank\">Plot time-series</a></p>"
+        content += "<p><a href=\"" + wps_url +
+            hit.file.path + "\" target=\"_blank\">Plot time-series</a></p>";
     }
     
-    content += "</section>"
+    content += "</section>";
     
     info = new google.maps.InfoWindow({
         content: content
@@ -262,7 +271,9 @@ function construct_info_window(hit) {
 }
 
 function draw_polygons(hits) {
-    for (i in hits) {
+    var i, j, polygon, hit, bbox, iw;
+    
+    for (i = 0; i < hits.length; i += 1) {
         hit = hits[i]._source;
         bbox = hit.spatial.geometries.bbox.coordinates;
 
@@ -279,24 +290,23 @@ function draw_polygons(hits) {
     // Add a listener function to polygon that opens a new
     // InfoWindow on top of the polygon that was clicked
     // (closes all other InfoWindows first)
-    for (i in info_windows) {
-        google.maps.event.addListener(
-            polygons[i], 'click',
-            (function(i, e) {
-                return function(e) {
-                    for (j in info_windows) {
-                        info_windows[j].close()
-                    }
-                    info_windows[i].open(map, null);
-                    info_windows[i].setPosition(e.latLng);
+    for (i = 0; i < hits.length; i += 1) {
+        google.maps.event.addListener(polygons[i], 'click', (function (i, e) {
+            return function (e) {
+                for (j = 0; j < info_windows.length; j += 1) {
+                    info_windows[j].close();
                 }
-            })(i)
-        );
+                info_windows[i].open(map, null);
+                info_windows[i].setPosition(e.latLng);
+            };
+        }(i)));
     }
 }
 
 // Search ES for data (and display received data asynchronously)
 function search_es_bbox(bbox) {
+    var xhr, request, response, hits;
+    
     // Create and send request
     xhr = new XMLHttpRequest();
     xhr.open("POST", es_url, true);
@@ -322,17 +332,19 @@ function search_es_bbox(bbox) {
                 draw_polygons(hits);
             }
         }
-    }
+    };
 }
 
 // Redraw the map (inc. polygons, etc)
 function redraw_map() {
+    var p, i, bounds;
+    
     // Clean up old polygons and info windows
-    for (p in polygons) {
+    for (p = 0; p < polygons.length; p += 1) {
         polygons[p].setMap(null);
     }
 
-    for (i in info_windows) {
+    for (i = 0; i < info_windows.length; i += 1) {
         info_windows[i].close();
     }
 
@@ -353,18 +365,15 @@ function redraw_map() {
 
     // Rate-limit requests to ES to 1 per second
     window.setTimeout(function () {
-        add_bounds_changed_listener(map)
+        add_bounds_changed_listener(map);
     }, 500);
 }
 
-
 // Add a listener to make an ES data request when the map bounds change
 function add_bounds_changed_listener(map) {
-    google.maps.event.addListenerOnce(map, 'bounds_changed',
-        function() {
-            redraw_map();
-        }
-    );
+    google.maps.event.addListenerOnce(map, 'bounds_changed', function () {
+        redraw_map();
+    });
 }
 
 // Start the main "bounds_changed" listener loop
