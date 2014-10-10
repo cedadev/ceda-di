@@ -67,7 +67,7 @@ function apply_filters() {
         start_time_query, start_time,
         end_time_query, end_time,
         time_queries;
-    
+
     // Free text search
     additional_filter_params = [];
     ftext_filt = {};
@@ -126,7 +126,7 @@ function apply_filters() {
 // Creates an ES geo_shape filter query based on a bounding box
 function create_es_request(bbox, offset) {
     var temp_ne, temp_sw, nw, se, request, i;
-    
+
     temp_ne = bbox.getNorthEast();
     temp_sw = bbox.getSouthWest();
 
@@ -178,7 +178,7 @@ function create_es_request(bbox, offset) {
 // Construct a google.maps.Polygon object from a bounding box
 function construct_polygon(bbox) {
     var vertices, polygon;
-    
+
     vertices = [];
     vertices.push(new google.maps.LatLng(bbox[0][1], bbox[0][0]));
     vertices.push(new google.maps.LatLng(bbox[1][1], bbox[1][0]));
@@ -199,7 +199,7 @@ function construct_polygon(bbox) {
 // Construct an InfoWindow from a search hit, containing useful info
 function construct_info_window(hit) {
     var content, info;
-    
+
     content = "<section><p><strong>Filename: </strong>" + hit.file.filename + "</p>";
 
     if (hit.temporal) {
@@ -211,14 +211,14 @@ function construct_info_window(hit) {
 
     content += "<p><a href=\"http://badc.nerc.ac.uk/browse" +
                    hit.file.path + "\">Get data</a></p>";
-                   
+
     if (hit.data_format.format === "NetCDF") {
         content += "<p><a href=\"" + wps_url +
             hit.file.path + "\" target=\"_blank\">Plot time-series</a></p>";
     }
-    
+
     content += "</section>";
-    
+
     info = new google.maps.InfoWindow({
         content: content
     });
@@ -228,7 +228,7 @@ function construct_info_window(hit) {
 
 function draw_polygons(hits) {
     var i, j, polygon, hit, bbox, iw;
-    
+
     for (i = 0; i < hits.length; i += 1) {
         hit = hits[i]._source;
         bbox = hit.spatial.geometries.bbox.coordinates;
@@ -262,7 +262,7 @@ function draw_polygons(hits) {
 // Search ES for data (and display received data asynchronously)
 function search_es_bbox(bbox) {
     var xhr, request, response, hits;
-    
+
     // Create and send request
     xhr = new XMLHttpRequest();
     xhr.open("POST", es_url, true);
@@ -276,6 +276,7 @@ function search_es_bbox(bbox) {
             response = JSON.parse(xhr.responseText);
             if (response.hits) {
                 $("#resptime").html(response.took);
+
                 // Update "number of hits" field in sidebar
                 $("#numresults").html(response.hits.total);
 
@@ -290,7 +291,7 @@ function search_es_bbox(bbox) {
 // Redraw the map (inc. polygons, etc)
 function redraw_map() {
     var p, i, bounds;
-    
+
     // Clean up old polygons and info windows
     for (p = 0; p < polygons.length; p += 1) {
         polygons[p].setMap(null);
@@ -330,21 +331,21 @@ function add_bounds_changed_listener(map) {
 
 function draw_histogram(response) {
     var i, data, keys, buckets, key;
-    
+
     data = [];
     keys = [];
     buckets = response.aggregations.times.buckets;
-    
+
     for (i = 0; i < buckets.length; i += 1) {
         data.push(buckets[i].doc_count);
         key = buckets[i].key_as_string.split("T")[0];
         if (i === 0) {
             keys.push("Unknown Date");
         } else {
-            keys.push("Week beginning " + key);
+            keys.push(key);
         }
     }
-    
+
     $("#histogram").highcharts({
         chart: {
             type: "column",
@@ -352,7 +353,10 @@ function draw_histogram(response) {
         },
         title: {
             size: "8px",
-            text: "Documents by Date"
+            text: "Documents by Date",
+            style: {
+                fontSize: "10px"
+            }
         },
         xAxis: {
             categories: keys,
@@ -366,7 +370,7 @@ function draw_histogram(response) {
             minorTickInterval: 0.5,
             tickInterval: 0.5,
             title: {
-                text: "Documents"
+                text: ""
             }
         },
         series: [
@@ -381,7 +385,18 @@ function draw_histogram(response) {
                 pointPadding: 0,
                 borderWidth: 1,
                 groupPadding: 0,
-                shadow: false
+                shadow: false,
+                point: {
+                    events: {
+                        click: function () {
+                            if (this.category !== "Unknown Date") {
+                                $("#start_time").val(this.category);
+                            } else {
+                                $("#start_time").val("1970-01-01");
+                            }
+                        }
+                    }
+                }
             }
         }
     });
@@ -389,7 +404,7 @@ function draw_histogram(response) {
 
 function request_histogram() {
     var xhr, request, response;
-    
+
     request = {
         "_source": {
             "include": []
@@ -404,7 +419,7 @@ function request_histogram() {
         },
         "size": 0
     };
-    
+
     // Create and send request
     xhr = new XMLHttpRequest();
     xhr.open("POST", es_url, true);
@@ -423,7 +438,7 @@ function request_histogram() {
 window.onload = function () {
     // Draw histogram
     var resp = request_histogram();
-    
+
     // Centre the map on Hungary initially
     geocoder.geocode(
         {
