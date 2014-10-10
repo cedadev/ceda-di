@@ -3,7 +3,7 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-SPHINXBUILD   = sphinx-apidoc -o ./source ../src/eufar; sphinx-build
+SPHINXBUILD   = sphinx-apidoc -o ./source ../src/ceda_di; sphinx-build
 PAPER         =
 BUILDDIR      = build
 
