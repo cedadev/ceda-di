@@ -25,7 +25,7 @@ class HDF4(_geospatial):
         """
         :param str fname: The path of the HDF4 file.
         """
-        self.fname = fname
+        self.fname = str(fname)
 
     def __enter__(self):
         """
