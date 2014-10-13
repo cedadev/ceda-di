@@ -5,6 +5,7 @@ Module for holding and exporting file metadata as JSON documents.
 from __future__ import division
 import json
 import logging
+import math
 from pyhull.convex_hull import qconvex
 
 
@@ -120,6 +121,23 @@ class Properties(object):
         chull["coordinates"] = hull_coords
         return chull
 
+    def _gen_coord_summary(self, coord_list):
+        """
+        Pull 30 evenly-spaced coordinates from a given list
+        :param list coord_list: Normalised and unique set of coordinates
+        :return dict summ: A summary formatted in the GeoJSON style
+        """
+
+        num_points = 30
+        summ = {
+            "type": "LineString"
+        }
+
+        step = math.ceil(len(coord_list) / num_points)
+        summ["coordinates"] = coord_list[::step]
+
+        return summ
+
     @staticmethod
     def _get_min_max(item_list, filter_func=None):
         """
@@ -183,8 +201,7 @@ class Properties(object):
             }
 
             geojson["geometries"]["bbox"] = self._gen_bbox(spatial)
-            if len(coord_list) > 3:
-                geojson["geometries"]["hull"] = self._gen_hull(coord_list)
+            geojson["geometries"]["summary"] = self._gen_coord_summary(spatial)
 
             return geojson
         return None
