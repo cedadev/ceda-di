@@ -136,7 +136,7 @@ class Properties(object):
         lons = coord_list["lon"]
         lats = coord_list["lat"]
 
-        step = int(math.ceil(len(coord_list) / num_points))
+        step = int(math.ceil(len(lons) / num_points))
         lons = lons[::step]
         lats = lats[::step]
 
