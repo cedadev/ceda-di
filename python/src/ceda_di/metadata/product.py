@@ -75,14 +75,14 @@ class Properties(object):
             return False
         return True
 
-    def _gen_bbox(self, spatial):
+    def _gen_bbox(self, coord_list):
         """
         Generate and return a bounding box for the given geospatial data.
-        :param dict spatial: Dictionary with "lat" and "lon" keys w/coordinates
+        :param dict coord_list: Dictionary with "lat" and "lon" lists
         :return dict bbox: A bounding-box formatted in the GeoJSON style
         """
-        lons = spatial["lon"]
-        lats = spatial["lat"]
+        lons = coord_list["lon"]
+        lats = coord_list["lat"]
 
         lon_lo, lon_hi = self._get_min_max(lons, filter_func=self.valid_lon)
         lat_lo, lat_hi = self._get_min_max(lats, filter_func=self.valid_lat)
@@ -133,8 +133,14 @@ class Properties(object):
             "type": "LineString"
         }
 
-        step = math.ceil(len(coord_list) / num_points)
-        summ["coordinates"] = coord_list[::step]
+        lons = coord_list["lon"]
+        lats = coord_list["lat"]
+
+        step = int(math.ceil(len(coord_list) / num_points))
+        lons = lons[::step]
+        lats = lats[::step]
+
+        summ["coordinates"] = zip(lons, lats)
 
         return summ
 
