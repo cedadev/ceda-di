@@ -147,7 +147,7 @@ class HDF4(_geospatial):
                 vg = self.v.attach(ref)
 
                 if vg._name == "Navigation":
-                    geospatial = self._get_coords(self.v, self.vs, self.fname)
+                    geospatial = self._get_coords(self.vs, self.fname)
                     vg.detach()
                     return geospatial
 
@@ -172,7 +172,7 @@ class HDF4(_geospatial):
                 vg = self.v.attach(ref)
 
                 if vg._name == "Mission":
-                    temporal = self._get_temporal(self.v, self.vs, self.fname)
+                    temporal = self._get_temporal(self.vs, self.fname)
                     vg.detach()
                     return temporal
 
