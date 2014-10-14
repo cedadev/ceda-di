@@ -202,9 +202,7 @@ class Properties(object):
                 coord_set.add((lon, lat))
 
             coord_list = list(coord_set)
-            geojson["geometries"] = {
-                "coordinates": coord_list,
-            }
+            geojson["geometries"] = {}
 
             geojson["geometries"]["bbox"] = self._gen_bbox(spatial)
             geojson["geometries"]["summary"] = self._gen_coord_summary(spatial)
