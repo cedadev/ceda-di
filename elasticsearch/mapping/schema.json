@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-03/schema#",
     "author": "Steve Donegan (steve.donegan@stfc.ac.uk)",
     "modified": "Charles Newey (charles.newey@stfc.ac.uk)",
-    "description": "File level EUFAR metadata product",
+    "description": "File level metadata product",
     "properties": {
         "file": {
             "description": "Basic archive information for the data file",

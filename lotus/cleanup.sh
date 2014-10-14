@@ -1,5 +1,5 @@
 #!/bin/bash
 
-rm /work/scratch/ccnewey/arsf-geo-map/log/*
-rm /work/scratch/ccnewey/arsf-geo-map/out/*
-find src/eufar/ -name "*.pyc" -exec rm {} \;
+rm /work/scratch/ccnewey/ceda_di/log/*
+rm /work/scratch/ccnewey/ceda_di/out/*
+find src/ceda_di/ -name "*.pyc" -exec rm {} \;

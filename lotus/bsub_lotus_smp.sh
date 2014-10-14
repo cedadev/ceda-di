@@ -1,11 +1,11 @@
 #!/bin/bash
 #BSUB -n 24
 #BSUB -W 1:30
-#BSUB -o /work/scratch/ccnewey/arsf-geo-map/%J.smp.out
-#BSUB -e /work/scratch/ccnewey/arsf-geo-map/%J.smp.err
+#BSUB -o /work/scratch/ccnewey/ceda-di/%J.smp.out
+#BSUB -e /work/scratch/ccnewey/ceda-di/%J.smp.err
 #BSUB -q lotus-smp
 
-cd ~ccnewey/arsf-geo-map
+cd ~ccnewey/ceda-di
 source bin/activate
-cd ~ccnewey/arsf-geo-map/src
+cd ~ccnewey/ceda-di/src
 python main.py

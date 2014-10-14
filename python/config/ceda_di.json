@@ -1,11 +1,12 @@
 {
     "_option": "outputpath: main output directory",
-    "outputpath": "/work/scratch/ccnewey/arsf-geo-map/",
+    "outputpath": "/home/ccnewey/ceda-di/out",
 
     "_option": "logpath: log dir path, relative to 'outputpath'",
     "logpath": "log/",
+
     "_option": "logfile: log file path, relative to 'logpath'",
-    "logfile": "arsf-geo-map.log",
+    "logfile": "ceda-di.log",
 
     "_option": "jsonpath: directory for JSON metadata, relative to 'outputpath'",
     "jsonpath": "json/",
@@ -21,5 +22,16 @@
     "logging": {
         "_option": "format: log entry format string",
         "format": "[%(levelname)s] (%(name)s) %(message)s"
+    },
+
+    "_option": {
+        "description": "handlers: python classes to handle data files",
+        "filename pattern": "handler class"
+    },
+    "handlers": {
+        "_nav_post_processed.bil.hdr": "envi_geo.BIL",
+        ".hdf": "hdf4_geo.HDF4",
+        ".tif": "exif_geo.EXIF",
+        ".nc": "netcdf_geo.NetCDF"
     }
 }

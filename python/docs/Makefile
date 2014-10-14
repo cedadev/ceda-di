@@ -3,7 +3,7 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-SPHINXBUILD   = sphinx-apidoc -o ./source ../src/eufar; sphinx-build
+SPHINXBUILD   = sphinx-apidoc -o ./source ../src/ceda_di; sphinx-build
 PAPER         =
 BUILDDIR      = build
 
@@ -85,17 +85,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/arsf-geo-map.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/ceda-di.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/arsf-geo-map.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/ceda-di.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/arsf-geo-map"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/arsf-geo-map"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/ceda-di"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/ceda-di"
 	@echo "# devhelp"
 
 epub:

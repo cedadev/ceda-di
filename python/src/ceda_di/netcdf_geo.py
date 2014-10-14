@@ -1,6 +1,6 @@
 """
 Adapter layer for SAFIRE/FAAM NetCDF files - acquire geospatial and temporal
-data points from EUFAR NetCDF files.
+data points from NetCDF files.
 
 Adapted from Axel's KML script <axll@faam.ac.uk>
 @author Charles Newey <charles.newey@stfc.ac.uk>
@@ -14,8 +14,8 @@ import re
 
 from netCDF4 import Dataset
 
-from ceda_di._dataset import _geospatial
-from ceda_di.metadata import product
+from _dataset import _geospatial
+from metadata import product
 
 
 class NetCDF(_geospatial):
@@ -166,12 +166,10 @@ class NetCDF(_geospatial):
                               for sec in tm_list]
                 return timestamps
             except ValueError:
-                # Variable isn't in the format we tried, try next alternative
+                # Timestamp doesn't match the format we tried, try next one
                 continue
 
-        # This code (with an ideal metadata file) would not be reached.
-        # Basically we couldn't find a useful timestamp format from the list,
-        # so we raise and log the error.
+        # Couldn't find a useful timestamp format in NetCDF, so log error
         self.logger.error("Couldn't match timestamp format: %s" % self.fpath)
         raise ValueError("Couldn't match timestamp format: %s" % tm_list[0])
 
@@ -251,9 +249,9 @@ class NetCDF(_geospatial):
 
     def get_properties(self):
         """
-        Return a ceda_di.metadata.product.Properties object populated with the
+        Return a eufar.metadata.product.Properties object populated with the
         NetCDF file's metadata.
-        :return properties: ceda_di.metadata.product.Properties with metadata
+        :return properties: eufar.metadata.product.Properties with metadata
         """
         with Dataset(self.fpath, 'r') as netcdf_data:
             # Timestamps

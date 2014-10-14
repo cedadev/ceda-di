@@ -10,146 +10,164 @@ import multiprocessing
 import os
 import sys
 
-from ceda_di import envi_geo, exif_geo, hdf4_geo, netcdf_geo
+from _dataset import _geospatial
 
 
-def get_config(fname="config/ceda_di.json"):
+class HandlerFactory(object):
     """
-    Reads the configuration file into a dictionary
-    :param fname: Path to the JSON configuration file
-    :return dict: Dict containing parsed JSON config
+    Factory for file handler classes.
     """
-    try:
-        with open(fname, "r") as f:
-            return json.load(f)
-    except IOError as ioe:
-        sys.stderr.write("ERR: can't read config.\n%s\n" % str(ioe))
-        exit(1)
+    def __init__(self, handler_map):
+        self.handlers = {}
+        for pattern, handler in handler_map.iteritems():
+            (module, hand) = handler.split(".", 1)
+            mod = __import__(module, fromlist=[hand])
+            self.handlers[pattern] = getattr(mod, hand)
+
+    def get(self, filename):
+        """
+        Return instance of correct file handler class.
+        """
+        for pattern, handler in self.handlers.iteritems():
+            if filename.endswith(pattern):
+                return handler(filename)
 
 
-def make_dirs(conf):
-    """Make all necessary directories."""
+class Main(object):
+    """
+    Main script to start processing of data files in ceda-di.
+    """
+    def __init__(self):
+        try:
+            self.conf = self.read_conf(sys.argv[1])
+        except IndexError:
+            # Try default configuration path if none provided
+            self.conf = self.read_conf("../../config/ceda_di.json")
 
-    json_out = os.path.join(conf["outputpath"], conf["jsonpath"])
-    if not os.path.isdir(json_out):
-        os.makedirs(json_out)
+        try:
+            self.make_dirs()
+            self.logger = self.prepare_logging()
 
-    log_out = os.path.join(conf["outputpath"], conf["logpath"])
-    if not os.path.isdir(log_out):
-        os.makedirs(log_out)
+            self.numcores = self.conf["numcores"]
+            self.datapath = self.conf["datapath"]
+            self.outpath = self.conf["outputpath"]
+            self.handler_factory = HandlerFactory(self.conf["handlers"])
 
+            self.jsonpath = os.path.join(self.conf["outputpath"],
+                                    self.conf["jsonpath"])
+        except KeyError as k:
+            sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
 
-def write_properties(fname, _geospatial_obj):
-    """Write module properties to an output file."""
-    fname = os.path.basename(fname)
+    def read_conf(self, conf_path):
+        """
+        Read the confuration file into a dictionary.
+        :param fname: Path to the JSON confuration file
+        :return dict: Dict containing parsed JSON conf
+        """
+        try:
+            with open(conf_path, "r") as conf:
+                return json.load(conf)
+        except IOError as ioe:
+            sys.stderr.write(  # Continued on next line
+                "Can't read configuration, exiting.\n%s\n" % str(ioe))
+            exit(1)
 
-    # Construct JSON path
-    fname = "%s/%s.json" % (jsonpath, os.path.splitext(fname)[0])
+    def make_dirs(self):
+        """
+        Create directories for output files.
+        """
+        conf = self.conf
+        json_out = os.path.join(conf["outputpath"], conf["jsonpath"])
+        if not os.path.isdir(json_out):
+            os.makedirs(json_out)
 
-    with open(fname, 'w') as j:
-        props = str(_geospatial_obj.get_properties())
-        j.write(props)
+        log_out = os.path.join(conf["outputpath"], conf["logpath"])
+        if not os.path.isdir(log_out):
+            os.makedirs(log_out)
 
+    def prepare_logging(self):
+        """
+        Initial logging setup
+        """
+        fname = os.path.join(self.conf["outputpath"],
+                             self.conf["logpath"],
+                             self.conf["logfile"])
 
-def process_bil(fpath):
-    """Process BIL files."""
-    with envi_geo.BIL(fpath) as bil:
-        write_properties(fpath, bil)
+        logging.basicConfig(filename=fname,
+                            format=self.conf["logging"]["format"],
+                            level=logging.INFO)
 
+        log = logging.getLogger(__name__)
 
-def process_hdf4(fpath):
-    """Process HDF4 files."""
-    with hdf4_geo.HDF4(str(fpath)) as hdf:
-        write_properties(fpath, hdf)
+        return log
 
+    def process_file(self, filename):
+        """
+        Instantiate a handler for a file and extract metadata.
+        """
+        handler = self.handler_factory.get(filename)
+        if handler is None:
+            return None
 
-def process_nc(fpath):
-    """Process NetCDF files."""
-    os.putenv("HDF5_DISABLE_VERSION_CHECK", "2")
-    with netcdf_geo.NetCDF(fpath) as netcdf:
-        write_properties(fpath, netcdf)
+        with handler as hand:
+            self.write_properties(filename, hand)
 
+    def write_properties(self, fname, _geospatial_obj):
+        """
+        Write module properties to an output file.
+        """
+        fname = os.path.basename(fname)
 
-def process_tiff(fpath):
-    """Process TIFF files."""
-    with exif_geo.EXIF(fpath) as exif:
-        write_properties(fpath, exif)
+        # Construct JSON path
+        fname = "%s/%s.json" % (self.jsonpath, os.path.splitext(fname)[0])
 
+        with open(fname, 'w') as j:
+            props = str(_geospatial_obj.get_properties())
+            j.write(props)
 
-def process_file((base, fname)):
-    """Process a data file."""
-    fpath = os.path.join(base, fname)
-    if "raw" not in fpath:
-        if fname.endswith("_nav_post_processed.bil.hdr"):
-            process_bil(fpath)
-        elif fname.endswith(".nc"):
-            process_nc(fpath)
-        elif fname.endswith(".tif"):
-            process_tiff(fpath)
-        elif fname.endswith(".hdf"):
-            process_hdf4(fpath)
+    def run(self):
+        """
+        Run main metadata extraction suite.
+        """
+        # Log beginning of processing
+        start = datetime.datetime.now()
+        self.logger.info("Metadata extraction started at: %s",
+                         start.isoformat())
 
+        # Build list of file paths
+        data_files = []
+        for root, _, files in os.walk(self.datapath, followlinks=True):
+            for each_file in files:
+                data_files.append((root, each_file))
 
-def prepare_logging(conf):
-    """Initial logging setup"""
+        if len(data_files) > 0:
+            # Process files
+            pool = []
 
-    fname = os.path.join(conf["outputpath"],
-                         conf["logpath"],
-                         conf["logfile"])
-    logging_config = {
-        "filename": fname,
-        "format": conf["logging"]["format"],
-        "level": logging.INFO
-    }
+            for f in data_files:
+                path = os.path.join(*f)
+                if "raw" not in path:
+                    p = multiprocessing.Process(target=self.process_file,
+                                                args=(path,))
+                    pool.append(p)
+                    p.start()
 
-    logging.basicConfig(**logging_config)
-    log = logging.getLogger(__name__)
+            while len(pool) >= self.numcores:
+                for p in pool:
+                    if p.exitcode is not None:
+                        pool.remove(p)
 
-    return log
+        for p in pool:
+            p.join()
 
-
-jsonpath = ""
-
-def main():
-    if len(sys.argv) > 1:
-        config = get_config(sys.argv[1])
-    else:
-        config = get_config()
-        
-    # Read useful sections from config
-    try:
-        make_dirs(config)
-        logger = prepare_logging(config)
-        numcores = config["numcores"]
-        datapath = config["datapath"]
-        outpath = config["outputpath"]
-        jsonpath = os.path.join(outpath, config["jsonpath"])
-    except KeyError as k:
-        sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
-
-    # Log beginning of processing
-    start = datetime.datetime.now()
-    logger.info("Metadata extraction started at: %s", start.isoformat())
-
-    # Build list of file paths
-    data_files = []
-    for root, dirs, files in os.walk(datapath, followlinks=True):
-        for f in files:
-            data_files.append((root, f))
-
-    if len(data_files) > 0:
-        # Process files
-        pool = multiprocessing.Pool(numcores)
-        pool.map(process_file, data_files)
-        pool.close()
-        pool.join()
-
-    # Log end of processing
-    end = datetime.datetime.now()
-    logger.info("Metadata extraction completed at: %s", end.isoformat())
-    logger.info("Start: %s, End: %s, Total: %s",
-                start.isoformat(), end.isoformat(), end - start)
+        # Log end of processing
+        end = datetime.datetime.now()
+        self.logger.info("Metadata extraction completed at: %s",
+                         end.isoformat())
+        self.logger.info("Start: %s, End: %s, Total: %s",
+                         start.isoformat(), end.isoformat(), end - start)
 
 
 if __name__ == "__main__":
-    main()
+    MAIN = Main()
+    MAIN.run()

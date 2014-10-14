@@ -1,14 +1,14 @@
-Welcome to arsf-geo-map's documentation!
+Welcome to ceda_di's documentation!
 ========================================
 
 Introduction
 ------------
 
-The arsf-geo-map module is a Python backend to interface with a wide range of historical scientific data formats.
+The ceda_di module is a Python backend to interface with a wide range of historical scientific data formats.
 
 Within this module, you will find:
 
-* Library interfaces to common scientific data file formats (focusing mostly on data formats within the EUFAR archive), including:
+* Library interfaces to common scientific data file formats (focusing mostly on data formats within the ceda_di archive), including:
     * NetCDF
     * HDF4
     * GeoTIFF
