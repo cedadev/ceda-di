@@ -144,6 +144,7 @@ function create_es_request(bbox, offset) {
                 "file.filename",
                 "file.path",
                 "spatial.geometries.bbox",
+                "spatial.geometries.summary",
                 "temporal"
             ]
         },
@@ -180,19 +181,26 @@ function construct_polygon(bbox) {
     var vertices, polygon;
 
     vertices = [];
+    for (i = 0; i < bbox.length; i += 1) {
+        vertices.push(new google.maps.LatLng(bbox[i][1], bbox[i][0]));
+    }
+    /*
     vertices.push(new google.maps.LatLng(bbox[0][1], bbox[0][0]));
     vertices.push(new google.maps.LatLng(bbox[1][1], bbox[1][0]));
     vertices.push(new google.maps.LatLng(bbox[3][1], bbox[3][0]));
     vertices.push(new google.maps.LatLng(bbox[2][1], bbox[2][0]));
+    */
+
     polygon = new google.maps.Polygon({
         paths: vertices,
         geodesic: false,
         strokeColor: "#FF0000",
         strokeWeight: 1,
         strokeOpacity: 1.0,
-        fillColor: "#FF0000",
+        fillColor: "#595959",
         fillOpacity: 0.1
     });
+
     return polygon;
 }
 
@@ -231,7 +239,7 @@ function draw_polygons(hits) {
 
     for (i = 0; i < hits.length; i += 1) {
         hit = hits[i]._source;
-        bbox = hit.spatial.geometries.bbox.coordinates;
+        bbox = hit.spatial.geometries.summary.coordinates;
 
         // Construct and display polygon
         polygon = construct_polygon(bbox);
