@@ -1,11 +1,5 @@
 {
   "eufar": {
-    "_source": {
-        "excludes": [
-            "spatial.geometries.coordinates",
-            "spatial.geometries.hull"
-        ]
-    },
     "_all": {
         "enabled": true
     },
@@ -48,24 +42,14 @@
                 "precision": "50m",
                 "store": "yes"
               },
-              "coordinates": {
-                "type": "double",
-                "enabled": false,
-                "include_in_all" : false,
-                "index": "no",
-                "store": "no"
-              },
-              "hull": {
+              "summary": {
                 "properties": {
                   "coordinates": {
                     "type": "double",
                     "enabled": false,
                     "include_in_all" : false,
                     "index": "no",
-                    "store": "no"
-                  },
-                  "type": {
-                    "type": "string"
+                    "store": "yes"
                   }
                 }
               }
