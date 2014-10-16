@@ -28,7 +28,7 @@ class NetCDFFactory(object):
             if "CF" in convention:
                 return NetCDF_CF(fpath, convention)
             elif "RAF" in convention:
-                return NetCDF_RAF(fpath)
+                return NetCDF_RAF(fpath, convention)
 
         except AttributeError:
             # Try creating a NetCDF extractor with an unknown convention
@@ -66,6 +66,16 @@ class NetCDF_Base(_geospatial):
             "lon": lons
         }
 
+    @staticmethod
+    def temporal(ncdf, time_name):
+        times = list(netCDF4.num2date(list(ncdf.variables[time_name]),
+                                      ncdf.variables[time_name].units))
+        return {
+            "start_time": times[0].isoformat(),
+            "end_time": times[-1].isoformat()
+        }
+
+
 class NetCDF_CF(_geospatial):
     """
     CF-compliant NetCDF metadata extraction class.
@@ -80,12 +90,7 @@ class NetCDF_CF(_geospatial):
 
     def get_temporal(self):
         with netCDF4.Dataset(self.fpath) as ncdf:
-            times = list(netCDF4.num2date(list(ncdf.variables["time"]),
-                                          ncdf.variables["time"].units))
-            return {
-                "start_time": times[0].isoformat(),
-                "end_time": times[-1].isoformat()
-            }
+            return NetCDF_Base.temporal(ncdf, "time")
 
     def get_parameters(self):
         with netCDF4.Dataset(self.fpath) as ncdf:
@@ -129,8 +134,22 @@ class NetCDF_RAF(_geospatial):
     """
     :param str fpath: Path to NetCDF file
     """
-    def __init__(self, fpath):
-        pass
+    def __init__(self, fpath, convention):
+        self.fpath = fpath
+        self.logger = logging.getLogger(__name__)
+        self.convention = convention
+
+    def get_temporal(self):
+        with netCDF4.Dataset(self.fpath) as ncdf:
+            for key, value in ncdf.variables.iteritems():
+                try:
+                    if value.standard_name.lower == "time":
+                        time_name = key
+                except AttributeError:
+                    self.logger.error("Could not find time variable: %s" %
+                                      self.fpath)
+
+            return NetCDF_Base.temporal(ncdf, time_name)
 
 class NetCDF_Unknown(_geospatial):
     """
