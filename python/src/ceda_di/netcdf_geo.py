@@ -22,11 +22,11 @@ class NetCDFFactory(object):
         Return correct metadata extraction class based on metadata format.
         """
         try:
-            with netCDF4.Dataset(fpath) as nc:
-                convention = nc.Conventions
+            with netCDF4.Dataset(fpath) as ncdf:
+                convention = ncdf.Conventions
 
             if "CF" in convention:
-                return NetCDF_CF(fpath)
+                return NetCDF_CF(fpath, convention)
             elif "RAF" in convention:
                 return NetCDF_RAF(fpath)
 
@@ -40,12 +40,12 @@ class NetCDF_Base(_geospatial):
     :param str fpath: Path to NetCDF file
     """
     @staticmethod
-    def params(nc):
+    def params(ncdf):
         """
         :return list: List of metadata.product.Parameter objects
         """
         params = []
-        for v_name, v_data in nc.variables.iteritems():
+        for v_name, v_data in ncdf.variables.iteritems():
             # Filter out _FillValue entries
             for key, _ in v_data.iteritems():
                 if "fillvalue" in key.lower():
@@ -75,12 +75,13 @@ class NetCDF_CF(_geospatial):
     """
     CF-compliant NetCDF metadata extraction class.
     """
-    def __init__(self, fpath):
+    def __init__(self, fpath, convention):
         """
         :param str fpath: Path to NetCDF file
         """
         self.fpath = fpath
         self.logger = logging.getLogger(__name__)
+        self.convention = convention
 
     def get_temporal(self):
         with netCDF4.Dataset(self.fpath) as ncdf:
@@ -116,7 +117,7 @@ class NetCDF_CF(_geospatial):
         temporal = self.get_temporal()
         filesystem = self.get_filesystem(self.fpath)
         spatial = self.get_geospatial()
-        data_format = {"format": "NetCDF/CF"}
+        data_format = {"format": ("NetCDF/%s" % self.convention)}
         parameters = self.get_parameters()
 
         return product.Properties(temporal=temporal,
