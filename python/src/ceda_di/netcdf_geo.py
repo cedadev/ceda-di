@@ -46,11 +46,6 @@ class NetCDF_Base(_geospatial):
         """
         params = []
         for v_name, v_data in ncdf.variables.iteritems():
-            # Filter out _FillValue entries
-            for key, _ in v_data.iteritems():
-                if "fillvalue" in key.lower():
-                    del v_data[key]
-
             param = product.Parameter(v_name, v_data.__dict__)
             params.append(param)
 
@@ -85,8 +80,13 @@ class NetCDF_CF(_geospatial):
 
     def get_temporal(self):
         with netCDF4.Dataset(self.fpath) as ncdf:
-            return list(netCDF4.num2date(list(ncdf.variables["time"]),
-                                         ncdf.variables["time"].units))
+            times = list(netCDF4.num2date(list(ncdf.variables["time"]),
+                                          ncdf.variables["time"].units))
+            return {
+                "start_time": times[0].isoformat(),
+                "end_time": times[-1].isoformat()
+            }
+
     def get_parameters(self):
         with netCDF4.Dataset(self.fpath) as ncdf:
             return NetCDF_Base.params(ncdf)
