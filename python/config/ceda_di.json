@@ -32,6 +32,6 @@
         "_nav_post_processed.bil.hdr": "envi_geo.BIL",
         ".hdf": "hdf4_geo.HDF4",
         ".tif": "exif_geo.EXIF",
-        ".nc": "netcdf_geo.NetCDF"
+        ".nc": "netcdf_geo.NetCDFFactory"
     }
 }
