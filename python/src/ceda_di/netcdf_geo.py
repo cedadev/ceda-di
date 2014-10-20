@@ -19,6 +19,12 @@ class NetCDFFactory(object):
     def __init__(self, fpath):
         self.fpath = fpath
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return None
+
     def get_properties(self):
         """
         Return correct metadata extraction class based on metadata format.
