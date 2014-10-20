@@ -106,24 +106,24 @@ class Main(object):
         Instantiate a handler for a file and extract metadata.
         """
         handler = self.handler_factory.get(filename)
-        if handler is None:
-            return None
-
-        with handler as hand:
-            self.write_properties(filename, hand)
+        if handler is not None:
+            with handler as hand:
+                self.write_properties(filename, hand)
 
     def write_properties(self, fname, _geospatial_obj):
         """
         Write module properties to an output file.
         """
+
         fname = os.path.basename(fname)
 
         # Construct JSON path
         fname = "%s/%s.json" % (self.jsonpath, os.path.splitext(fname)[0])
 
-        with open(fname, 'w') as j:
-            props = str(_geospatial_obj.get_properties())
-            j.write(props)
+        props = _geospatial_obj.get_properties()
+        if props is not None:
+            with open(fname, 'w') as j:
+                j.write(str(props))
 
     def run(self):
         """

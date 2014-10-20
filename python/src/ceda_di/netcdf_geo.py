@@ -34,12 +34,12 @@ class NetCDFFactory(object):
                 convention = ncdf.Conventions
 
             if "CF" in convention:
-                return NetCDF_CF(self.fpath, convention)
+                return NetCDF_CF(self.fpath, convention).get_properties()
             elif "RAF" in convention:
-                return NetCDF_RAF(self.fpath, convention)
+                return NetCDF_RAF(self.fpath, convention).get_properties()
         except AttributeError:
-            # Return a NetCDF extractor wit no associated metadata convention
-            return NetCDF_Unknown(self.fpath)
+            # Return a NetCDF extractor with no associated metadata convention
+            return NetCDF_Unknown(self.fpath).get_properties()
 
 class NetCDF_Base(_geospatial):
     """
@@ -133,7 +133,8 @@ class NetCDF_CF(_geospatial):
 
     def get_temporal(self):
         with netCDF4.Dataset(self.fpath) as ncdf:
-            return NetCDF_Base.temporal(ncdf, "time")
+            time_name = NetCDF_Base.find_var_by_standard_name(ncdf, "time")
+            return NetCDF_Base.temporal(ncdf, time_name)
 
     def get_parameters(self):
         with netCDF4.Dataset(self.fpath) as ncdf:
@@ -191,7 +192,7 @@ class NetCDF_RAF(_geospatial):
             lon_name = NetCDF_Base.find_var_by_standard_name(ncdf, "longitude")
 
             if lat_name and lon_name:
-                return NetCDF_Base.geospatial(ncdf, "LATC", "LONC")
+                return NetCDF_Base.geospatial(ncdf, lat_name, lon_name)
             else:
                 self.logger.info("Couldn't find lat/lon variables: %s" %
                                  self.fpath)
@@ -222,3 +223,6 @@ class NetCDF_Unknown(_geospatial):
     def get_geospatial(self):
         raise TypeError("Cannot extract metadata from \"%s\"" +  # Continued
                         "(nonconformant format" % self.fpath)
+
+    def get_properties(self):
+        return None
