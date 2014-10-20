@@ -16,23 +16,24 @@ class NetCDFFactory(object):
     extraction class.
     :param str fpath: Path to NetCDF file
     """
-    @staticmethod
-    def get(fpath):
+    def __init__(self, fpath):
+        self.fpath = fpath
+
+    def get_properties(self):
         """
         Return correct metadata extraction class based on metadata format.
         """
         try:
-            with netCDF4.Dataset(fpath) as ncdf:
+            with netCDF4.Dataset(self.fpath) as ncdf:
                 convention = ncdf.Conventions
 
             if "CF" in convention:
-                return NetCDF_CF(fpath, convention)
+                return NetCDF_CF(self.fpath, convention)
             elif "RAF" in convention:
-                return NetCDF_RAF(fpath, convention)
-
+                return NetCDF_RAF(self.fpath, convention)
         except AttributeError:
-            # Try creating a NetCDF extractor with an unknown convention
-            return NetCDF_Unknown(fpath)
+            # Return a NetCDF extractor wit no associated metadata convention
+            return NetCDF_Unknown(self.fpath)
 
 class NetCDF_Base(_geospatial):
     """
