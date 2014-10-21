@@ -19,6 +19,12 @@ class NetCDFFactory(object):
     def __init__(self, fpath):
         self.fpath = fpath
 
+        try:
+            with netCDF4.Dataset(self.fpath) as ncdf:
+                self.convention = ncdf.Conventions
+        except AttributeError:
+            self.convention = None
+
     def __enter__(self):
         return self
 
@@ -29,16 +35,12 @@ class NetCDFFactory(object):
         """
         Return correct metadata extraction class based on metadata format.
         """
-        try:
-            with netCDF4.Dataset(self.fpath) as ncdf:
-                convention = ncdf.Conventions
-
-            if "CF" in convention:
-                return NetCDF_CF(self.fpath, convention).get_properties()
-            elif "RAF" in convention:
-                return NetCDF_RAF(self.fpath, convention).get_properties()
-        except AttributeError:
-            # Return a NetCDF extractor with no associated metadata convention
+        if "CF" in self.convention:
+            return NetCDF_CF(self.fpath, self.convention).get_properties()
+        elif "RAF" in self.convention:
+            return NetCDF_RAF(self.fpath, self.convention).get_properties()
+        else:
+            # Return a placeholder NetCDF extractor with no convention
             return NetCDF_Unknown(self.fpath).get_properties()
 
 class NetCDF_Base(_geospatial):
