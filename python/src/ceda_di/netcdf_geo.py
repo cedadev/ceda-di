@@ -220,9 +220,5 @@ class NetCDF_Unknown(_geospatial):
         self.logger = logging.getLogger(__name__)
         self.logger.info("No metadata convention: \"%s\"" % fpath)
 
-    def get_geospatial(self):
-        raise TypeError("Cannot extract metadata from \"%s\"" +  # Continued
-                        "(nonconformant format" % self.fpath)
-
     def get_properties(self):
         return None
