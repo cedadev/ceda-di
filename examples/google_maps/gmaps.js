@@ -14,7 +14,7 @@ var map = new google.maps.Map(
     document.getElementById('map'),
     {
         mapTypeId: google.maps.MapTypeId.TERRAIN,
-        zoom: 6
+        zoom: 4
     }
 );
 
@@ -164,7 +164,7 @@ function create_es_request(bbox, offset) {
                 ]
             }
         },
-        "size": 50
+        "size": 80
     };
 
     // Add any extra user-defined filters
@@ -184,12 +184,6 @@ function construct_polygon(bbox) {
     for (i = 0; i < bbox.length; i += 1) {
         vertices.push(new google.maps.LatLng(bbox[i][1], bbox[i][0]));
     }
-    /*
-    vertices.push(new google.maps.LatLng(bbox[0][1], bbox[0][0]));
-    vertices.push(new google.maps.LatLng(bbox[1][1], bbox[1][0]));
-    vertices.push(new google.maps.LatLng(bbox[3][1], bbox[3][0]));
-    vertices.push(new google.maps.LatLng(bbox[2][1], bbox[2][0]));
-    */
 
     polygon = new google.maps.Polygon({
         paths: vertices,
