@@ -38,13 +38,13 @@ class NetCDFFactory(object):
         """
         Return correct metadata extraction class based on metadata format.
         """
+        if not self.convention:
+            # Return a placeholder NetCDF extractor with no convention
+            return NetCDF_Unknown(self.fpath).get_properties()
         if "CF" in self.convention:
             return NetCDF_CF(self.fpath, self.convention).get_properties()
         elif "RAF" in self.convention:
             return NetCDF_RAF(self.fpath, self.convention).get_properties()
-        else:
-            # Return a placeholder NetCDF extractor with no convention
-            return NetCDF_Unknown(self.fpath).get_properties()
 
 class NetCDF_Base(_geospatial):
     """
