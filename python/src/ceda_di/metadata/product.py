@@ -93,8 +93,8 @@ class Properties(object):
             "type": "MultiPoint",
             "coordinates": [[lon_lo, lat_lo],
                             [lon_lo, lat_hi],
-                            [lon_hi, lat_lo],
-                            [lon_hi, lat_hi]]
+                            [lon_hi, lat_hi],
+                            [lon_hi, lat_lo]]
         }
 
         return bbox
