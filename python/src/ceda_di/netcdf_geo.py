@@ -74,8 +74,10 @@ class NetCDF_Base(_geospatial):
         :param lon_name: Name of parameter containing longitude values
         :return geospatial: Geospatial information as dict.
         """
-        lats = ncdf.variables[lat_name][:].ravel()[10:-10]
-        lons = ncdf.variables[lon_name][:].ravel()[10:-10]
+
+        # Filter out items that are equal to "masked"
+        lats = [x for x in ncdf.variables[lat_name][:].ravel() if x != "masked"]
+        lons = [x for x in ncdf.variables[lon_name][:].ravel() if x != "masked"]
         return {
             "lat": lats,
             "lon": lons
