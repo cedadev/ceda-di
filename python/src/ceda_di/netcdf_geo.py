@@ -19,11 +19,14 @@ class NetCDFFactory(object):
     def __init__(self, fpath):
         self.fpath = fpath
 
-        try:
-            with netCDF4.Dataset(self.fpath) as ncdf:
-                self.convention = ncdf.Conventions
-        except AttributeError:
-            self.convention = None
+        # Try fetching the 'Convention' global variable from the NetCDF header.
+        # Some organisations don't capitalise "Convention" in accordance with
+        # the CF/RAF spec, so a regular expression is needed...
+        self.convention = None
+        with netCDF4.Dataset(self.fpath) as ncdf:
+            for attr in ncdf.ncattrs():
+                if re.match(attr, "conventions", flags=re.IGNORECASE):
+                    self.convention = getattr(ncdf, attr)
 
     def __enter__(self):
         return self
