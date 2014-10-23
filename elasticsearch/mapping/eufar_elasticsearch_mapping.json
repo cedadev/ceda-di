@@ -3,6 +3,9 @@
     "_all": {
         "enabled": true
     },
+    "_id" {
+        "path": "_id"
+    }
     "properties": {
       "data_format": {
         "properties": {
