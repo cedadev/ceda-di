@@ -69,9 +69,13 @@ class NetCDF_Base(_geospatial):
     def clean_coordinate(coord):
         """Return True if coordinate is valid."""
         try:
-            if coord > 0:
-                coord = int(coord)
-                return True
+            # This filters out misconfigured "_FillValue" elements
+            if coord == 0.0:
+                return False
+
+            int(coord) # If this fails, "coord" is not a number!
+
+            return True
         except ValueError:
             return False
 
