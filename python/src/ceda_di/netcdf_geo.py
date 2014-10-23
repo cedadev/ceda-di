@@ -66,6 +66,16 @@ class NetCDF_Base(_geospatial):
         return params
 
     @staticmethod
+    def clean_coordinate(coord):
+        """Return True if coordinate is valid."""
+        try:
+            if coord > 0:
+                coord = int(coord)
+                return True
+        except ValueError:
+            return False
+
+    @staticmethod
     def geospatial(ncdf, lat_name, lon_name):
         """
         Return a dict containing lat/lons from NetCDF file.
@@ -76,8 +86,10 @@ class NetCDF_Base(_geospatial):
         """
 
         # Filter out items that are equal to "masked"
-        lats = [x for x in ncdf.variables[lat_name][:].ravel() if x != "masked"]
-        lons = [x for x in ncdf.variables[lon_name][:].ravel() if x != "masked"]
+        lats = filter(NetCDF_Base.clean_coordinate,
+                      ncdf.variables[lat_name][:].ravel())
+        lons = filter(NetCDF_Base.clean_coordinate,
+                      ncdf.variables[lon_name][:].ravel())
         return {
             "lat": lats,
             "lon": lons
