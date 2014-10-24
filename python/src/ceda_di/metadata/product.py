@@ -3,8 +3,10 @@ Module for holding and exporting file metadata as JSON documents.
 """
 
 from __future__ import division
+import hashlib
 import json
 import logging
+import math
 from pyhull.convex_hull import qconvex
 
 
@@ -40,10 +42,13 @@ class Properties(object):
 
         self.spatial = spatial
         if self.spatial is not None:
+            self.spatial["lat"] = filter(self.valid_lat, self.spatial["lat"])
+            self.spatial["lon"] = filter(self.valid_lon, self.spatial["lon"])
             self.spatial = self._to_geojson(self.spatial)
 
         self.misc = kwargs
         self.properties = {
+            "_id": hashlib.sha1(self.filesystem["path"]).hexdigest(),
             "data_format": self.data_format,
             "file": self.filesystem,
             "misc": self.misc,
@@ -74,14 +79,14 @@ class Properties(object):
             return False
         return True
 
-    def _gen_bbox(self, spatial):
+    def _gen_bbox(self, coord_list):
         """
         Generate and return a bounding box for the given geospatial data.
-        :param dict spatial: Dictionary with "lat" and "lon" keys w/coordinates
+        :param dict coord_list: Dictionary with "lat" and "lon" lists
         :return dict bbox: A bounding-box formatted in the GeoJSON style
         """
-        lons = spatial["lon"]
-        lats = spatial["lat"]
+        lons = coord_list["lon"]
+        lats = coord_list["lat"]
 
         lon_lo, lon_hi = self._get_min_max(lons, filter_func=self.valid_lon)
         lat_lo, lat_hi = self._get_min_max(lats, filter_func=self.valid_lat)
@@ -90,8 +95,8 @@ class Properties(object):
             "type": "MultiPoint",
             "coordinates": [[lon_lo, lat_lo],
                             [lon_lo, lat_hi],
-                            [lon_hi, lat_lo],
-                            [lon_hi, lat_hi]]
+                            [lon_hi, lat_hi],
+                            [lon_hi, lat_lo]]
         }
 
         return bbox
@@ -119,6 +124,29 @@ class Properties(object):
 
         chull["coordinates"] = hull_coords
         return chull
+
+    def _gen_coord_summary(self, coord_list):
+        """
+        Pull 30 evenly-spaced coordinates from a given list
+        :param list coord_list: Normalised and unique set of coordinates
+        :return dict summ: A summary formatted in the GeoJSON style
+        """
+
+        num_points = 30
+        summ = {
+            "type": "LineString"
+        }
+
+        lons = coord_list["lon"]
+        lats = coord_list["lat"]
+
+        step = int(math.ceil(len(lons) / num_points))
+        lons = lons[::step]
+        lats = lats[::step]
+
+        summ["coordinates"] = zip(lons, lats)
+
+        return summ
 
     @staticmethod
     def _get_min_max(item_list, filter_func=None):
@@ -172,19 +200,12 @@ class Properties(object):
         lons = spatial["lon"]
 
         if len(lats) > 0 and len(lons) > 0:
-            geojson = {}
-            coord_set = set()
-            for lat, lon in zip(lats, lons):
-                coord_set.add((lon, lat))
-
-            coord_list = list(coord_set)
-            geojson["geometries"] = {
-                "coordinates": coord_list,
+            geojson = {
+                "geometries": {
+                    "bbox": self._gen_bbox(spatial),
+                    "summary" : self._gen_coord_summary(spatial)
+                }
             }
-
-            geojson["geometries"]["bbox"] = self._gen_bbox(spatial)
-            if len(coord_list) > 3:
-                geojson["geometries"]["hull"] = self._gen_hull(coord_list)
 
             return geojson
         return None

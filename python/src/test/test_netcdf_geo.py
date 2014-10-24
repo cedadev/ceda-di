@@ -2,73 +2,89 @@
 Test module for ceda_di.netcdf_geo
 """
 
-import re
 import unittest
 
-from ceda_di.netcdf_geo import NetCDF
+from ceda_di.netcdf_geo import NetCDF_Base
 from ceda_di.metadata.product import Parameter
 
-class TestNetCDF(unittest.TestCase):
+class NetCDFStub(object):
+    """Stub for netCDF4.Dataset"""
+
+    class VarStub(object):
+        """Parameter stub class"""
+        def __init__(self, attributes):
+            for key, value in attributes.iteritems():
+                setattr(self, key, value)
+
+        def __getitem__(self, key):
+            return getattr(self, key)
+
+    def __init__(self, fpath):
+        self.fpath = fpath
+        self.variables = {}
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+    def set(self, attr, value):
+        """
+        Set attribute on self.
+        """
+        setattr(self, attr, value)
+
+    def add_variable(self, name, attributes):
+        """Add a variable to self.variables"""
+        self.variables[name] = self.VarStub(attributes)
+
+class Test_NetCDF_Base(unittest.TestCase):
     """
-    Test class for ceda_di.netcdf_geo.NetCDF
+    Test class for the main NetCDF_Base class.
     """
     def setUp(self):
-        self.path = "/path/to/some/file"
+        fpath = "/some/fake/file/here.nc"
+        self.nc_stub = NetCDFStub(fpath)
 
-    def test_nc_var_from_regex(self):
-        with NetCDF(self.path) as ncdf:
-            ncdf.variables = ["test", "TIME"]
-            assert ncdf._nc_var_from_regex("time", ncdf,
-                                           re.IGNORECASE) == "TIME"
+    def test_get_params(self):
+        self.nc_stub.add_variable("spam",
+                             {"nobody expects": "the spanish inquisition"})
 
-        with NetCDF(self.path) as ncdf:
-            ncdf.variables = ["test", "more test",
-                              "time", "teeeeeeest"]
-            assert ncdf._nc_var_from_regex("time", ncdf,
-                                           re.IGNORECASE) == "time"
+        assert NetCDF_Base.params(self.nc_stub)[0].__dict__ == {
+            "name": "spam",
+            "items": [{
+                "name": "nobody expects",
+                 "value": "the spanish inquisition"
+            }]
+        }
 
-        with NetCDF(self.path) as ncdf:
-            ncdf.variables = ["brian", "spam", "error"]
-            assert ncdf._nc_var_from_regex("time", ncdf,
-                                           re.IGNORECASE) is None
+    @unittest.skip
+    def test_get_temporal(self):
+        self.nc_stub.add_variable(
+            "time",
+            {"units": "seconds since 1970-01-01 00:00:00"}
+        )
 
-    def test_nc_var_from_list(self):
-        with NetCDF(self.path) as ncdf:
-            possible_vars = ["pressure", "PRESSURE"]
-            ncdf.variables = ["pressure", "something else"]
-            assert ncdf._nc_var_from_list(possible_vars, ncdf) == "pressure"
+        NetCDF_Base.temporal(self.nc_stub, "time")
 
-        with NetCDF(self.path) as ncdf:
-            possible_vars = ["altitude", "cheese", "ni"]
-            ncdf.variables = ["height", "angular momentum"]
-            self.assertRaises(AttributeError,
-                ncdf._nc_var_from_list, possible_vars, ncdf)
+    def test_find_var_by_standard_name(self):
+        self.nc_stub.add_variable(
+            "spam",
+            {"standard_name": "spammity spam"}
+        )
 
-    def test_get_parameters(self):
-        class Mock(object):
-            __dict__ = {"thing": "Brian",
-                        "something": "some other thing"}
+        assert NetCDF_Base.find_var_by_standard_name(
+            self.nc_stub, "spammity spam"
+        ) == "spam"
 
-        item = Mock()
-        param = {"name": item}
-        with NetCDF(self.path) as ncdf:
-            ncdf.variables = param
-            assert isinstance(ncdf.get_parameters(ncdf), list)
-            assert isinstance(ncdf.get_parameters(ncdf)[0], Parameter)
+    def test_find_var_by_regex(self):
+        self.nc_stub.add_variable(
+            "spam",
+            {"spam spam spam": "spammity spam"}
+        )
 
-    def test_time_from_num_format(self):
-        pass
-
-    def test_time_from_str_format(self):
-        pass
-
-    def test_get_time_data(self):
-        #with NetCDF(self.path) as ncdf:
-        #    ncdf.get_time_data(ncdf)
-        pass
-
-    def test_get_geospatial(self):
-        pass
-
-    def test_get_properties(self):
-        pass
+        assert NetCDF_Base.find_var_by_regex(
+            self.nc_stub,
+            "SPAM{1,3}"
+        ) == "spam"
