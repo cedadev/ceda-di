@@ -42,6 +42,8 @@ class Properties(object):
 
         self.spatial = spatial
         if self.spatial is not None:
+            self.spatial["lat"] = filter(self.valid_lat, self.spatial["lat"])
+            self.spatial["lon"] = filter(self.valid_lon, self.spatial["lon"])
             self.spatial = self._to_geojson(self.spatial)
 
         self.misc = kwargs
@@ -198,16 +200,12 @@ class Properties(object):
         lons = spatial["lon"]
 
         if len(lats) > 0 and len(lons) > 0:
-            geojson = {}
-            coord_set = set()
-            for lat, lon in zip(lats, lons):
-                coord_set.add((lon, lat))
-
-            coord_list = list(coord_set)
-            geojson["geometries"] = {}
-
-            geojson["geometries"]["bbox"] = self._gen_bbox(spatial)
-            geojson["geometries"]["summary"] = self._gen_coord_summary(spatial)
+            geojson = {
+                "geometries": {
+                    "bbox": self._gen_bbox(spatial),
+                    "summary" : self._gen_coord_summary(spatial)
+                }
+            }
 
             return geojson
         return None
