@@ -215,7 +215,7 @@ function construct_info_window(hit) {
     content += "<p><a href=\"http://badc.nerc.ac.uk/browse" +
                    hit.file.path + "\">Get data</a></p>";
 
-    if (hit.data_format.format === "NetCDF/NCAR-RAF") {
+    if (hit.data_format.format.search("RAF") > 0) {
         content += "<p><a href=\"" + wps_url +
             hit.file.path + "\" target=\"_blank\">Plot time-series</a></p>";
     }
