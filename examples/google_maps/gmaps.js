@@ -48,7 +48,8 @@ function location_search() {
                 } else {
                     alert("Could not find '" + loc + "'");
                 }
-            });
+            }
+        );
     }
 }
 
@@ -310,14 +311,6 @@ function redraw_map() {
     bounds = map.getBounds();
     search_es_bbox(bounds);
 
-    // Update bounding coordinates on sidebar
-    $("#ge_northeast").html(
-        bounds.getNorthEast().toUrlValue(3).replace(",", ", ")
-    );
-    $("#ge_southwest").html(
-        bounds.getSouthWest().toUrlValue(3).replace(",", ", ")
-    );
-
     // Rate-limit requests to ES to 1 per second
     window.setTimeout(function () {
         add_bounds_changed_listener(map);
@@ -440,6 +433,15 @@ function request_histogram() {
 window.onload = function () {
     // Draw histogram
     var resp = request_histogram();
+
+    // Add listener to update mouse position
+    // see: http://bit.ly/1zAfter
+    google.maps.event.addListener(map,'mousemove',function(event) {
+        lat = event.latLng.lat().toFixed(4);
+        lon = event.latLng.lng().toFixed(4);
+		$("#mouse").html(lat + ', ' + lon);
+	});
+
 
     // Centre the map on Hungary initially
     geocoder.geocode(
