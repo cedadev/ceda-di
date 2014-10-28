@@ -7,73 +7,72 @@
         "path": "_id"
     },
     "properties": {
-      "data_format": {
-        "properties": {
-          "format": {
-            "type": "string",
-            "store": "yes"
-          }
-        }
-      },
-      "file": {
-        "properties": {
-          "filename": {
-            "type": "string",
-            "analyzer": "simple",
-            "store": "yes"
-          },
-          "path": {
-            "type": "string",
-            "analyzer": "simple",
-            "store": "yes"
-          },
-          "size": {
-            "type": "long"
-          }
-        }
-      },
-      "misc": {
-        "type": "object"
-      },
-      "spatial": {
-        "properties": {
-          "geometries": {
+        "data_format": {
             "properties": {
-              "bbox": {
-                "type": "geo_shape",
-                "tree": "quadtree",
-                "precision": "50m",
-                "store": "yes"
-              },
-              "summary": {
-                "properties": {
-                  "coordinates": {
-                    "type": "double",
-                    "enabled": false,
-                    "include_in_all" : false,
-                    "index": "no",
+                "format": {
+                    "type": "string",
                     "store": "yes"
-                  }
                 }
-              }
             }
-          }
         }
-      },
-      "temporal": {
+    },
+    "file": {
         "properties": {
-          "end_time": {
-            "type": "date",
-            "format": "dateOptionalTime",
-            "store": "yes"
-          },
-          "start_time": {
-            "type": "date",
-            "format": "dateOptionalTime",
-            "store": "yes"
-          }
+            "filename": {
+                "type": "string",
+                "analyzer": "simple",
+                "store": "yes"
+            },
+            "path": {
+                "type": "string",
+                "analyzer": "simple",
+                "store": "yes"
+            },
+            "size": {
+                "type": "long"
+            }
         }
-      }
+    },
+    "misc": {
+        "type": "object"
+    },
+    "spatial": {
+        "properties": {
+            "geometries": {
+                "properties": {
+                    "bbox": {
+                        "type": "geo_shape",
+                        "tree": "quadtree",
+                        "precision": "50m",
+                        "store": "yes"
+                    },
+                    "summary": {
+                        "properties": {
+                            "coordinates": {
+                                "type": "double",
+                                "enabled": false,
+                                "include_in_all" : false,
+                                "index": "no",
+                                "store": "yes"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "temporal": {
+        "properties": {
+            "end_time": {
+                "type": "date",
+                "format": "dateOptionalTime",
+                "store": "yes"
+            },
+            "start_time": {
+                "type": "date",
+                "format": "dateOptionalTime",
+                "store": "yes"
+            }
+        }
     }
-  }
 }
