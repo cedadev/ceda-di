@@ -2,16 +2,12 @@
 /*global google, $ */
 
 /*---------------------------- Setup ----------------------------*/
-// Set up constants
-var polygons = []; // Array of polygon shapes drawn from ES requests
-var info_windows = []; // Array of InfoWindows (one for each polygon)
-var additional_filter_params = []; // Additional filter parameters
-
 // Colour palette from here: http://bit.ly/1wLGsBG
 var path_colours = ["#4D4D4D", "#5DA5DA", "#FAA43A",
                     "#60BD68", "#F17CB0", "#B2912F",
                     "#B276B2", "#DECF3F", "#F15854"]
 
+// Constants
 var es_url = "http://fatcat-test.jc.rl.ac.uk:9200/badc/eufar/_search";
 var wps_url = "http://ceda-wps2.badc.rl.ac.uk:8080/submit/form?proc_id=PlotTimeSeries&FilePath=";
 var geocoder = new google.maps.Geocoder();
@@ -22,6 +18,11 @@ var map = new google.maps.Map(
         zoom: 4
     }
 );
+
+// Global arrays
+var polygons = []; // Array of polygon shapes drawn from ES requests
+var info_windows = []; // Array of InfoWindows (one for each polygon)
+var additional_filter_params = []; // Additional filter parameters
 
 /*---------------------------- Functions ----------------------------*/
 String.prototype.hashCode = function () {
@@ -86,46 +87,6 @@ function apply_filters() {
             }
         };
         additional_filter_params.push(ftext_filt);
-    }
-
-    // Time range
-    start_time_query = {};
-    start_time = $("#start_time").val();
-    if (start_time.length > 0) {
-        start_time_query = {
-            "range": {
-                "temporal.start_time": {
-                    "from": start_time
-                }
-            }
-        };
-    }
-
-    end_time_query = {};
-    end_time = $("#end_time").val();
-    if (end_time.length > 0) {
-        end_time_query = {
-            "range": {
-                "temporal.start_time": {
-                    "to": end_time
-                }
-            }
-        };
-    }
-
-    // Combine time restrictions into single filter
-    time_queries = {};
-    if (!$.isEmptyObject(start_time_query)) {
-        $.extend(true, time_queries, start_time_query);
-    }
-
-    if (!$.isEmptyObject(end_time_query)) {
-        $.extend(true, time_queries, end_time_query);
-    }
-
-    // Add time filter to list of search criteria
-    if (!$.isEmptyObject(time_queries)) {
-        additional_filter_params.push(time_queries);
     }
 }
 
