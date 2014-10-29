@@ -7,6 +7,11 @@ var polygons = []; // Array of polygon shapes drawn from ES requests
 var info_windows = []; // Array of InfoWindows (one for each polygon)
 var additional_filter_params = null; // Additional filter parameters
 
+// Colour palette from here: http://bit.ly/1wLGsBG
+var path_colours = ["#4D4D4D", "#5DA5DA", "#FAA43A",
+                    "#60BD68", "#F17CB0", "#B2912F",
+                    "#B276B2", "#DECF3F", "#F15854"]
+
 var es_url = "http://fatcat-test.jc.rl.ac.uk:9200/badc/eufar/_search";
 var wps_url = "http://ceda-wps2.badc.rl.ac.uk:8080/submit/form?proc_id=PlotTimeSeries&FilePath=";
 var geocoder = new google.maps.Geocoder();
@@ -19,16 +24,15 @@ var map = new google.maps.Map(
 );
 
 /*---------------------------- Functions ----------------------------*/
-
-// Checks if a given item is in an array
-function is_in(array, item) {
-    var i;
-    for (i = 0; i < array.length; i += 1) {
-        if (i === array[i]) {
-            return true;
-        }
+String.prototype.hashCode = function () {
+    // Please see: http://bit.ly/1dSyf18 for original
+    var hash = 0;
+    if (this.length == 0) return hash;
+    for (i = 0; i < this.length; i++) {
+        c = this.charCodeAt(i);
+        hash = ((hash << 5) - hash) + c;
     }
-    return false;
+    return hash;
 }
 
 // Location search
@@ -180,7 +184,7 @@ function create_es_request(bbox, offset) {
 }
 
 // Construct a google.maps.Polygon object from a bounding box
-function construct_polygon(bbox) {
+function construct_polygon(bbox, hit_id) {
     var vertices, polygon;
 
     vertices = [];
@@ -188,14 +192,18 @@ function construct_polygon(bbox) {
         vertices.push(new google.maps.LatLng(bbox[i][1], bbox[i][0]));
     }
 
-    polygon = new google.maps.Polygon({
-        paths: vertices,
-        geodesic: false,
-        strokeColor: "#FF0000",
-        strokeWeight: 1,
-        strokeOpacity: 1.0,
-        fillColor: "#595959",
-        fillOpacity: 0.1
+    // Pick a colour for the line based on hash value of _id
+    index = (hit_id.hashCode() % path_colours.length);
+    if (index < 0)  index = -index;
+    lineColor = path_colours[index];
+
+    console.log(index);
+    polygon = new google.maps.Polyline({
+        path: vertices,
+        geodesic: true,
+        strokeColor: lineColor,
+        strokeWeight: 5,
+        strokeOpacity: 0.8
     });
 
     return polygon;
@@ -246,10 +254,11 @@ function draw_polygons(hits) {
 
     for (i = 0; i < hits.length; i += 1) {
         hit = hits[i]._source;
+        hit_id = hits[i]._id;
         bbox = hit.spatial.geometries.summary.coordinates;
 
         // Construct and display polygon
-        polygon = construct_polygon(bbox);
+        polygon = construct_polygon(bbox, hit_id);
         polygon.setMap(map);
         polygons.push(polygon);
 
@@ -290,7 +299,6 @@ function search_es_bbox(bbox) {
         if (xhr.readyState === 4) {
             response = JSON.parse(xhr.responseText);
             if (response.hits) {
-                console.log(JSON.stringify(response, null, "    "));
                 $("#resptime").html(response.took);
 
                 // Update "number of hits" field in sidebar
@@ -391,7 +399,7 @@ function draw_histogram(response) {
         plotOptions: {
             column: {
                 pointPadding: 0,
-                borderWidth: 1,
+                borderWidth: 0,
                 groupPadding: 0,
                 shadow: false,
                 point: {
