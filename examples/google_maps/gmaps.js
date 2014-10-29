@@ -144,6 +144,7 @@ function create_es_request(bbox, offset) {
                 "data_format.format",
                 "file.filename",
                 "file.path",
+                "misc",
                 "spatial.geometries.bbox",
                 "spatial.geometries.summary",
                 "temporal"
@@ -174,6 +175,7 @@ function create_es_request(bbox, offset) {
             request.filter.and.must.unshift(additional_filter_params[i]);
         }
     }
+
     return request;
 }
 
@@ -210,6 +212,16 @@ function construct_info_window(hit) {
                     hit.temporal.start_time + "</p>" +
                     "<p><strong>End Time: </strong>" +
                     hit.temporal.end_time + "</p>";
+    }
+
+    if (hit.misc.flight_num) {
+        content += "<p><strong>Flight Num: </strong>\"" +
+                    hit.misc.flight_num + "\"</p>"
+    }
+
+        if (hit.misc.organisation) {
+        content += "<p><strong>Organisation: </strong>\"" +
+                    hit.misc.organisation + "\"</p>"
     }
 
     content += "<p><a href=\"http://badc.nerc.ac.uk/browse" +
@@ -278,6 +290,7 @@ function search_es_bbox(bbox) {
         if (xhr.readyState === 4) {
             response = JSON.parse(xhr.responseText);
             if (response.hits) {
+                console.log(JSON.stringify(response, null, "    "));
                 $("#resptime").html(response.took);
 
                 // Update "number of hits" field in sidebar
