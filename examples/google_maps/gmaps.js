@@ -2,11 +2,6 @@
 /*global google, $ */
 
 /*---------------------------- Setup ----------------------------*/
-// Colour palette from here: http://bit.ly/1wLGsBG
-var path_colours = ["#4D4D4D", "#5DA5DA", "#FAA43A",
-                    "#60BD68", "#F17CB0", "#B2912F",
-                    "#B276B2", "#DECF3F", "#F15854"]
-
 // Constants
 var es_url = "http://fatcat-test.jc.rl.ac.uk:9200/badc/eufar/_search";
 var wps_url = "http://ceda-wps2.badc.rl.ac.uk:8080/submit/form?proc_id=PlotTimeSeries&FilePath=";
@@ -19,10 +14,14 @@ var map = new google.maps.Map(
     }
 );
 
+// Colour palette from here: http://bit.ly/1wLGsBG
+var path_colours = ["#4D4D4D", "#5DA5DA", "#FAA43A",
+                    "#60BD68", "#F17CB0", "#B2912F",
+                    "#B276B2", "#DECF3F", "#F15854"]
+
 // Global arrays
-var polygons = []; // Array of polygon shapes drawn from ES requests
-var info_windows = []; // Array of InfoWindows (one for each polygon)
-var additional_filter_params = []; // Additional filter parameters
+window.polygons = []; // Array of polygon shapes drawn from ES requests
+window.info_windows = []; // Array of InfoWindows (one for each polygon)
 
 /*---------------------------- Functions ----------------------------*/
 String.prototype.hashCode = function () {
@@ -36,7 +35,6 @@ String.prototype.hashCode = function () {
     return hash;
 }
 
-// Location search
 function location_search() {
     var loc = $("#location").val();
     if (loc === "") {
@@ -58,91 +56,15 @@ function location_search() {
     }
 }
 
-// Clears additional filters from ES request
-function clear_filters() {
-    additional_filter_params = [];
-    $("#ftext").val("");
-    $("#start_time").val("");
-    $("#end_time").val("");
-    redraw_map();
-}
-
-// Applies additional filters to ES request
-function apply_filters() {
-    var ftext_filt, ftq,
-        start_time_query, start_time,
-        end_time_query, end_time,
-        time_queries;
-
-    // Redraw map
-    redraw_map();
-
-    additional_filter_params = [];
-    ftext_filt = {};
-    ftq = $("#ftext").val();
-    if (ftq.length > 0) {
-        ftext_filt = {
+function get_text_filters() {
+    full_text_filter = $("#ftext").val();
+    if (full_text_filter.length > 0) {
+        return {
             "term": {
-                "_all": ftq
+                "_all": full_text_filter
             }
         };
-        additional_filter_params.push(ftext_filt);
     }
-}
-
-// Creates an ES geo_shape filter query based on a bounding box
-function create_es_request(bbox, offset) {
-    var temp_ne, temp_sw, nw, se, request, i;
-
-    temp_ne = bbox.getNorthEast();
-    temp_sw = bbox.getSouthWest();
-
-    // Build search extent using NW/SE and lng/lat format
-    nw = [temp_sw.lng().toString(),
-          temp_ne.lat().toString()];
-    se = [temp_ne.lng().toString(),
-          temp_sw.lat().toString()];
-
-    // Construct request for ElasticSearch
-    request = {
-        "_source": {
-            "include": [
-                "data_format.format",
-                "file.filename",
-                "file.path",
-                "misc",
-                "spatial.geometries.bbox",
-                "spatial.geometries.summary",
-                "temporal"
-            ]
-        },
-        "filter": {
-            "and": {
-                "must": [
-                    {
-                        "geo_shape": {
-                            "bbox": {
-                                "shape": {
-                                    "type": "envelope",
-                                    "coordinates": [nw, se]
-                                }
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        "size": 30
-    };
-
-    // Add any extra user-defined filters
-    if (additional_filter_params.length > 0) {
-        for (i = 0; i < additional_filter_params.length; i += 1) {
-            request.filter.and.must.unshift(additional_filter_params[i]);
-        }
-    }
-
-    return request;
 }
 
 // Construct a google.maps.Polygon object from a bounding box
@@ -203,10 +125,7 @@ function construct_info_window(hit) {
 
     content += "</section>";
 
-    info = new google.maps.InfoWindow({
-        content: content
-    });
-
+    info = new google.maps.InfoWindow({content: content});
     return info;
 }
 
@@ -221,27 +140,82 @@ function draw_polygons(hits) {
         // Construct and display polygon
         polygon = construct_polygon(bbox, hit_id);
         polygon.setMap(map);
-        polygons.push(polygon);
+        window.polygons.push(polygon);
 
         // Add info window
         iw = construct_info_window(hits[i]._source);
-        info_windows.push(iw);
+        window.info_windows.push(iw);
     }
 
     // Add a listener function to polygon that opens a new
     // InfoWindow on top of the polygon that was clicked
     // (closes all other InfoWindows first)
     for (i = 0; i < hits.length; i += 1) {
-        google.maps.event.addListener(polygons[i], 'click', (function (i, e) {
-            return function (e) {
-                for (j = 0; j < info_windows.length; j += 1) {
-                    info_windows[j].close();
-                }
-                info_windows[i].open(map, null);
-                info_windows[i].setPosition(e.latLng);
-            };
-        }(i)));
+        google.maps.event.addListener(window.polygons[i], 'click',
+            (function (i, e) {
+                return function (e) {
+                    for (j = 0; j < window.info_windows.length; j += 1) {
+                        window.info_windows[j].close();
+                    }
+                    window.info_windows[i].open(map, null);
+                    window.info_windows[i].setPosition(e.latLng);
+                };
+            }
+        (i)));
     }
+}
+
+// Creates an ES geo_shape filter query based on a bounding box
+function create_es_request(bbox, offset) {
+    var temp_ne, temp_sw, nw, se, request, i;
+
+    temp_ne = bbox.getNorthEast();
+    temp_sw = bbox.getSouthWest();
+
+    // Build search extent using NW/SE and lng/lat format
+    nw = [temp_sw.lng().toString(),
+          temp_ne.lat().toString()];
+    se = [temp_ne.lng().toString(),
+          temp_sw.lat().toString()];
+
+    // Construct request for ElasticSearch
+    request = {
+        "_source": {
+            "include": [
+                "data_format.format",
+                "file.filename",
+                "file.path",
+                "misc",
+                "spatial.geometries.summary",
+                "temporal"
+            ]
+        },
+        "filter": {
+            "and": {
+                "must": [
+                    {
+                        "geo_shape": {
+                            "bbox": {
+                                "shape": {
+                                    "type": "envelope",
+                                    "coordinates": [nw, se]
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "size": 30
+    };
+
+    // Add any extra user-defined filters
+    tf = get_text_filters();
+    if (tf) {
+        request.filter.and.must.unshift(tf);
+    }
+
+    return request;
 }
 
 // Search ES for data (and display received data asynchronously)
@@ -273,21 +247,28 @@ function search_es_bbox(bbox) {
     };
 }
 
-// Redraw the map (inc. polygons, etc)
-function redraw_map() {
-    var p, i, bounds;
+function cleanup() {
+    var p, i;
 
     // Clean up old polygons and info windows
-    for (p = 0; p < polygons.length; p += 1) {
-        polygons[p].setMap(null);
+    for (p = 0; p < window.polygons.length; p += 1) {
+        window.polygons[p].setMap(null);
     }
 
-    for (i = 0; i < info_windows.length; i += 1) {
-        info_windows[i].close();
+    for (i = 0; i < window.info_windows.length; i += 1) {
+        window.info_windows[i].close();
     }
 
-    polygons = [];
-    info_windows = [];
+    window.polygons = [];
+    window.info_windows = [];
+
+}
+
+// Redraw the map (inc. polygons, etc)
+function redraw_map() {
+    var bounds;
+
+    cleanup();
 
     // Make ES request
     bounds = map.getBounds();
@@ -418,7 +399,7 @@ window.onload = function () {
 
     // Add listener to update mouse position
     // see: http://bit.ly/1zAfter
-    google.maps.event.addListener(map,'mousemove',function(event) {
+    google.maps.event.addListener(map, 'mousemove', function(event) {
         lat = event.latLng.lat().toFixed(4);
         lon = event.latLng.lng().toFixed(4);
 		$("#mouse").html(lat + ', ' + lon);
@@ -447,14 +428,20 @@ window.onload = function () {
     // Clears all input values
     $("#clearfil").click(
         function () {
-            clear_filters();
+            $("#ftext").val("");
+            $("#start_time").val("");
+            $("#end_time").val("");
+
+            cleanup();
+            redraw_map();
         }
     );
 
     // Constructs query filters from input values
     $("#applyfil").click(
         function () {
-            apply_filters();
+            cleanup();
+            redraw_map();
         }
     );
 
