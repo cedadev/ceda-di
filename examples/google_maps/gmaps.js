@@ -5,7 +5,7 @@
 // Set up constants
 var polygons = []; // Array of polygon shapes drawn from ES requests
 var info_windows = []; // Array of InfoWindows (one for each polygon)
-var additional_filter_params = null; // Additional filter parameters
+var additional_filter_params = []; // Additional filter parameters
 
 // Colour palette from here: http://bit.ly/1wLGsBG
 var path_colours = ["#4D4D4D", "#5DA5DA", "#FAA43A",
@@ -59,7 +59,7 @@ function location_search() {
 
 // Clears additional filters from ES request
 function clear_filters() {
-    additional_filter_params = null;
+    additional_filter_params = [];
     $("#ftext").val("");
     $("#start_time").val("");
     $("#end_time").val("");
@@ -73,7 +73,9 @@ function apply_filters() {
         end_time_query, end_time,
         time_queries;
 
-    // Free text search
+    // Redraw map
+    redraw_map();
+
     additional_filter_params = [];
     ftext_filt = {};
     ftq = $("#ftext").val();
@@ -125,7 +127,6 @@ function apply_filters() {
     if (!$.isEmptyObject(time_queries)) {
         additional_filter_params.push(time_queries);
     }
-    redraw_map();
 }
 
 // Creates an ES geo_shape filter query based on a bounding box
@@ -170,11 +171,11 @@ function create_es_request(bbox, offset) {
                 ]
             }
         },
-        "size": 80
+        "size": 30
     };
 
     // Add any extra user-defined filters
-    if (additional_filter_params !== null) {
+    if (additional_filter_params.length > 0) {
         for (i = 0; i < additional_filter_params.length; i += 1) {
             request.filter.and.must.unshift(additional_filter_params[i]);
         }
@@ -197,7 +198,6 @@ function construct_polygon(bbox, hit_id) {
     if (index < 0)  index = -index;
     lineColor = path_colours[index];
 
-    console.log(index);
     polygon = new google.maps.Polyline({
         path: vertices,
         geodesic: true,
