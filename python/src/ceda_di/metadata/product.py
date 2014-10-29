@@ -73,7 +73,7 @@ class Properties(object):
             "arsf": {
                 "patterns": [
                     r"arsf(?P<flight_num>\d{3}.*)-",
-                    r"(e|h)(?P<flight_num>\d{3}(.?)(\d{2}))(.?)\d"
+                    r"(e|h)(?P<flight_num>\d{3}(.?)(\d{2,3}))(.?)\d"
                 ]
             },
             "faam": {
