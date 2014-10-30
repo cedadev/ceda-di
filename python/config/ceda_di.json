@@ -29,9 +29,25 @@
         "filename pattern": "handler class"
     },
     "handlers": {
-        "_nav_post_processed.bil.hdr": "envi_geo.BIL",
-        ".hdf": "hdf4_geo.HDF4",
-        ".tif": "exif_geo.EXIF",
-        ".nc": "netcdf_geo.NetCDFFactory"
+        "_nav_post_processed.bil.hdr$": {
+            "class": "ceda_di.envi_geo.BIL",
+            "priority": 10
+        },
+        ".hdf$": {
+            "class": "ceda_di.hdf4_geo.HDF4",
+            "priority": 10
+        },
+        ".tif$": {
+            "class": "ceda_di.exif_geo.EXIF",
+            "priority": 10
+        },
+        ".nc$": {
+            "class": "ceda_di.netcdf_geo.NetCDFFactory",
+            "priority": 1
+        },
+        ".*_CS_.*GRANULE.*\\.hdf$": {
+            "class": "ceda_di.jascis.CloudSat",
+            "priority": 1
+        }
     }
 }

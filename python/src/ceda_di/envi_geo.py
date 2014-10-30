@@ -5,9 +5,9 @@ Also contains methods for extracting metadata (geospatial/temporal).
 
 import logging
 
-from io import envi
-from metadata import product
-from _dataset import _geospatial
+from ceda_di.io import envi
+from ceda_di.metadata import product
+from ceda_di._dataset import _geospatial
 
 
 class ENVI(_geospatial):

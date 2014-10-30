@@ -9,6 +9,7 @@ import logging.config
 import multiprocessing
 import os
 import sys
+import re
 
 from _dataset import _geospatial
 
@@ -20,17 +21,31 @@ class HandlerFactory(object):
     def __init__(self, handler_map):
         self.handlers = {}
         for pattern, handler in handler_map.iteritems():
-            (module, hand) = handler.split(".", 1)
-            mod = __import__(module, fromlist=[hand])
-            self.handlers[pattern] = getattr(mod, hand)
+            handler_class = handler['class']
+            priority = handler['priority']
+            (module, _class) = handler_class.rsplit(".", 1)
+            mod = __import__(module, fromlist=[_class])
+            self.handlers[pattern] = {"class": getattr(mod, _class), "priority": priority}
 
-    def get(self, filename):
+    def get_handler(self, filename):
         """
         Return instance of correct file handler class.
         """
+        handler_class = self.get_handler_class(filename)
+        return handler_class(filename)
+
+    def get_handler_class(self, filename):
+        """
+        Return the class of the correct file handler (un-instantiated).
+        """
+        handler_candidates = []  # All handlers whose file signatures match the filename
         for pattern, handler in self.handlers.iteritems():
-            if filename.endswith(pattern):
-                return handler(filename)
+            if re.search(pattern, filename):
+                handler_candidates.append(handler)
+        # Sort by priority to ensure the correct class is returned when files match multiple signatures
+        if len(handler_candidates) > 0:
+            handler_candidates.sort(key=lambda h: h['priority'])
+            return handler_candidates[0]['class']
 
 
 class Main(object):
@@ -105,7 +120,7 @@ class Main(object):
         """
         Instantiate a handler for a file and extract metadata.
         """
-        handler = self.handler_factory.get(filename)
+        handler = self.handler_factory.get_handler(filename)
         if handler is not None:
             with handler as hand:
                 self.write_properties(filename, hand)
