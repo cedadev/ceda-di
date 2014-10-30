@@ -311,7 +311,7 @@ function draw_histogram(response) {
         },
         title: {
             size: "8px",
-            text: "Documents by Date",
+            text: "",
             style: {
                 fontSize: "10px"
             }
@@ -344,17 +344,6 @@ function draw_histogram(response) {
                 borderWidth: 0,
                 groupPadding: 0,
                 shadow: false,
-                point: {
-                    events: {
-                        click: function () {
-                            if (this.category !== "Unknown Date") {
-                                $("#start_time").val(this.category);
-                            } else {
-                                $("#start_time").val("1970-01-01");
-                            }
-                        }
-                    }
-                }
             }
         }
     });
