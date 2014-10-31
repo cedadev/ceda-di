@@ -2,6 +2,7 @@
 /*global google, $*/
 
 // Window constants
+var wps_url = "http://ceda-wps2.badc.rl.ac.uk:8080/submit/form?proc_id=PlotTimeSeries&FilePath=";
 var track_colours = ["#4D4D4D", "#5DA5DA", "#FAA43A",
                 "#60BD68", "#F17CB0", "#B2912F",
                 "#B276B2", "#DECF3F", "#F15854"];
@@ -101,14 +102,14 @@ function send_elasticsearch_request(gmap, full_text) {
         if (xhr.readyState === 4) {
             response = JSON.parse(xhr.responseText);
             if (response.hits) {
-                console.log(JSON.stringify(response));
                 $("#resptime").html(response.took);
                 $("#numresults").html(response.hits.total);
 
-                draw_flight_tracks(response.hits.hits);
+                draw_flight_tracks(gmap, response.hits.hits);
             }
         }
     };
+
 }
 
 // -----------------------------------Map--------------------------------------
@@ -133,6 +134,7 @@ function centre_map(gmap, geocoder, loc) {
 function create_info_window(hit) {
     var content, info;
 
+    hit = hit._source;
     content = "<section><p><strong>Filename: </strong>" + hit.file.filename + "</p>";
     if (hit.temporal) {
         content += "<p><strong>Start Time: </strong>" + hit.temporal.start_time + "</p>" +
@@ -153,20 +155,28 @@ function create_info_window(hit) {
     }
 
     content += "</section>";
-    info = new google.maps.InfoWindow({content: content});
+    info = new google.maps.InfoWindow(
+        {
+            content: content,
+            disableAutoPan: false
+        }
+    );
+
     return info;
 }
 
-function draw_flight_tracks(hits) {
-    var i, j, track, hit, iw;
+function draw_flight_tracks(gmap, hits) {
+    var i, j, coords, corrected_coords, colour_index, track, hit, info_window;
 
     for (i = 0; i < hits.length; i+= 1) {
         hit = hits[i];
 
         // Construct flight track (flipping coordinates in the process)
         coords = hit._source.spatial.geometries.summary.coordinates;
+        corrected_coords = [];
         for (j = 0; j < coords.length; j += 1) {
-            coords[i] = [coords[i][1], coords[i][0]];
+            corrected_coords.push(
+                    new google.maps.LatLng(coords[j][1], coords[j][0]));
         }
 
         colour_index = (hit._id.hashCode() % track_colours.length);
@@ -174,43 +184,48 @@ function draw_flight_tracks(hits) {
             colour_index = -colour_index;
         }
 
+        // Construct and display track
         track = new google.maps.Polyline({
-            path: coords,
+            path: corrected_coords,
             geodesic: true,
             strokeColor: track_colours[colour_index],
             strokeWeight: 5,
-            strokeOpacity: 0.8
+            strokeOpacity: 0.6
         });
+        track.setMap(gmap);
 
         // Construct info window
         info_window = create_info_window(hit);
 
         // Add to lists
-        flight_tracks.append(track);
-        info_windows.append(info_window);
+        flight_tracks.push(track);
+        info_windows.push(info_window);
+    }
 
-        // Add a listener function to track that opens an InfoWindow
-        // (closes all other InfoWindows first)
-        //
-        /*
-        google.maps.event.addListener(track, 'click',
+    for (i = 0; i < flight_tracks.length; i++) {
+        google.maps.event.addListener(flight_tracks[i], 'click',
             (function (i, e) {
                 return function (e) {
-                    for (j = 0; j < info_windows.length; j += 1) {
+                    google.maps.event.clearListeners(gmap, "bounds_changed");
+
+                    for (var j = 0; j < info_windows.length; j++) {
                         info_windows[j].close();
                     }
 
-                    info_windows[i].open(map, null);
                     info_windows[i].setPosition(e.latLng);
+                    info_windows[i].open(gmap, null);
+
+                    window.setTimeout(function () {
+                        add_bounds_changed_listener(gmap);
+                    }, 500);
                 };
             }
-        (i)));
-        */
+        )(i));
     }
 }
 
 function cleanup() {
-    var i, j;
+    var i;
 
     for (i = 0; i < flight_tracks.length; i += 1) {
         flight_tracks[i].setMap(null);
@@ -231,7 +246,7 @@ function redraw_map(gmap) {
     send_elasticsearch_request(gmap, full_text);
 
     window.setTimeout(function () {
-        add_bounds_changed_listener(map);
+        add_bounds_changed_listener(gmap);
     }, 500);
 }
 
@@ -243,8 +258,7 @@ function add_bounds_changed_listener(gmap) {
 
 // ------------------------------window.onload---------------------------------
 window.onload = function () {
-    var geocoder, map, trackColours;
-
+    var geocoder, lat, lon, map;
 
     // Google Maps geocoder and map object
     geocoder = new google.maps.Geocoder();
@@ -276,16 +290,22 @@ window.onload = function () {
         function (e) {
             var charcode = e.charCode || e.keyCode || e.which;
             if (charcode === 13) {
-                location_search();
+                centre_map(map, geocoder, $("#location").val());
                 return false;
             }
+        }
+    );
+
+    $("#applyfil").click(
+        function () {
+            cleanup();
+            redraw_map(map);
         }
     );
 
     $("#clearfil").click(
         function () {
             $("#ftext").val("");
-
             cleanup();
             redraw_map(map);
         }
