@@ -1,77 +1,90 @@
 {
-  "eufar": {
-    "_all": {
-        "enabled": true
-    },
-    "_id": {
-        "path": "_id"
-    },
-    "properties": {
-        "data_format": {
-            "properties": {
-                "format": {
-                    "type": "string",
-                    "store": "yes"
-                }
-            }
-        }
-    },
-    "file": {
+    "eufar": {
+        "_all": {
+            "enabled": true
+        },
+        "_id": {
+            "path": "_id"
+        },
         "properties": {
-            "filename": {
-                "type": "string",
-                "analyzer": "simple",
-                "store": "yes"
-            },
-            "path": {
-                "type": "string",
-                "analyzer": "simple",
-                "store": "yes"
-            },
-            "size": {
-                "type": "long"
-            }
-        }
-    },
-    "misc": {
-        "type": "object"
-    },
-    "spatial": {
-        "properties": {
-            "geometries": {
+            "data_format": {
                 "properties": {
-                    "bbox": {
-                        "type": "geo_shape",
-                        "tree": "quadtree",
-                        "precision": "50m",
+                    "format": {
+                        "type": "string",
+                        "store": "yes"
+                    }
+                }
+            },
+            "file": {
+                "properties": {
+                    "filename": {
+                        "type": "string",
+                        "analyzer": "simple",
                         "store": "yes"
                     },
-                    "summary": {
+                    "path": {
+                        "type": "string",
+                        "analyzer": "simple",
+                        "store": "yes"
+                    },
+                    "size": {
+                        "type": "long"
+                    }
+                }
+            },
+            "misc": {
+                "type": "object"
+            },
+            "parameters": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "analyzer": "variable_name_analyzer"
+                    },
+                    "value": {
+                        "type": "string",
+                        "analyzer": "variable_name_analyzer"
+                    }
+                }
+            },
+            "spatial": {
+                "properties": {
+                    "geometries": {
                         "properties": {
-                            "coordinates": {
-                                "type": "double",
-                                "enabled": false,
-                                "include_in_all" : false,
-                                "index": "no",
+                            "bbox": {
+                                "type": "geo_shape",
+                                "tree": "quadtree",
+                                "precision": "50m",
                                 "store": "yes"
+                            },
+                            "summary": {
+                                "properties": {
+                                    "coordinates": {
+                                        "type": "double",
+                                        "enabled": false,
+                                        "include_in_all" : false,
+                                        "index": "no",
+                                        "store": "yes"
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
-        }
-    },
-    "temporal": {
-        "properties": {
-            "end_time": {
-                "type": "date",
-                "format": "dateOptionalTime",
-                "store": "yes"
             },
-            "start_time": {
-                "type": "date",
-                "format": "dateOptionalTime",
-                "store": "yes"
+            "temporal": {
+                "properties": {
+                    "end_time": {
+                        "type": "date",
+                        "format": "dateOptionalTime",
+                        "store": "yes"
+                    },
+                    "start_time": {
+                        "type": "date",
+                        "format": "dateOptionalTime",
+                        "store": "yes"
+                    }
+                }
             }
         }
     }
