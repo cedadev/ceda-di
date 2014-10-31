@@ -320,5 +320,7 @@ window.onload = function () {
         }
     );
 
+    $("#multiselect").multiSelect();
+
     add_bounds_changed_listener(map);
 };
