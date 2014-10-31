@@ -36,6 +36,18 @@
     "misc": {
         "type": "object"
     },
+    "parameters": {
+        "properties": {
+            "name": {
+                "type": "string",
+                "analyzer": "variable_name_analyzer"
+            },
+            "value": {
+                "type": "string",
+                "analyzer": "variable_name_analyzer"
+            }
+        }
+    },
     "spatial": {
         "properties": {
             "geometries": {
