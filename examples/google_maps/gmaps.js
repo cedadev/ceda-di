@@ -4,8 +4,8 @@
 // Window constants
 var wps_url = "http://ceda-wps2.badc.rl.ac.uk:8080/submit/form?proc_id=PlotTimeSeries&FilePath=";
 var track_colours = ["#4D4D4D", "#5DA5DA", "#FAA43A",
-                "#60BD68", "#F17CB0", "#B2912F",
-                "#B276B2", "#DECF3F", "#F15854"];
+                     "#60BD68", "#F17CB0", "#B2912F",
+                     "#B276B2", "#DECF3F", "#F15854"];
 
 // -----------------------------String.hashCode--------------------------------
 String.prototype.hashCode = function () {
@@ -188,7 +188,7 @@ function draw_flight_tracks(gmap, hits) {
             // Construct and display track
             track = new google.maps.Polyline({
                 path: corrected_coords,
-                geodesic: true,
+                geodesic: false,
                 strokeColor: track_colours[colour_index],
                 strokeWeight: 5,
                 strokeOpacity: 0.6
