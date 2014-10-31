@@ -77,7 +77,7 @@ function create_elasticsearch_request(gmaps_corners, full_text) {
                 ]
             }
         },
-        size: 30,
+        size: 100,
     };
 
     // Add extra filters from free-text search box
@@ -184,21 +184,30 @@ function draw_flight_tracks(gmap, hits) {
             colour_index = -colour_index;
         }
 
-        // Construct and display track
-        track = new google.maps.Polyline({
-            path: corrected_coords,
-            geodesic: true,
-            strokeColor: track_colours[colour_index],
-            strokeWeight: 5,
-            strokeOpacity: 0.6
-        });
-        track.setMap(gmap);
+        if (corrected_coords.length > 1) {
+            // Construct and display track
+            track = new google.maps.Polyline({
+                path: corrected_coords,
+                geodesic: true,
+                strokeColor: track_colours[colour_index],
+                strokeWeight: 5,
+                strokeOpacity: 0.6
+            });
+            track.setMap(gmap);
+            flight_tracks.push(track);
+        } else {
+            marker = new google.maps.Marker({
+                position: corrected_coords[0],
+                icon: "./img/camera.png"
+            });
+            marker.setMap(gmap);
+            flight_tracks.push(marker);
+        }
 
         // Construct info window
         info_window = create_info_window(hit);
 
         // Add to lists
-        flight_tracks.push(track);
         info_windows.push(info_window);
     }
 
