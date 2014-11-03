@@ -160,7 +160,9 @@ class Main(object):
             pool = []
 
             for f in data_files:
-                path = os.path.join(*f)
+                # HDF libraries don't seem to like unicode strings, which the filenames will
+                # be if the configuration paths loaded from JSON end up in unicode 
+                path = str(os.path.join(*f))
                 if "raw" not in path:
                     p = multiprocessing.Process(target=self.process_file,
                                                 args=(path,))
