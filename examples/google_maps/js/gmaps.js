@@ -25,24 +25,79 @@ String.prototype.hashCode = function () {
     return hash;
 };
 
+// ---------------------------------Array.has----------------------------------
+Array.prototype.has = function (elem) {
+    var i;
+
+    for (i = 0; i < this.length; i += 1) {
+        if (this[i] === elem) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+// ------------------------------Variable Filter-------------------------------
+function clear_aggregated_variables() {
+    select = $("#multiselect").html("");
+    select.multiSelect("refresh");
+}
+
+function display_aggregated_variables(aggregations) {
+    var select, i, buckets;
+
+    select = $("#multiselect");
+    buckets = aggregations.variables.buckets;
+    for (i = 0; i < buckets.length; i += 1) {
+        select.multiSelect("addOption", {
+            value: buckets[i].key,
+            text: buckets[i].key
+        });
+    }
+}
+
+function request_from_multiselect() {
+    var i, vars, req;
+    req = [];
+    vars = $("#multiselect").val();
+
+    if (vars) {
+        for (i = 0; i < vars.length; i += 1) {
+            req.push({
+                term: {
+                    _all: vars[i]
+                }
+            });
+        }
+        return req;
+    } else {
+        return "";
+    }
+}
+
 // -------------------------------ElasticSearch--------------------------------
 var es_url = "http://fatcat-test.jc.rl.ac.uk:9200/badc/eufar/_search";
 function request_from_filters(full_text) {
-    var req;
+    var i, req, vars;
 
+    req = [];
     if (full_text.length > 0) {
-        req = {
-            "term": {
-                "_all": full_text
-            }
-        };
+        ft = full_text.split(" ");
+        for (i = 0; i < ft.length; i += 1) {
+            req.push({
+                term: {
+                    _all: ft[i]
+                }
+            });
+        }
 
         return req;
     }
 }
 
 function create_elasticsearch_request(gmaps_corners, full_text) {
-    var tmp_ne, tmp_sw, nw, se, request, tf;
+    var i, tmp_ne, tmp_sw, nw, se, request, tf, vars;
 
     tmp_ne = gmaps_corners.getNorthEast();
     tmp_sw = gmaps_corners.getSouthWest();
@@ -77,13 +132,30 @@ function create_elasticsearch_request(gmaps_corners, full_text) {
                 ]
             }
         },
+        aggs: {
+            variables: {
+                terms: {
+                    field: "value",
+                    size: 30
+                }
+            }
+        },
         size: 100,
     };
 
     // Add extra filters from free-text search box
     tf = request_from_filters(full_text);
     if (tf) {
-        request.filter.and.must.push(tf);
+        for (i = 0; i < tf.length; i += 1) {
+            request.filter.and.must.push(tf[i]);
+        }
+    }
+
+    vars = request_from_multiselect();
+    if (vars) {
+        for (i = 0; i < vars.length; i += 1) {
+            request.filter.and.must.push(vars[i]);
+        }
     }
 
     return request;
@@ -106,6 +178,10 @@ function send_elasticsearch_request(gmap, full_text) {
                 $("#numresults").html(response.hits.total);
 
                 draw_flight_tracks(gmap, response.hits.hits);
+            }
+
+            if (response.aggregations) {
+                display_aggregated_variables(response.aggregations);
             }
         }
     };
@@ -160,7 +236,9 @@ function create_info_window(hit) {
             content: content,
             disableAutoPan: false
         }
-    );
+    );;
+
+
 
     return info;
 }
@@ -315,12 +393,22 @@ window.onload = function () {
     $("#clearfil").click(
         function () {
             $("#ftext").val("");
+            clear_aggregated_variables();
             cleanup();
             redraw_map(map);
         }
     );
 
-    $("#multiselect").multiSelect();
+    $("#multiselect").multiSelect(
+        {
+            afterSelect: function () {
+                redraw_map(map);
+            },
+            afterDeselect: function () {
+                redraw_map(map);
+            },
+        }
+    );
 
     add_bounds_changed_listener(map);
 };

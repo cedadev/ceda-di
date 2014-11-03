@@ -40,24 +40,21 @@
                                 <input id="ftext" name="ftext" placeholder="Any text query, e.g. 'velocity', 'safire', etc" class="form-control input-md" type="text">
                             </div>
                         </div>
-                        
-                        <div class="form-group text-center buffer10">
+                    </fieldset>
+                </form>
+
+                <div class="buffer10 form-group">
+                    <fieldset>
+                        <label class="control-label" for="param">Common Variables</label>
+                        <select id="multiselect" multiple="multiple">
+                        </select>
+
+                        <div class="form-group text-center buffer30">
                             <div class="controls">
                                 <button type="button" id="applyfil" class="btn btn-success">Apply Filters</button>
                                 <button type="button" id="clearfil" class="btn btn-danger">Clear Filters</button>
                             </div>
-                            
-                            <div id="histogram" class="buffer10"></div>
                         </div>
-                    </fieldset>
-                </form>
-
-                <div class="buffer30 form-group">
-                    <fieldset>
-                        <legend>Filter by Variable</legend>
-                        <select id="multiselect">
-                            <option>Test</option>
-                        </select>
                     </fieldset>
                 </div>
             
@@ -74,7 +71,6 @@
                     <div class="form-group row buffer10">
                         <p><strong>Mouse: </strong> <span id="mouse">123.123, 456.456</span></p>
                     </div>
-
                     <hr>
                 </div>
             </div>
