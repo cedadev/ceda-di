@@ -1,6 +1,6 @@
 {
     "_option": "outputpath: main output directory",
-    "outputpath": "/home/vagrant/ceda-di/out",
+    "outputpath": "/home/ccnewey/ceda-di/out",
 
     "_option": "logpath: log dir path, relative to 'outputpath'",
     "logpath": "log/",
@@ -12,7 +12,7 @@
     "jsonpath": "json/",
 
     "_option": "datapath: data input path (where to extract metadata from)",
-    "datapath": "/home/vagrant/ceda-di/in",
+    "datapath": "/badc/eufar/data/projects",
 
     "_option": "numcores: number of processes to use in parallel",
     "numcores": 3,
