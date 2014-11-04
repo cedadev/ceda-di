@@ -18,8 +18,8 @@ class HandlerFactory(object):
     def __init__(self, handler_map):
         self.handlers = {}
         for pattern, handler in handler_map.iteritems():
-            (module, hand) = handler.split(".", 1)
-            mod = __import__(module, fromlist=[hand])
+            (module, hand) = handler.rsplit(".", 1)
+            mod = __import__(str(module), fromlist=[str(hand)])
             self.handlers[pattern] = getattr(mod, hand)
 
     def get(self, filename):
@@ -40,7 +40,7 @@ class Main(object):
             self.conf = self.read_conf(sys.argv[1])
         except IndexError:
             # Try default configuration path if none provided
-            self.conf = self.read_conf("../../config/ceda_di.json")
+            self.conf = self.read_conf("../config/ceda_di.json")
 
         try:
             self.make_dirs()

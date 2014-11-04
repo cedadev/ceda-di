@@ -1,6 +1,6 @@
 {
     "_option": "outputpath: main output directory",
-    "outputpath": "/home/ccnewey/ceda-di/out",
+    "outputpath": "/home/users/ccnewey/scratch/ceda-di",
 
     "_option": "logpath: log dir path, relative to 'outputpath'",
     "logpath": "log/",
@@ -29,9 +29,9 @@
         "filename pattern": "handler class"
     },
     "handlers": {
-        "_nav_post_processed.bil.hdr": "envi_geo.BIL",
-        ".hdf": "hdf4_geo.HDF4",
-        ".tif": "exif_geo.EXIF",
-        ".nc": "netcdf_geo.NetCDFFactory"
+        "_nav_post_processed.bil.hdr": "ceda_di.envi_geo.BIL",
+        ".hdf": "ceda_di.hdf4_geo.HDF4",
+        ".tif": "ceda_di.exif_geo.EXIF",
+        ".nc": "ceda_di.netcdf_geo.NetCDFFactory"
     }
 }
