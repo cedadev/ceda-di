@@ -8,6 +8,7 @@ import logging
 import logging.config
 import multiprocessing
 import os
+import re
 import sys
 
 from _dataset import _geospatial
@@ -26,10 +27,11 @@ class HandlerFactory(object):
             mod = __import__(module, fromlist=[_class])
             self.handlers[pattern] = {"class": getattr(mod, _class), "priority": priority}
 
-    def get(self, filename):
+    def get_handler(self, filename):
         """
         Return instance of correct file handler class.
         """
+        handler_candidates = []  # All handlers whose file signatures match the filename
         for pattern, handler in self.handlers.iteritems():
             if re.search(pattern, filename):
                 handler_candidates.append(handler)
