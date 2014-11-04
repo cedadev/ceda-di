@@ -28,7 +28,7 @@ class HandlerFactory(object):
         """
         for pattern, handler in self.handlers.iteritems():
             if filename.endswith(pattern):
-                return handler(filename)
+                return handler(str(filename))
 
 
 class Main(object):
