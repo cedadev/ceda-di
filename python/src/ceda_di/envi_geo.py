@@ -5,9 +5,9 @@ Also contains methods for extracting metadata (geospatial/temporal).
 
 import logging
 
-from io import envi
-from metadata import product
-from _dataset import _geospatial
+from ceda_di import envi_io
+from ceda_di.metadata import product
+from ceda_di._dataset import _geospatial
 
 
 class ENVI(_geospatial):
@@ -98,7 +98,7 @@ class ENVI(_geospatial):
 
 class BIL(ENVI):
     """
-    Sub-class of ENVI that uses the io.envi.BilFile class to read
+    Sub-class of ENVI that uses the envi_io.BilFile class to read
     binary data from BIL files.
     """
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
@@ -107,9 +107,9 @@ class BIL(ENVI):
         self.data_format = "ENVI BIL (Band Interleaved by Line)"
 
         # Construct file access object
-        self.b = envi.BilFile(header_path=self.header_path,
-                              path=self.path,
-                              unpack_fmt=self.unpack_fmt)
+        self.b = envi_io.BilFile(header_path=self.header_path,
+                                 path=self.path,
+                                 unpack_fmt=self.unpack_fmt)
         self.path = self.b.path
 
     def __enter__(self):
@@ -126,7 +126,7 @@ class BIL(ENVI):
 
 class BSQ(ENVI):
     """
-    Sub-class of ENVI that uses the io.envi.BsqFile class to read
+    Sub-class of ENVI that uses the envi_io.BsqFile class to read
     binary data from BSQ files.
     """
     def __init__(self, header_path, path=None, unpack_fmt="<d"):
@@ -135,9 +135,9 @@ class BSQ(ENVI):
         self.data_format = "ENVI BSQ (Band Sequential)"
 
         # Construct file access object
-        self.b = envi.BsqFile(header_path=self.header_path,
-                              path=self.path,
-                              unpack_fmt=self.unpack_fmt)
+        self.b = envi_io.BsqFile(header_path=self.header_path,
+                                 path=self.path,
+                                 unpack_fmt=self.unpack_fmt)
         self.path = self.b.path
 
     def __enter__(self):

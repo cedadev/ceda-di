@@ -10,8 +10,6 @@ import multiprocessing
 import os
 import sys
 
-from _dataset import _geospatial
-
 
 class HandlerFactory(object):
     """
@@ -20,8 +18,8 @@ class HandlerFactory(object):
     def __init__(self, handler_map):
         self.handlers = {}
         for pattern, handler in handler_map.iteritems():
-            (module, hand) = handler.split(".", 1)
-            mod = __import__(module, fromlist=[hand])
+            (module, hand) = handler.rsplit(".", 1)
+            mod = __import__(str(module), fromlist=[str(hand)])
             self.handlers[pattern] = getattr(mod, hand)
 
     def get(self, filename):
@@ -30,7 +28,7 @@ class HandlerFactory(object):
         """
         for pattern, handler in self.handlers.iteritems():
             if filename.endswith(pattern):
-                return handler(filename)
+                return handler(str(filename))
 
 
 class Main(object):
@@ -42,7 +40,7 @@ class Main(object):
             self.conf = self.read_conf(sys.argv[1])
         except IndexError:
             # Try default configuration path if none provided
-            self.conf = self.read_conf("../../config/ceda_di.json")
+            self.conf = self.read_conf("../config/ceda_di.json")
 
         try:
             self.make_dirs()
@@ -54,7 +52,7 @@ class Main(object):
             self.handler_factory = HandlerFactory(self.conf["handlers"])
 
             self.jsonpath = os.path.join(self.conf["outputpath"],
-                                    self.conf["jsonpath"])
+                                         self.conf["jsonpath"])
         except KeyError as k:
             sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
 

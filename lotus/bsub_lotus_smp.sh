@@ -8,4 +8,4 @@
 cd ~ccnewey/ceda-di
 source bin/activate
 cd ~ccnewey/ceda-di/src
-python main.py
+python -m ceda_di.main

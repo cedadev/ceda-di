@@ -7,6 +7,7 @@ import hashlib
 import json
 import logging
 import math
+import re
 from pyhull.convex_hull import qconvex
 
 
@@ -18,8 +19,8 @@ class Properties(object):
                  temporal=None, data_format=None, parameters=None,
                  **kwargs):
         """
-        Construct a 'ceda_di.metadata.Properties' ready to export as JSON or dict
-        (see "doc/schema.json")
+        Construct 'ceda_di.metadata.Properties' ready to export.
+        (for structure, see "doc/schema.json")
 
         :param dict filesystem: Filesystem information about file
         :param dict spatial: Spatial information about file
@@ -47,6 +48,10 @@ class Properties(object):
             self.spatial = self._to_geojson(self.spatial)
 
         self.misc = kwargs
+        flight_info = self.get_flight_info()
+        if flight_info:
+            self.misc.update(flight_info)
+
         self.properties = {
             "_id": hashlib.sha1(self.filesystem["path"]).hexdigest(),
             "data_format": self.data_format,
@@ -56,6 +61,48 @@ class Properties(object):
             "spatial": self.spatial,
             "temporal": self.temporal,
         }
+
+    def get_flight_info(self):
+        """
+        Return a dictionary populated with metadata about the flight that the
+        given data file was captured on.
+
+        Flight number, organisation, etc.
+        """
+        patterns = {
+            "arsf": {
+                "patterns": [
+                    r"arsf(?P<flight_num>\d{3}.*)-",
+                    r"(e|h)(\d{3})(\S?)(?P<flight_num>(\d{3})(\S?))"
+                ]
+            },
+            "faam": {
+                "patterns": [
+                    r"_(?P<flight_num>b(\d{3}))"
+                ]
+            },
+            "safire": {
+                "patterns": [
+                    r"_(?P<flight_num>((as|az|fs)\d{6}))"
+                ]
+            }
+        }
+
+        for org, info in patterns.iteritems():
+            for pattern in info["patterns"]:
+                match = re.search(pattern, self.filesystem["filename"])
+                if match:
+                    flight_info = {
+                        "organisation": org,
+                        "flight_num": match.group("flight_num")
+                    }
+
+                    try:
+                        flight_info["project"] = match.group("project")
+                    except IndexError:
+                        pass
+
+                    return flight_info
 
     @staticmethod
     def valid_lat(num):
@@ -203,7 +250,7 @@ class Properties(object):
             geojson = {
                 "geometries": {
                     "bbox": self._gen_bbox(spatial),
-                    "summary" : self._gen_coord_summary(spatial)
+                    "summary": self._gen_coord_summary(spatial)
                 }
             }
 
