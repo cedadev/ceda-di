@@ -1,17 +1,14 @@
 """
-Main script to handle processing of CEDA Data Index data.
+'Extract' module - handles file crawling and metadata extraction.
 """
 
 import datetime
-import json
 import logging
 import logging.config
 import multiprocessing
 import os
 import sys
 import re
-
-from _dataset import _geospatial
 
 
 class HandlerFactory(object):
@@ -25,7 +22,10 @@ class HandlerFactory(object):
             priority = handler['priority']
             (module, _class) = handler_class.rsplit(".", 1)
             mod = __import__(module, fromlist=[_class])
-            self.handlers[pattern] = {"class": getattr(mod, _class), "priority": priority}
+            self.handlers[pattern] = {
+                "class": getattr(mod, _class),
+                "priority": priority
+            }
 
     def get_handler(self, filename):
         """
@@ -38,27 +38,24 @@ class HandlerFactory(object):
         """
         Return the class of the correct file handler (un-instantiated).
         """
-        handler_candidates = []  # All handlers whose file signatures match the filename
+        handler_candidates = []  # All handlers whose file signatures match
         for pattern, handler in self.handlers.iteritems():
             if re.search(pattern, filename):
                 handler_candidates.append(handler)
-        # Sort by priority to ensure the correct class is returned when files match multiple signatures
+        # Sort by priority to ensure the correct class is returned
+        # when files match multiple signatures
         if len(handler_candidates) > 0:
             handler_candidates.sort(key=lambda h: h['priority'])
             return handler_candidates[0]['class']
 
 
-class Main(object):
+class Extract(object):
     """
-    Main script to start processing of data files in ceda-di.
+    File crawler and metadata exractor class.
+    Part of core functionality of ceda_di.
     """
-    def __init__(self):
-        try:
-            self.conf = self.read_conf(sys.argv[1])
-        except IndexError:
-            # Try default configuration path if none provided
-            self.conf = self.read_conf("../config/ceda_di.json")
-
+    def __init__(self, conf):
+        self.conf = conf
         try:
             self.make_dirs()
             self.logger = self.prepare_logging()
@@ -69,23 +66,9 @@ class Main(object):
             self.handler_factory = HandlerFactory(self.conf["handlers"])
 
             self.jsonpath = os.path.join(self.conf["outputpath"],
-                                    self.conf["jsonpath"])
+                                         self.conf["jsonpath"])
         except KeyError as k:
             sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
-
-    def read_conf(self, conf_path):
-        """
-        Read the confuration file into a dictionary.
-        :param fname: Path to the JSON confuration file
-        :return dict: Dict containing parsed JSON conf
-        """
-        try:
-            with open(conf_path, "r") as conf:
-                return json.load(conf)
-        except IOError as ioe:
-            sys.stderr.write(  # Continued on next line
-                "Can't read configuration, exiting.\n%s\n" % str(ioe))
-            exit(1)
 
     def make_dirs(self):
         """
@@ -160,8 +143,9 @@ class Main(object):
             pool = []
 
             for f in data_files:
-                # HDF libraries don't seem to like unicode strings, which the filenames will
-                # be if the configuration paths loaded from JSON end up in unicode
+                # HDF libraries don't seem to like unicode strings,
+                # which the filenames will be if the configuration paths
+                # loaded from JSON end up in unicode
                 path = str(os.path.join(*f))
                 if "raw" not in path:
                     p = multiprocessing.Process(target=self.process_file,
@@ -174,8 +158,8 @@ class Main(object):
                     if p.exitcode is not None:
                         pool.remove(p)
 
-        for p in pool:
-            p.join()
+            for p in pool:
+                p.join()
 
         # Log end of processing
         end = datetime.datetime.now()
@@ -183,8 +167,3 @@ class Main(object):
                          end.isoformat())
         self.logger.info("Start: %s, End: %s, Total: %s",
                          start.isoformat(), end.isoformat(), end - start)
-
-
-if __name__ == "__main__":
-    MAIN = Main()
-    MAIN.run()
