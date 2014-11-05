@@ -55,31 +55,34 @@ class Extract(object):
     Part of core functionality of ceda_di.
     """
     def __init__(self, conf):
-        self.conf = conf
+        self.configuration = conf
         try:
             self.make_dirs()
             self.logger = self.prepare_logging()
-
-            self.numcores = self.conf["numcores"]
-            self.datapath = self.conf["datapath"]
-            self.outpath = self.conf["outputpath"]
-            self.handler_factory = HandlerFactory(self.conf["handlers"])
-
-            self.jsonpath = os.path.join(self.conf["outputpath"],
-                                         self.conf["jsonpath"])
+            self.handler_factory = HandlerFactory(self.conf("handlers"))
         except KeyError as k:
             sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
+
+    def conf(self, conf_opt):
+        """
+        Return configuration option or raise exception if it doesn't exist.
+        :param str conf_opt: The name of the configuration option to find.
+        """
+        if conf_opt in self.configuration:
+            return self.configuration[conf_opt]
+        else:
+            raise AttributeError(
+                "Mandatory configuration option not found: %s" % conf_opt)
 
     def make_dirs(self):
         """
         Create directories for output files.
         """
-        conf = self.conf
-        json_out = os.path.join(conf["outputpath"], conf["jsonpath"])
+        json_out = os.path.join(self.conf("output-path"), self.conf("json-path"))
         if not os.path.isdir(json_out):
             os.makedirs(json_out)
 
-        log_out = os.path.join(conf["outputpath"], conf["logpath"])
+        log_out = os.path.join(self.conf("output-path"), self.conf("log-path"))
         if not os.path.isdir(log_out):
             os.makedirs(log_out)
 
@@ -87,12 +90,12 @@ class Extract(object):
         """
         Initial logging setup
         """
-        fname = os.path.join(self.conf["outputpath"],
-                             self.conf["logpath"],
-                             self.conf["logfile"])
+        fname = os.path.join(self.conf("output-path"),
+                             self.conf("log-path"),
+                             self.conf("log-file"))
 
         logging.basicConfig(filename=fname,
-                            format=self.conf["logging"]["format"],
+                            format=self.conf("logging")["format"],
                             level=logging.INFO)
 
         log = logging.getLogger(__name__)
@@ -112,15 +115,14 @@ class Extract(object):
         """
         Write module properties to an output file.
         """
-
-        fname = os.path.basename(fname)
-
         # Construct JSON path
-        fname = "%s/%s.json" % (self.jsonpath, os.path.splitext(fname)[0])
+        fname = os.path.basename(fname)
+        json_path = os.path.join(self.conf("output-path"), self.conf("json-path"))
+        out_fname = "%s/%s.json" % (json_path, os.path.splitext(fname)[0])
 
         props = _geospatial_obj.get_properties()
         if props is not None:
-            with open(fname, 'w') as j:
+            with open(out_fname, 'w') as j:
                 j.write(str(props))
 
     def run(self):
@@ -134,7 +136,7 @@ class Extract(object):
 
         # Build list of file paths
         data_files = []
-        for root, _, files in os.walk(self.datapath, followlinks=True):
+        for root, _, files in os.walk(self.conf("input-path"), followlinks=True):
             for each_file in files:
                 data_files.append((root, each_file))
 
@@ -153,7 +155,7 @@ class Extract(object):
                     pool.append(p)
                     p.start()
 
-            while len(pool) >= self.numcores:
+            while len(pool) >= self.conf("num-cores"):
                 for p in pool:
                     if p.exitcode is not None:
                         pool.remove(p)
