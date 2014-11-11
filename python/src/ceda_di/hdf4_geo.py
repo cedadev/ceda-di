@@ -9,8 +9,8 @@ from pyhdf.VS import VS
 from pyhdf.V import V
 from pyhdf.error import HDF4Error
 
-from _dataset import _geospatial
-from metadata import product
+from ceda_di._dataset import _geospatial
+from ceda_di.metadata import product
 
 
 class HDF4(_geospatial):
