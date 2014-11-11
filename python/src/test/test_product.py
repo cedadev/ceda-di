@@ -9,7 +9,7 @@ from ceda_di.metadata.product import Properties, Parameter
 class TestProperties(unittest.TestCase):
     def setUp(self):
         # Just some dummy data (totally arbitrary)
-        fs = {"size": 3}
+        fs = {"size": 3, "path": "/some/non/existent/path"}
         tmp = {"start_time": "2014-09-22T20:51:53Z",
                "end_time": "2014-09-22T20:51:53Z"}
         df = {"data_format": "spam"}
@@ -39,7 +39,7 @@ class TestProperties(unittest.TestCase):
 
         assert self.prop._gen_bbox(spatial) == {
             "type": "MultiPoint",
-            "coordinates": [[3, 3], [3, 5], [5, 3], [5, 5]]
+            "coordinates": [[3, 3], [3, 5], [5, 5], [5, 3]]
         }
 
 

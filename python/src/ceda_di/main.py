@@ -11,8 +11,6 @@ import os
 import sys
 import re
 
-from _dataset import _geospatial
-
 
 class HandlerFactory(object):
     """
@@ -69,7 +67,7 @@ class Main(object):
             self.handler_factory = HandlerFactory(self.conf["handlers"])
 
             self.jsonpath = os.path.join(self.conf["outputpath"],
-                                    self.conf["jsonpath"])
+                                         self.conf["jsonpath"])
         except KeyError as k:
             sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
 
