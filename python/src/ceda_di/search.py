@@ -19,16 +19,19 @@ class JsonQueryBuilder(object):
                         }
                     }
                 }
-            }
+            },
+            "size": 10
         }
 
-    def build(self, extents_string=None):
+    def build(self, extents_string=None, max_results=None):
         """
         Builds an Elasticsearch query dictionary from a given extents string
         :param extents_string: A string specifying temporal or spatial extents
         e.g. 't=[2014-10-12T12:13:14,2014-10-12T17:18:19]'
         :return: a dictionary which is valid Elasticsearch query JSON.
         """
+        if max_results is not None:
+            self.query_dict['size'] = max_results
         if extents_string is not None:
             self._validate_extents_string(extents_string)
             start, end = self._get_start_end_date(extents_string)
@@ -91,9 +94,9 @@ class JsonQueryBuilder(object):
 
 class ElasticsearchClientFactory(object):
 
-    def get_client(self, config):
-        host = config['es_host']
-        port = config['es_port']
+    def get_client(self, config_args):
+        host = config_args['es_host']
+        port = config_args['es_port']
         return Elasticsearch(hosts=[{"host": host, "port": port}])
 
 
@@ -102,29 +105,28 @@ class Searcher(object):
     Coordinates the searching of Elasticsearch nodes to output matching filepaths.
     """
 
-    def __init__(self, config, json_query_builder=JsonQueryBuilder(),
+    def __init__(self, config_args, json_query_builder=JsonQueryBuilder(),
                  elastic_search_client_factory=ElasticsearchClientFactory()):
         """
         Creates a new Searcher instance
-        :param config: Configuration / command line args dictionary (includes the extents string)
+        :param config_args: Configuration / command line args dictionary (includes the extents string)
         :param json_query_builder: Takes the user input extents string and converts it to Elasticsearch query DSL JSON
         :param elastic_search_client_factory: Creates appropriately configured Elasticsearch client instances
         :return: A new Searcher instance
         """
-        self.elastic_search_client_factory = elastic_search_client_factory
-        self.json_query_builder = json_query_builder
-        self.config = config
+        self._elastic_search_client_factory = elastic_search_client_factory
+        self._json_query_builder = json_query_builder
+        self._config_args = config_args
 
     def run(self):
         """
         Run the search and output the results matching the configuration belonging to this instance
         :return: Outputs matching filenames to sys.stdout
         """
-        extents = None
-        if 'extents' in self.config:
-            extents = self.config['extents']
-        query = self.json_query_builder.build(extents)
-        es = self.elastic_search_client_factory.get_client(self.config)
+        extents = self._config_args.get('extents')
+        max_results = self._config_args.get('max-results')
+        query = self._json_query_builder.build(extents, max_results=max_results)
+        es = self._elastic_search_client_factory.get_client(self._config_args)
         try:
             results = es.search(index='badc', doc_type='eufar', body=query)
         except ConnectionError as ex:

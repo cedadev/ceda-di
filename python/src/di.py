@@ -6,8 +6,8 @@ Usage:
                 (--host=<host> --port=<port> --index=<name>)
     di.py query [options] <path-to-request-json>
                 (--host=<host> --port=<port> --index=<name>)
-    di.py search
-    di.py search <extents>
+    di.py search [options]
+    di.py search <extents> [options]
     di.py extract [options] [--send-to-index]
                   [<input-path> (<output-path> | --no-create-files)]
 
@@ -20,6 +20,7 @@ Options:
     --index=<name>             Specify ElasticSearch index name.
     --send-to-index            Index metadata with ElasticSearch.
     --no-create-files          Don't create JSON metadata files.
+    --max-results=<num>        Max number of results to return when searching
 """
 
 import json

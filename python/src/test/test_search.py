@@ -41,7 +41,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
                         }
                     }
                 }
-            }
+            },
+            "size": 10
         }))
 
     def test_GIVEN_extents_are_None_WHEN_build_THEN_correct_JSON_returned(self):
@@ -59,7 +60,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
                         }
                     }
                 }
-            }
+            },
+            "size": 10
         }))
 
     def test_GIVEN_query_string_not_matching_temporal_format_WHEN_build_THEN_ValueError_raised(self):
