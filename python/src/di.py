@@ -6,6 +6,8 @@ Usage:
                 (--host=<host> --port=<port> --index=<name>)
     di.py query [options] <path-to-request-json>
                 (--host=<host> --port=<port> --index=<name>)
+    di.py search
+    di.py search <extents>
     di.py extract [options] [--send-to-index]
                   [<input-path> (<output-path> | --no-create-files)]
 
@@ -27,6 +29,7 @@ from docopt import docopt
 
 from ceda_di import __version__  # Grab version from package __init__.py
 from ceda_di.extract import Extract
+from ceda_di.search import Searcher
 
 
 def sanitise_args(config):
@@ -97,6 +100,10 @@ if __name__ == "__main__":
     if CONF_ARGS["extract"]:
         E = Extract(CONFIG)
         E.run()
+
+    if CONF_ARGS["search"]:
+        searcher = Searcher(CONFIG)
+        searcher.run()
 
     elif CONF_ARGS["test"]:
         # TODO Would be nice to run unit tests from here later on
