@@ -15,7 +15,7 @@ Usage:
 Options:
     --help                     Show this screen.
     --version                  Show version.
-    --config=<path>            Config file.
+    --config=<path>            Config file. [default: ../config/ceda_di.json]
     --host=<host>              Specify ElasticSearch host.
     --port=<port>              Specify ElasticSearch port.
     --index=<name>             Specify ElasticSearch index name.
