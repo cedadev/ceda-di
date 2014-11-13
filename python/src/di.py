@@ -10,11 +10,12 @@ Usage:
     di.py search <extents> [options]
     di.py extract [options] [--send-to-index]
                   [<input-path> (<output-path> | --no-create-files)]
+    di.py test
 
 Options:
     --help                     Show this screen.
     --version                  Show version.
-    --config=<path>            Config file. [default: ../config/ceda_di.json]
+    --config=<path>            Config file.
     --host=<host>              Specify ElasticSearch host.
     --port=<port>              Specify ElasticSearch port.
     --index=<name>             Specify ElasticSearch index name.
@@ -24,6 +25,7 @@ Options:
 """
 
 import json
+import os
 import sys
 
 from docopt import docopt
@@ -82,8 +84,13 @@ CONFIG = {
     }
 }
 
-if __name__ == "__main__":
+
+def main():
     CONF_ARGS = sanitise_args(docopt(__doc__, version=__version__))
+    if 'config' not in CONF_ARGS or not CONF_ARGS["config"]:
+        dir = os.path.dirname(__file__)
+        conf_path = os.path.join(dir, '../../config/ceda_di.json')
+        CONF_ARGS['config'] = conf_path
     CONF_FILE = read_conf(CONF_ARGS["config"])
 
     # Apply updates to CONFIG dictionary in priority order
@@ -93,7 +100,7 @@ if __name__ == "__main__":
     CONFIG.update(CONF_ARGS)
 
     # XXX Check for unimplemented functions and raise error
-    UNIMPL = ["index", "query", "send-to-index", "no-create-files"]
+    UNIMPL = ["index", "query", "no-create-files"]
     for cmd in UNIMPL:
         if cmd in CONF_ARGS and CONF_ARGS[cmd]:
             not_implemented(cmd)
@@ -109,3 +116,6 @@ if __name__ == "__main__":
     elif CONF_ARGS["test"]:
         # TODO Would be nice to run unit tests from here later on
         pass
+
+if __name__ == "__main__":
+    main()

@@ -80,6 +80,15 @@ class TestJsonQueryBuilder(unittest.TestCase):
         with self.assertRaises(ValueError):
             query_builder.build(query_string)
 
+    def test_GIVEN_non_iso_timestamp_WHEN_build_THEN_timestamp_converted_to_iso(self):
+        query_builder = JsonQueryBuilder()
+        start = "2010/04/19 23:39:54"
+        end = "2010/04/19 15:12:40"
+        query_string = "t=[%s,%s]" % (start, end)
+        query = query_builder.build(query_string)
+        must = query['query']['filtered']['filter']['bool']['must']
+        assert_that(must[0]['range']['eufar.temporal.start_time']['lte'], is_('2010-04-19T15:12:40'))
+        assert_that(must[1]['range']['eufar.temporal.end_time']['gte'], is_('2010-04-19T23:39:54'))
 
 class TestSearcher(unittest.TestCase):
     """

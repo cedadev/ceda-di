@@ -9,6 +9,7 @@ import multiprocessing
 import os
 import sys
 import re
+from ceda_di.search import ElasticsearchClientFactory
 
 
 class HandlerFactory(object):
@@ -32,7 +33,8 @@ class HandlerFactory(object):
         Return instance of correct file handler class.
         """
         handler_class = self.get_handler_class(filename)
-        return handler_class(filename)
+        if handler_class is not None:
+            return handler_class(filename)
 
     def get_handler_class(self, filename):
         """
@@ -109,7 +111,20 @@ class Extract(object):
         handler = self.handler_factory.get_handler(filename)
         if handler is not None:
             with handler as hand:
-                self.write_properties(filename, hand)
+                if self.conf('send-to-index'):
+                    self.index_properties(filename, hand)
+                else:
+                    self.write_properties(filename, hand)
+
+    def index_properties(self, filename, handler):
+        """
+        Index the file in Elasicsearch
+        """
+        es_factory = ElasticsearchClientFactory()
+        es = es_factory.get_client(self.configuration)
+        props = handler.get_properties()
+        if props is not None:
+            es.index(index=self.conf('es_index'), doc_type='eufar', body=str(props))
 
     def write_properties(self, fname, _geospatial_obj):
         """
