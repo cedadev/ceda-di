@@ -1,7 +1,6 @@
 import re
 
 from elasticsearch import Elasticsearch, ConnectionError
-import dateutil.parser
 import sys
 
 
@@ -32,8 +31,12 @@ class JsonQueryBuilder(object):
                                 }]
 
     def process_datetime_extents(self, start, end):
-        for date_str in start, end:
-            dateutil.parser.parse(date_str)
+        from jasmin_cis.parse_datetime import parse_partial_datetime
+        try:
+            start = parse_partial_datetime(start, True).isoformat()
+            end = parse_partial_datetime(end, False).isoformat()
+        except ValueError:
+            raise ValueError("Couldn't parse datetimes: use the ISO-8601 YYYY-MM-DDTHH:MM:SS format.")
         start_constraint = {
             "range": {
                 "eufar.temporal.start_time": {
@@ -52,23 +55,7 @@ class JsonQueryBuilder(object):
         self._add_to_query_filter("must", end_constraint)
 
     def process_single_datetime(self, datetime):
-        dateutil.parser.parse(datetime)
-        start_constraint = {
-            "range": {
-                "eufar.temporal.start_time": {
-                    "lte": datetime
-                }
-            }
-        }
-        end_constraint = {
-            "range": {
-                "eufar.temporal.end_time": {
-                    "gte": datetime
-                }
-            }
-        }
-        self._add_to_query_filter("must", start_constraint)
-        self._add_to_query_filter("must", end_constraint)
+        self.process_datetime_extents(datetime, datetime)
 
     def build(self, extents_string=None, max_results=None):
         """
@@ -96,19 +83,6 @@ class JsonQueryBuilder(object):
         :return: None
         """
         self.query_dict['query']['filtered']['filter']['bool'][filter_logic].append(filter_dict)
-
-    def _validate_extents_string(self, extents_string):
-        """
-        Determine if a string is a valid extents string
-        :param extents_string: A string specifying temporal or spatial extents
-        e.g. 't=[2014-10-12T12:13:14,2014-10-12T17:18:19]'
-        :return: True
-        :raises: ValueError if validation fails
-        """
-        valid_regex = r't=\[([^\[\],]*),([^\[\],]*)\]'
-        if not re.match(valid_regex, extents_string):
-            raise ValueError("Invalid extents specified")
-        return True
 
 
 class ElasticsearchClientFactory(object):
