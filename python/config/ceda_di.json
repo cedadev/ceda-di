@@ -1,21 +1,21 @@
 {
-    "_option": "outputpath: main output directory",
-    "outputpath": "/home/ccnewey/ceda-di/out",
+    "_option": "output-path: main output directory",
+    "output-path": "/home/ccnewey/ceda-di/out",
 
-    "_option": "logpath: log dir path, relative to 'outputpath'",
-    "logpath": "log/",
+    "_option": "log-path: log dir path, relative to 'outputpath'",
+    "log-path": "log/",
 
-    "_option": "logfile: log file path, relative to 'logpath'",
-    "logfile": "ceda-di.log",
+    "_option": "log-file: log file path, relative to 'logpath'",
+    "log-file": "ceda-di.log",
 
-    "_option": "jsonpath: directory for JSON metadata, relative to 'outputpath'",
-    "jsonpath": "json/",
+    "_option": "json-path: directory for JSON metadata, relative to 'outputpath'",
+    "json-path": "json/",
 
-    "_option": "datapath: data input path (where to extract metadata from)",
-    "datapath": "/badc/eufar/data/projects",
+    "_option": "input-path: data input path (where to extract metadata from)",
+    "input-path": "/badc/eufar/data/projects",
 
-    "_option": "numcores: number of processes to use in parallel",
-    "numcores": 3,
+    "_option": "num-cores: number of processes to use in parallel",
+    "num-cores": 3,
 
     "_option": "logging: options for the 'logging' module",
     "_ref": "(see: https://docs.python.org/2/library/logging.html)",
@@ -24,10 +24,7 @@
         "format": "[%(levelname)s] (%(name)s) %(message)s"
     },
 
-    "_option": {
-        "description": "handlers: python classes to handle data files",
-        "filename pattern": "handler class"
-    },
+    "_option": "handlers: python classes to handle data files",
     "handlers": {
         "_nav_post_processed.bil.hdr$": {
             "class": "ceda_di.envi_geo.BIL",
