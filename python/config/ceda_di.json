@@ -1,21 +1,33 @@
 {
-    "_option": "outputpath: main output directory",
-    "outputpath": "/home/ccnewey/ceda-di/out",
+    "_option": "es_host: hostname of Elasticsearch node to use",
+    "es_host": "fatcat-test.jc.rl.ac.uk",
 
-    "_option": "logpath: log dir path, relative to 'outputpath'",
-    "logpath": "log/",
+    "_option": "es_port: port number of Elasticsearch node to use",
+    "es_port": 9200,
 
-    "_option": "logfile: log file path, relative to 'logpath'",
-    "logfile": "ceda-di.log",
+    "_option": "es_index: Elasticsearch index to use",
+    "es_index": "badc",
 
-    "_option": "jsonpath: directory for JSON metadata, relative to 'outputpath'",
-    "jsonpath": "json/",
+    "_option": "max_results: max number of search results to request",
+    "max-results": 100,
 
-    "_option": "datapath: data input path (where to extract metadata from)",
-    "datapath": "/badc/eufar/data/projects",
+    "_option": "output-path: main output directory",
+    "output-path": "/home/ccnewey/ceda-di/out",
 
-    "_option": "numcores: number of processes to use in parallel",
-    "numcores": 3,
+    "_option": "log-path: log dir path, relative to 'outputpath'",
+    "log-path": "log/",
+
+    "_option": "log-file: log file path, relative to 'logpath'",
+    "log-file": "ceda-di.log",
+
+    "_option": "json-path: directory for JSON metadata, relative to 'outputpath'",
+    "json-path": "json/",
+
+    "_option": "input-path: data input path (where to extract metadata from)",
+    "input-path": "/badc/eufar/data/projects",
+
+    "_option": "num-cores: number of processes to use in parallel",
+    "num-cores": 3,
 
     "_option": "logging: options for the 'logging' module",
     "_ref": "(see: https://docs.python.org/2/library/logging.html)",
@@ -24,14 +36,27 @@
         "format": "[%(levelname)s] (%(name)s) %(message)s"
     },
 
-    "_option": {
-        "description": "handlers: python classes to handle data files",
-        "filename pattern": "handler class"
-    },
+    "_option": "handlers: python classes to handle data files",
     "handlers": {
-        "_nav_post_processed.bil.hdr": "envi_geo.BIL",
-        ".hdf": "hdf4_geo.HDF4",
-        ".tif": "exif_geo.EXIF",
-        ".nc": "netcdf_geo.NetCDFFactory"
+        "_nav_post_processed.bil.hdr$": {
+            "class": "ceda_di.envi_geo.BIL",
+            "priority": 10
+        },
+        ".hdf$": {
+            "class": "ceda_di.hdf4_geo.HDF4",
+            "priority": 10
+        },
+        ".tif$": {
+            "class": "ceda_di.exif_geo.EXIF",
+            "priority": 10
+        },
+        ".nc$": {
+            "class": "ceda_di.netcdf_geo.NetCDFFactory",
+            "priority": 1
+        },
+        ".*_CS_.*GRANULE.*\\.hdf$": {
+            "class": "ceda_di.jascis.CloudSat",
+            "priority": 1
+        }
     }
 }
