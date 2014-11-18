@@ -139,7 +139,7 @@ class Properties(object):
         lat_lo, lat_hi = self._get_min_max(lats, filter_func=self.valid_lat)
 
         bbox = {
-            "type": "MultiPoint",
+            "type": "envelope",
             "coordinates": [[lon_lo, lat_lo],
                             [lon_lo, lat_hi],
                             [lon_hi, lat_hi],
