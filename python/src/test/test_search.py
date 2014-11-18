@@ -99,6 +99,133 @@ class TestJsonQueryBuilder(unittest.TestCase):
         with self.assertRaises(ValueError):
             query_builder.build(query_string)
 
+    def test_GIVEN_lat_range_WHEN_build_THEN_lat_bounds_in_json(self):
+        query_builder = JsonQueryBuilder()
+        ymin, ymax = 40, 60
+        query_string = "y=[%s,%s]" % (ymin, ymax)
+        query = query_builder.build(query_string)
+        must = query['query']['filtered']['filter']['bool']['must']
+        shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
+        assert_that(shape['type'], is_('envelope'))
+        assert_that(shape['coordinates'], is_([[-180, ymax], [180, ymin]]))
+
+    def test_GIVEN_single_lat_WHEN_build_THEN_lat_bounds_in_json(self):
+        query_builder = JsonQueryBuilder()
+        lat = 55
+        query_string = "y=[%s]" % lat
+        query = query_builder.build(query_string)
+        must = query['query']['filtered']['filter']['bool']['must']
+        shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
+        assert_that(shape['type'], is_('envelope'))
+        assert_that(shape['coordinates'], is_([[-180, lat], [180, lat]]))
+
+    def test_GIVEN_invalid_lat_WHEN_build_THEN_raises_ValueError(self):
+        query_builder = JsonQueryBuilder()
+        query_string = "y=[51N, 55N]"
+        with self.assertRaises(ValueError):
+            query_builder.build(query_string)
+
+    def test_GIVEN_lat_out_of_range_WHEN_build_THEN_raises_ValueError(self):
+        query_builder = JsonQueryBuilder()
+        query_string = "y=[100]"
+        with self.assertRaises(ValueError):
+            query_builder.build(query_string)
+        query_string = "y=[-91]"
+        with self.assertRaises(ValueError):
+            query_builder.build(query_string)
+
+    def test_GIVEN_lon_range_WHEN_build_THEN_lon_bounds_in_json(self):
+        query_builder = JsonQueryBuilder()
+        xmin, xmax = -140, 160
+        query_string = "x=[%s,%s]" % (xmin, xmax)
+        query = query_builder.build(query_string)
+        must = query['query']['filtered']['filter']['bool']['must']
+        shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
+        assert_that(shape['type'], is_('envelope'))
+        assert_that(shape['coordinates'], is_([[xmin, 90], [xmax, -90]]))
+
+    def test_GIVEN_single_lon_WHEN_build_THEN_lat_bounds_in_json(self):
+        query_builder = JsonQueryBuilder()
+        lon = 120
+        query_string = "x=[%s]" % lon
+        query = query_builder.build(query_string)
+        must = query['query']['filtered']['filter']['bool']['must']
+        shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
+        assert_that(shape['type'], is_('envelope'))
+        assert_that(shape['coordinates'], is_([[lon, 90], [lon, -90]]))
+
+    def test_GIVEN_invalid_lon_WHEN_build_THEN_ValueError(self):
+        query_builder = JsonQueryBuilder()
+        query_string = "x=[90E]"
+        with self.assertRaises(ValueError):
+            query_builder.build(query_string)
+
+    def test_GIVEN_single_lon_less_than_minus_180_WHEN_build_THEN_wraps_around(self):
+        query_builder = JsonQueryBuilder()
+        lon = -190
+        query_string = "x=[%s]" % lon
+        wrapped_lon = 170
+        query = query_builder.build(query_string)
+        must = query['query']['filtered']['filter']['bool']['must']
+        shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
+        assert_that(shape['type'], is_('envelope'))
+        assert_that(shape['coordinates'], is_([[wrapped_lon, 90], [wrapped_lon, -90]]))
+
+    def test_GIVEN_lon_range_less_than_minus_180_WHEN_build_THEN_wraps_around(self):
+        query_builder = JsonQueryBuilder()
+        start, end = -190, 10
+        wrapped_start, wrapped_end = 170, 10
+        query_string = "x=[%s,%s]" % (start, end)
+        query = query_builder.build(query_string)
+        must = query['query']['filtered']['filter']['bool']['must']
+        shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
+        assert_that(shape['type'], is_('envelope'))
+        assert_that(shape['coordinates'], is_([[wrapped_start, 90], [wrapped_end, -90]]))
+
+    def test_GIVEN_single_lon_greater_than_180_WHEN_build_THEN_wraps_around(self):
+        query_builder = JsonQueryBuilder()
+        lon = 200
+        wrapped_lon = -160
+        query_string = "x=[%s]" % lon
+        query = query_builder.build(query_string)
+        must = query['query']['filtered']['filter']['bool']['must']
+        shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
+        assert_that(shape['type'], is_('envelope'))
+        assert_that(shape['coordinates'], is_([[wrapped_lon, 90], [wrapped_lon, -90]]))
+
+    def test_GIVEN_single_lon_greater_than_360_WHEN_build_THEN_wraps_around(self):
+        query_builder = JsonQueryBuilder()
+        lon = 370
+        wrapped_lon = 10
+        query_string = "x=[%s]" % lon
+        query = query_builder.build(query_string)
+        must = query['query']['filtered']['filter']['bool']['must']
+        shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
+        assert_that(shape['type'], is_('envelope'))
+        assert_that(shape['coordinates'], is_([[wrapped_lon, 90], [wrapped_lon, -90]]))
+
+    def test_GIVEN_lon_range_greater_than_180_WHEN_build_THEN_wraps_around(self):
+        query_builder = JsonQueryBuilder()
+        start, end = 0, 270
+        wrapped_start, wrapped_end = 0, -90
+        query_string = "x=[%s,%s]" % (start, end)
+        query = query_builder.build(query_string)
+        must = query['query']['filtered']['filter']['bool']['must']
+        shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
+        assert_that(shape['type'], is_('envelope'))
+        assert_that(shape['coordinates'], is_([[wrapped_start, 90], [wrapped_end, -90]]))
+
+    def test_GIVEN_lon_range_greater_than_360_WHEN_build_THEN_wraps_around(self):
+        query_builder = JsonQueryBuilder()
+        start, end = - 150, 730
+        wrapped_start, wrapped_end = -150, 10
+        query_string = "x=[%s,%s]" % (start, end)
+        query = query_builder.build(query_string)
+        must = query['query']['filtered']['filter']['bool']['must']
+        shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
+        assert_that(shape['type'], is_('envelope'))
+        assert_that(shape['coordinates'], is_([[wrapped_start, 90], [wrapped_end, -90]]))
+
 
 class TestSearcher(unittest.TestCase):
     """

@@ -28,15 +28,41 @@ class JsonQueryBuilder(object):
                                 {'name': 'Single datetime',
                                  'regex': r't=\[([^\[\],]*)\]',
                                  'func': self.process_single_datetime
+                                },
+                                {'name': 'Latitude extents',
+                                 'regex': r'y=\[([^\[\],]*),([^\[\],]*)\]',
+                                 'func': self.process_latitude_extents
+                                },
+                                {'name': 'Single latitude',
+                                 'regex': r'y=\[([^\[\],]*)\]',
+                                 'func': self.process_single_latitude
+                                },
+                                {'name': 'Longitude extents',
+                                 'regex': r'x=\[([^\[\],]*),([^\[\],]*)\]',
+                                 'func': self.process_longitude_extents
+                                },
+                                {'name': 'Single longitude',
+                                 'regex': r'x=\[([^\[\],]*)\]',
+                                 'func': self.process_single_longitude
                                 }]
 
     def process_datetime_extents(self, start, end):
+        """
+        Process a datetime extents search filter and add it to the query dictionary.
+
+        Will parse partial datetimes to maximise the search window - e.g. start=2009, end=2010 will find all results
+        from 2009-01-01T00:00:00 to 2010-12-31T23:59:59
+        :param start: Start datetime string
+        :param end: End datetime string
+        :return:
+        """
         from jasmin_cis.parse_datetime import parse_partial_datetime
         try:
             start = parse_partial_datetime(start, True).isoformat()
             end = parse_partial_datetime(end, False).isoformat()
         except ValueError:
-            raise ValueError("Couldn't parse datetimes: use the ISO-8601 YYYY-MM-DDTHH:MM:SS format.")
+            raise ValueError("Couldn't parse datetimes '{start}' and '{end}': "
+                             "use the ISO-8601 YYYY-MM-DDTHH:MM:SS format.".format(start=start, end=end))
         start_constraint = {
             "range": {
                 "eufar.temporal.start_time": {
@@ -55,7 +81,108 @@ class JsonQueryBuilder(object):
         self._add_to_query_filter("must", end_constraint)
 
     def process_single_datetime(self, datetime):
+        """
+        Process a single datetime search filter and add it to the query dictionary.
+
+        Will parse partial datetimes to maximise the search window - e.g. 2009 will find all results
+        from 2009-01-01T00:00:00 to 2009-12-31T23:59:59
+        :param datetime: Start datetime string
+        :return:
+        """
         self.process_datetime_extents(datetime, datetime)
+
+    def process_latitude_extents(self, lat_1, lat_2):
+        """
+        Process latitude extents search filter and add it to the query dictionary.
+
+        Will always include the region from the lowest latitude specified to the highest, regardless of the order in
+        which they are passed to this function.
+        :param lat_1: Latitude float in the range -90 to +90 degrees.
+        :param lat_2: Latitude float in the range -90 to +90 degrees.
+        :return:
+        """
+        try:
+            lat1 = float(lat_1)
+            lat2 = float(lat_2)
+        except ValueError:
+            raise ValueError("Couldn't parse latitude extents: '{start}' and '{end}'.".format(start=lat_1, end=lat_1))
+        if not (-90 <= lat1 <= 90 and -90 <= lat1 <= 90):
+            raise ValueError("Latitudes out of range: should be in -90 to 90, was {lat1} and {lat2}"
+                             .format(lat1=lat1, lat2=lat2))
+        # Sort them to the correct order
+        bottom = min([lat1, lat2])
+        top = max([lat1, lat2])
+        lat_constraint = {
+            "geo_shape": {
+                "eufar.spatial.geometries.bbox": {
+                    "shape": {
+                        "type": "envelope",
+                        "coordinates": [[-180, top], [180, bottom]]
+                    }
+                }
+            }
+        }
+        self._add_to_query_filter("must", lat_constraint)
+
+    def process_single_latitude(self, lat):
+        """
+        Process a single latitude search filter and add it to the query dictionary.
+
+        :param lat: Latitude to filter by
+        :return:
+        """
+        self.process_latitude_extents(lat, lat)
+
+    def process_longitude_extents(self, start, end):
+        """
+        Process longitude extents search filter and add it to the query dictionary.
+
+        Will automatically constrain start and end longitudes to be within the range -180 to +180 (so they may
+        be specified e.g. as 370). The region searched is always the region from the start longitude to the end latitude
+        :param start: Start latitude
+        :param end: End latitude
+        :return:
+        """
+        try:
+            start = float(start)
+            end = float(end)
+        except ValueError:
+            raise ValueError("Couldn't parse latitude extents: '{start}' and '{end}'.".format(start=start, end=end))
+        start = self._confine_lon(start)
+        end = self._confine_lon(end)
+        lat_constraint = {
+            "geo_shape": {
+                "eufar.spatial.geometries.bbox": {
+                    "shape": {
+                        "type": "envelope",
+                        "coordinates": [[start, 90], [end, -90]]
+                    }
+                }
+            }
+        }
+        self._add_to_query_filter("must", lat_constraint)
+
+    def process_single_longitude(self, lon):
+        """
+        Process a single longitude search filter
+
+        Will automatically constrain to within the range -180 to +180 (so values of e.g. 370 are acceptable).
+        :param lon: Longitude to filter by
+        :return:
+        """
+        self.process_longitude_extents(lon, lon)
+
+    def _confine_lon(self, lon):
+        """
+        Confine a longitude range to -180 -> +180
+        :param lon: Longitude to confine
+        :return: Confined longitude
+        """
+        while lon > 180:
+            lon -= 360
+        while lon < -180:
+            lon += 360
+        return lon
 
     def build(self, extents_string=None, max_results=None):
         """
@@ -88,6 +215,12 @@ class JsonQueryBuilder(object):
 class ElasticsearchClientFactory(object):
 
     def get_client(self, config_args):
+        """
+        Return an appropriately configured Elasticsearch client.
+        :param config_args: Configuration dictionary. Should contain an Elasticsearch hostname under key 'es_host'
+        and an Elasticsearch port under the key 'es_port'.
+        :return:
+        """
         host = config_args['es_host']
         port = config_args['es_port']
         return Elasticsearch(hosts=[{"host": host, "port": port}])
