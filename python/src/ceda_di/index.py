@@ -8,18 +8,21 @@ class BulkIndexer(object):
     by pooling documents and submitting in large bulk requests when
     the document count reaches a certain threshold.
     """
-    def __init__(self, host, port, index, threshold=1000):
+    def __init__(self, es_host, es_port, es_index, threshold=1000):
         """
-        :param str host: The Elasticsearch host.
-        :param int port: The port that the Elasticsearch service runs on.
-        :param str index: The index to submit bulk requests to.
+        :param str es_host: The Elasticsearch host.
+        :param int es_port: The port that the Elasticsearch service runs on.
+        :param str es_index: The index to submit bulk requests to.
         :param int threshold: The number of documents to hold in the buffer before indexing.
         """
-        host_string = "%s:%d" % (host, port)
+        host_string = "%s:%d" % (es_host, es_port)
 
-        self.index = index
+        self.index = es_index
         self.threshold = threshold
         self.es = Elasticsearch([host_string])
+
+        # Dict containing key:value pairs of mapping:[list of documents]
+        # That way, this class can handle indexing multiple types of documents
         self.doc_pool = {}
 
     def __enter__(self):
@@ -44,6 +47,22 @@ class BulkIndexer(object):
         if len(self.doc_pool[mapping]) >= self.threshold:
             self.submit_pool(mapping)
 
+    def index_directory(self, path, mapping):
+        """
+        Indexes all files in a given directory.
+        :param str path: The path to the directory containing the data files.
+        :param str mapping: The mapping type (doc type) for the document to be indexed as.
+        """
+        import os  # Only import in this method - it's not needed anywhere else
+        for root, _, files in os.walk(path):
+            for file_name in files:
+                path = os.path.join(root, file_name)
+                with open(path, 'r') as file_handle:
+                    self.doc_pool[mapping].append(file_handle.read())
+
+        # Make sure all documents are submitted to the index
+        self.submit_pool(mapping)
+
     def submit_pool(self, mapping):
         """
         Submit current document grouping (grouped by mapping) to the
@@ -59,7 +78,7 @@ class BulkIndexer(object):
 
         # We want to see any errors that are thrown up by Elasticsearch
         response = self.es.bulk(docs, index=self.index, doc_type=mapping)
-        if "errors" in response and response["errors"] == True:
+        if response["errors"] is True:
             raise ElasticsearchException(
                 "Error response from Elasticsearch server: %s" % response)
 
@@ -71,4 +90,5 @@ class BulkIndexer(object):
         Submit all current document pools to the ElasticSearch index.
         """
         for mapping in self.doc_pool.keys():
-            self.submit_pool(mapping)
+            if len(self.doc_pool[mapping]) > 0:
+                self.submit_pool(mapping)

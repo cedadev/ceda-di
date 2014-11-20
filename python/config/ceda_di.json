@@ -8,6 +8,9 @@
     "_option": "es_index: Elasticsearch index to use",
     "es_index": "badc",
 
+    "_option": "es_mapping: Elasticsearch document type to index data as",
+    "es_mapping": "eufar",
+
     "_option": "max_results: max number of search results to request",
     "max-results": 100,
 
