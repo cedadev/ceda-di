@@ -21,7 +21,7 @@ Options:
     --max-results=<num>        Max number of results to return when searching
 """
 
-import json
+import simplejson as json
 import os
 import sys
 
@@ -111,7 +111,6 @@ def main():
         # submitted properly to the index (all pools get submitted)
         with BulkIndexer(CONFIG) as index:
             index.index_directory(CONFIG["path-to-json-docs"])
-        print json.dumps(CONF_ARGS, indent=4)
     elif CONF_ARGS["search"]:
         searcher = Searcher(CONFIG)
         searcher.run()

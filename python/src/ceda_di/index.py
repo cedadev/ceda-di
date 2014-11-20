@@ -28,7 +28,7 @@ def create_index(config, elasticsearch):
     index_settings_path = config["es_index_settings"]
     index_name = config["es_index"]
 
-    import json  # Import here as unused in rest of module
+    import simplejson as json  # Import here as unused in rest of module
     with open(index_settings_path, 'r') as settings:
         index_settings = json.load(settings)
 
