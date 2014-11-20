@@ -2,6 +2,33 @@ from elasticsearch import Elasticsearch
 from elasticsearch import ElasticsearchException
 
 
+def _get_host_string(config):
+    """
+    Take appropriate elements from a config dictionary and convert them into
+    a string of format 'host:port'.
+    :param dict config: Application configuration dictionary, including ES config.
+    """
+    host = config["es_host"]
+    port = config["es_port"]
+    return "%s:%d" % (host, port)
+
+
+def create_index(config, elasticsearch):
+    """
+    Set up an index in ElasticSearch, given a configuration file path.
+    :param dict config: Application configuration dictionary, including ES config.
+    :param str index_settings_path: Path to index settings JSON document.
+    """
+    index_settings_path = config["es_settings_path"]
+    index_name = config["es_index"]
+
+    import json  # Import here as unused in rest of module
+    with open(index_settings_path, 'r') as settings:
+        index_settings = json.load(settings)
+
+    elasticsearch.indices.create(index=index_name, body=index_settings)
+
+
 class BulkIndexer(object):
     """
     Context manager for indexing into an ES installation
@@ -10,19 +37,17 @@ class BulkIndexer(object):
     """
     def __init__(self, config, threshold=1000):
         """
-        :param str es_host: The Elasticsearch host.
-        :param int es_port: The port that the Elasticsearch service runs on.
-        :param str es_index: The index to submit bulk requests to.
+        :param dict config: Application configuration dictionary, including ES config.
         :param int threshold: The number of documents to hold in the buffer before indexing.
         """
-        host = config["es_host"]
-        port = config["es_port"]
         self.index = config["es_index"]
         self.default_mapping = config["es_mapping"]
         self.threshold = threshold
+        self.es = Elasticsearch([_get_host_string(config)])
 
-        host_string = "%s:%d" % (host, port)
-        self.es = Elasticsearch([host_string])
+        # If the index doesn't exist, create it
+        if not self.es.exists(self.index):
+            create_index(config, self.es)
 
         # Dict containing key:value pairs of mapping:[list of documents]
         # That way, this class can handle indexing multiple types of documents

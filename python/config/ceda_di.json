@@ -11,6 +11,9 @@
     "_option": "es_mapping: Elasticsearch document type to index data as",
     "es_mapping": "eufar",
 
+    "_option": "es_index_settings: Path to Elasticsearch index settings config",
+    "es_index_settings": "../../../elasticsearch/mapping/index_settings.json",
+
     "_option": "max_results: max number of search results to request",
     "max-results": 100,
 
