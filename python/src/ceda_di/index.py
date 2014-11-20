@@ -1,5 +1,6 @@
 from elasticsearch import Elasticsearch
 from elasticsearch import ElasticsearchException
+from elasticsearch.exceptions import TransportError
 
 
 def _get_host_string(config):
@@ -13,13 +14,18 @@ def _get_host_string(config):
     return "%s:%d" % (host, port)
 
 
+def _index_exists(config, elasticsearch):
+    """
+    """
+
+
 def create_index(config, elasticsearch):
     """
     Set up an index in ElasticSearch, given a configuration file path.
     :param dict config: Application configuration dictionary, including ES config.
     :param str index_settings_path: Path to index settings JSON document.
     """
-    index_settings_path = config["es_settings_path"]
+    index_settings_path = config["es_index_settings"]
     index_name = config["es_index"]
 
     import json  # Import here as unused in rest of module
@@ -46,8 +52,12 @@ class BulkIndexer(object):
         self.es = Elasticsearch([_get_host_string(config)])
 
         # If the index doesn't exist, create it
-        if not self.es.exists(self.index):
+        # This will throw an error if the index already exists this is *fine*
+        try:
             create_index(config, self.es)
+        except TransportError as te:
+            if te[0] != 400:
+                raise TransportError(te)
 
         # Dict containing key:value pairs of mapping:[list of documents]
         # That way, this class can handle indexing multiple types of documents
@@ -65,7 +75,6 @@ class BulkIndexer(object):
         :param str mapping: The mapping to index the document into.
         :param object document: The JSON-serialisable object to index.
         """
-
         # Set default mapping
         if not mapping:
             mapping = self.default_mapping
@@ -86,7 +95,6 @@ class BulkIndexer(object):
         :param str path: The path to the directory containing the data files.
         :param str mapping: The mapping type (doc type) for the document to be indexed as.
         """
-
         # Set default mapping
         if not mapping:
             mapping = self.default_mapping
@@ -107,6 +115,7 @@ class BulkIndexer(object):
         appropriate mapping in the ElasticSearch index.
         :param str mapping: The mapping to submit a to index.
         """
+        # Set default mapping
         if not mapping:
             mapping = self.default_mapping
 

@@ -12,7 +12,7 @@
     "es_mapping": "eufar",
 
     "_option": "es_index_settings: Path to Elasticsearch index settings config",
-    "es_index_settings": "../../../elasticsearch/mapping/index_settings.json",
+    "es_index_settings": "../../elasticsearch/mapping/index_settings.json",
 
     "_option": "max_results: max number of search results to request",
     "max-results": 100,
