@@ -3,9 +3,7 @@
 Usage:
     di.py (--help | --version)
     di.py index [options] <path-to-json-docs>
-                (--host=<host> --port=<port> --index=<name>)
     di.py query [options] <path-to-request-json>
-                (--host=<host> --port=<port> --index=<name>)
     di.py search <extents> [options]
     di.py extract [options] [--send-to-index]
                   [<input-path> (<output-path> | --no-create-files)]
@@ -100,7 +98,7 @@ def main():
     CONFIG.update(CONF_ARGS)
 
     # XXX Check for unimplemented functions and raise error
-    UNIMPL = ["index", "query", "no-create-files"]
+    UNIMPL = ["query", "no-create-files"]
     for cmd in UNIMPL:
         if cmd in CONF_ARGS and CONF_ARGS[cmd]:
             not_implemented(cmd)
@@ -110,10 +108,9 @@ def main():
         extract.run()
     elif CONF_ARGS["index"]:
         # Opening the BulkIndexer as a context manager ensures all docs get
-        # submitted properly to the index
-        with BulkIndexer(**CONFIG) as index:  # Beware: Using **kwargs magic
-            index.index_directory(CONFIG["path-to-json-docs"],
-                                  CONFIG["es_mapping"])
+        # submitted properly to the index (all pools get submitted)
+        with BulkIndexer(CONFIG) as index:
+            index.index_directory(CONFIG["path-to-json-docs"])
     elif CONF_ARGS["search"]:
         searcher = Searcher(CONFIG)
         searcher.run()
