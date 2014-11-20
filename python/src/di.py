@@ -3,11 +3,11 @@
 Usage:
     di.py (--help | --version)
     di.py index [options] <path-to-json-docs>
-                (--host=<host> --port=<port> --index=<name>)
     di.py query [options] <path-to-request-json>
-                (--host=<host> --port=<port> --index=<name>)
+    di.py search <extents> [options]
     di.py extract [options] [--send-to-index]
                   [<input-path> (<output-path> | --no-create-files)]
+    di.py test
 
 Options:
     --help                     Show this screen.
@@ -18,15 +18,19 @@ Options:
     --index=<name>             Specify ElasticSearch index name.
     --send-to-index            Index metadata with ElasticSearch.
     --no-create-files          Don't create JSON metadata files.
+    --max-results=<num>        Max number of results to return when searching
 """
 
-import json
+import simplejson as json
+import os
 import sys
 
 from docopt import docopt
 
 from ceda_di import __version__  # Grab version from package __init__.py
 from ceda_di.extract import Extract
+from ceda_di.index import BulkIndexer
+from ceda_di.search import Searcher
 
 
 def sanitise_args(config):
@@ -78,8 +82,13 @@ CONFIG = {
     }
 }
 
-if __name__ == "__main__":
+
+def main():
     CONF_ARGS = sanitise_args(docopt(__doc__, version=__version__))
+    if 'config' not in CONF_ARGS or not CONF_ARGS["config"]:
+        dir = os.path.dirname(__file__)
+        conf_path = os.path.join(dir, '../../config/ceda_di.json')
+        CONF_ARGS['config'] = conf_path
     CONF_FILE = read_conf(CONF_ARGS["config"])
 
     # Apply updates to CONFIG dictionary in priority order
@@ -89,15 +98,25 @@ if __name__ == "__main__":
     CONFIG.update(CONF_ARGS)
 
     # XXX Check for unimplemented functions and raise error
-    UNIMPL = ["index", "query", "send-to-index", "no-create-files"]
+    UNIMPL = ["query", "no-create-files"]
     for cmd in UNIMPL:
         if cmd in CONF_ARGS and CONF_ARGS[cmd]:
             not_implemented(cmd)
 
     if CONF_ARGS["extract"]:
-        E = Extract(CONFIG)
-        E.run()
-
+        extract = Extract(CONFIG)
+        extract.run()
+    elif CONF_ARGS["index"]:
+        # Opening the BulkIndexer as a context manager ensures all docs get
+        # submitted properly to the index (all pools get submitted)
+        with BulkIndexer(CONFIG) as index:
+            index.index_directory(CONFIG["path-to-json-docs"])
+    elif CONF_ARGS["search"]:
+        searcher = Searcher(CONFIG)
+        searcher.run()
     elif CONF_ARGS["test"]:
         # TODO Would be nice to run unit tests from here later on
         pass
+
+if __name__ == "__main__":
+    main()

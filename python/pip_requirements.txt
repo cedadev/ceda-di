@@ -7,3 +7,16 @@ pyhull==1.5.2
 ExifRead==1.4.2
 requests==2.4.1
 xmltodict==0.9.0
+Cython==0.21.1
+ExifRead==1.4.2
+docopt==0.6.2
+elasticsearch==1.2.0
+h5py==2.3.1
+netCDF4==1.1.1
+numpy==1.9.1
+pyhdf==0.8.3
+pyhull==1.5.3
+requests==2.4.3
+simplejson==3.6.5
+urllib3==1.9.1
+xmltodict==0.9.0

@@ -1,5 +1,5 @@
 from unittest import TestCase
-import json
+import simplejson as json
 import os
 import sys
 import datetime as dt
