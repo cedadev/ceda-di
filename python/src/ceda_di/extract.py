@@ -124,7 +124,9 @@ class Extract(object):
         es = es_factory.get_client(self.configuration)
         props = handler.get_properties()
         if props is not None:
-            es.index(index=self.conf('es-index'), doc_type='eufar', body=str(props))
+            es.index(index=self.conf('es-index'),
+                     doc_type=self.conf('es-mapping'),
+                     body=str(props))
 
     def write_properties(self, fname, _geospatial_obj):
         """
