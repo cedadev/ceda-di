@@ -9,8 +9,8 @@ def _get_host_string(config):
     a string of format 'host:port'.
     :param dict config: Application configuration dictionary, including ES config.
     """
-    host = config["es_host"]
-    port = config["es_port"]
+    host = config["es-host"]
+    port = config["es-port"]
     return "%s:%d" % (host, port)
 
 
@@ -20,8 +20,8 @@ def create_index(config, elasticsearch):
     :param dict config: Application configuration dictionary, including ES config.
     :param str index_settings_path: Path to index settings JSON document.
     """
-    index_settings_path = config["es_index_settings"]
-    index_name = config["es_index"]
+    index_settings_path = config["es-index-settings"]
+    index_name = config["es-index"]
 
     import simplejson as json  # Import here as unused in rest of module
     with open(index_settings_path, 'r') as settings:
@@ -41,8 +41,8 @@ class BulkIndexer(object):
         :param dict config: Application configuration dictionary, including ES config.
         :param int threshold: The number of documents to hold in the buffer before indexing.
         """
-        self.index = config["es_index"]
-        self.default_mapping = config["es_mapping"]
+        self.index = config["es-index"]
+        self.default_mapping = config["es-mapping"]
         self.threshold = threshold
         self.es = Elasticsearch([_get_host_string(config)])
 

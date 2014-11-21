@@ -217,12 +217,12 @@ class ElasticsearchClientFactory(object):
     def get_client(self, config_args):
         """
         Return an appropriately configured Elasticsearch client.
-        :param config_args: Configuration dictionary. Should contain an Elasticsearch hostname under key 'es_host'
-        and an Elasticsearch port under the key 'es_port'.
+        :param config_args: Configuration dictionary. Should contain an Elasticsearch hostname under key 'es-host'
+        and an Elasticsearch port under the key 'es-port'.
         :return:
         """
-        host = config_args['es_host']
-        port = config_args['es_port']
+        host = config_args['es-host']
+        port = config_args['es-port']
         return Elasticsearch(hosts=[{"host": host, "port": port}])
 
 
@@ -254,7 +254,10 @@ class Searcher(object):
         query = self._json_query_builder.build(extents, max_results=max_results)
         es = self._elastic_search_client_factory.get_client(self._config_args)
         try:
-            results = es.search(index=self._config_args.get('es_index'), doc_type='eufar', body=query)
+            # XXX
+            index = self._config_args.get('es-index')
+            doc_type = self._config_args.get('es-mapping')
+            results = es.search(index=index, doc_type=doc_type, body=query)
         except ConnectionError as ex:
             url = es.transport.seed_connections[0].host
             error_msg = "Couldn't connect to elastic search node at {url}. Exception was {exc}".format(url=url,

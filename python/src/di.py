@@ -105,7 +105,8 @@ def main():
 
     if CONF_ARGS["extract"]:
         extract = Extract(CONFIG)
-        extract.run()
+        print json.dumps(CONFIG, indent=4, sort_keys=True)
+        # extract.run()
     elif CONF_ARGS["index"]:
         # Opening the BulkIndexer as a context manager ensures all docs get
         # submitted properly to the index (all pools get submitted)

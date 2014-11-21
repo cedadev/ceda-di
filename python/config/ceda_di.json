@@ -1,18 +1,18 @@
 {
     "_option": "es_host: hostname of Elasticsearch node to use",
-    "es_host": "fatcat-test.jc.rl.ac.uk",
+    "es-host": "fatcat-test.jc.rl.ac.uk",
 
     "_option": "es_port: port number of Elasticsearch node to use",
-    "es_port": 9200,
+    "es-port": 9200,
 
     "_option": "es_index: Elasticsearch index to use",
-    "es_index": "badc",
+    "es-index": "badc",
 
     "_option": "es_mapping: Elasticsearch document type to index data as",
-    "es_mapping": "eufar",
+    "es-mapping": "eufar",
 
     "_option": "es_index_settings: Path to Elasticsearch index settings config",
-    "es_index_settings": "../../elasticsearch/mapping/index_settings.json",
+    "es-index-settings": "../../elasticsearch/mapping/index_settings.json",
 
     "_option": "max_results: max number of search results to request",
     "max-results": 100,
@@ -58,10 +58,6 @@
         },
         ".nc$": {
             "class": "ceda_di.netcdf_geo.NetCDFFactory",
-            "priority": 1
-        },
-        ".*_CS_.*GRANULE.*\\.hdf$": {
-            "class": "ceda_di.jascis.CloudSat",
             "priority": 1
         }
     }
