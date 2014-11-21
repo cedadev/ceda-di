@@ -118,13 +118,13 @@ class Extract(object):
 
     def index_properties(self, filename, handler):
         """
-        Index the file in Elasicsearch
+        Index the file in Elasticsearch
         """
         es_factory = ElasticsearchClientFactory()
         es = es_factory.get_client(self.configuration)
         props = handler.get_properties()
         if props is not None:
-            es.index(index=self.conf('es_index'), doc_type='eufar', body=str(props))
+            es.index(index=self.conf('es_index'), doc_type='eufar', body=str(props), id=props["_id"])
 
     def write_properties(self, fname, _geospatial_obj):
         """
