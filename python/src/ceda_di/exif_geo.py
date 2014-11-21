@@ -56,19 +56,24 @@ class EXIF(_geospatial):
         """
 
         # Traverse XML
-        pos = self.xml["Camera_Image"]["Plane_info"]
-        if "Exterior_orientation" in pos:
-            pos = pos["Exterior_orientation"]["Position"]
-        elif "Position" in pos:
-            pos = pos["Position"]
+        try:
+            pos = self.xml["Camera_Image"]["Plane_info"]
+            if "Exterior_orientation" in pos:
+                pos = pos["Exterior_orientation"]["Position"]
+            elif "Position" in pos:
+                pos = pos["Position"]
 
-        geospatial = {
-            "lat": [float(pos["Latitude"])],
-            "lon": [float(pos["Longitude"])],
-            "alt": [float(pos["Height"])],
-        }
+            geospatial = {
+                "lat": [float(pos["Latitude"])],
+                "lon": [float(pos["Longitude"])],
+                "alt": [float(pos["Height"])],
+            }
 
-        return geospatial
+            return geospatial
+        except (TypeError, KeyError):
+            self.logger.warn("Could not get geospatial data from image: %s" %
+                             self.fname)
+            return {}
 
     def get_temporal(self):
         """
