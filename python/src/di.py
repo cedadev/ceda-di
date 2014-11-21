@@ -3,7 +3,6 @@
 Usage:
     di.py (--help | --version)
     di.py index [options] <path-to-json-docs>
-    di.py query [options] <path-to-request-json>
     di.py search <extents> [options]
     di.py extract [options] [--send-to-index]
                   [<input-path> (<output-path> | --no-create-files)]
@@ -97,16 +96,9 @@ def main():
     CONFIG.update(CONF_FILE)
     CONFIG.update(CONF_ARGS)
 
-    # XXX Check for unimplemented functions and raise error
-    UNIMPL = ["query", "no-create-files"]
-    for cmd in UNIMPL:
-        if cmd in CONF_ARGS and CONF_ARGS[cmd]:
-            not_implemented(cmd)
-
     if CONF_ARGS["extract"]:
         extract = Extract(CONFIG)
-        print json.dumps(CONFIG, indent=4, sort_keys=True)
-        # extract.run()
+        extract.run()
     elif CONF_ARGS["index"]:
         # Opening the BulkIndexer as a context manager ensures all docs get
         # submitted properly to the index (all pools get submitted)
