@@ -14,11 +14,6 @@ def _get_host_string(config):
     return "%s:%d" % (host, port)
 
 
-def _index_exists(config, elasticsearch):
-    """
-    """
-
-
 def create_index(config, elasticsearch):
     """
     Set up an index in ElasticSearch, given a configuration file path.
