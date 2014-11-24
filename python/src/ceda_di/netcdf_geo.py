@@ -14,6 +14,7 @@ class NetCDFFactory(object):
     """
     Factory for checking, handling and returning an appropriate metadata
     extraction class.
+
     :param str fpath: Path to NetCDF file
     """
     def __init__(self, fpath):
@@ -49,14 +50,16 @@ class NetCDFFactory(object):
 class NetCDF_Base(_geospatial):
     """
     Base class - provides common NetCDF metadata extraction methods
+
     :param str fpath: Path to NetCDF file
     """
     @staticmethod
     def params(ncdf):
         """
         Construct list of Parameters based on variables in NetCDF file.
+
         :param Dataset ncdf: Reference to an opened netcdf4.Dataset object
-        :return list: List of metadata.product.Parameter objects
+        :returns list: List of metadata.product.Parameter objects
         """
         params = []
         for v_name, v_data in ncdf.variables.iteritems():
@@ -83,10 +86,11 @@ class NetCDF_Base(_geospatial):
     def geospatial(ncdf, lat_name, lon_name):
         """
         Return a dict containing lat/lons from NetCDF file.
+
         :param Dataset ncdf: Reference to an opened netcdf4.Dataset object
         :param lat_name: Name of parameter containing latitude values
         :param lon_name: Name of parameter containing longitude values
-        :return geospatial: Geospatial information as dict.
+        :returns: Geospatial information as dict.
         """
 
         # Filter out items that are equal to "masked"
@@ -103,6 +107,7 @@ class NetCDF_Base(_geospatial):
     def temporal(ncdf, time_name):
         """
         Extract time values from Dataset using the variable name provided.
+
         :param Dataset ncdf: Reference to an opened netcdf4.Dataset object
         :param str time_name: Name of the time parameter
         """
@@ -117,6 +122,7 @@ class NetCDF_Base(_geospatial):
     def find_var_by_standard_name(ncdf, standard_name):
         """
         Find a variable reference searching by CF standard name.
+
         :param Dataset ncdf: Reference to an opened netCDF4.Dataset object
         :param str standard_name: The CF standard name to search for
         """
@@ -135,6 +141,7 @@ class NetCDF_Base(_geospatial):
     def find_var_by_regex(ncdf, regex):
         """
         Find a variable reference searching by regular expression.
+
         :param Dataset ncdf: Reference to an opened netCDF4.Dataset object
         :param re regex: Regular expression to match with variable name
         """
@@ -177,7 +184,8 @@ class NetCDF_CF(_geospatial):
     def get_properties(self):
         """
         Return a metadata.product.Properties object populated with metadata.
-        :return properties: Properties object populated with metadata
+
+        :returns: Properties object populated with metadata
         """
         data_format = {"format": ("NetCDF/%s" % self.convention)}
         return product.Properties(temporal=self.get_temporal(),
@@ -223,7 +231,8 @@ class NetCDF_RAF(_geospatial):
     def get_properties(self):
         """
         Return a metadata.product.Properties object populated with metadata.
-        :return properties: Properties object populated with metadata
+
+        :returns: Properties object populated with metadata
         """
         data_format = {"format": ("NetCDF/%s" % self.convention)}
         return product.Properties(temporal=self.get_temporal(),

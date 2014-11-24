@@ -31,7 +31,8 @@ class EXIF(_geospatial):
     def __enter__(self):
         """
         Context manager entry method (e.g. "with" statement)
-        :return self:
+
+        :returns: Self.
         """
 
         try:
@@ -52,7 +53,8 @@ class EXIF(_geospatial):
     def get_geospatial(self):
         """
         Return a dictionary containing geospatial extent metadata.
-        :return dict: Dictionary containing geospatial extent metadata.
+
+        :returns: Dictionary containing geospatial extent metadata.
         """
 
         # Traverse XML
@@ -78,7 +80,8 @@ class EXIF(_geospatial):
     def get_temporal(self):
         """
         Return a dictionary containing temporal extent metadata
-        :return dict: Dictionary containing temporal extent metadata
+
+        :returns: Dictionary containing temporal extent metadata
         """
         proj = self.xml["Camera_Image"]["Project_info"]
 
@@ -107,7 +110,8 @@ class EXIF(_geospatial):
         """
         Return a ceda_di.metadata.product.Properties object populated with the
         file's metadata.
-        :return props: A ceda_di.metadata.product.Properties object
+
+        :returns: A ceda_di.metadata.product.Properties object
         """
         filesystem = super(EXIF, self).get_filesystem(self.fname)
         data_format = {

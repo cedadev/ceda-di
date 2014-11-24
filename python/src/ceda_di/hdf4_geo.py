@@ -30,7 +30,8 @@ class HDF4(_geospatial):
     def __enter__(self):
         """
         Open HDF file and interfaces for use as context manager.
-        :return self:
+
+        :returns: Self.
         """
         self.hdf = HDF(self.fname)
         self.vs = self.hdf.vstart()
@@ -52,7 +53,7 @@ class HDF4(_geospatial):
 
         :param HDF4.V.vs vs: VData object
         :param str fn: Path to the data file
-        :return dict: Dict containing geospatial information.
+        :returns: Dict containing geospatial information.
         """
         mappings = {
             "NVlat2": "lat",
@@ -77,10 +78,11 @@ class HDF4(_geospatial):
 
     def _get_temporal(self, vs, fn):
         """
-        Returns start and end timestamps (if existing)
+        Return start and end timestamps (if existing)
+
         :param HDF4.V.vs vs: VData object
         :param str fn: Path to the data file
-        :return dict: Dict containing temporal information.
+        :returns: Dict containing temporal information.
         """
         mappings = {
             "MIdate": "date",
@@ -116,8 +118,9 @@ class HDF4(_geospatial):
     def _parse_timestamps(self, tm_dict):
         """
         Parse start and end timestamps from an HDF4 file.
+
         :param dict tm_dict: The timestamp to be parsed
-        :return dict: Dict containing start and end timestamps
+        :returns: Dict containing start and end timestamps
         """
         st_base = ("%s %s" % (tm_dict["date"], tm_dict["start_time"][0]))
         et_base = ("%s %s" % (tm_dict["date"], tm_dict["end_time"][0]))
@@ -138,7 +141,8 @@ class HDF4(_geospatial):
         """
         Search through HDF4 file, returning a list of coordinates from the
         'Navigation' vgroup (if it exists).
-        :return dict: Dict containing geospatial information.
+
+        :returns: Dict containing geospatial information.
         """
         ref = -1
         while True:
@@ -163,7 +167,8 @@ class HDF4(_geospatial):
         """
         Search through HDF4 file, returning timestamps from the 'Mission'
         vgroup (if it exists)
-        :return list: List containing temporal metadata
+
+        :returns: List containing temporal metadata
         """
         ref = -1
         while True:
@@ -188,7 +193,8 @@ class HDF4(_geospatial):
         """
         Returns ceda_di.metadata.properties.Properties object
         containing geospatial and temporal metadata from file.
-        :return ceda_di.metadata.properties.Properties: Metadata object
+
+        :returns: Metadata.product.Properties object
         """
         geospatial = self.get_geospatial()
         temporal = self.get_temporal()

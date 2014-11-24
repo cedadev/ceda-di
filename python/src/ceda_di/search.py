@@ -5,7 +5,6 @@ import sys
 
 
 class JsonQueryBuilder(object):
-
     def __init__(self):
         self.query_dict = {
             "query": {
@@ -21,7 +20,8 @@ class JsonQueryBuilder(object):
             },
             "size": 10
         }
-        self.extent_handlers = [{'name': 'Datetime extents',
+        self.extent_handlers = [{
+                                 'name': 'Datetime extents',
                                  'regex': r't=\[([^\[\],]*),([^\[\],]*)\]',
                                  'func': self.process_datetime_extents
                                 },
@@ -52,9 +52,10 @@ class JsonQueryBuilder(object):
 
         Will parse partial datetimes to maximise the search window - e.g. start=2009, end=2010 will find all results
         from 2009-01-01T00:00:00 to 2010-12-31T23:59:59
+
         :param start: Start datetime string
         :param end: End datetime string
-        :return:
+        :returns:
         """
         from jasmin_cis.parse_datetime import parse_partial_datetime
         try:
@@ -87,7 +88,7 @@ class JsonQueryBuilder(object):
         Will parse partial datetimes to maximise the search window - e.g. 2009 will find all results
         from 2009-01-01T00:00:00 to 2009-12-31T23:59:59
         :param datetime: Start datetime string
-        :return:
+        :returns:
         """
         self.process_datetime_extents(datetime, datetime)
 
@@ -97,9 +98,10 @@ class JsonQueryBuilder(object):
 
         Will always include the region from the lowest latitude specified to the highest, regardless of the order in
         which they are passed to this function.
+
         :param lat_1: Latitude float in the range -90 to +90 degrees.
         :param lat_2: Latitude float in the range -90 to +90 degrees.
-        :return:
+        :returns:
         """
         try:
             lat1 = float(lat_1)
@@ -129,7 +131,7 @@ class JsonQueryBuilder(object):
         Process a single latitude search filter and add it to the query dictionary.
 
         :param lat: Latitude to filter by
-        :return:
+        :returns:
         """
         self.process_latitude_extents(lat, lat)
 
@@ -141,7 +143,7 @@ class JsonQueryBuilder(object):
         be specified e.g. as 370). The region searched is always the region from the start longitude to the end latitude
         :param start: Start latitude
         :param end: End latitude
-        :return:
+        :returns:
         """
         try:
             start = float(start)
@@ -164,19 +166,21 @@ class JsonQueryBuilder(object):
 
     def process_single_longitude(self, lon):
         """
-        Process a single longitude search filter
+        Process a single longitude search filter.
 
         Will automatically constrain to within the range -180 to +180 (so values of e.g. 370 are acceptable).
+
         :param lon: Longitude to filter by
-        :return:
+        :returns:
         """
         self.process_longitude_extents(lon, lon)
 
     def _confine_lon(self, lon):
         """
-        Confine a longitude range to -180 -> +180
+        Confine a longitude range to -180 -> +180.
+
         :param lon: Longitude to confine
-        :return: Confined longitude
+        :returns: Confined longitude
         """
         while lon > 180:
             lon -= 360
@@ -186,10 +190,11 @@ class JsonQueryBuilder(object):
 
     def build(self, extents_string=None, max_results=None):
         """
-        Builds an Elasticsearch query dictionary from a given extents string
+        Build an Elasticsearch query dictionary from a given extents string.
+
         :param extents_string: A string specifying temporal or spatial extents
         e.g. 't=[2014-10-12T12:13:14,2014-10-12T17:18:19]'
-        :return: a dictionary which is valid Elasticsearch query JSON.
+        :returns: a dictionary which is valid Elasticsearch query JSON.
         """
         if max_results is not None:
             self.query_dict['size'] = max_results
@@ -205,9 +210,10 @@ class JsonQueryBuilder(object):
     def _add_to_query_filter(self, filter_logic, filter_dict):
         """
         Add a filter dictionary to the overall query dictionary.
+
         :param filter_logic: Elasticsearch filter logic: one of 'must', 'must_not', 'should'.
         :param filter_dict: Filter dictionary (e.g {"range": {...}})
-        :return: None
+        :returns: None
         """
         self.query_dict['query']['filtered']['filter']['bool'][filter_logic].append(filter_dict)
 
@@ -217,9 +223,10 @@ class ElasticsearchClientFactory(object):
     def get_client(self, config_args):
         """
         Return an appropriately configured Elasticsearch client.
+
         :param config_args: Configuration dictionary. Should contain an Elasticsearch hostname under key 'es-host'
         and an Elasticsearch port under the key 'es-port'.
-        :return:
+        :returns:
         """
         host = config_args['es-host']
         port = config_args['es-port']
@@ -234,11 +241,12 @@ class Searcher(object):
     def __init__(self, config_args, json_query_builder=JsonQueryBuilder(),
                  elastic_search_client_factory=ElasticsearchClientFactory()):
         """
-        Creates a new Searcher instance
+        Create a new Searcher instance.
+
         :param config_args: Configuration / command line args dictionary (includes the extents string)
         :param json_query_builder: Takes the user input extents string and converts it to Elasticsearch query DSL JSON
         :param elastic_search_client_factory: Creates appropriately configured Elasticsearch client instances
-        :return: A new Searcher instance
+        :returns: A new Searcher instance
         """
         self._elastic_search_client_factory = elastic_search_client_factory
         self._json_query_builder = json_query_builder
@@ -246,8 +254,9 @@ class Searcher(object):
 
     def run(self):
         """
-        Run the search and output the results matching the configuration belonging to this instance
-        :return: Outputs matching filenames to sys.stdout
+        Run the search and output the results matching the configuration belonging to this instance.
+
+        :returns: Outputs matching filenames to sys.stdout
         """
         extents = self._config_args.get('extents')
         max_results = self._config_args.get('max-results')
@@ -269,9 +278,10 @@ class Searcher(object):
 
     def _print_results(self, results):
         """
-        Print the result's filepaths
+        Print the result's file paths.
+
         :param results: Elasticsearch query results JSON
-        :return: Prints the results' filepaths to sys.stdout
+        :returns: Prints the results' filepaths to sys.stdout
         """
         hits = results['hits']['hits']
         for hit in hits:

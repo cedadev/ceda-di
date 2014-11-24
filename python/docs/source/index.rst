@@ -6,20 +6,23 @@ Introduction
 
 The ceda_di module is a Python backend to interface with a wide range of historical scientific data formats.
 
-Within this module, you will find:
+Within this project, you will find:
 
-* Library interfaces to common scientific data file formats (focusing mostly on data formats within the ceda_di archive), including:
+* Library interfaces to common scientific data formats (focusing mostly on data formats within the BADC archive), including:
     * NetCDF
     * HDF4
     * GeoTIFF
     * ENVI BIL/BSQ
 * Interfaces to the file format modules, to enable extraction of domain-specific metadata (including geospatial/temporal metadata)
-* A main file discovery/parsing script - designed to be run in parallel on a multi-core processor with access to the CEDA archive
+* A command-line interface to a suite of tools designed to be run on a multi-core system with filesystem access to scientific data. This includes:
+    * A tool to extract metadata from common scientific data formats
+    * A tool to index metadata into an Elasticsearch installation
+    * A suite of tools to query and visualise the data stored within Elasticsearch
 
 Project Goals
 -------------
 
-This module set was developed with focus on a particular project - this project included the following goals:
+The metadata extraction toolkit was developed with following goals:
 
 * Extract geospatial, temporal and parameter metadata from a historical dataset with homogenous data stored in various file formats
 * Generate JSON documents from the readable files containing geospatial and temporal metadata
