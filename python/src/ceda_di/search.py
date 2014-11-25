@@ -192,9 +192,8 @@ class JsonQueryBuilder(object):
         """
         Build an Elasticsearch query dictionary from a given extents string.
 
-        :param extents_string: A string specifying temporal or spatial extents
-        e.g. 't=[2014-10-12T12:13:14,2014-10-12T17:18:19]'
-        :returns: a dictionary which is valid Elasticsearch query JSON.
+        :param extents_string: A string specifying temporal or spatial extents, e.g. 't=[2014-10-12T12:13:14,2014-10-12T17:18:19]'.
+        :returns: A dictionary which is valid Elasticsearch query JSON.
         """
         if max_results is not None:
             self.query_dict['size'] = max_results
@@ -224,9 +223,8 @@ class ElasticsearchClientFactory(object):
         """
         Return an appropriately configured Elasticsearch client.
 
-        :param config_args: Configuration dictionary. Should contain an Elasticsearch hostname under key 'es-host'
-        and an Elasticsearch port under the key 'es-port'.
-        :returns:
+        :param config_args: Configuration dictionary. Should contain an Elasticsearch hostname under key 'es-host' and an Elasticsearch port under the key 'es-port'.
+        :returns: A configured Elasticsearch instance
         """
         host = config_args['es-host']
         port = config_args['es-port']
