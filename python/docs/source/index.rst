@@ -1,5 +1,5 @@
-Welcome to ceda_di's documentation!
-========================================
+ceda-di (CEDA Data Index)
+=========================
 
 Introduction
 ------------
@@ -19,6 +19,7 @@ Within this project, you will find:
     * A tool to index metadata into an Elasticsearch installation
     * A suite of tools to query and visualise the data stored within Elasticsearch
 
+
 Project Goals
 -------------
 
@@ -29,13 +30,83 @@ The metadata extraction toolkit was developed with following goals:
 * Ingest the created JSON documents into an enterprise full-text search system (ElasticSearch)
 * Build a query system around the ElasticSearch module
 
-Module Contents:
+
+Setup
+-----
+
+.. code-block:: bash
+
+    bash code goes here
+
+
+Command-line Usage
+==================
+
+Usage string
+------------
+
+The usage string for the command-line application is as follows:
+
+.. literalinclude:: ../../src/di.py
+    :language: python
+    :lines: 2-21
+    :linenos:
+
+
+Sample usage
+------------
+
+**Note:** This is not a comprehensive guide! Please refer to the :doc:`commandline`
+documentation for a more thorough explanation.
+
+.. code-block:: bash
+
+    # Extracts metadata from files in /path/to/input
+    # Outputs data to Elasticsearch (--send-to-index)
+    # Outputs JSON files to /path/to/output
+    di.py extract --send-to-index /path/to/input /path/to/output
+
+    # Extracts metadata from files in /path/to/input
+    # Outputs data to Elasticsearch (--send-to-index)
+    # Does not create JSON documents (--no-create-files)
+    di.py extract --no-create-files --send-to-index /path/to/input
+
+    # Finds all JSON documents in /path/to/json and sends to Elasticsearch
+    di.py index /path/to/json
+
+    # Run unit tests
+    di.py test
+
+
+More information
+----------------
+
+For more information, see the section on the :doc:`commandline`.
+
+
+Configuration File
+==================
+
+Format
+------
+
+The configuration for the command-line interface for ``di.py`` is written in a JSON file with various nested elements for various options.
+
+More information
+----------------
+
+For a full summary of all configuration options, read the section on the :doc:`configuration`.
+
+
+Module Contents
 ================
 
 .. toctree::
+    commandline
+    configuration
     modules
 
-Indices and tables
+Indices and Tables
 ==================
 
 * :ref:`genindex`
