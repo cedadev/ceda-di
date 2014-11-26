@@ -31,14 +31,6 @@ The metadata extraction toolkit was developed with following goals:
 * Build a query system around the ElasticSearch module
 
 
-Setup
------
-
-.. code-block:: bash
-
-    bash code goes here
-
-
 Command-line Usage
 ==================
 
@@ -104,7 +96,6 @@ Module Contents
 .. toctree::
     commandline
     configuration
-    modules
 
 Indices and Tables
 ==================
