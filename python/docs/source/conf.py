@@ -25,11 +25,10 @@ from ceda_di import __version__
 # This stubs out some of the imports using a MagicMock if docs are being
 # built on ReadTheDocs.org
 readthedocs = (os.environ.get("READTHEDOCS", None) == "True")
-readthedocs = True
 if readthedocs:
-    from mock import Mock as MagicMock
+    import mock
 
-    class Mock(MagicMock):
+    class Mock(mock.Mock):
         @classmethod
         def __getitem__(cls, name):
             return Mock()
@@ -38,6 +37,28 @@ if readthedocs:
     with open("../../pip_requirements.txt", "r") as f:
         MOCK_MODULES = [l.rstrip().split("=")[0].rstrip(">=<")
                         for l in f.readlines()]
+
+        MOCK_MODULES.extend([
+            "cartopy.crs",
+            "cartopy.feature",
+            "elasticsearch.exceptions",
+            "iris.analysis",
+            "iris.coord_systems",
+            "iris.cube",
+            "iris.fileformats",
+            "iris.fileformats.dot",
+            "jasmin_cis.data_io.products.products",
+            "numpy.dtype",
+            "numpy.ma",
+            "pyhdf.error",
+            "pyhdf.HDF",
+            "pyhdf.SD",
+            "pyhdf.V",
+            "pyhdf.VS",
+            "pyhull.convex_hull",
+            "scipy.interpolate",
+            "urllib.request",
+        ])
 
     for mod_name in MOCK_MODULES:
         if ((mod_name != "mock") and
