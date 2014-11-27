@@ -22,6 +22,28 @@ from ceda_di import __version__
 
 # -- General configuration ------------------------------------------------
 
+# This stubs out some of the imports using a MagicMock if docs are being
+# built on ReadTheDocs.org
+readthedocs = (os.environ.get("READTHEDOCS", None) == "True")
+readthedocs = True
+if readthedocs:
+    from mock import Mock as MagicMock
+
+    class Mock(MagicMock):
+        @classmethod
+        def __getitem__(cls, name):
+            return Mock()
+
+    MOCK_MODULES = []
+    with open("../../pip_requirements.txt", "r") as f:
+        MOCK_MODULES = [l.rstrip().split("=")[0].rstrip(">=<")
+                        for l in f.readlines()]
+
+    for mod_name in MOCK_MODULES:
+        if ((mod_name != "mock") and
+                (mod_name != "docutils")):
+            sys.modules[mod_name] = Mock()
+
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'
 
@@ -29,9 +51,7 @@ from ceda_di import __version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.coverage',
-    'sphinx.ext.viewcode',
+    'sphinx.ext.autodoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
