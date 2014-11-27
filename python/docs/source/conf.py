@@ -22,6 +22,50 @@ from ceda_di import __version__
 
 # -- General configuration ------------------------------------------------
 
+# This stubs out some of the imports using a MagicMock if docs are being
+# built on ReadTheDocs.org
+readthedocs = (os.environ.get("READTHEDOCS", None) == "True")
+if readthedocs:
+    import mock
+
+    class Mock(mock.Mock):
+        @classmethod
+        def __getitem__(cls, name):
+            return Mock()
+
+    MOCK_MODULES = []
+    with open("../../pip_requirements.txt", "r") as f:
+        MOCK_MODULES = [l.rstrip().split("=")[0].rstrip(">=<")
+                        for l in f.readlines()]
+
+        MOCK_MODULES.extend([
+            "cartopy.crs",
+            "cartopy.feature",
+            "elasticsearch.exceptions",
+            "exifread",
+            "iris.analysis",
+            "iris.coord_systems",
+            "iris.cube",
+            "iris.fileformats",
+            "iris.fileformats.dot",
+            "jasmin_cis.data_io.products.products",
+            "numpy.dtype",
+            "numpy.ma",
+            "pyhdf.error",
+            "pyhdf.HDF",
+            "pyhdf.SD",
+            "pyhdf.V",
+            "pyhdf.VS",
+            "pyhull.convex_hull",
+            "scipy.interpolate",
+            "urllib.request",
+        ])
+
+    for mod_name in MOCK_MODULES:
+        if ((mod_name != "mock") and
+                (mod_name != "docutils")):
+            sys.modules[mod_name] = Mock()
+
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'
 
@@ -29,9 +73,7 @@ from ceda_di import __version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.coverage',
-    'sphinx.ext.viewcode',
+    'sphinx.ext.autodoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
