@@ -42,6 +42,7 @@ if readthedocs:
             "cartopy.crs",
             "cartopy.feature",
             "elasticsearch.exceptions",
+            "exifread",
             "iris.analysis",
             "iris.coord_systems",
             "iris.cube",
