@@ -11,6 +11,8 @@ man/
 out/
 dist/
 
+ceda_di.rst
+ceda_di.metadata.rst
 *.pyc
 *.egg-info
 *~
