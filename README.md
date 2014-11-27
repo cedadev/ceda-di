@@ -13,12 +13,18 @@ The Python backend is designed to be run on a system with a large number of CPU
 cores. It extracts metadata from scientific data files and outputs it as
 platform-independent JSON documents.
 
-This JSON metadata can then be stored in a NoSQL data store such as 
+This JSON metadata can then be stored in a NoSQL data store such as
 ElasticSearch. This repository contains some example applications of the
 toolkit, including an Ansible playbook to set up and configure an ElasticSearch
-cluster. This repo also contains a sample web interface that allows for 
+cluster. This repo also contains a sample web interface that allows for
 real-time faceted search (including full-text, temporal, and geospatial facets)
 and live display of data files on a map.
+
+
+Documentation Status
+====================
+
+[![Documentation Status](https://readthedocs.org/projects/ceda-di/badge/?version=latest)](https://readthedocs.org/projects/ceda-di/?badge=latest)
 
 
 Guide to This Repository
