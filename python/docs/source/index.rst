@@ -96,6 +96,7 @@ Module Contents
 .. toctree::
     commandline
     configuration
+    contrbuting
 
 Indices and Tables
 ==================
