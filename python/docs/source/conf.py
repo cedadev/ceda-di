@@ -90,7 +90,9 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'ceda_di'
-copyright = u'2014, Charles Newey <charles.newey@stfc.ac.uk>'
+copyright = '2014 ' + \
+            '<http://www.ceda.ac.uk/> ' + \
+            '<charles.newey@stfc.ac.uk>'
 
 # Version/release strings
 version = __version__
