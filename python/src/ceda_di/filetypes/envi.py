@@ -5,7 +5,7 @@ Also contains methods for extracting metadata (geospatial/temporal).
 
 import logging
 
-from ceda_di import envi_io
+from ceda_di.filetypes.file_io import envi_io
 from ceda_di.metadata import product
 from ceda_di._dataset import _geospatial
 
