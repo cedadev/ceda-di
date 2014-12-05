@@ -45,15 +45,15 @@
     "_option": "handlers: python classes to handle data files",
     "handlers": {
         "_nav_post_processed.bil.hdr$": {
-            "class": "ceda_di.filetypes.envi.BIL",
+            "class": "ceda_di.providers.arsf.envi.BIL",
             "priority": 10
         },
         ".hdf$": {
-            "class": "ceda_di.filetypes.hdf4.HDF4",
+            "class": "ceda_di.providers.arsf.hdf4.HDF4",
             "priority": 10
         },
         ".tif$": {
-            "class": "ceda_di.filetypes.exif.EXIF",
+            "class": "ceda_di.providers.arsf.exif.EXIF",
             "priority": 10
         },
         ".nc$": {
