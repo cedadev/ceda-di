@@ -45,19 +45,19 @@
     "_option": "handlers: python classes to handle data files",
     "handlers": {
         "_nav_post_processed.bil.hdr$": {
-            "class": "ceda_di.envi_geo.BIL",
+            "class": "ceda_di.providers.arsf.envi.BIL",
             "priority": 10
         },
         ".hdf$": {
-            "class": "ceda_di.hdf4_geo.HDF4",
+            "class": "ceda_di.providers.arsf.hdf4.HDF4",
             "priority": 10
         },
         ".tif$": {
-            "class": "ceda_di.exif_geo.EXIF",
+            "class": "ceda_di.providers.arsf.exif.EXIF",
             "priority": 10
         },
         ".nc$": {
-            "class": "ceda_di.netcdf_geo.NetCDFFactory",
+            "class": "ceda_di.filetypes.netcdf.NetCDFFactory",
             "priority": 1
         }
     }

@@ -5,7 +5,8 @@ Also contains methods for extracting metadata (geospatial/temporal).
 
 import logging
 
-from ceda_di import envi_io
+from ceda_di.filetypes.file_io import envi_io
+from ceda_di.providers import arsf
 from ceda_di.metadata import product
 from ceda_di._dataset import _geospatial
 
@@ -97,11 +98,13 @@ class ENVI(_geospatial):
         if "band names" in self.parameters:
             self.parameters = self.parameters["band names"]
 
+        instrument = arsf.Hyperspectral.get_instrument(filesystem["filename"])
         prop = product.Properties(filesystem=filesystem,
                                   temporal=self.get_temporal(),
                                   data_format=self.get_data_format(),
                                   spatial=self.get_geospatial(),
-                                  parameters=self.get_parameters())
+                                  parameters=self.get_parameters(),
+                                  instrument=instrument)
         return prop
 
 
