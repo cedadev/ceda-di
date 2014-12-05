@@ -35,8 +35,9 @@ from ceda_di.search import Searcher
 def sanitise_args(config):
     """
     Sanitise command-line configuration.
+
     :param config: Config dictionary (from docopt)
-    :return dict: Config dictionary with all keys stripped of '<' '>' and '--'
+    :returns: Config dictionary with all keys stripped of '<' '>' and '--'
     """
     sane_conf = {}
     for key, value in config.iteritems():
@@ -50,8 +51,9 @@ def sanitise_args(config):
 def read_conf(conf_path):
     """
     Read configuration file into a dictionary.
+
     :param conf_path: Path to the JSON configuration file
-    :return dict: Dict containing parsed JSON conf
+    :returns: Dict containing parsed JSON conf
     """
     try:
         with open(conf_path, "r") as conf:
@@ -65,6 +67,7 @@ def read_conf(conf_path):
 def not_implemented(option):
     """
     Raise a NotImplementedError with a message saying "option" is unimplemented.
+
     :param str option: Name of the unimplemented command/option.
     """
     raise NotImplementedError(

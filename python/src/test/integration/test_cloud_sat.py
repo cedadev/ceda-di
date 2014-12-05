@@ -73,9 +73,10 @@ class TestCloudSat(TestCase):
             """
             Get the value of a specified variable attribute from a list of attribute dictionaries,
             each containing a 'name' and 'value' key.
+
             :param variable_attributes: List of variable attribute dictionaries of format
             {"name": name, "value": value}
-            :return: value of matching attribute
+            :returns: value of matching attribute
             """
             for attribute in variable_attributes:
                 if attribute['name'] == attribute_name:

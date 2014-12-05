@@ -11,7 +11,7 @@
             "analyzer": {
                 "variable_name_analyzer": {
                     "type": "custom",
-                    "tokenizer": "lowercase",
+                    "tokenizer": "keyword",
                     "filter": ["min_length_5_filter"]
                 }
             }

@@ -12,6 +12,5 @@ out/
 dist/
 
 *.pyc
-*.rst
 *.egg-info
 *~
