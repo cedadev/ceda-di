@@ -11,6 +11,7 @@ from pyhdf.error import HDF4Error
 
 from ceda_di._dataset import _geospatial
 from ceda_di.metadata import product
+from ceda_di.providers import arsf
 
 
 class HDF4(_geospatial):
@@ -203,6 +204,7 @@ class HDF4(_geospatial):
             "format": "HDF4",
         }
 
+        instrument = arsf.Hyperspectral.get_instrument(filesystem["filename"])
         props = product.Properties(spatial=geospatial,
                                    temporal=temporal,
                                    filesystem=filesystem,
