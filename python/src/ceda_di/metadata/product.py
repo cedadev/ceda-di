@@ -143,10 +143,12 @@ class Properties(object):
 
         bbox = {
             "type": "envelope",
-            "coordinates": [[lon_lo, lat_lo],
-                            [lon_lo, lat_hi],
-                            [lon_hi, lat_hi],
-                            [lon_hi, lat_lo]]
+            "coordinates": [
+                [lon_hi, lat_hi],
+                [lon_hi, lat_lo],
+                [lon_lo, lat_lo],
+                [lon_lo, lat_hi]
+            ]
         }
 
         return bbox

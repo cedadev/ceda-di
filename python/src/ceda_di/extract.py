@@ -9,7 +9,11 @@ import multiprocessing
 import os
 import sys
 import re
+
+from elasticsearch.exceptions import TransportError
+
 from ceda_di.search import ElasticsearchClientFactory
+from ceda_di import index
 
 
 class HandlerFactory(object):
@@ -113,20 +117,18 @@ class Extract(object):
             with handler as hand:
                 if self.conf('send-to-index'):
                     self.index_properties(filename, hand)
-                else:
+                if not self.conf('no-create-files'):
                     self.write_properties(filename, hand)
 
     def index_properties(self, filename, handler):
         """
         Index the file in Elasicsearch
         """
-        es_factory = ElasticsearchClientFactory()
-        es = es_factory.get_client(self.configuration)
         props = handler.get_properties()
         if props is not None:
-            es.index(index=self.conf('es-index'),
-                     doc_type=self.conf('es-mapping'),
-                     body=str(props))
+            self.es.index(index=self.conf('es-index'),
+                          doc_type=self.conf('es-mapping'),
+                          body=str(props))
 
     def write_properties(self, fname, _geospatial_obj):
         """
@@ -150,6 +152,19 @@ class Extract(object):
         start = datetime.datetime.now()
         self.logger.info("Metadata extraction started at: %s",
                          start.isoformat())
+
+        # Create index if necessary
+        if self.conf("send-to-index"):
+            es_factory = ElasticsearchClientFactory()
+            self.es = es_factory.get_client(self.configuration)
+
+            try:
+                index.create_index(self.configuration, self.es)
+            except TransportError as te:
+                if te[0] == 400:
+                    pass
+                else:
+                    raise TransportError(te)
 
         # Build list of file paths
         data_files = []
