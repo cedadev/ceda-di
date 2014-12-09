@@ -1,7 +1,9 @@
 import re
+import sys
+
+import simplejson as json
 
 from elasticsearch import Elasticsearch, ConnectionError
-import sys
 
 
 class JsonQueryBuilder(object):
@@ -20,31 +22,38 @@ class JsonQueryBuilder(object):
             },
             "size": 10
         }
-        self.extent_handlers = [{
-                                 'name': 'Datetime extents',
-                                 'regex': r't=\[([^\[\],]*),([^\[\],]*)\]',
-                                 'func': self.process_datetime_extents
-                                },
-                                {'name': 'Single datetime',
-                                 'regex': r't=\[([^\[\],]*)\]',
-                                 'func': self.process_single_datetime
-                                },
-                                {'name': 'Latitude extents',
-                                 'regex': r'y=\[([^\[\],]*),([^\[\],]*)\]',
-                                 'func': self.process_latitude_extents
-                                },
-                                {'name': 'Single latitude',
-                                 'regex': r'y=\[([^\[\],]*)\]',
-                                 'func': self.process_single_latitude
-                                },
-                                {'name': 'Longitude extents',
-                                 'regex': r'x=\[([^\[\],]*),([^\[\],]*)\]',
-                                 'func': self.process_longitude_extents
-                                },
-                                {'name': 'Single longitude',
-                                 'regex': r'x=\[([^\[\],]*)\]',
-                                 'func': self.process_single_longitude
-                                }]
+        self.extent_handlers = [
+            {
+                'name': 'Datetime extents',
+                'regex': r't=\[([^\[\],]*),([^\[\],]*)\]',
+                'func': self.process_datetime_extents
+            },
+            {
+                'name': 'Single datetime',
+                'regex': r't=\[([^\[\],]*)\]',
+                'func': self.process_single_datetime
+            },
+            {
+                'name': 'Latitude extents',
+                'regex': r'y=\[([^\[\],]*),([^\[\],]*)\]',
+                'func': self.process_latitude_extents
+            },
+            {
+                'name': 'Single latitude',
+                'regex': r'y=\[([^\[\],]*)\]',
+                'func': self.process_single_latitude
+            },
+            {
+                'name': 'Longitude extents',
+                'regex': r'x=\[([^\[\],]*),([^\[\],]*)\]',
+                'func': self.process_longitude_extents
+            },
+            {
+                'name': 'Single longitude',
+                'regex': r'x=\[([^\[\],]*)\]',
+                'func': self.process_single_longitude
+            }
+        ]
 
     def process_datetime_extents(self, start, end):
         """
@@ -55,7 +64,6 @@ class JsonQueryBuilder(object):
 
         :param start: Start datetime string
         :param end: End datetime string
-        :returns:
         """
         from jasmin_cis.parse_datetime import parse_partial_datetime
         try:
@@ -88,7 +96,6 @@ class JsonQueryBuilder(object):
         Will parse partial datetimes to maximise the search window - e.g. 2009 will find all results
         from 2009-01-01T00:00:00 to 2009-12-31T23:59:59
         :param datetime: Start datetime string
-        :returns:
         """
         self.process_datetime_extents(datetime, datetime)
 
@@ -101,7 +108,6 @@ class JsonQueryBuilder(object):
 
         :param lat_1: Latitude float in the range -90 to +90 degrees.
         :param lat_2: Latitude float in the range -90 to +90 degrees.
-        :returns:
         """
         try:
             lat1 = float(lat_1)
@@ -131,7 +137,6 @@ class JsonQueryBuilder(object):
         Process a single latitude search filter and add it to the query dictionary.
 
         :param lat: Latitude to filter by
-        :returns:
         """
         self.process_latitude_extents(lat, lat)
 
@@ -143,7 +148,6 @@ class JsonQueryBuilder(object):
         be specified e.g. as 370). The region searched is always the region from the start longitude to the end latitude
         :param start: Start latitude
         :param end: End latitude
-        :returns:
         """
         try:
             start = float(start)
@@ -171,7 +175,6 @@ class JsonQueryBuilder(object):
         Will automatically constrain to within the range -180 to +180 (so values of e.g. 370 are acceptable).
 
         :param lon: Longitude to filter by
-        :returns:
         """
         self.process_longitude_extents(lon, lon)
 
@@ -212,7 +215,6 @@ class JsonQueryBuilder(object):
 
         :param filter_logic: Elasticsearch filter logic: one of 'must', 'must_not', 'should'.
         :param filter_dict: Filter dictionary (e.g {"range": {...}})
-        :returns: None
         """
         self.query_dict['query']['filtered']['filter']['bool'][filter_logic].append(filter_dict)
 
@@ -260,6 +262,7 @@ class Searcher(object):
         max_results = self._config_args.get('max-results')
         query = self._json_query_builder.build(extents, max_results=max_results)
         es = self._elastic_search_client_factory.get_client(self._config_args)
+
         try:
             # XXX
             index = self._config_args.get('es-index')
@@ -267,20 +270,34 @@ class Searcher(object):
             results = es.search(index=index, doc_type=doc_type, body=query)
         except ConnectionError as ex:
             url = es.transport.seed_connections[0].host
-            error_msg = "Couldn't connect to elastic search node at {url}. Exception was {exc}".format(url=url,
-                                                                                                       exc=ex.message)
+            error_msg = "Couldn't connect to Elasticsearch node at {url}." + \
+                        "Exception was: \"{exc}\".".format(url=url, exc=ex.message)
+
             print(error_msg)
             sys.exit(1)
-        self._print_results(results)
+
+        if self._config_args.get('file-paths'):
+            self._print_file_paths(results)
+        else:
+            self._print_json_results(results)
+
         sys.exit(0)
 
-    def _print_results(self, results):
+    def _print_file_paths(self, results):
         """
         Print the result's file paths.
 
         :param results: Elasticsearch query results JSON
-        :returns: Prints the results' filepaths to sys.stdout
         """
         hits = results['hits']['hits']
         for hit in hits:
             print(hit['_source']['file']['path'])
+
+    def _print_json_results(self, results):
+        """
+        Print the results in JSON format.
+
+        :param results: Elasticsearch query results.
+        """
+        hits = results['hits']['hits']
+        print(json.dumps(hits, indent=4))
