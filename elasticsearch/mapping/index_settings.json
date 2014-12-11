@@ -13,6 +13,10 @@
                     "type": "custom",
                     "tokenizer": "keyword",
                     "filter": ["min_length_5_filter"]
+                },
+                "path_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "path_hierarchy"
                 }
             }
         }
@@ -43,7 +47,7 @@
                         },
                         "path": {
                             "type": "string",
-                            "analyzer": "simple",
+                            "analyzer": "path_analyzer",
                             "store": "yes"
                         },
                         "size": {
