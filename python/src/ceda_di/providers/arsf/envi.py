@@ -99,12 +99,14 @@ class ENVI(_geospatial):
             self.parameters = self.parameters["band names"]
 
         instrument = arsf.Hyperspectral.get_instrument(filesystem["filename"])
+        flight_info = arsf.Hyperspectral.get_flight_info(filesystem["filename"])
         prop = product.Properties(filesystem=filesystem,
                                   temporal=self.get_temporal(),
                                   data_format=self.get_data_format(),
                                   spatial=self.get_geospatial(),
                                   parameters=self.get_parameters(),
-                                  instrument=instrument)
+                                  instrument=instrument,
+                                  flight_info=flight_info)
         return prop
 
 

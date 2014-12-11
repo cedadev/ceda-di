@@ -205,9 +205,12 @@ class HDF4(_geospatial):
         }
 
         instrument = arsf.Hyperspectral.get_instrument(filesystem["filename"])
+        flight_info = arsf.Hyperspectral.get_flight_info(filesystem["filename"])
         props = product.Properties(spatial=geospatial,
                                    temporal=temporal,
                                    filesystem=filesystem,
-                                   data_format=data_format)
+                                   data_format=data_format,
+                                   instrument=instrument,
+                                   flight_info=flight_info)
 
         return props
