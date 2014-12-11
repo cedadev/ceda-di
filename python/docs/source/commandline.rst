@@ -98,6 +98,32 @@ Command-line Tasks (Commands)
     with the provided parameters and return ``--max-results``-element long list
     of results.
 
+    There are three simple modes of restricting your search, and the syntax is
+    based on the `JASMIN_CIS <http://jasmin-cis.readthedocs.org/en/latest/colocation_examples.html>`_
+    syntax.
+
+    Latitude and longitude is restricted like so:
+    
+    .. code-block:: bash
+
+        # Syntax:
+        di.py search x[lower_bound, upper_bound] y[lower_bound, upper_bound]
+
+        # For example, this is a valid command:
+        di.py search x[1.1111, 2.2222] y[3.3333, 4.4444]
+
+    
+    It is also possible to restrict your search temporally, like so:
+
+    .. code-block:: bash
+    
+        # Syntax
+        di.py search t[lower_bound, upper_bound]
+
+        # Please note that timestamps MUST be in ISO8601 format.
+        # For example, this is a valid command:
+        di.py search t[2008-01-01, 2012-05-05]
+
 .. option:: extract [options] <paths>
 
     This command is a little hard to describe with a paragraph of text, so read

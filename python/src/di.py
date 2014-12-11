@@ -3,7 +3,7 @@
 Usage:
     di.py (--help | --version)
     di.py index [options] <path-to-json-docs>
-    di.py search <extents> [options]
+    di.py search <extents> [options] [--file-paths | --json]
     di.py extract [options] [--send-to-index]
                   [<input-path> (<output-path> | --no-create-files)]
     di.py test
@@ -18,6 +18,8 @@ Options:
     --send-to-index            Index metadata with ElasticSearch.
     --no-create-files          Don't create JSON metadata files.
     --max-results=<num>        Max number of results to return when searching
+    --file-paths               Print out search results as file paths.
+    --json                     Print out search results as pure JSON.
 """
 
 import simplejson as json
@@ -64,15 +66,6 @@ def read_conf(conf_path):
         return {}
 
 
-def not_implemented(option):
-    """
-    Raise a NotImplementedError with a message saying "option" is unimplemented.
-
-    :param str option: Name of the unimplemented command/option.
-    """
-    raise NotImplementedError(
-        "The \"%s\" command has not been implemented yet.\n" % option)
-
 # Default configuration options
 # These are overridden by the config file and command-line arguments
 CONFIG = {
@@ -88,8 +81,8 @@ CONFIG = {
 def main():
     CONF_ARGS = sanitise_args(docopt(__doc__, version=__version__))
     if 'config' not in CONF_ARGS or not CONF_ARGS["config"]:
-        dir = os.path.dirname(__file__)
-        conf_path = os.path.join(dir, '../../config/ceda_di.json')
+        direc = os.path.dirname(__file__)
+        conf_path = os.path.join(direc, '../../config/ceda_di.json')
         CONF_ARGS['config'] = conf_path
     CONF_FILE = read_conf(CONF_ARGS["config"])
 
