@@ -62,48 +62,6 @@ class Properties(object):
             "temporal": self.temporal,
         }
 
-    def get_flight_info(self):
-        """
-        Return a dictionary populated with metadata about the flight that the
-        given data file was captured on - flight number, organisation, etc.
-
-        :return: A dict containing flight metadata.
-        """
-        patterns = {
-            "arsf": {
-                "patterns": [
-                    r"arsf(?P<flight_num>\d{3}.*)-",
-                    r"(e|h)(\d{3})(\S?)(?P<flight_num>(\d{3})(\S?))"
-                ]
-            },
-            "faam": {
-                "patterns": [
-                    r"_(?P<flight_num>b(\d{3}))"
-                ]
-            },
-            "safire": {
-                "patterns": [
-                    r"_(?P<flight_num>((as|az|fs)\d{6}))"
-                ]
-            }
-        }
-
-        for org, info in patterns.iteritems():
-            for pattern in info["patterns"]:
-                match = re.search(pattern, self.filesystem["filename"])
-                if match:
-                    flight_info = {
-                        "organisation": org,
-                        "flight_num": match.group("flight_num")
-                    }
-
-                    try:
-                        flight_info["project"] = match.group("project")
-                    except IndexError:
-                        pass
-
-                    return flight_info
-
     @staticmethod
     def valid_lat(num):
         """
