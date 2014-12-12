@@ -7,7 +7,6 @@ import hashlib
 import simplejson as json
 import logging
 import math
-import re
 from pyhull.convex_hull import qconvex
 
 
@@ -36,6 +35,8 @@ class Properties(object):
         self.temporal = temporal
         self.data_format = data_format
 
+        self.misc = kwargs
+
         if parameters is not None:
             self.parameters = [p.get() for p in parameters]
         else:
@@ -46,11 +47,6 @@ class Properties(object):
             self.spatial["lat"] = filter(self.valid_lat, self.spatial["lat"])
             self.spatial["lon"] = filter(self.valid_lon, self.spatial["lon"])
             self.spatial = self._to_geojson(self.spatial)
-
-        self.misc = kwargs
-        flight_info = self.get_flight_info()
-        if flight_info:
-            self.misc.update(flight_info)
 
         self.properties = {
             "_id": hashlib.sha1(self.filesystem["path"]).hexdigest(),
