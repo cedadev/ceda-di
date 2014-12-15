@@ -58,12 +58,12 @@
                         },
                         "path": {
                             "type": "string",
-                            "analyzer": "path_hierarchy_analyzer",
+                            "analyzer": "path_analyzer",
                             "store": "yes",
                             "fields": {
-                                "search": {
+                                "hierarchy": {
                                     "type": "string",
-                                    "analyzer": "path_analyzer",
+                                    "analyzer": "path_hierarchy_analyzer",
                                     "store": "yes"
                                 }
                             }
