@@ -51,11 +51,11 @@
             "priority": 10
         },
         ".nc$": {
-            "class": "ceda_di.netcdf_geo.NetCDFFactory",
+            "class": "ceda_di.jascis.JasCisDataProduct",
             "priority": 1
         },
         ".*_CS_.*GRANULE.*\\.hdf$": {
-            "class": "ceda_di.jascis.CloudSat",
+            "class": "ceda_di.jascis.JasCisDataProduct",
             "priority": 1
         }
     }

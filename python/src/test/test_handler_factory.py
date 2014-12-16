@@ -1,6 +1,5 @@
 from unittest import TestCase
-
-from ceda_di.main import HandlerFactory
+from ceda_di.extract import HandlerFactory
 
 
 class TestHandlerFactory(TestCase):

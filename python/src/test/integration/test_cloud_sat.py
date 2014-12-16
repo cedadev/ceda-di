@@ -1,11 +1,12 @@
 from unittest import TestCase
 import json
 import os
-import sys
 import datetime as dt
-from hamcrest import assert_that, is_, close_to
 
-from ceda_di.main import Main
+from hamcrest import assert_that, is_, close_to
+from ceda_di.extract import Extract
+
+from di import read_conf
 
 
 class TestCloudSat(TestCase):
@@ -14,18 +15,19 @@ class TestCloudSat(TestCase):
     """
 
     CONFIG_FILE = '../../../config/ceda_di.json'
-    TEST_DIR = 'test_files'
+    TEST_DIR = os.path.join(os.path.dirname(__file__), 'test_files')
     CLOUD_SAT_FILE = os.path.join(TEST_DIR, '2007189224156_06358_CS_2C-PRECIP-COLUMN_GRANULE_P_R04_E02.hdf')
     JSON_FILE = os.path.join(TEST_DIR, 'json/2007189224156_06358_CS_2C-PRECIP-COLUMN_GRANULE_P_R04_E02.json')
 
     @classmethod
     def setUpClass(cls):
         # Process the file in the class setup method so it only has to do the slow bit once for all tests.
-        sys.argv[1] = cls.CONFIG_FILE
-        main = Main()
-        main.conf['outputpath'] = main.outpath = cls.TEST_DIR
-        main.conf['jsonpath'] = main.jsonpath = cls.TEST_DIR + '/json'
-        main.process_file(cls.CLOUD_SAT_FILE)
+        config = read_conf(cls.CONFIG_FILE)
+        config['output-path'] = cls.TEST_DIR
+        config['json-path'] = cls.TEST_DIR + '/json'
+        config['send-to-index'] = False
+        extract = Extract(config)
+        extract.process_file(cls.CLOUD_SAT_FILE)
 
     def get_output_json(self):
         fp = open(self.JSON_FILE)
@@ -66,7 +68,7 @@ class TestCloudSat(TestCase):
     def test_json_has_parameters(self):
         json_body = self.get_output_json()
         parameters = json_body['parameters']
-        assert_that(len(parameters), is_(37))
+        assert_that(len(parameters), is_(34))
 
 
         def get_variable_attribute_value_by_name(variable_attributes, attribute_name):
