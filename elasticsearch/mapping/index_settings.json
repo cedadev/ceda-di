@@ -1,0 +1,115 @@
+﻿{
+    "settings": {
+        "analysis": {
+            "filter": {
+                "min_length_5_filter": {
+                    "type": "length",
+                    "min": 5,
+                    "max": 256
+                }
+            },
+            "analyzer": {
+                "variable_name_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "keyword",
+                    "filter": ["min_length_5_filter"]
+                },
+                "path_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "path_hierarchy"
+                }
+            }
+        }
+    },
+    "mappings": {
+        "eufar": {
+            "_all": {
+                "enabled": true
+            },
+            "_id": {
+                "path": "_id"
+            },
+            "properties": {
+                "data_format": {
+                    "properties": {
+                        "format": {
+                            "type": "string",
+                            "store": "yes"
+                        }
+                    }
+                },
+                "file": {
+                    "properties": {
+                        "filename": {
+                            "type": "string",
+                            "analyzer": "simple",
+                            "store": "yes"
+                        },
+                        "path": {
+                            "type": "string",
+                            "analyzer": "path_analyzer",
+                            "store": "yes"
+                        },
+                        "size": {
+                            "type": "long"
+                        }
+                    }
+                },
+                "misc": {
+                    "type": "object"
+                },
+                "parameters": {
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "analyzer": "variable_name_analyzer"
+                        },
+                        "value": {
+                            "type": "string",
+                            "analyzer": "variable_name_analyzer"
+                        }
+                    }
+                },
+                "spatial": {
+                    "properties": {
+                        "geometries": {
+                            "properties": {
+                                "bbox": {
+                                    "type": "geo_shape",
+                                    "tree": "quadtree",
+                                    "precision": "50m",
+                                    "store": "yes"
+                                },
+                                "summary": {
+                                    "properties": {
+                                        "coordinates": {
+                                            "type": "double",
+                                            "enabled": false,
+                                            "include_in_all" : false,
+                                            "index": "no",
+                                            "store": "yes"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "temporal": {
+                    "properties": {
+                        "end_time": {
+                            "type": "date",
+                            "format": "dateOptionalTime",
+                            "store": "yes"
+                        },
+                        "start_time": {
+                            "type": "date",
+                            "format": "dateOptionalTime",
+                            "store": "yes"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

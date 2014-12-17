@@ -1,18 +1,24 @@
 {
     "_option": "es_host: hostname of Elasticsearch node to use",
-    "es_host": "fatcat-test.jc.rl.ac.uk",
+    "es-host": "fatcat-test.jc.rl.ac.uk/es",
 
     "_option": "es_port: port number of Elasticsearch node to use",
-    "es_port": 9200,
+    "es-port": 80,
 
     "_option": "es_index: Elasticsearch index to use",
-    "es_index": "badc",
+    "es-index": "badc",
+
+    "_option": "es_mapping: Elasticsearch document type to index data as",
+    "es-mapping": "eufar",
+
+    "_option": "es_index_settings: Path to Elasticsearch index settings config",
+    "es-index-settings": "../../elasticsearch/mapping/index_settings.json",
 
     "_option": "max_results: max number of search results to request",
     "max-results": 100,
 
     "_option": "output-path: main output directory",
-    "output-path": "/home/ccnewey/ceda-di/out",
+    "output-path": "/work/scratch/ccnewey/ceda-di/",
 
     "_option": "log-path: log dir path, relative to 'outputpath'",
     "log-path": "log/",
@@ -27,7 +33,7 @@
     "input-path": "/badc/eufar/data/projects",
 
     "_option": "num-cores: number of processes to use in parallel",
-    "num-cores": 3,
+    "num-cores": 16,
 
     "_option": "logging: options for the 'logging' module",
     "_ref": "(see: https://docs.python.org/2/library/logging.html)",
@@ -39,15 +45,15 @@
     "_option": "handlers: python classes to handle data files",
     "handlers": {
         "_nav_post_processed.bil.hdr$": {
-            "class": "ceda_di.envi_geo.BIL",
+            "class": "ceda_di.providers.arsf.envi.BIL",
             "priority": 10
         },
         ".hdf$": {
-            "class": "ceda_di.hdf4_geo.HDF4",
+            "class": "ceda_di.providers.arsf.hdf4.HDF4",
             "priority": 10
         },
         ".tif$": {
-            "class": "ceda_di.exif_geo.EXIF",
+            "class": "ceda_di.providers.arsf.exif.EXIF",
             "priority": 10
         },
         ".nc$": {
