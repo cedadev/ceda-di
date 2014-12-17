@@ -257,8 +257,8 @@ class Searcher(object):
             results = es.search(index=self._config_args.get('es_index'), doc_type='eufar', body=query)
         except ConnectionError as ex:
             url = es.transport.seed_connections[0].host
-            error_msg = "Couldn't connect to elastic search node at {url}. Exception was {exc}".format(url=url,
-                                                                                                       exc=ex.message)
+            error_msg = "Couldn't connect to elastic search node at {url}. Exception was {exc}"\
+                .format(url=url, exc=ex.info.args[1])
             print(error_msg)
             sys.exit(1)
         self._print_results(results)
