@@ -57,10 +57,10 @@
             "priority": 10
         },
         ".nc$": {
-            "class": "ceda_di.jascis.JasCisDataProduct",
-            "priority": 1
+            "class": "ceda_di.filetypes.netcdf.NetCDFFactory",
+            "priority": 10
         },
-        ".*_CS_.*GRANULE.*\\.hdf$": {
+        ".*": {
             "class": "ceda_di.jascis.JasCisDataProduct",
             "priority": 1
         }

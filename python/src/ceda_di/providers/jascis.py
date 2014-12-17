@@ -3,12 +3,14 @@ Contains class which use the JASMIN CIS tool to extract metadata from specific d
 """
 
 import coards
+from jasmin_cis.exceptions import ClassNotFoundError
+from jasmin_cis.exceptions import FileFormatError as jasmin_cis_FileFormatError
 from jasmin_cis.data_io.products.AProduct import get_coordinates, get_variables, get_data, get_file_format, \
-    get_product_full_name
+    get_product_full_name, ProductPluginException
 
 from ceda_di._dataset import _geospatial
 from ceda_di.metadata import product
-from ceda_di.metadata.product import Parameter
+from ceda_di.metadata.product import Parameter, FileFormatError
 
 
 # noinspection PyMissingConstructor
@@ -16,6 +18,18 @@ class JasCisDataProduct(_geospatial):
     """
     Use a JASMIN CIS data product to read the data from a file
     """
+
+    @staticmethod
+    def get_file_format(filename):
+        try:
+            get_file_format([filename])
+        except ClassNotFoundError:
+            raise FileFormatError("No reader from CIS could be found")
+        except jasmin_cis_FileFormatError as ex:
+            message = ".".join(ex.error_list)
+            raise FileFormatError(message)
+        except ProductPluginException as ex:
+            raise FileFormatError("There was a problem with CIS %s" % ex.message)
 
     def __init__(self, filename):
         """

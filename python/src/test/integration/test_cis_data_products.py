@@ -7,12 +7,12 @@ from hamcrest import *
 from ceda_di.extract import Extract
 from di import read_conf
 from jasmin_cis.test.test_files.data import *
-from test.integration.test_files.data import ceda_di_test_files
 from test.utils_for_testing.within_delta import within_delta
 from test.utils_for_testing.corner_same_as_bounds import corner_in_bounds_by_delta
+from test.integration.test_files.data import ceda_di_test_files
 
 
-class TestCISProduct(TestCase):
+class CISProductTests(object):
     """
     Abstract class for testing products
     """
@@ -96,7 +96,7 @@ class TestCISProduct(TestCase):
         assert_that(indexer, contains_string(self.cis_test_file.product_name), "data format")
 
 
-class TestGASSP(TestCISProduct):
+class TestGASSP(CISProductTests, TestCase):
     """
     Test that CEDA DI can read GASSP data:
     """
@@ -105,7 +105,7 @@ class TestGASSP(TestCISProduct):
     def setUpClass(cls):
         cls.setUpForTest("GASSP_aeroplane")
 
-class TestCloudSat(TestCISProduct):
+class TestCloudSat(CISProductTests, TestCase):
     """
     Test that CEDA DI can read GASSP data:
     """

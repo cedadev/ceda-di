@@ -11,6 +11,13 @@ import re
 from pyhull.convex_hull import qconvex
 
 
+class FileFormatError(Exception):
+    """
+    Exception to raise if there is a error in the file format
+    """
+    pass
+
+
 class Properties(object):
     """
     A class to hold, manipulate, and export geospatial metadata at file level.
