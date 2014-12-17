@@ -87,6 +87,11 @@ class TestCISProduct(TestCase):
         # If we got here it means that we couldn't find a matching parameter so we should fail
         raise AssertionError("%s not found in list of parameters" % self.cis_test_file.data_variable_name)
 
+    def test_json_has_correct_format_and_source(self):
+        json_body = self.get_output_json()
+        dataformat = json_body['data_format']['format']
+        assert_that(dataformat, is_(self.cis_test_file.file_format), "data format")
+
 
 class TestGASSP(TestCISProduct):
     """

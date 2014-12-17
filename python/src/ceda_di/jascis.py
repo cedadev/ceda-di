@@ -3,13 +3,14 @@ Contains class which use the JASMIN CIS tool to extract metadata from specific d
 """
 
 import coards
-from jasmin_cis.data_io.products.AProduct import get_coordinates, get_variables, get_data
+from jasmin_cis.data_io.products.AProduct import get_coordinates, get_variables, get_data, get_file_format
 
 from ceda_di._dataset import _geospatial
 from ceda_di.metadata import product
 from ceda_di.metadata.product import Parameter
 
 
+# noinspection PyMissingConstructor
 class JasCisDataProduct(_geospatial):
     """
     Use a JASMIN CIS data product to read the data from a file
@@ -21,7 +22,6 @@ class JasCisDataProduct(_geospatial):
         :param filename: filename to read
         :return: nothing
         """
-        super(JasCisDataProduct, self).__init__()
         self._filenames = [filename]
 
     def __enter__(self):
@@ -88,7 +88,7 @@ class JasCisDataProduct(_geospatial):
         filesystem = self.get_filesystem(self._filenames[0])
         parameters = self.get_parameters()
         data_format = {
-            "format": "CloudSat HDF",
+            "format": get_file_format(self._filenames),
         }
 
         props = product.Properties(spatial=geospatial,
