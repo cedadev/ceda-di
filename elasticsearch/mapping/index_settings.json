@@ -38,6 +38,14 @@
                         }
                     }
                 },
+                "index_entry_creation": {
+                    "properties": {
+                        "indexer": {
+                            "type": "string",
+                            "store": "yes"
+                        }
+                    }
+                },
                 "file": {
                     "properties": {
                         "filename": {

@@ -15,8 +15,13 @@ class Properties(object):
     """
     A class to hold, manipulate, and export geospatial metadata at file level.
     """
-    def __init__(self, filesystem=None, spatial=None,
-                 temporal=None, data_format=None, parameters=None,
+    def __init__(self,
+                 filesystem=None,
+                 spatial=None,
+                 temporal=None,
+                 data_format=None,
+                 parameters=None,
+                 index_entry_creation=None,
                  **kwargs):
         """
         Construct 'ceda_di.metadata.Properties' ready to export.
@@ -27,6 +32,7 @@ class Properties(object):
         :param dict temporal: Temporal information about file
         :param dict data_format: Data format information about file
         :param list parameters: Parameter objects in list
+        :param index_entry_creation: the program that created the index entry
         :param **kwargs: Key-value pairs of any extra relevant metadata.
         """
 
@@ -35,6 +41,9 @@ class Properties(object):
         self.filesystem = filesystem
         self.temporal = temporal
         self.data_format = data_format
+
+        self.index_entry_creation = index_entry_creation
+
 
         if parameters is not None:
             self.parameters = [p.get() for p in parameters]
@@ -55,6 +64,7 @@ class Properties(object):
         self.properties = {
             "_id": hashlib.sha1(self.filesystem["path"]).hexdigest(),
             "data_format": self.data_format,
+            "index_entry_creation": self.index_entry_creation,
             "file": self.filesystem,
             "misc": self.misc,
             "parameters": self.parameters,

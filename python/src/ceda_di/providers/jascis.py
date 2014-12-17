@@ -3,7 +3,8 @@ Contains class which use the JASMIN CIS tool to extract metadata from specific d
 """
 
 import coards
-from jasmin_cis.data_io.products.AProduct import get_coordinates, get_variables, get_data, get_file_format
+from jasmin_cis.data_io.products.AProduct import get_coordinates, get_variables, get_data, get_file_format, \
+    get_product_full_name
 
 from ceda_di._dataset import _geospatial
 from ceda_di.metadata import product
@@ -88,13 +89,19 @@ class JasCisDataProduct(_geospatial):
         filesystem = self.get_filesystem(self._filenames[0])
         parameters = self.get_parameters()
         data_format = {
-            "format": get_file_format(self._filenames),
+            "format": get_file_format(self._filenames)
+        }
+
+        indexer = get_product_full_name(self._filenames)
+        index_entry_creation = {
+            "indexer": indexer
         }
 
         props = product.Properties(spatial=geospatial,
                                    temporal=temporal,
                                    filesystem=filesystem,
                                    data_format=data_format,
-                                   parameters=parameters)
+                                   parameters=parameters,
+                                   index_entry_creation=index_entry_creation)
 
         return props

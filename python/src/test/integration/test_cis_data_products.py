@@ -27,6 +27,7 @@ class TestCISProduct(TestCase):
         config['output-path'] = cls.TEST_DIR
         config['json-path'] = cls.TEST_DIR + '/json'
         config['send-to-index'] = False
+        config['no-create-files'] = False
         extract = Extract(config)
         cls.cis_test_file = cis_test_files[product_name]
         extract.process_file(cls.cis_test_file.master_filename)
@@ -90,7 +91,9 @@ class TestCISProduct(TestCase):
     def test_json_has_correct_format_and_source(self):
         json_body = self.get_output_json()
         dataformat = json_body['data_format']['format']
+        indexer = json_body['index_entry_creation']['indexer']
         assert_that(dataformat, is_(self.cis_test_file.file_format), "data format")
+        assert_that(indexer, contains_string(self.cis_test_file.product_name), "data format")
 
 
 class TestGASSP(TestCISProduct):
