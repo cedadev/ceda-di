@@ -17,7 +17,7 @@ class CISProductTests(object):
     Abstract class for testing products
     """
 
-    CONFIG_FILE = '../../../config/ceda_di.json'
+    CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../../../config/ceda_di.json')
     TEST_DIR = os.path.join(os.path.dirname(__file__), 'test_files')
 
     @classmethod

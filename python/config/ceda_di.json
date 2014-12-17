@@ -61,7 +61,7 @@
             "priority": 10
         },
         ".*": {
-            "class": "ceda_di.jascis.JasCisDataProduct",
+            "class": "ceda_di.providers.jascis.JasCisDataProduct",
             "priority": 1
         }
     }

@@ -14,10 +14,11 @@ class CornersSameAsBounds(BaseMatcher):
         :param item: bounding corner, [bottom left, top left, top right, bottom right]
         :return: true if the same
         """
-        bottom_left = item[0]
-        bottom_right = item[3]
-        top_left = item[1]
-        top_right = item[2]
+        top_right = item[0]
+        bottom_right = item[1]
+        bottom_left = item[2]
+        top_left = item[3]
+
 
         return \
             self._check_corner(bottom_left, self.bounds.lon_min, self.bounds.lat_min) and \
@@ -32,13 +33,13 @@ class CornersSameAsBounds(BaseMatcher):
         top_right = item[2]
 
         mismatch_description.append_description_of(item)
-        if self._check_corner(bottom_left, self.bounds.lon_min, self.bounds.lat_min):
+        if not self._check_corner(bottom_left, self.bounds.lon_min, self.bounds.lat_min):
             mismatch_description.append_text(' differed on bottom left ')
-        if self._check_corner(bottom_right, self.bounds.lon_max, self.bounds.lat_min):
+        if not self._check_corner(bottom_right, self.bounds.lon_max, self.bounds.lat_min):
             mismatch_description.append_text(' differed on bottom right ')
-        if self._check_corner(top_left, self.bounds.lon_min, self.bounds.lat_max):
+        if not self._check_corner(top_left, self.bounds.lon_min, self.bounds.lat_max):
             mismatch_description.append_text(' differed on top left ')
-        if self._check_corner(top_right, self.bounds.lon_max, self.bounds.lat_max):
+        if not self._check_corner(top_right, self.bounds.lon_max, self.bounds.lat_max):
             mismatch_description.append_text(' differed on top right ')
 
     def describe_to(self, description):
