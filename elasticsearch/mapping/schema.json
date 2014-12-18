@@ -58,5 +58,10 @@
             "format": "string",
             "version": "string",
         },
+        "index_entry_creation": {
+            "description": "Information on the program which indexed this file. Generally name of program, sub setting and version (slash separated)",
+            "indexer": "string",
+            "version": "string",
+        }
     }
 }

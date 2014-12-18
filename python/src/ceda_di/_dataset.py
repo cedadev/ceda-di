@@ -37,7 +37,8 @@ class _geospatial(object):
         """
         Return a ceda_di.metadata.product.Properties object populated with the
         file's metadata.
-        :return props: A ceda_di.metadata.product.Properties object
+
+        :returns: A ceda_di.metadata.product.Properties object
         """
         self.unimpl_base_class()
 

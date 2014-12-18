@@ -5,7 +5,8 @@ Also contains methods for extracting metadata (geospatial/temporal).
 
 import logging
 
-from ceda_di import envi_io
+from ceda_di.filetypes.file_io import envi_io
+from ceda_di.providers import arsf
 from ceda_di.metadata import product
 from ceda_di._dataset import _geospatial
 
@@ -33,6 +34,8 @@ class ENVI(_geospatial):
     def get_parameters(self):
         """
         Return a list of Parameter objects containing parameter information.
+
+        :return: A list of Parameter objects containing parameter information.
         """
         params = []
         for p_name in self.parameters:
@@ -43,7 +46,8 @@ class ENVI(_geospatial):
     def get_geospatial(self):
         """
         Read geospatial data parsed from binary file
-        :return dict: A dict containing geospatial information
+
+        :returns: A dict containing geospatial information
         """
         spatial = {
             "lat": self.data[1],
@@ -57,6 +61,11 @@ class ENVI(_geospatial):
         return spatial
 
     def get_temporal(self):
+        """
+        Return a dictionary containing the start and end times of the data file.
+
+        :returns: A dict containing temporal data.
+        """
         temporal = {
             "start_time": self.data[0][0],
             "end_time": self.data[0][-1],
@@ -67,7 +76,8 @@ class ENVI(_geospatial):
     def get_data_format(self):
         """
         Return file format information
-        :return dict: A dict containing file format information
+
+        :returns: A dict containing file format information
         """
         data_format = {
             "format": self.data_format,
@@ -80,7 +90,7 @@ class ENVI(_geospatial):
         Return a metadata.product.Properties object describing
         the file's metadata.
 
-        :return metadata.product.Properties: Metadata
+        :returns: Metadata.product.Properties object describing the file.
         """
         filesystem = super(ENVI, self).get_filesystem(self.path)
 
@@ -88,11 +98,13 @@ class ENVI(_geospatial):
         if "band names" in self.parameters:
             self.parameters = self.parameters["band names"]
 
+        instrument = arsf.Hyperspectral.get_instrument(filesystem["filename"])
         prop = product.Properties(filesystem=filesystem,
                                   temporal=self.get_temporal(),
                                   data_format=self.get_data_format(),
                                   spatial=self.get_geospatial(),
-                                  parameters=self.get_parameters())
+                                  parameters=self.get_parameters(),
+                                  instrument=instrument)
         return prop
 
 
@@ -120,6 +132,11 @@ class BIL(ENVI):
         pass
 
     def read(self):
+        """
+        Return a dict containing a summary of the file's data.
+
+        :returns: A dict containing a summary of the file's data.
+        """
         self._load_data()
         return self.data
 
@@ -148,5 +165,10 @@ class BSQ(ENVI):
         pass
 
     def read(self):
+        """
+        Return a dict containing a summary of the file's data.
+
+        :returns: A dict containing a summary of the file's data.
+        """
         self._load_data()
         return self.data

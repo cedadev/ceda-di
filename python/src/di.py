@@ -3,11 +3,7 @@
 Usage:
     di.py (--help | --version)
     di.py index [options] <path-to-json-docs>
-                (--host=<host> --port=<port> --index=<name>)
-    di.py query [options] <path-to-request-json>
-                (--host=<host> --port=<port> --index=<name>)
-    di.py search [options]
-    di.py search <extents> [options]
+    di.py search <extents> [options] [--file-paths | --json]
     di.py extract [options] [--send-to-index]
                   [<input-path> (<output-path> | --no-create-files)]
     di.py test
@@ -22,9 +18,11 @@ Options:
     --send-to-index            Index metadata with ElasticSearch.
     --no-create-files          Don't create JSON metadata files.
     --max-results=<num>        Max number of results to return when searching
+    --file-paths               Print out search results as file paths.
+    --json                     Print out search results as pure JSON.
 """
 
-import json
+import simplejson as json
 import os
 import sys
 
@@ -32,14 +30,16 @@ from docopt import docopt
 
 from ceda_di import __version__  # Grab version from package __init__.py
 from ceda_di.extract import Extract
+from ceda_di.index import BulkIndexer
 from ceda_di.search import Searcher
 
 
 def sanitise_args(config):
     """
     Sanitise command-line configuration.
+
     :param config: Config dictionary (from docopt)
-    :return dict: Config dictionary with all keys stripped of '<' '>' and '--'
+    :returns: Config dictionary with all keys stripped of '<' '>' and '--'
     """
     sane_conf = {}
     for key, value in config.iteritems():
@@ -53,8 +53,9 @@ def sanitise_args(config):
 def read_conf(conf_path):
     """
     Read configuration file into a dictionary.
+
     :param conf_path: Path to the JSON configuration file
-    :return dict: Dict containing parsed JSON conf
+    :returns: Dict containing parsed JSON conf
     """
     try:
         with open(conf_path, "r") as conf:
@@ -64,14 +65,6 @@ def read_conf(conf_path):
             "Can't read configuration file\n%s\n\n" % str(ioe))
         return {}
 
-
-def not_implemented(option):
-    """
-    Raise a NotImplementedError with a message saying "option" is unimplemented.
-    :param str option: Name of the unimplemented command/option.
-    """
-    raise NotImplementedError(
-        "The \"%s\" command has not been implemented yet.\n" % option)
 
 # Default configuration options
 # These are overridden by the config file and command-line arguments
@@ -88,8 +81,8 @@ CONFIG = {
 def main():
     CONF_ARGS = sanitise_args(docopt(__doc__, version=__version__))
     if 'config' not in CONF_ARGS or not CONF_ARGS["config"]:
-        dir = os.path.dirname(__file__)
-        conf_path = os.path.join(dir, '../../config/ceda_di.json')
+        direc = os.path.dirname(__file__)
+        conf_path = os.path.join(direc, '../../config/ceda_di.json')
         CONF_ARGS['config'] = conf_path
     CONF_FILE = read_conf(CONF_ARGS["config"])
 
@@ -99,20 +92,17 @@ def main():
     CONFIG.update(CONF_FILE)
     CONFIG.update(CONF_ARGS)
 
-    # XXX Check for unimplemented functions and raise error
-    UNIMPL = ["index", "query", "no-create-files"]
-    for cmd in UNIMPL:
-        if cmd in CONF_ARGS and CONF_ARGS[cmd]:
-            not_implemented(cmd)
-
     if CONF_ARGS["extract"]:
-        E = Extract(CONFIG)
-        E.run()
-
-    if CONF_ARGS["search"]:
+        extract = Extract(CONFIG)
+        extract.run()
+    elif CONF_ARGS["index"]:
+        # Opening the BulkIndexer as a context manager ensures all docs get
+        # submitted properly to the index (all pools get submitted)
+        with BulkIndexer(CONFIG) as index:
+            index.index_directory(CONFIG["path-to-json-docs"])
+    elif CONF_ARGS["search"]:
         searcher = Searcher(CONFIG)
         searcher.run()
-
     elif CONF_ARGS["test"]:
         # TODO Would be nice to run unit tests from here later on
         pass

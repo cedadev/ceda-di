@@ -47,7 +47,8 @@ class EnviFile(object):
     def check_valid_fmt_string(self):
         """
         Check the format string for validity.
-        :return int: Number of bytes needed for type in the format string
+
+        :returns: Number of bytes needed for type in the format string
         """
         try:  # Check given format string is valid
             num_bytes = struct.calcsize(self.unpack_fmt)
@@ -64,7 +65,7 @@ class EnviFile(object):
 
         :param path: Path to the BIL header file
         :param ext: Extension of the binary data file to read
-        :return str: The path of the BIL data file
+        :returns: The path of the BIL data file
         """
         p = os.path.splitext(path)[0]
         if not os.path.isfile(p):
@@ -75,7 +76,8 @@ class EnviFile(object):
     def process_hdr(self):
         """
         Parse the provided header file.
-        :return dict: Header file parsed into key/value pairs
+
+        :returns: Header file parsed into key/value pairs
         """
         with open(self.hdr_path, 'r') as fh:
             lines = fh.readlines()
@@ -190,6 +192,8 @@ class BilFile(EnviFile):
     def read(self):
         """
         Read BIL file (reading bytes in correct order)
+
+        :return: A multi-dimensional list containing unpacked BIL data.
         """
         return super(BilFile, self).read(int(self.hdr["bands"]),
                                          int(self.hdr["lines"]),
@@ -221,6 +225,8 @@ class BsqFile(EnviFile):
     def read(self):
         """
         Read BSQ file (reading bytes in correct order)
+
+        :return: A multi-dimensional list containing unpacked BSQ data.
         """
         return super(BsqFile, self).read(int(self.hdr["lines"]),
                                          int(self.hdr["bands"]),

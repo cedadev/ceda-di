@@ -5,46 +5,47 @@
 # See the LICENSE file in the source distribution of this software for
 # the full license text.
 
-from setuptools import setup, find_packages
-import sys, os
-
+from setuptools import find_packages
+from setuptools import setup
+import os
+import sys
 
 # Import version from the top-level package
-sys.path[:0] = [os.path.join(os.path.dirname(__file__), 'src')]
+sys.path.insert(1, os.path.join(os.path.dirname(__file__), 'src'))
 from ceda_di import __version__
-#from ceda_di import __doc__ as long_description
+from ceda_di import __doc__ as long_description
 
-setup(name='ceda-di',
-      version=__version__,
-      description="A library interacting with ESGF services within Python",
-      #long_description=long_description,
-      classifiers=[
+basepath = os.path.dirname(os.path.abspath(__file__))
+path = os.path.join(basepath, "pip_requirements.txt")
+with open(path, 'r') as f:
+    requirements = [l.rstrip() for l in f.readlines()]
+
+setup(
+    name='ceda-di',
+    version=__version__,
+    description='',
+    long_description=long_description,
+    # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+    classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: BSD License',
         'Topic :: Scientific/Engineering',
         'Programming Language :: Python :: 2.7',
-        ], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
-      keywords='',
-      author='Charles Newey',
-      author_email='Charles.Newey@stfc.ac.uk',
-      #url='http://github.com/cedadev/ceda-di',
-      #download_url='',
-      license='BSD',
-      packages=find_packages('src', exclude=['ez_setup', 'examples', 'test']),
-      package_dir={'': 'src'},
-      include_package_data=True,
-      zip_safe=False,
-      
-      #!TODO: Decide whether to use setuptools or requirements file for dependencies.
-      
-      # See pip_requirements.txt for dependencies
-      #install_requires=[
-      #],
-      
-      entry_points= {
-          'console_scripts': [
-              'ceda-di = ceda_di.main:main',
-          ],
-        },
-      #test_suite='nose.collector',
-      )
+    ],
+    keywords='',
+    author='Charles Newey',
+    author_email='Charles.Newey@stfc.ac.uk',
+    url='http://github.com/cedadev/ceda-di',
+    download_url='http://github.com/cedadev/ceda-di',
+    license='BSD',
+    packages=find_packages('src', exclude=['ez_setup', 'examples', 'test']),
+    package_dir={'': 'src'},
+    include_package_data=True,
+    zip_safe=False,
+    install_requires=requirements,
+    entry_points={
+        'console_scripts': [
+            'ceda-di = ceda_di.main:main',
+        ],
+    },
+)
