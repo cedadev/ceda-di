@@ -105,9 +105,10 @@ class TestGASSP(CISProductTests, TestCase):
     def setUpClass(cls):
         cls.setUpForTest("GASSP_aeroplane")
 
+
 class TestCloudSat(CISProductTests, TestCase):
     """
-    Test that CEDA DI can read GASSP data:
+    Test that CEDA DI can read CloudSat
     """
 
     @classmethod
@@ -115,3 +116,14 @@ class TestCloudSat(CISProductTests, TestCase):
         for key, value in ceda_di_test_files.iteritems():
             cis_test_files[key] = value
         cls.setUpForTest("cloudsat_PRECIP_2007")
+
+
+# Test skipped because we are unsure of the behaviour
+# class TestGridded2DFile(CISProductTests, TestCase):
+#     """
+#     Test that CEDA DI can read gridded 2D
+#     """
+#
+#     @classmethod
+#     def setUpClass(cls):
+#         cls.setUpForTest("2D_GRIDDED")
