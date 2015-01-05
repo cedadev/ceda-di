@@ -1,3 +1,4 @@
+setuptools>=5.7
 Babel
 Biggus
 Cartopy

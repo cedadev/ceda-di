@@ -7,11 +7,12 @@ from jasmin_cis.exceptions import ClassNotFoundError
 from jasmin_cis.exceptions import FileFormatError as jasmin_cis_FileFormatError
 from jasmin_cis.data_io.products.AProduct import get_coordinates, get_variables, get_data, get_file_format, \
     get_product_full_name, ProductPluginException
+from jasmin_cis.time_util import convert_std_time_to_datetime
 
 from ceda_di._dataset import _geospatial
 from ceda_di.metadata import product
 from ceda_di.metadata.product import Parameter, FileFormatError
-
+import numpy as np
 
 # noinspection PyMissingConstructor
 class JasCisDataProduct(_geospatial):
@@ -38,6 +39,7 @@ class JasCisDataProduct(_geospatial):
         :return: nothing
         """
         self._filenames = [filename]
+        self._coords = None
 
     def __enter__(self):
         """
@@ -54,18 +56,27 @@ class JasCisDataProduct(_geospatial):
         """
         pass
 
+
+    def _get_coords(self):
+        """
+        Return the coordinates, loading them first if needed
+        :return: the coordinate list
+        """
+        if self._coords is None:
+            self._coords = get_coordinates(self._filenames)
+        return self._coords
+
     def get_geospatial(self):
         """
         Returns a dict containing geospatial information
         """
 
-        coords = get_coordinates(self._filenames)
-        lat = coords.coord(standard_name='latitude')
-        lon = coords.coord(standard_name='longitude')
-
+        coords = self._get_coords()
+        lat = coords.get_coordinates_points().latitudes
+        lon = coords.get_coordinates_points().longitudes
         return {
-            'lat': lat.points,
-            'lon': lon.points
+            'lat': lat,
+            'lon': lon
         }
 
     def get_temporal(self):
@@ -73,10 +84,10 @@ class JasCisDataProduct(_geospatial):
         Returns a dict containing temporal information
         """
 
-        coords = get_coordinates(self._filenames)
-        time = coords.coord(standard_name='time')
-        start_time = coards.parse(min(time.points), time.units)
-        end_time = coards.parse(max(time.points), time.units)
+        coords = self._get_coords()
+        time = coords.get_coordinates_points().times
+        start_time = convert_std_time_to_datetime(np.amin(time))
+        end_time  = convert_std_time_to_datetime(np.amax(time))
         return {"start_time": start_time.isoformat(),
                 "end_time": end_time.isoformat()}
 

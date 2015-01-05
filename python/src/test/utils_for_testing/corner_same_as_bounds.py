@@ -27,10 +27,10 @@ class CornersSameAsBounds(BaseMatcher):
             self._check_corner(top_right, self.bounds.lon_max, self.bounds.lat_max)
 
     def describe_mismatch(self, item, mismatch_description):
-        bottom_left = item[0]
-        bottom_right = item[3]
-        top_left = item[1]
-        top_right = item[2]
+        top_right = item[0]
+        bottom_right = item[1]
+        bottom_left = item[2]
+        top_left = item[3]
 
         mismatch_description.append_description_of(item)
         if not self._check_corner(bottom_left, self.bounds.lon_min, self.bounds.lat_min):
