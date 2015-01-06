@@ -51,7 +51,9 @@ class BulkIndexer(object):
         try:
             create_index(config, self.es)
         except TransportError as te:
-            if te[0] != 400:
+            if te[0] == 400:
+                print(te)
+            else:
                 raise TransportError(te)
 
         # Dict containing key:value pairs of mapping:[list of documents]
