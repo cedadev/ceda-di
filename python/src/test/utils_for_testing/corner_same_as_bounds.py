@@ -45,14 +45,14 @@ class CornersSameAsBounds(BaseMatcher):
     def describe_to(self, description):
         description.append_text('corners within ')  \
                    .append_description_of(self.delta)       \
-                   .append_text(' lat:')                     \
-                   .append_description_of(self.bounds.lat_min) \
-                   .append_text(' - ')                     \
-                   .append_description_of(self.bounds.lat_max) \
                    .append_text(' lon:')                     \
                    .append_description_of(self.bounds.lon_min) \
                    .append_text(' - ') \
-                   .append_description_of(self.bounds.lon_max)
+                   .append_description_of(self.bounds.lon_max) \
+                   .append_text(' lat:')                     \
+                   .append_description_of(self.bounds.lat_min) \
+                   .append_text(' - ')                     \
+                   .append_description_of(self.bounds.lat_max)
 
     def _check_corner(self, corner, lon, lat):
         return fabs(float(corner[0]) - float(lon)) < self.delta and fabs(float(corner[1]) - float(lat)) < self.delta
