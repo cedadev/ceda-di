@@ -109,9 +109,6 @@ class TestCloudsatRVODsdata(CISProductTests, TestCase):
         cls.setUpForTest("CloudsatRVODsdata")
 
 class TestCloudSat(CISProductTests, TestCase):
-    """
-    Test that CEDA DI can read CloudSat
-    """
 
     @classmethod
     def setUpClass(cls):
@@ -185,9 +182,6 @@ class TestASCII(CISProductTests, TestCase):
 
 
 class TestGASSP(CISProductTests, TestCase):
-    """
-    Test that CEDA DI can read GASSP data:
-    """
 
     @classmethod
     def setUpClass(cls):
