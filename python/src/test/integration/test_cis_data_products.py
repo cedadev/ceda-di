@@ -101,6 +101,11 @@ class CISProductTests(object):
         assert_that(dataformat, is_(self.cis_test_file.file_format), "data format")
         assert_that(indexer, contains_string(self.cis_test_file.product_name), "data format")
 
+class TestCEDA_DI_CI_can_index_CloudsatRVODsdata(CISProductTests, TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.setUpForTest("CloudsatRVODsdata")
+
 
 class TestGASSP(CISProductTests, TestCase):
     """
@@ -131,11 +136,33 @@ class TestAeronet(CISProductTests, TestCase):
         cls.setUpForTest("aeronet")
 
 
+class TestCaliop_L2(CISProductTests, TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setUpForTest("caliop_L2")
+
+
+class TestCaliop_L1(CISProductTests, TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setUpForTest("caliop_L1")
+
+
 class TestModisL2(CISProductTests, TestCase):
 
     @classmethod
     def setUpClass(cls):
         cls.setUpForTest("modis_L2")
+
+
+class TestModisL3(CISProductTests, TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+
+        cls.setUpForTest("modis_L3")
 
 
 class TestGridded2DFile(CISProductTests, TestCase):
