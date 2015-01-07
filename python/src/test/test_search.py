@@ -226,6 +226,17 @@ class TestJsonQueryBuilder(unittest.TestCase):
         assert_that(shape['type'], is_('envelope'))
         assert_that(shape['coordinates'], is_([[wrapped_start, 90], [wrapped_end, -90]]))
 
+    def test_GIVEN_non_existant_file_WHEN_build_THEN_wraps_around(self):
+        query_builder = JsonQueryBuilder()
+        start, end = - 150, 730
+        wrapped_start, wrapped_end = -150, 10
+        query_string = "x=[%s,%s]" % (start, end)
+        query = query_builder.build(query_string)
+        must = query['query']['filtered']['filter']['bool']['must']
+        shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
+        assert_that(shape['type'], is_('envelope'))
+        assert_that(shape['coordinates'], is_([[wrapped_start, 90], [wrapped_end, -90]]))
+
 
 class TestSearcher(unittest.TestCase):
     """
