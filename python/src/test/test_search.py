@@ -318,7 +318,21 @@ class TestJsonQueryBuilder(unittest.TestCase):
         assert_that(shape['type'], is_('polygon'))
         assert_that(shape['coordinates'], is_([[lon_hi, lat_hi], [lon_lo, lat_hi], [lon_lo, lat_lo], [lon_hi, lat_lo]]))
 
-# no lat or lon returned from handler
+    def test_GIVEN_bounding_box_filename_with_no_lat_and_lon_WHEN_build_THEN_lat_and_lon_set(self):
+        file_handle_factory = MagicMock(HandlerFactory)
+        file_handler = MagicMock(_geospatial)
+        filename = "filename"
+        query_string = "bb_from_file=[%s]" % filename
+        lats = []
+        lons = []
+
+        file_handle_factory.get_handler = MagicMock(return_value=file_handler)
+        file_handler.get_geospatial = MagicMock(return_value={'lat': lats, 'lon': lons})
+
+        with self.assertRaises(ValueError) as exception_context:
+            self.run_query_builder_return_must(query_string, file_handle_factory)
+
+        assert_that(exception_context.exception.message, contains_string("No bounding box generated when reading the file."), "error message")
 
 
 class TestSearcher(unittest.TestCase):

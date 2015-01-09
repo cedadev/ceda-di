@@ -74,8 +74,17 @@ class JsonQueryBuilder(object):
         ]
 
     def _add_region_to_query_filter(self, latitudes, longitudes, from_file):
+        """
+        Add a region query to the filter
+        :param latitudes: the list of latitudes
+        :param longitudes: the list of longitudes
+        :param from_file: whether query was from a file (if so a polygon is created not just an envelope)
+        :return: nothing
+        """
         generator = GeoJSONGenerator(latitudes, longitudes)
         bbox = generator.generate_bounding_box(from_file)
+        if bbox is None:
+            raise ValueError("No bounding box generated when reading the file.")
         constraint = {
             "geo_shape": {
                 "eufar.spatial.geometries.bbox": {
