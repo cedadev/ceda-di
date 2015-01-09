@@ -4,10 +4,23 @@ import sys
 import simplejson as json
 
 from elasticsearch import Elasticsearch, ConnectionError
+from ceda_di.metadata.product import GeoJSONGenerator
 
 
 class JsonQueryBuilder(object):
-    def __init__(self):
+    """
+    Create a JSon Query Builder which can create an elastic search json query from extents and max results strings
+    """
+
+    def __init__(self, file_handler_factory):
+        """
+        Initialise
+        :param file_handler_factory: factory used to get a file handler to return information on a file if needed
+        :return: nothing
+        """
+
+        self.file_handler_factory = file_handler_factory
+
         self.query_dict = {
             "query": {
                 "filtered": {
@@ -52,8 +65,51 @@ class JsonQueryBuilder(object):
                 'name': 'Single longitude',
                 'regex': r'x=\[([^\[\],]*)\]',
                 'func': self.process_single_longitude
+            },
+            {
+                'name': 'Bounding Box from a File',
+                'regex': r'bb_from_file=\[([^\[\],]*)\]',  # filename inside square brackets e.g. [a filename.txt]
+                'func': self.process_bounding_box_from_file
             }
         ]
+
+    def _add_region_to_query_filter(self, latitudes, longitudes, from_file):
+        generator = GeoJSONGenerator(latitudes, longitudes)
+        bbox = generator.generate_bounding_box(from_file)
+        constraint = {
+            "geo_shape": {
+                "eufar.spatial.geometries.bbox": {
+                    "shape": bbox
+                }
+            }
+        }
+        self._add_to_query_filter("must", constraint)
+
+    def process_bounding_box_from_file(self, filename):
+        """
+        Process bounding box from a file and add it to the query dictionary.
+
+        Will automatically constrain start and end longitudes to be within the range -180 to +180 (so they may
+        be specified e.g. as 370). The region searched is always the region from the start longitude to the end latitude
+        :param filename: the filename to read the bounding box from
+        """
+
+        if len(filename.strip()) == 0:
+            raise ValueError("No filename given for bb_from_file extent.")
+        try:
+            handler = self.file_handler_factory.get_handler(filename)
+        except Exception as ex:
+            raise ValueError("An error occurred when determining the file format for the bounding box. "
+                             "Filename: '{filename}', error: '{error}'".format(filename=filename, error=ex.message))
+        if handler is None:
+                raise ValueError("File can not be read because format is not known, file: '{filename}'."
+                                 .format(filename=filename))
+        try:
+            spatial = handler.get_geospatial()
+            self._add_region_to_query_filter(spatial["lat"], spatial["lon"], True)
+        except Exception as ex:
+            raise ValueError("An error occurred when reading the file for the bounding box. Filename: '{filename}', "
+                             "error: '{error}'".format(filename=filename, error=ex.message))
 
     def process_datetime_extents(self, start, end):
         """
@@ -117,20 +173,7 @@ class JsonQueryBuilder(object):
         if not (-90 <= lat1 <= 90 and -90 <= lat1 <= 90):
             raise ValueError("Latitudes out of range: should be in -90 to 90, was {lat1} and {lat2}"
                              .format(lat1=lat1, lat2=lat2))
-        # Sort them to the correct order
-        bottom = min([lat1, lat2])
-        top = max([lat1, lat2])
-        lat_constraint = {
-            "geo_shape": {
-                "eufar.spatial.geometries.bbox": {
-                    "shape": {
-                        "type": "envelope",
-                        "coordinates": [[-180, top], [180, bottom]]
-                    }
-                }
-            }
-        }
-        self._add_to_query_filter("must", lat_constraint)
+        self._add_region_to_query_filter([lat1, lat2], [-180, 180], False)
 
     def process_single_latitude(self, lat):
         """
@@ -156,17 +199,8 @@ class JsonQueryBuilder(object):
             raise ValueError("Couldn't parse latitude extents: '{start}' and '{end}'.".format(start=start, end=end))
         start = self._confine_lon(start)
         end = self._confine_lon(end)
-        lat_constraint = {
-            "geo_shape": {
-                "eufar.spatial.geometries.bbox": {
-                    "shape": {
-                        "type": "envelope",
-                        "coordinates": [[start, 90], [end, -90]]
-                    }
-                }
-            }
-        }
-        self._add_to_query_filter("must", lat_constraint)
+
+        self._add_region_to_query_filter([-90, 90], [start, end], False)
 
     def process_single_longitude(self, lon):
         """
@@ -238,7 +272,7 @@ class Searcher(object):
     Coordinates the searching of Elasticsearch nodes to output matching filepaths.
     """
 
-    def __init__(self, config_args, json_query_builder=JsonQueryBuilder(),
+    def __init__(self, config_args, json_query_builder=None,
                  elastic_search_client_factory=ElasticsearchClientFactory()):
         """
         Create a new Searcher instance.
@@ -248,8 +282,20 @@ class Searcher(object):
         :param elastic_search_client_factory: Creates appropriately configured Elasticsearch client instances
         :returns: A new Searcher instance
         """
+        from ceda_di.extract import HandlerFactory
+
         self._elastic_search_client_factory = elastic_search_client_factory
-        self._json_query_builder = json_query_builder
+
+        if json_query_builder is not None:
+            self._json_query_builder = json_query_builder
+        else:
+            try:
+                handler_factory = HandlerFactory(config_args["handlers"])
+            except KeyError as k:
+                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
+                raise SystemExit("Missing configuration option: %s\n\n" % str(k))
+            self._json_query_builder = JsonQueryBuilder(handler_factory)
+
         self._config_args = config_args
 
     def run(self):
@@ -271,7 +317,7 @@ class Searcher(object):
         except ConnectionError as ex:
             url = es.transport.seed_connections[0].host
             error_msg = "Couldn't connect to Elasticsearch node at {url}. Exception was {exc}"\
-                .format(url=url, exc=ex.info.args[1])
+                .format(url=url, exc=str(ex))
             print(error_msg)
             sys.exit(1)
 

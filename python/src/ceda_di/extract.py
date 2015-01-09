@@ -69,7 +69,7 @@ class HandlerFactory(object):
 
 class Extract(object):
     """
-    File crawler and metadata exractor class.
+    File crawler and metadata extractor class.
     Part of core functionality of ceda_di.
     """
     def __init__(self, conf):

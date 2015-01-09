@@ -15,10 +15,9 @@ class CornersSameAsBounds(BaseMatcher):
         :return: true if the same
         """
         top_right = item[0]
-        bottom_right = item[1]
+        top_left = item[1]
         bottom_left = item[2]
-        top_left = item[3]
-
+        bottom_right = item[3]
 
         return \
             self._check_corner(bottom_left, self.bounds.lon_min, self.bounds.lat_min) and \
@@ -28,9 +27,9 @@ class CornersSameAsBounds(BaseMatcher):
 
     def describe_mismatch(self, item, mismatch_description):
         top_right = item[0]
-        bottom_right = item[1]
+        top_left = item[1]
         bottom_left = item[2]
-        top_left = item[3]
+        bottom_right = item[3]
 
         mismatch_description.append_description_of(item)
         if not self._check_corner(bottom_left, self.bounds.lon_min, self.bounds.lat_min):

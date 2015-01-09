@@ -18,6 +18,163 @@ class FileFormatError(Exception):
     pass
 
 
+class GeoJSONGenerator(object):
+    """
+    A class that can generate various geometric objects based on latitudes and longitudes
+    """
+
+    def __init__(self, latitudes, longitudes):
+        self.latitudes = filter(self.valid_lat, latitudes)
+        self.longitudes = filter(self.valid_lon, longitudes)
+
+    def calc_spatial_geometries(self):
+        """
+        Calculate the spatial geometries geojson
+        :return: geojson object
+        """
+
+        if len(self.latitudes) > 0 and len(self.longitudes) > 0:
+            geojson = {
+                "geometries": {
+                    "bbox": self.generate_bounding_box(True),
+                    "summary": self._gen_coord_summary()
+                }
+            }
+
+            return geojson
+        return None
+
+    def _gen_coord_summary(self):
+        """
+        Pull 30 evenly-spaced coordinates
+
+        :returns: A summary formatted in the GeoJSON style
+        """
+
+        num_points = 30
+        summ = {
+            "type": "LineString"
+        }
+
+        step = int(math.ceil(len(self.longitudes) / num_points))
+        summary_lons = self.longitudes[::step]
+        summary_lats = self.latitudes[::step]
+
+        summ["coordinates"] = zip(summary_lons, summary_lats)
+
+        return summ
+
+    def generate_bounding_box(self, generate_polygon):
+        """
+        Generate and return a bounding box for the given geospatial data.
+        If there are no data points then bounding box is none
+
+        :param generate_polygon: if True bounding box is for a polygon, otherwise for an envelope
+        :returns: A bounding-box formatted in the GeoJSON style
+        """
+
+        lon_left, lon_right = self._get_bounds(self.longitudes, filter_func=self.valid_lon, wrapped_coords=True)
+
+        lat_bottom, lat_top = self._get_bounds(self.latitudes, filter_func=self.valid_lat)
+
+        if lon_left is None or lon_right is None or lat_bottom is None or lat_top is None:
+            return None
+
+        if generate_polygon:
+            corners = [[lon_right, lat_top], [lon_left, lat_top], [lon_left, lat_bottom], [lon_right, lat_bottom]]
+            bbox = {
+                "type": "polygon",
+                "orientation": "counterclockwise",
+                "coordinates": corners
+            }
+        else:
+            corners = [[lon_left, lat_top], [lon_right, lat_bottom]]
+            bbox = {
+                "type": "envelope",
+                "coordinates": corners
+            }
+
+        return bbox
+
+    @staticmethod
+    def valid_lat(num):
+        """
+        Return true if 'num' is a valid latitude.
+
+        :param float num: Number to test
+        :returns: True if 'num' is valid, else False
+        """
+        if num < -90 or num > 90:
+            return False
+        return True
+
+    @staticmethod
+    def valid_lon(num):
+        """
+        Return true if 'num' is a valid longitude.
+
+        :param float num: Number to test
+        :returns: True if 'num' is valid, else False
+        """
+        if num < -180 or num > 180:
+            return False
+        return True
+
+    @staticmethod
+    def _get_bounds(item_list, filter_func=None, wrapped_coords=False):
+        """
+        Return a tuple containing the first and secound bound in the list.
+        For No values it returns None, None
+        For One value it returns the that value twice
+        For Two values it returns those low, high for unwrapped co-ordinates or in the order given for wrapped
+        For Multiple values unwrapped co-ordinates this returns min and max
+        For Multiple values wrapped co-ordinates it returns the value around the largest gap in values
+
+        :param list item_list: List of comparable data items
+        :param function filter_func: Function that returns True for good values
+        :param wrapped_coords: is this a coordinate which wraps at 360 back to 0, e.g. longitude
+        :returns: Tuple of (first bound, second bound for values in the list)
+        """
+
+        # Filter out ignore_value (useful for _FillValue, etc)
+        if filter_func is not None:
+            filtered_items = [i for i in item_list if filter_func(i)]
+        else:
+            filtered_items = item_list
+
+        if len(filtered_items) < 1:
+            return None, None
+
+        if len(filtered_items) == 1:
+            return filtered_items[0], filtered_items[0]
+
+        if wrapped_coords:
+            if len(filtered_items) is 2:
+                first_bound = filtered_items[0]
+                second_bound = filtered_items[1]
+            else:
+                # find the largest angle between closest points and exclude this from the bounding box ensuring that
+                # this includes going across the zero line
+                filtered_items = sorted(filtered_items)
+                first_bound_index = 0
+                second_bound_index = len(filtered_items) - 1
+                max_diff = (filtered_items[first_bound_index] - filtered_items[second_bound_index]) % 360
+                for i in range(1, len(filtered_items)):
+                    diff = (filtered_items[i] - filtered_items[i-1]) % 360
+                    if diff > max_diff:
+                        max_diff = diff
+                        first_bound_index = i
+                        second_bound_index = i-1
+
+                first_bound = filtered_items[first_bound_index]
+                second_bound = filtered_items[second_bound_index]
+        else:
+            second_bound = max(filtered_items)
+            first_bound = min(filtered_items)
+
+        return first_bound, second_bound
+
+
 class Properties(object):
     """
     A class to hold, manipulate, and export geospatial metadata at file level.
@@ -51,17 +208,16 @@ class Properties(object):
 
         self.index_entry_creation = index_entry_creation
 
-
         if parameters is not None:
             self.parameters = [p.get() for p in parameters]
         else:
             self.parameters = None
 
-        self.spatial = spatial
-        if self.spatial is not None:
-            self.spatial["lat"] = filter(self.valid_lat, self.spatial["lat"])
-            self.spatial["lon"] = filter(self.valid_lon, self.spatial["lon"])
-            self.spatial = self._to_geojson(self.spatial)
+        if spatial is None:
+            self.spatial = None
+        else:
+            geo_json_generator = GeoJSONGenerator(spatial["lat"], spatial["lon"])
+            self.spatial = geo_json_generator.calc_spatial_geometries()
 
         self.misc = kwargs
         flight_info = self.get_flight_info()
@@ -121,55 +277,6 @@ class Properties(object):
 
                     return flight_info
 
-    @staticmethod
-    def valid_lat(num):
-        """
-        Return true if 'num' is a valid latitude.
-
-        :param float num: Number to test
-        :returns: True if 'num' is valid, else False
-        """
-        if num < -90 or num > 90:
-            return False
-        return True
-
-    @staticmethod
-    def valid_lon(num):
-        """
-        Return true if 'num' is a valid longitude.
-
-        :param float num: Number to test
-        :returns: True if 'num' is valid, else False
-        """
-        if num < -180 or num > 180:
-            return False
-        return True
-
-    def _gen_bbox(self, coord_list):
-        """
-        Generate and return a bounding box for the given geospatial data.
-
-        :param dict coord_list: Dictionary with "lat" and "lon" lists
-        :returns: A bounding-box formatted in the GeoJSON style
-        """
-        lons = coord_list["lon"]
-        lats = coord_list["lat"]
-
-        lon_lo, lon_hi = self._get_min_max(lons, filter_func=self.valid_lon)
-        lat_lo, lat_hi = self._get_min_max(lats, filter_func=self.valid_lat)
-
-        bbox = {
-            "type": "envelope",
-            "coordinates": [
-                [lon_hi, lat_hi],
-                [lon_hi, lat_lo],
-                [lon_lo, lat_lo],
-                [lon_lo, lat_hi]
-            ]
-        }
-
-        return bbox
-
     def _gen_hull(self, coord_list):
         """
         Generate and return a convex hull for the given geospatial data.
@@ -195,51 +302,6 @@ class Properties(object):
         chull["coordinates"] = hull_coords
         return chull
 
-    def _gen_coord_summary(self, coord_list):
-        """
-        Pull 30 evenly-spaced coordinates from a given list
-
-        :param list coord_list: Normalised and unique set of coordinates
-        :returns: A summary formatted in the GeoJSON style
-        """
-
-        num_points = 30
-        summ = {
-            "type": "LineString"
-        }
-
-        lons = coord_list["lon"]
-        lats = coord_list["lat"]
-
-        step = int(math.ceil(len(lons) / num_points))
-        lons = lons[::step]
-        lats = lats[::step]
-
-        summ["coordinates"] = zip(lons, lats)
-
-        return summ
-
-    @staticmethod
-    def _get_min_max(item_list, filter_func=None):
-        """
-        Return a tuple containing the (highest, lowest) values in the list.
-
-        :param list item_list: List of comparable data items
-        :param function filter_func: Function that returns True for good values
-        :returns: Tuple of (highest, lowest values in the list)
-        """
-        if len(item_list) < 1:
-            return (None, None)
-
-        # Filter out ignore_value (useful for _FillValue, etc)
-        if filter_func is not None:
-            item_list = [i for i in item_list if filter_func(i)]
-
-        high = max(item_list)
-        low = min(item_list)
-
-        return (low, high)
-
     @staticmethod
     def _to_wkt(spatial):
         """
@@ -260,27 +322,6 @@ class Properties(object):
         linestring = "LINESTRING (%s)" % coord_string
 
         return linestring
-
-    def _to_geojson(self, spatial):
-        """
-        Convert lats and lons to a GeoJSON-compatible type.
-
-        :param dict spatial: A dict with keys 'lat' and 'lon' (as lists)
-        :returns: A Python dict representing a GeoJSON-compatible coord array
-        """
-        lats = spatial["lat"]
-        lons = spatial["lon"]
-
-        if len(lats) > 0 and len(lons) > 0:
-            geojson = {
-                "geometries": {
-                    "bbox": self._gen_bbox(spatial),
-                    "summary": self._gen_coord_summary(spatial)
-                }
-            }
-
-            return geojson
-        return None
 
     def __str__(self):
         """
