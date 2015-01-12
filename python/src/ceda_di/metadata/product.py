@@ -220,10 +220,6 @@ class Properties(object):
             self.spatial = geo_json_generator.calc_spatial_geometries()
 
         self.misc = kwargs
-        flight_info = self.get_flight_info()
-        if flight_info:
-            self.misc.update(flight_info)
-
         self.properties = {
             "_id": hashlib.sha1(self.filesystem["path"]).hexdigest(),
             "data_format": self.data_format,
@@ -232,32 +228,6 @@ class Properties(object):
             "parameters": self.parameters,
             "spatial": self.spatial,
             "temporal": self.temporal,
-        }
-
-    def get_flight_info(self):
-        """
-        Return a dictionary populated with metadata about the flight that the
-        given data file was captured on - flight number, organisation, etc.
-
-        :return: A dict containing flight metadata.
-        """
-        patterns = {
-            "arsf": {
-                "patterns": [
-                    r"arsf(?P<flight_num>\d{3}.*)-",
-                    r"(e|h)(\d{3})(\S?)(?P<flight_num>(\d{3})(\S?))"
-                ]
-            },
-            "faam": {
-                "patterns": [
-                    r"_(?P<flight_num>b(\d{3}))"
-                ]
-            },
-            "safire": {
-                "patterns": [
-                    r"_(?P<flight_num>((as|az|fs)\d{6}))"
-                ]
-            }
         }
 
         for org, info in patterns.iteritems():
