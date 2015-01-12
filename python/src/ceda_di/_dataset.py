@@ -33,6 +33,15 @@ class _geospatial(object):
         """Returns a dict containing parameter information"""
         self.unimpl_base_class()
 
+    def get_properties(self):
+        """
+        Return a ceda_di.metadata.product.Properties object populated with the
+        file's metadata.
+
+        :returns: A ceda_di.metadata.product.Properties object
+        """
+        self.unimpl_base_class()
+
     @staticmethod
     def unimpl_base_class():
         """Throws relevant NotImplementedError."""

@@ -4,65 +4,110 @@ Module for holding and exporting file metadata as JSON documents.
 
 from __future__ import division
 import hashlib
-import json
+import simplejson as json
 import logging
 import math
+import re
 from pyhull.convex_hull import qconvex
 
 
-class Properties(object):
+class FileFormatError(Exception):
     """
-    A class to hold, manipulate, and export geospatial metadata at file level.
+    Exception to raise if there is a error in the file format
     """
-    def __init__(self, filesystem=None, spatial=None,
-                 temporal=None, data_format=None, parameters=None,
-                 **kwargs):
+    pass
+
+
+class GeoJSONGenerator(object):
+    """
+    A class that can generate various geometric objects based on latitudes and longitudes
+    """
+
+    def __init__(self, latitudes, longitudes):
+        self.latitudes = filter(self.valid_lat, latitudes)
+        self.longitudes = filter(self.valid_lon, longitudes)
+
+    def calc_spatial_geometries(self):
         """
-        Construct a 'ceda_di.metadata.Properties' ready to export as JSON or dict
-        (see "doc/schema.json")
-
-        :param dict filesystem: Filesystem information about file
-        :param dict spatial: Spatial information about file
-        :param dict temporal: Temporal information about file
-        :param dict data_format: Data format information about file
-        :param list parameters: Parameter objects in list
-        :param **kwargs: Key-value pairs of any extra relevant metadata.
+        Calculate the spatial geometries geojson
+        :return: geojson object
         """
 
-        self.logger = logging.getLogger(__name__)
+        if len(self.latitudes) > 0 and len(self.longitudes) > 0:
+            geojson = {
+                "geometries": {
+                    "bbox": self.generate_bounding_box(False),
+                    "summary": self._gen_coord_summary()
+                }
+            }
 
-        self.filesystem = filesystem
-        self.temporal = temporal
-        self.data_format = data_format
+            return geojson
+        return None
 
-        if parameters is not None:
-            self.parameters = [p.get() for p in parameters]
-        else:
-            self.parameters = None
+    def _gen_coord_summary(self):
+        """
+        Pull 30 evenly-spaced coordinates
 
-        self.spatial = spatial
-        if self.spatial is not None:
-            self.spatial["lat"] = filter(self.valid_lat, self.spatial["lat"])
-            self.spatial["lon"] = filter(self.valid_lon, self.spatial["lon"])
-            self.spatial = self._to_geojson(self.spatial)
+        :returns: A summary formatted in the GeoJSON style
+        """
 
-        self.misc = kwargs
-        self.properties = {
-            "_id": hashlib.sha1(self.filesystem["path"]).hexdigest(),
-            "data_format": self.data_format,
-            "file": self.filesystem,
-            "misc": self.misc,
-            "parameters": self.parameters,
-            "spatial": self.spatial,
-            "temporal": self.temporal,
+        num_points = 30
+        summ = {
+            "type": "LineString"
         }
+
+        step = int(math.ceil(len(self.longitudes) / num_points))
+        summary_lons = self.longitudes[::step]
+        summary_lats = self.latitudes[::step]
+
+        summ["coordinates"] = zip(summary_lons, summary_lats)
+
+        return summ
+
+    def generate_bounding_box(self, generate_polygon):
+        """
+        Generate and return a bounding box for the given geospatial data.
+        If there are no data points then bounding box is none
+
+        :param generate_polygon: if True bounding box is for a polygon, otherwise for an envelope
+        :returns: A bounding-box formatted in the GeoJSON style
+        """
+
+        lon_left, lon_right = self._get_bounds(self.longitudes, filter_func=self.valid_lon, wrapped_coords=True)
+
+        lat_bottom, lat_top = self._get_bounds(self.latitudes, filter_func=self.valid_lat)
+
+        if lon_left is None or lon_right is None or lat_bottom is None or lat_top is None:
+            return None
+
+        if generate_polygon:
+            corners = [[
+                       [lon_right, lat_top],
+                       [lon_left, lat_top],
+                       [lon_left, lat_bottom],
+                       [lon_right, lat_bottom],
+                       [lon_right, lat_top]]]
+            bbox = {
+                "type": "polygon",
+                "orientation": "counterclockwise",
+                "coordinates": corners
+            }
+        else:
+            corners = [[lon_left, lat_top], [lon_right, lat_bottom]]
+            bbox = {
+                "type": "envelope",
+                "coordinates": corners
+            }
+
+        return bbox
 
     @staticmethod
     def valid_lat(num):
         """
         Return true if 'num' is a valid latitude.
+
         :param float num: Number to test
-        :return: True if 'num' is valid, else False
+        :returns: True if 'num' is valid, else False
         """
         if num < -90 or num > 90:
             return False
@@ -72,40 +117,177 @@ class Properties(object):
     def valid_lon(num):
         """
         Return true if 'num' is a valid longitude.
+
         :param float num: Number to test
-        :return: True if 'num' is valid, else False
+        :returns: True if 'num' is valid, else False
         """
         if num < -180 or num > 180:
             return False
         return True
 
-    def _gen_bbox(self, coord_list):
+    @staticmethod
+    def _get_bounds(item_list, filter_func=None, wrapped_coords=False):
         """
-        Generate and return a bounding box for the given geospatial data.
-        :param dict coord_list: Dictionary with "lat" and "lon" lists
-        :return dict bbox: A bounding-box formatted in the GeoJSON style
+        Return a tuple containing the first and secound bound in the list.
+        For No values it returns None, None
+        For One value it returns the that value twice
+        For Two values it returns those low, high for unwrapped co-ordinates or in the order given for wrapped
+        For Multiple values unwrapped co-ordinates this returns min and max
+        For Multiple values wrapped co-ordinates it returns the value around the largest gap in values
+
+        :param list item_list: List of comparable data items
+        :param function filter_func: Function that returns True for good values
+        :param wrapped_coords: is this a coordinate which wraps at 360 back to 0, e.g. longitude
+        :returns: Tuple of (first bound, second bound for values in the list)
         """
-        lons = coord_list["lon"]
-        lats = coord_list["lat"]
 
-        lon_lo, lon_hi = self._get_min_max(lons, filter_func=self.valid_lon)
-        lat_lo, lat_hi = self._get_min_max(lats, filter_func=self.valid_lat)
+        # Filter out ignore_value (useful for _FillValue, etc)
+        if filter_func is not None:
+            filtered_items = [i for i in item_list if filter_func(i)]
+        else:
+            filtered_items = item_list
 
-        bbox = {
-            "type": "MultiPoint",
-            "coordinates": [[lon_lo, lat_lo],
-                            [lon_lo, lat_hi],
-                            [lon_hi, lat_hi],
-                            [lon_hi, lat_lo]]
+        if len(filtered_items) < 1:
+            return None, None
+
+        if len(filtered_items) == 1:
+            return filtered_items[0], filtered_items[0]
+
+        if wrapped_coords:
+            if len(filtered_items) is 2:
+                first_bound_index = 0
+                second_bound_index = 1
+            else:
+                # find the largest angle between closest points and exclude this from the bounding box ensuring that
+                # this includes going across the zero line
+                filtered_items = sorted(filtered_items)
+                first_bound_index = 0
+                second_bound_index = len(filtered_items) - 1
+                max_diff = (filtered_items[first_bound_index] - filtered_items[second_bound_index]) % 360
+                for i in range(1, len(filtered_items)):
+                    diff = (filtered_items[i] - filtered_items[i-1]) % 360
+                    if diff > max_diff:
+                        max_diff = diff
+                        first_bound_index = i
+                        second_bound_index = i-1
+
+            first_bound = filtered_items[first_bound_index]
+            second_bound = filtered_items[second_bound_index]
+        else:
+            second_bound = max(filtered_items)
+            first_bound = min(filtered_items)
+
+        return float(first_bound), float(second_bound)
+
+
+class Properties(object):
+    """
+    A class to hold, manipulate, and export geospatial metadata at file level.
+    """
+    def __init__(self,
+                 filesystem=None,
+                 spatial=None,
+                 temporal=None,
+                 data_format=None,
+                 parameters=None,
+                 index_entry_creation=None,
+                 **kwargs):
+        """
+        Construct 'ceda_di.metadata.Properties' ready to export.
+        (for structure, see "doc/schema.json")
+
+        :param dict filesystem: Filesystem information about file
+        :param dict spatial: Spatial information about file
+        :param dict temporal: Temporal information about file
+        :param dict data_format: Data format information about file
+        :param list parameters: Parameter objects in list
+        :param index_entry_creation: the program that created the index entry
+        :param **kwargs: Key-value pairs of any extra relevant metadata.
+        """
+
+        self.logger = logging.getLogger(__name__)
+
+        self.filesystem = filesystem
+        self.temporal = temporal
+        self.data_format = data_format
+
+        self.index_entry_creation = index_entry_creation
+
+        if parameters is not None:
+            self.parameters = [p.get() for p in parameters]
+        else:
+            self.parameters = None
+
+        if spatial is None:
+            self.spatial = None
+        else:
+            geo_json_generator = GeoJSONGenerator(spatial["lat"], spatial["lon"])
+            self.spatial = geo_json_generator.calc_spatial_geometries()
+
+        self.misc = kwargs
+        flight_info = self.get_flight_info()
+        if flight_info:
+            self.misc.update(flight_info)
+
+        self.properties = {
+            "_id": hashlib.sha1(self.filesystem["path"]).hexdigest(),
+            "data_format": self.data_format,
+            "index_entry_creation": self.index_entry_creation,
+            "file": self.filesystem,
+            "misc": self.misc,
+            "parameters": self.parameters,
+            "spatial": self.spatial,
+            "temporal": self.temporal,
         }
 
-        return bbox
+    def get_flight_info(self):
+        """
+        Return a dictionary populated with metadata about the flight that the
+        given data file was captured on - flight number, organisation, etc.
+
+        :return: A dict containing flight metadata.
+        """
+        patterns = {
+            "arsf": {
+                "patterns": [
+                    r"arsf(?P<flight_num>\d{3}.*)-",
+                    r"(e|h)(\d{3})(\S?)(?P<flight_num>(\d{3})(\S?))"
+                ]
+            },
+            "faam": {
+                "patterns": [
+                    r"_(?P<flight_num>b(\d{3}))"
+                ]
+            },
+            "safire": {
+                "patterns": [
+                    r"_(?P<flight_num>((as|az|fs)\d{6}))"
+                ]
+            }
+        }
+
+        for org, info in patterns.iteritems():
+            for pattern in info["patterns"]:
+                match = re.search(pattern, self.filesystem["filename"])
+                if match:
+                    flight_info = {
+                        "organisation": org,
+                        "flight_num": match.group("flight_num")
+                    }
+
+                    try:
+                        flight_info["project"] = match.group("project")
+                    except IndexError:
+                        pass
+
+                    return flight_info
 
     def _gen_hull(self, coord_list):
         """
         Generate and return a convex hull for the given geospatial data.
+
         :param list coord_list: Normalised and uniquified set of coordinates
-        :return dict chul: A convex hull formatted in the GeoJSON style
+        :returns: A convex hull formatted in the GeoJSON style
         """
 
         chull = {
@@ -125,56 +307,13 @@ class Properties(object):
         chull["coordinates"] = hull_coords
         return chull
 
-    def _gen_coord_summary(self, coord_list):
-        """
-        Pull 30 evenly-spaced coordinates from a given list
-        :param list coord_list: Normalised and unique set of coordinates
-        :return dict summ: A summary formatted in the GeoJSON style
-        """
-
-        num_points = 30
-        summ = {
-            "type": "LineString"
-        }
-
-        lons = coord_list["lon"]
-        lats = coord_list["lat"]
-
-        step = int(math.ceil(len(lons) / num_points))
-        lons = lons[::step]
-        lats = lats[::step]
-
-        summ["coordinates"] = zip(lons, lats)
-
-        return summ
-
-    @staticmethod
-    def _get_min_max(item_list, filter_func=None):
-        """
-        Return a tuple containing the (highest, lowest) values in the list.
-        :param list item_list: List of comparable data items
-        :param function filter_func: Function that returns True for good values
-        :return tuple: Tuple of (highest, lowest values in the list)
-        """
-        if len(item_list) < 1:
-            return (None, None)
-
-        # Filter out ignore_value (useful for _FillValue, etc)
-        if filter_func is not None:
-            item_list = [i for i in item_list if filter_func(i)]
-
-        high = max(item_list)
-        low = min(item_list)
-
-        return (low, high)
-
     @staticmethod
     def _to_wkt(spatial):
         """
         Convert lats and lons to a WKT linestring.
 
         :param dict spatial: A dict with keys 'lat' and 'lon' (as lists)
-        :return: A Python string representing a WKT linestring
+        :returns: A Python string representing a WKT linestring
         """
         lats = spatial["lat"]
         lons = spatial["lon"]
@@ -189,32 +328,11 @@ class Properties(object):
 
         return linestring
 
-    def _to_geojson(self, spatial):
-        """
-        Convert lats and lons to a GeoJSON-compatible type.
-
-        :param dict spatial: A dict with keys 'lat' and 'lon' (as lists)
-        :return: A Python dict representing a GeoJSON-compatible coord array
-        """
-        lats = spatial["lat"]
-        lons = spatial["lon"]
-
-        if len(lats) > 0 and len(lons) > 0:
-            geojson = {
-                "geometries": {
-                    "bbox": self._gen_bbox(spatial),
-                    "summary" : self._gen_coord_summary(spatial)
-                }
-            }
-
-            return geojson
-        return None
-
     def __str__(self):
         """
         Format file properties to JSON when coercing object to string.
 
-        :return: A Python string containing JSON representation of object.
+        :returns: A Python string containing JSON representation of object.
         """
         return json.dumps(self.properties, default=repr)
 
@@ -222,7 +340,7 @@ class Properties(object):
         """
         Return metadata as JSON string.
 
-        :return str: JSON document describing metadata.
+        :returns: JSON document describing metadata.
         """
         return self.__str__()
 
@@ -230,7 +348,7 @@ class Properties(object):
         """
         Return metadata as dict object.
 
-        :return dict: Dictionary describing metadata
+        :returns: Dictionary describing metadata
         """
         return self.properties
 
@@ -238,6 +356,7 @@ class Properties(object):
 class Parameter(object):
     """
     Placeholder/wrapper class for metadata parameters
+
     :param str name: Name of variable/parameter
     :param dict other_params: Optional - Dict containing other param metadata
     """
@@ -255,9 +374,10 @@ class Parameter(object):
     def make_param_item(name, value):
         """
         Convert a name/value pair to dictionary (for better indexing in ES)
+
         :param str name: Name of the parameter item (e.g. "long_name_fr", etc)
         :param str value: Value of the parameter item (e.g. "Radiance")
-        :return dict: Dict containing name:value information
+        :returns: Dict containing name:value information
         """
         return {"name": name,
                 "value": value}

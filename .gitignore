@@ -10,8 +10,8 @@ log/
 man/
 out/
 dist/
+python/src/test/integration/test_files/json/
 
 *.pyc
-*.rst
 *.egg-info
 *~
