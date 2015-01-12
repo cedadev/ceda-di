@@ -20,6 +20,19 @@ Options:
     --max-results=<num>        Max number of results to return when searching
     --file-paths               Print out search results as file paths.
     --json                     Print out search results as pure JSON.
+
+ <extents> for searching:
+    one or more conditions that must be satisfied by the file:
+    t=[<time>]                    contains <time>
+    t=[<start time>, <end time>]  contains some data in the period
+    times_from_file=[filename]    contains some data from the period in the file
+
+    x=[<longitude>]               contains the longitude point
+    x=[<start long>, <end long>]  contains some data in the longitude range
+    y=[<latitude>]                contains the latitude point
+    y=[<start lat>, <end lat>]    contains some data in the latitude range
+
+    bb_from_file=[filename]       contains some data from the region in the file
 """
 
 import simplejson as json
