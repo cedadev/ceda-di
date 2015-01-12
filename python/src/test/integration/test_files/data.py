@@ -27,6 +27,7 @@ ceda_di_test_files["cloudsat_PRECIP_2007"] = TestFileTestData(
     valid_vars_count=34,
     all_variable_names=None,
     data_variable_name='DEM_elevation',
+    data_variable_standard_name='DEM_elevation',
     data_variable_properties={
         "long_name": "Digital Elevation Map",
         "standard_name": "DEM_elevation",

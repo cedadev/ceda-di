@@ -11,48 +11,37 @@ class CornersSameAsBounds(BaseMatcher):
     def _matches(self, item):
         """
 
-        :param item: bounding corner, [bottom left, top left, top right, bottom right]
+        :param item: bounding corner, [top left, bottom right]
         :return: true if the same
         """
-        top_right = item[0]
+        top_left = item[0]
         bottom_right = item[1]
-        bottom_left = item[2]
-        top_left = item[3]
-
 
         return \
-            self._check_corner(bottom_left, self.bounds.lon_min, self.bounds.lat_min) and \
             self._check_corner(bottom_right, self.bounds.lon_max, self.bounds.lat_min) and \
-            self._check_corner(top_left, self.bounds.lon_min, self.bounds.lat_max) and \
-            self._check_corner(top_right, self.bounds.lon_max, self.bounds.lat_max)
+            self._check_corner(top_left, self.bounds.lon_min, self.bounds.lat_max)
 
     def describe_mismatch(self, item, mismatch_description):
-        bottom_left = item[0]
-        bottom_right = item[3]
-        top_left = item[1]
-        top_right = item[2]
+        top_left = item[0]
+        bottom_right = item[1]
 
         mismatch_description.append_description_of(item)
-        if not self._check_corner(bottom_left, self.bounds.lon_min, self.bounds.lat_min):
-            mismatch_description.append_text(' differed on bottom left ')
         if not self._check_corner(bottom_right, self.bounds.lon_max, self.bounds.lat_min):
             mismatch_description.append_text(' differed on bottom right ')
         if not self._check_corner(top_left, self.bounds.lon_min, self.bounds.lat_max):
             mismatch_description.append_text(' differed on top left ')
-        if not self._check_corner(top_right, self.bounds.lon_max, self.bounds.lat_max):
-            mismatch_description.append_text(' differed on top right ')
 
     def describe_to(self, description):
-        description.append_text('corners within ')  \
+        description.append_text('envlope within ')  \
                    .append_description_of(self.delta)       \
-                   .append_text(' lat:')                     \
-                   .append_description_of(self.bounds.lat_min) \
-                   .append_text(' - ')                     \
-                   .append_description_of(self.bounds.lat_max) \
                    .append_text(' lon:')                     \
                    .append_description_of(self.bounds.lon_min) \
                    .append_text(' - ') \
-                   .append_description_of(self.bounds.lon_max)
+                   .append_description_of(self.bounds.lon_max) \
+                   .append_text(' lat:')                     \
+                   .append_description_of(self.bounds.lat_min) \
+                   .append_text(' - ')                     \
+                   .append_description_of(self.bounds.lat_max)
 
     def _check_corner(self, corner, lon, lat):
         return fabs(float(corner[0]) - float(lon)) < self.delta and fabs(float(corner[1]) - float(lat)) < self.delta

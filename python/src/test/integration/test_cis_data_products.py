@@ -43,13 +43,19 @@ class CISProductTests(object):
     def test_json_has_start_time(self):
         json_body = self.get_output_json()
         start_date_str = json_body['temporal']['start_time']
-        start_date = dt.datetime.strptime(start_date_str, "%Y-%m-%dT%H:%M:%S.%f")
+        try:
+            start_date = dt.datetime.strptime(start_date_str, "%Y-%m-%dT%H:%M:%S.%f")
+        except ValueError:
+            start_date = dt.datetime.strptime(start_date_str, "%Y-%m-%dT%H:%M:%S")
         assert_that(start_date, is_(within_delta(self.cis_test_file.start_datetime, dt.timedelta(seconds=1))))
 
     def test_json_has_end_time(self):
         json_body = self.get_output_json()
         end_date_str = json_body['temporal']['end_time']
-        end_date = dt.datetime.strptime(end_date_str, "%Y-%m-%dT%H:%M:%S.%f")
+        try:
+            end_date = dt.datetime.strptime(end_date_str, "%Y-%m-%dT%H:%M:%S.%f")
+        except ValueError:
+            end_date = dt.datetime.strptime(end_date_str, "%Y-%m-%dT%H:%M:%S")
         assert_that(end_date, is_(within_delta(self.cis_test_file.end_datetime, dt.timedelta(seconds=1))))
 
     def test_json_has_geo_bounds(self):
@@ -76,17 +82,19 @@ class CISProductTests(object):
                 if attribute['name'] == attribute_name:
                     return attribute['value']
 
+        variable_names_in_json = []
         for variable_attrs in parameters:
             name = get_variable_attribute_value_by_name(variable_attrs, 'standard_name')
+            variable_names_in_json.append(name)
 
-            if name == self.cis_test_file.data_variable_name:
+            if name == self.cis_test_file.data_variable_standard_name:
                 for key, expected_value in self.cis_test_file.data_variable_properties.iteritems():
                     value = get_variable_attribute_value_by_name(variable_attrs, key)
                     assert_that(value, is_(str(expected_value)), "Value is present and matched for key '{}'".format(key))
                 return
 
         # If we got here it means that we couldn't find a matching parameter so we should fail
-        raise AssertionError("%s not found in list of parameters" % self.cis_test_file.data_variable_name)
+        raise AssertionError("%s not found in list of parameters (%s)" % (self.cis_test_file.data_variable_name, variable_names_in_json))
 
     def test_json_has_correct_format_and_source(self):
         json_body = self.get_output_json()
@@ -95,21 +103,12 @@ class CISProductTests(object):
         assert_that(dataformat, is_(self.cis_test_file.file_format), "data format")
         assert_that(indexer, contains_string(self.cis_test_file.product_name), "data format")
 
-
-class TestGASSP(CISProductTests, TestCase):
-    """
-    Test that CEDA DI can read GASSP data:
-    """
-
+class TestCloudsatRVODsdata(CISProductTests, TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.setUpForTest("GASSP_aeroplane")
-
+        cls.setUpForTest("CloudsatRVODsdata")
 
 class TestCloudSat(CISProductTests, TestCase):
-    """
-    Test that CEDA DI can read CloudSat
-    """
 
     @classmethod
     def setUpClass(cls):
@@ -118,12 +117,73 @@ class TestCloudSat(CISProductTests, TestCase):
         cls.setUpForTest("cloudsat_PRECIP_2007")
 
 
-# Test skipped because we are unsure of the behaviour
-# class TestGridded2DFile(CISProductTests, TestCase):
-#     """
-#     Test that CEDA DI can read gridded 2D
-#     """
-#
-#     @classmethod
-#     def setUpClass(cls):
-#         cls.setUpForTest("2D_GRIDDED")
+class TestCaliop_L2(CISProductTests, TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setUpForTest("caliop_L2")
+
+
+class TestCaliop_L1(CISProductTests, TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setUpForTest("caliop_L1")
+
+
+class TestModisL3(CISProductTests, TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+
+        cls.setUpForTest("modis_L3")
+
+
+class TestModisL2(CISProductTests, TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setUpForTest("modis_L2")
+
+
+class TestCloudCCI(CISProductTests, TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setUpForTest("Cloud_CCI")
+
+
+class TestAerosol_CCI(CISProductTests, TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setUpForTest("Aerosol_CCI")
+
+
+class TestCIS(CISProductTests, TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setUpForTest("CIS_Ungridded")
+
+
+class TestAeronet(CISProductTests, TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setUpForTest("aeronet")
+
+
+class TestASCII(CISProductTests, TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setUpForTest("ascii")
+
+
+class TestGASSP(CISProductTests, TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setUpForTest("GASSP_aeroplane")
+
