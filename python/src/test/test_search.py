@@ -1,5 +1,6 @@
 import copy
 import os
+from datetime import datetime
 from hamcrest import *
 import unittest
 from elasticsearch import ConnectionError
@@ -256,7 +257,7 @@ class TestJsonQueryBuilder(unittest.TestCase):
         with self.assertRaises(ValueError) as exception_context:
             self.run_query_builder_return_must(query_string, file_handle_factory)
 
-        assert_that(exception_context.exception.message, contains_string("No filename given for bb_from_file extent."), "error message")
+        assert_that(exception_context.exception.message, contains_string("No filename given when reading the file for bounding box."), "error message")
 
     def test_GIVEN_bounding_box_filename_with_no_handler_WHEN_build_THEN_error(self):
         file_handle_factory = MagicMock(HandlerFactory)
@@ -333,6 +334,55 @@ class TestJsonQueryBuilder(unittest.TestCase):
             self.run_query_builder_return_must(query_string, file_handle_factory)
 
         assert_that(exception_context.exception.message, contains_string("No bounding box generated when reading the file."), "error message")
+
+    def test_GIVEN_temporal_filename_handler_throws_when_called_WHEN_build_THEN_error(self):
+        file_handle_factory = MagicMock(HandlerFactory)
+        file_handler = MagicMock(_geospatial)
+        filename = "filename"
+        error_message = "error message from temporal"
+        query_string = "times_from_file=[%s]" % filename
+
+        file_handle_factory.get_handler = MagicMock(return_value=file_handler)
+        file_handler.get_temporal = MagicMock(side_effect=Exception(error_message))
+
+        with self.assertRaises(ValueError) as exception_context:
+            self.run_query_builder_return_must(query_string, file_handle_factory)
+
+        assert_that(exception_context.exception.message, contains_string("An error occurred when reading"), "error message")
+        assert_that(exception_context.exception.message, contains_string(error_message), "error message")
+
+    def test_GIVEN_temporal_filename_with_times_WHEN_build_THEN_times_set(self):
+        file_handle_factory = MagicMock(HandlerFactory)
+        file_handler = MagicMock(_geospatial)
+        filename = "filename"
+        query_string = "times_from_file=[%s]" % filename
+        start_time = datetime(2009, 12, 31, 23, 59, 59)
+        end_time = datetime(2009, 1, 1, 0, 0)
+
+        file_handle_factory.get_handler = MagicMock(return_value=file_handler)
+        file_handler.get_temporal = MagicMock(return_value={
+            "start_time": start_time.isoformat(),
+            "end_time": end_time.isoformat()})
+
+        must = self.run_query_builder_return_must(query_string, file_handle_factory)
+        assert_that(must[0]['range']['eufar.temporal.start_time']['lte'], is_('2009-01-01T00:00:00'))
+        assert_that(must[1]['range']['eufar.temporal.end_time']['gte'], is_('2009-12-31T23:59:59'))
+
+
+    def test_GIVEN_bounding_box_filename_with_times_WHEN_build_THEN_error(self):
+        file_handle_factory = MagicMock(HandlerFactory)
+        file_handler = MagicMock(_geospatial)
+        filename = "filename"
+        query_string = "times_from_file=[%s]" % filename
+
+        file_handle_factory.get_handler = MagicMock(return_value=file_handler)
+        file_handler.get_temporal = MagicMock(return_value={})
+
+        with self.assertRaises(ValueError) as exception_context:
+            self.run_query_builder_return_must(query_string, file_handle_factory)
+
+        assert_that(exception_context.exception.message, contains_string("No times found when reading the file."), "error message")
+
 
 
 class TestSearcher(unittest.TestCase):

@@ -70,6 +70,11 @@ class JsonQueryBuilder(object):
                 'name': 'Bounding Box from a File',
                 'regex': r'bb_from_file=\[([^\[\],]*)\]',  # filename inside square brackets e.g. [a filename.txt]
                 'func': self.process_bounding_box_from_file
+            },
+            {
+                'name': 'Times from a File',
+                'regex': r'times_from_file=\[([^\[\],]*)\]',  # filename inside square brackets e.g. [a filename.txt]
+                'func': self.process_times_from_file
             }
         ]
 
@@ -94,6 +99,20 @@ class JsonQueryBuilder(object):
         }
         self._add_to_query_filter("must", constraint)
 
+    def _get_handler_for_file(self, action, filename):
+        if len(filename.strip()) == 0:
+            raise ValueError("No filename given when reading the file for %s." % action)
+        try:
+            handler = self.file_handler_factory.get_handler(filename)
+        except Exception as ex:
+            raise ValueError("An error occurred when determining the file format for the {action}. "
+                             "Filename: '{filename}', error: '{error}'"
+                             .format(filename=filename, error=ex.message, action=action))
+        if handler is None:
+            raise ValueError("File can not be read because format is not known, file: '{filename}'."
+                             .format(filename=filename))
+        return handler
+
     def process_bounding_box_from_file(self, filename):
         """
         Process bounding box from a file and add it to the query dictionary.
@@ -102,23 +121,48 @@ class JsonQueryBuilder(object):
         be specified e.g. as 370). The region searched is always the region from the start longitude to the end latitude
         :param filename: the filename to read the bounding box from
         """
-
-        if len(filename.strip()) == 0:
-            raise ValueError("No filename given for bb_from_file extent.")
-        try:
-            handler = self.file_handler_factory.get_handler(filename)
-        except Exception as ex:
-            raise ValueError("An error occurred when determining the file format for the bounding box. "
-                             "Filename: '{filename}', error: '{error}'".format(filename=filename, error=ex.message))
-        if handler is None:
-                raise ValueError("File can not be read because format is not known, file: '{filename}'."
-                                 .format(filename=filename))
+        handler = self._get_handler_for_file("bounding box", filename)
         try:
             spatial = handler.get_geospatial()
             self._add_region_to_query_filter(spatial["lat"], spatial["lon"], False)
         except Exception as ex:
             raise ValueError("An error occurred when reading the file for the bounding box. Filename: '{filename}', "
                              "error: '{error}'".format(filename=filename, error=ex.message))
+
+    def process_times_from_file(self, filename):
+        """
+        Process times from a file and add it to the query dictionary.
+
+        :param filename: the filename to read the bounding box from
+        """
+        handler = self._get_handler_for_file("times", filename)
+        try:
+            temporal = handler.get_temporal()
+        except Exception as ex:
+            raise ValueError("An error occurred when reading the file for the times. Filename: '{filename}', "
+                             "error: '{error}'".format(filename=filename, error=ex.message))
+        try:
+            self._add_temporal_query_to_filter(temporal["start_time"], temporal["end_time"])
+        except KeyError:
+            raise ValueError("No times found when reading the file. Filename: '{filename}'".format(filename=filename))
+
+    def _add_temporal_query_to_filter(self, start, end):
+        start_constraint = {
+            "range": {
+                "eufar.temporal.start_time": {
+                    "lte": end
+                }
+            }
+        }
+        end_constraint = {
+            "range": {
+                "eufar.temporal.end_time": {
+                    "gte": start
+                }
+            }
+        }
+        self._add_to_query_filter("must", start_constraint)
+        self._add_to_query_filter("must", end_constraint)
 
     def process_datetime_extents(self, start, end):
         """
@@ -137,22 +181,7 @@ class JsonQueryBuilder(object):
         except ValueError:
             raise ValueError("Couldn't parse datetimes '{start}' and '{end}': "
                              "use the ISO-8601 YYYY-MM-DDTHH:MM:SS format.".format(start=start, end=end))
-        start_constraint = {
-            "range": {
-                "eufar.temporal.start_time": {
-                    "lte": end
-                }
-            }
-        }
-        end_constraint = {
-            "range": {
-                "eufar.temporal.end_time": {
-                    "gte": start
-                }
-            }
-        }
-        self._add_to_query_filter("must", start_constraint)
-        self._add_to_query_filter("must", end_constraint)
+        self._add_temporal_query_to_filter(start, end)
 
     def process_single_datetime(self, datetime):
         """

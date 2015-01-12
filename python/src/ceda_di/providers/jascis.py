@@ -87,7 +87,7 @@ class JasCisDataProduct(_geospatial):
         coords = self._get_coords()
         time = coords.get_coordinates_points().times
         start_time = convert_std_time_to_datetime(np.amin(time))
-        end_time  = convert_std_time_to_datetime(np.amax(time))
+        end_time = convert_std_time_to_datetime(np.amax(time))
         return {"start_time": start_time.isoformat(),
                 "end_time": end_time.isoformat()}
 
