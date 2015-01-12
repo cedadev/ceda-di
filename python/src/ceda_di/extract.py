@@ -14,6 +14,7 @@ from elasticsearch.exceptions import TransportError
 
 from ceda_di.search import ElasticsearchClientFactory
 from ceda_di import index
+from ceda_di.metadata.product import FileFormatError
 
 
 class HandlerFactory(object):
@@ -21,6 +22,7 @@ class HandlerFactory(object):
     Factory for file handler classes.
     """
     def __init__(self, handler_map):
+        self.logger = logging.getLogger(__name__)
         self.handlers = {}
         for pattern, handler in handler_map.iteritems():
             handler_class = handler['class']
@@ -48,11 +50,21 @@ class HandlerFactory(object):
         for pattern, handler in self.handlers.iteritems():
             if re.search(pattern, filename):
                 handler_candidates.append(handler)
+
         # Sort by priority to ensure the correct class is returned
         # when files match multiple signatures
-        if len(handler_candidates) > 0:
-            handler_candidates.sort(key=lambda h: h['priority'])
-            return handler_candidates[0]['class']
+        handler_candidates.sort(key=lambda h: h['priority'])
+        for handler in handler_candidates:
+            handler_class = handler['class']
+            try:
+                handler_class.get_file_format(filename)
+                return handler_class
+            except FileFormatError as ex:
+                self.logger.info("Not using handler {} because {}".format(handler_class, ex.message))
+                pass
+            except AttributeError:
+                return handler_class
+        return None
 
 
 class Extract(object):
@@ -122,13 +134,14 @@ class Extract(object):
 
     def index_properties(self, filename, handler):
         """
-        Index the file in Elasicsearch
+        Index the file in Elasticsearch
         """
         props = handler.get_properties()
         if props is not None:
             self.es.index(index=self.conf('es-index'),
                           doc_type=self.conf('es-mapping'),
-                          body=str(props))
+                          body=str(props), 
+                          id=props.properties["_id"])
 
     def write_properties(self, fname, _geospatial_obj):
         """

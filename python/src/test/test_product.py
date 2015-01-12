@@ -6,6 +6,7 @@ import unittest
 
 from ceda_di.metadata.product import Properties, Parameter
 
+
 class TestProperties(unittest.TestCase):
     def setUp(self):
         # Just some dummy data (totally arbitrary)
