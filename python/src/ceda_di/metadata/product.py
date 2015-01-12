@@ -155,8 +155,8 @@ class GeoJSONGenerator(object):
 
         if wrapped_coords:
             if len(filtered_items) is 2:
-                first_bound = filtered_items[0]
-                second_bound = filtered_items[1]
+                first_bound_index = 0
+                second_bound_index = 0
             else:
                 # find the largest angle between closest points and exclude this from the bounding box ensuring that
                 # this includes going across the zero line
@@ -171,13 +171,13 @@ class GeoJSONGenerator(object):
                         first_bound_index = i
                         second_bound_index = i-1
 
-                first_bound = filtered_items[first_bound_index]
-                second_bound = filtered_items[second_bound_index]
+            first_bound = filtered_items[first_bound_index]
+            second_bound = filtered_items[second_bound_index]
         else:
             second_bound = max(filtered_items)
             first_bound = min(filtered_items)
 
-        return first_bound, second_bound
+        return float(first_bound), float(second_bound)
 
 
 class Properties(object):
