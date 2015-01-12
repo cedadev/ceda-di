@@ -315,8 +315,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
 
         must = self.run_query_builder_return_must(query_string, file_handle_factory)
         shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
-        assert_that(shape['type'], is_('polygon'))
-        assert_that(shape['coordinates'], is_([[lon_hi, lat_hi], [lon_lo, lat_hi], [lon_lo, lat_lo], [lon_hi, lat_lo]]))
+        assert_that(shape['type'], is_('envelope'))
+        assert_that(shape['coordinates'], is_([[lon_lo, lat_hi], [lon_hi, lat_lo]]))
 
     def test_GIVEN_bounding_box_filename_with_no_lat_and_lon_WHEN_build_THEN_lat_and_lon_set(self):
         file_handle_factory = MagicMock(HandlerFactory)

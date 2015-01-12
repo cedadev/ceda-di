@@ -36,7 +36,7 @@ class GeoJSONGenerator(object):
         if len(self.latitudes) > 0 and len(self.longitudes) > 0:
             geojson = {
                 "geometries": {
-                    "bbox": self.generate_bounding_box(True),
+                    "bbox": self.generate_bounding_box(False),
                     "summary": self._gen_coord_summary()
                 }
             }
@@ -81,7 +81,12 @@ class GeoJSONGenerator(object):
             return None
 
         if generate_polygon:
-            corners = [[lon_right, lat_top], [lon_left, lat_top], [lon_left, lat_bottom], [lon_right, lat_bottom]]
+            corners = [[
+                       [lon_right, lat_top],
+                       [lon_left, lat_top],
+                       [lon_left, lat_bottom],
+                       [lon_right, lat_bottom],
+                       [lon_right, lat_top]]]
             bbox = {
                 "type": "polygon",
                 "orientation": "counterclockwise",

@@ -115,7 +115,7 @@ class JsonQueryBuilder(object):
                                  .format(filename=filename))
         try:
             spatial = handler.get_geospatial()
-            self._add_region_to_query_filter(spatial["lat"], spatial["lon"], True)
+            self._add_region_to_query_filter(spatial["lat"], spatial["lon"], False)
         except Exception as ex:
             raise ValueError("An error occurred when reading the file for the bounding box. Filename: '{filename}', "
                              "error: '{error}'".format(filename=filename, error=ex.message))
