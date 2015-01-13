@@ -17,9 +17,26 @@ class _geospatial(object):
             "filename": os.path.basename(fpath),
             "path": fpath,
             "size": os.stat(fpath).st_size,
+            "symlinks": _geospatial.get_symlinks(fpath)
         }
 
         return filesystem
+
+    @staticmethod
+    def get_symlinks(path):
+        """
+        Return a list of all the levels of symlinks (if any).
+
+        :param path: A string containing the path to examine.
+        :returns pathlist: A list of file paths corresponding to symlinks.
+        """
+        paths_seen = []
+
+        while os.path.islink(path) and path not in paths_seen:
+            paths_seen.append(path)
+            path = os.readlink(path)
+
+        return paths_seen
 
     def get_geospatial(self):
         """Returns a dict containing geospatial information"""
@@ -50,4 +67,3 @@ class _geospatial(object):
             "to be used as an interface ONLY."
 
         raise NotImplementedError(exception)
-
