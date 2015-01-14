@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>ES Date Histogram</title>
+</head>
+<body>
+    <div id="chart"></div>
+    <script type="text/javascript" src="jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="highcharts.js"></script>
+    <script type="text/javascript">
+        // Note: in production this would be replaced with a "live" ES query
+        var response = {
+          "took" : 12,
+          "timed_out" : false,
+          "_shards" : {
+            "total" : 5,
+            "successful" : 5,
+            "failed" : 0
+          },
+          "hits" : {
+            "total" : 10002,
+            "max_score" : 0.0,
+            "hits" : [ ]
+          },
+          "aggregations" : {
+            "times" : {
+              "buckets" : [ {
+                "key_as_string" : "1969-12-29T00:00:00.000Z",
+                "key" : -259200000,
+                "doc_count" : 323
+              }, {
+                "key_as_string" : "2010-07-12T00:00:00.000Z",
+                "key" : 1278892800000,
+                "doc_count" : 4536
+              }, {
+                "key_as_string" : "2010-07-19T00:00:00.000Z",
+                "key" : 1279497600000,
+                "doc_count" : 24
+              }, {
+                "key_as_string" : "2010-08-16T00:00:00.000Z",
+                "key" : 1281916800000,
+                "doc_count" : 1325
+              }, {
+                "key_as_string" : "2010-08-23T00:00:00.000Z",
+                "key" : 1282521600000,
+                "doc_count" : 592
+              }, {
+                "key_as_string" : "2010-08-30T00:00:00.000Z",
+                "key" : 1283126400000,
+                "doc_count" : 7
+              }, {
+                "key_as_string" : "2010-09-13T00:00:00.000Z",
+                "key" : 1284336000000,
+                "doc_count" : 16
+              }, {
+                "key_as_string" : "2010-10-25T00:00:00.000Z",
+                "key" : 1287964800000,
+                "doc_count" : 475
+              }, {
+                "key_as_string" : "2010-11-01T00:00:00.000Z",
+                "key" : 1288569600000,
+                "doc_count" : 2
+              }, {
+                "key_as_string" : "2011-04-04T00:00:00.000Z",
+                "key" : 1301875200000,
+                "doc_count" : 1900
+              }, {
+                "key_as_string" : "2011-06-06T00:00:00.000Z",
+                "key" : 1307318400000,
+                "doc_count" : 1
+              }, {
+                "key_as_string" : "2011-06-13T00:00:00.000Z",
+                "key" : 1307923200000,
+                "doc_count" : 9
+              }, {
+                "key_as_string" : "2011-06-20T00:00:00.000Z",
+                "key" : 1308528000000,
+                "doc_count" : 11
+              }, {
+                "key_as_string" : "2011-08-01T00:00:00.000Z",
+                "key" : 1312156800000,
+                "doc_count" : 62
+              }, {
+                "key_as_string" : "2011-10-17T00:00:00.000Z",
+                "key" : 1318809600000,
+                "doc_count" : 541
+              }, {
+                "key_as_string" : "2012-09-10T00:00:00.000Z",
+                "key" : 1347235200000,
+                "doc_count" : 2
+              }, {
+                "key_as_string" : "2012-10-01T00:00:00.000Z",
+                "key" : 1349049600000,
+                "doc_count" : 2
+              }, {
+                "key_as_string" : "2012-10-29T00:00:00.000Z",
+                "key" : 1351468800000,
+                "doc_count" : 2
+              }, {
+                "key_as_string" : "2012-11-05T00:00:00.000Z",
+                "key" : 1352073600000,
+                "doc_count" : 2
+              } ]
+            }
+          }
+        };
+
+        data = [];
+        keys = [];
+        buckets = response.aggregations.times.buckets;
+        for (i in buckets) {
+          doc_count = buckets[i].doc_count;
+          data.push(doc_count);
+          
+          key = buckets[i].key_as_string.split("T")[0];
+          if (i == 0) {
+            keys.push("Unknown Date");
+          } else {  
+            keys.push("Week beginning " + key);
+          }
+        }
+
+        window.onload = function () {
+          $("#chart").highcharts(
+            {
+              chart: {
+                type: "column",
+                height: 150,
+                width: 300,
+              },
+              title: {text: ""},
+              xAxis: {
+                categories: keys,
+                labels: {
+                  enabled: false
+                }
+              },
+              yAxis: {
+                type: "logarithmic",
+                ceiling: 10000,
+                max: 10000,
+                title: {text: ""}
+              },
+              series: [
+                {
+                  showInLegend: false,
+                  name: "Files",
+                  data: data
+                }
+              ],
+              plotOptions: {
+                column: {
+                  pointPadding: 0,
+                  borderWidth: 1,
+                  groupPadding: 0,
+                  shadow: false
+                }
+              }
+            }
+          );
+        };
+    </script>
+</body>
+</html>

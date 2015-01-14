@@ -9,6 +9,8 @@ local/
 log/
 man/
 out/
+dist/
 
 *.pyc
-*.rst
+*.egg-info
+*~
