@@ -10,6 +10,7 @@ import netCDF4
 from ceda_di._dataset import _geospatial
 from ceda_di.metadata import product
 
+
 class NetCDFFactory(object):
     """
     Factory for checking, handling and returning an appropriate metadata
@@ -47,6 +48,7 @@ class NetCDFFactory(object):
         elif "RAF" in self.convention:
             return NetCDF_RAF(self.fpath, self.convention).get_properties()
 
+
 class NetCDF_Base(_geospatial):
     """
     Base class - provides common NetCDF metadata extraction methods
@@ -76,7 +78,7 @@ class NetCDF_Base(_geospatial):
             if coord == 0.0:
                 return False
 
-            int(coord) # If this fails, "coord" is not a number!
+            int(coord)  # If this fails, "coord" is not a number!
 
             return True
         except ValueError:
@@ -135,7 +137,7 @@ class NetCDF_Base(_geospatial):
 
         logger = logging.getLogger(__name__)
         logger.info("Could not find standard name variable: \"%s\"",
-                     (standard_name))
+                    (standard_name))
 
     @staticmethod
     def find_var_by_regex(ncdf, regex):
@@ -151,6 +153,39 @@ class NetCDF_Base(_geospatial):
 
         logger = logging.getLogger(__name__)
         logger.info("Could not find variable by regex: \"%s\"", regex)
+
+    @staticmethod
+    def get_flight_info(fname):
+        """
+        Return a dictionary populated with metadata about the flight that the
+        given data file was captured on - flight number, organisation, etc.
+
+        :return: A dict containing flight metadata.
+        """
+        patterns = {
+            "faam": {
+                "patterns": [
+                    r"_(?P<flight_num>b(\d{3}))"
+                ]
+            },
+            "safire": {
+                "patterns": [
+                    r"_(?P<flight_num>((as|az|fs)\d{6}))"
+                ]
+            }
+        }
+
+        for org, info in patterns.iteritems():
+            for pattern in info["patterns"]:
+                match = re.search(pattern, fname)
+                if match:
+                    flight_info = {
+                        "organisation": org,
+                        "flight_num": match.group("flight_num")
+                    }
+
+                    return flight_info
+
 
 class NetCDF_CF(_geospatial):
     """
@@ -188,11 +223,14 @@ class NetCDF_CF(_geospatial):
         :returns: Properties object populated with metadata
         """
         data_format = {"format": ("NetCDF/%s" % self.convention)}
+        filesystem = self.get_filesystem(self.fpath)
+        flight_info = NetCDF_Base.get_flight_info(filesystem["filename"])
         return product.Properties(temporal=self.get_temporal(),
-                                  filesystem=self.get_filesystem(self.fpath),
+                                  filesystem=filesystem,
                                   spatial=self.get_geospatial(),
                                   data_format=data_format,
-                                  parameters=self.get_parameters())
+                                  parameters=self.get_parameters(),
+                                  flight_info=flight_info)
 
 
 class NetCDF_RAF(_geospatial):

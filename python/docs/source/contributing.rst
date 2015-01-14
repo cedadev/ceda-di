@@ -168,3 +168,11 @@ Properties
 .. function:: get_properties()
 
     Returns a dictionary containing metadata from all of the above functions.
+
+File Format Check
+-----------------
+
+.. function:: get_file_format(filename):
+
+   When choosing the correct handler this static function will be called if it exists. If it raises a FileFormatError
+   then the handler will be ignore; just as if it did not match the regular expression for the file type
