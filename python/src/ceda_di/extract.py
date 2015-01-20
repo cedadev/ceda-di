@@ -108,11 +108,13 @@ class Extract(object):
         """
         Initial logging setup
         """
-        fname = os.path.join(self.conf("output-path"),
+        log_fname = (self.conf("es-index") + "_" +
+                     datetime.datetime.now().isoformat())
+        fpath = os.path.join(self.conf("output-path"),
                              self.conf("log-path"),
-                             self.conf("log-file"))
+                             log_fname)
 
-        logging.basicConfig(filename=fname,
+        logging.basicConfig(filename=fpath,
                             format=self.conf("logging")["format"],
                             level=logging.INFO)
 
@@ -140,7 +142,7 @@ class Extract(object):
         if props is not None:
             self.es.index(index=self.conf('es-index'),
                           doc_type=self.conf('es-mapping'),
-                          body=str(props), 
+                          body=str(props),
                           id=props.properties["_id"])
 
     def write_properties(self, fname, _geospatial_obj):
