@@ -41,12 +41,15 @@ class NetCDFFactory(object):
         Return correct metadata extraction class based on metadata format.
         """
         if not self.convention:
-            # Return a placeholder NetCDF extractor with no convention
+            # Return a placeholder NetCDF handler with no convention
             return NetCDF_Unknown(self.fpath).get_properties()
-        if "CF" in self.convention:
+        elif "CF" in self.convention:
             return NetCDF_CF(self.fpath, self.convention).get_properties()
         elif "RAF" in self.convention:
             return NetCDF_RAF(self.fpath, self.convention).get_properties()
+        else:
+            # Return a placeholder NetCDF handler and log the unknown convention
+            return NetCDF_Unknown(self.fpath, self.convention).get_properties()
 
 
 class NetCDF_Base(_geospatial):
@@ -121,7 +124,7 @@ class NetCDF_Base(_geospatial):
         }
 
     @staticmethod
-    def find_var_by_standard_name(ncdf, standard_name):
+    def find_var_by_standard_name(ncdf, fpath, standard_name):
         """
         Find a variable reference searching by CF standard name.
 
@@ -136,8 +139,8 @@ class NetCDF_Base(_geospatial):
                 continue
 
         logger = logging.getLogger(__name__)
-        logger.info("Could not find standard name variable: \"%s\"",
-                    (standard_name))
+        logger.info("Could not find standard name variable \"%s\": %s" %
+                    (standard_name, fpath))
 
     @staticmethod
     def find_var_by_regex(ncdf, regex):
@@ -198,7 +201,7 @@ class NetCDF_CF(_geospatial):
 
     def get_temporal(self):
         with netCDF4.Dataset(self.fpath) as ncdf:
-            time_name = NetCDF_Base.find_var_by_standard_name(ncdf, "time")
+            time_name = NetCDF_Base.find_var_by_standard_name(ncdf, self.fpath, "time")
             return NetCDF_Base.temporal(ncdf, time_name)
 
     def get_parameters(self):
@@ -207,13 +210,13 @@ class NetCDF_CF(_geospatial):
 
     def get_geospatial(self):
         with netCDF4.Dataset(self.fpath) as ncdf:
-            lat_name = NetCDF_Base.find_var_by_standard_name(ncdf, "latitude")
-            lon_name = NetCDF_Base.find_var_by_standard_name(ncdf, "longitude")
+            lat_name = NetCDF_Base.find_var_by_standard_name(ncdf, self.fpath, "latitude")
+            lon_name = NetCDF_Base.find_var_by_standard_name(ncdf, self.fpath, "longitude")
 
             if lat_name and lon_name:
                 return NetCDF_Base.geospatial(ncdf, lat_name, lon_name)
             else:
-                self.logger.info("Couldn't find lat/lon variables: %s" %
+                self.logger.info("Could not find lat/lon variables: %s" %
                                  self.fpath)
 
     def get_properties(self):
@@ -244,7 +247,7 @@ class NetCDF_RAF(_geospatial):
 
     def get_temporal(self):
         with netCDF4.Dataset(self.fpath) as ncdf:
-            time_name = NetCDF_Base.find_var_by_standard_name(ncdf, "time")
+            time_name = NetCDF_Base.find_var_by_standard_name(ncdf, self.fpath, "time")
             return NetCDF_Base.temporal(ncdf, time_name)
 
     def get_parameters(self):
@@ -257,8 +260,8 @@ class NetCDF_RAF(_geospatial):
             with netCDF4.Dataset(self.fpath) as ncdf:
                 return NetCDF_Base.geospatial(ncdf, "LATC", "LONC")
         except AttributeError:
-            lat_name = NetCDF_Base.find_var_by_standard_name(ncdf, "latitude")
-            lon_name = NetCDF_Base.find_var_by_standard_name(ncdf, "longitude")
+            lat_name = NetCDF_Base.find_var_by_standard_name(ncdf, self.fpath, "latitude")
+            lon_name = NetCDF_Base.find_var_by_standard_name(ncdf, self.fpath, "longitude")
 
             if lat_name and lon_name:
                 return NetCDF_Base.geospatial(ncdf, lat_name, lon_name)
@@ -285,10 +288,15 @@ class NetCDF_Unknown(_geospatial):
     A wrapper to extract NetCDF metadata that is stored using an unknown
     metadata convention, or no known associated metadata convention.
     """
-    def __init__(self, fpath):
+    def __init__(self, fpath, convention=None):
         self.fpath = fpath
         self.logger = logging.getLogger(__name__)
-        self.logger.info("No metadata convention: \"%s\"" % fpath)
+
+        if not convention:
+            self.logger.info("Missing metadata convention: \"%s\"" % fpath)
+        else:
+            self.logger.info("Unrecognised metadata convention \"%s\": \"%s\"" %
+                             (convention, fpath))
 
     def get_properties(self):
         return None
