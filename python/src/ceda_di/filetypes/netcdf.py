@@ -139,8 +139,8 @@ class NetCDF_Base(_geospatial):
                 continue
 
         logger = logging.getLogger(__name__)
-        logger.info("Could not find standard name variable \"%s\": %s" %
-                    (standard_name, fpath))
+        logger.error("Could not find standard name variable \"%s\": %s" %
+                     (standard_name, fpath))
 
     @staticmethod
     def find_var_by_regex(ncdf, regex):
@@ -155,7 +155,7 @@ class NetCDF_Base(_geospatial):
                 return key
 
         logger = logging.getLogger(__name__)
-        logger.info("Could not find variable by regex: \"%s\"", regex)
+        logger.error("Could not find variable by regex: \"%s\"", regex)
 
     @staticmethod
     def get_flight_info(fname):
@@ -216,8 +216,8 @@ class NetCDF_CF(_geospatial):
             if lat_name and lon_name:
                 return NetCDF_Base.geospatial(ncdf, lat_name, lon_name)
             else:
-                self.logger.info("Could not find lat/lon variables: %s" %
-                                 self.fpath)
+                self.logger.error("Could not find lat/lon variables: %s" %
+                                  self.fpath)
 
     def get_properties(self):
         """
@@ -266,8 +266,8 @@ class NetCDF_RAF(_geospatial):
             if lat_name and lon_name:
                 return NetCDF_Base.geospatial(ncdf, lat_name, lon_name)
             else:
-                self.logger.info("Couldn't find lat/lon variables: %s" %
-                                 self.fpath)
+                self.logger.error("Couldn't find lat/lon variables: %s" %
+                                  self.fpath)
 
     def get_properties(self):
         """
@@ -293,10 +293,10 @@ class NetCDF_Unknown(_geospatial):
         self.logger = logging.getLogger(__name__)
 
         if not convention:
-            self.logger.info("Missing metadata convention: \"%s\"" % fpath)
+            self.logger.error("Missing metadata convention: \"%s\"" % fpath)
         else:
-            self.logger.info("Unrecognised metadata convention \"%s\": \"%s\"" %
-                             (convention, fpath))
+            self.logger.error("Unrecognised metadata convention \"%s\": \"%s\"" %
+                              (convention, fpath))
 
     def get_properties(self):
         return None
