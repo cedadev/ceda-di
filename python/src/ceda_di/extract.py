@@ -109,7 +109,8 @@ class Extract(object):
         Initial logging setup
         """
         log_fname = (self.conf("es-index") + "_" +
-                     datetime.datetime.now().isoformat())
+                     datetime.datetime.now().isoformat() +
+                     ".log")
         fpath = os.path.join(self.conf("output-path"),
                              self.conf("log-path"),
                              log_fname)
