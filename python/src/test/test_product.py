@@ -4,6 +4,7 @@ Test module for ceda_di.metadata.product
 
 import unittest
 from hamcrest import *
+import numpy.ma as ma
 
 from ceda_di.metadata.product import Properties, Parameter, GeoJSONGenerator
 
@@ -38,14 +39,13 @@ class TestGeoJSONGenerator(unittest.TestCase):
 
         if is_polygon:
             assert_that(actual["type"], is_("polygon"), "bbounding box type")
-            bounds = [[lon_right, lat_top], [lon_left, lat_top], [lon_left, lat_bottom], [lon_right, lat_bottom]]
+            bounds = [[[lon_right, lat_top], [lon_left, lat_top], [lon_left, lat_bottom], [lon_right, lat_bottom], [lon_right, lat_top]]]
             assert_that(actual["coordinates"], is_(bounds), "bbounding box type")
 
         else:
             assert_that(actual["type"], is_("envelope"), "bbounding box type")
             bounds = [[lon_left, lat_top], [lon_right, lat_bottom]]
             assert_that(actual["coordinates"], is_(bounds), "bbounding box type")
-
 
     def test_valid_lat(self):
         # Lovely lovely edge cases
@@ -112,3 +112,23 @@ class TestGeoJSONGenerator(unittest.TestCase):
         box = gen.generate_bounding_box(False)
 
         self.assert_type_and_coords(box, False, 1.1, 5.1, -120, 120)
+
+    def test_GIVEN_masked_entries_for_lats_and_lons_in_any_order_on_back_of_globe_THEN_masked_enties_ignored(self):
+        latitudes = ma.masked_array([3.1, 5.1, 1.1], [False, True, False])
+        longitudes = ma.masked_array([0, 120,  -120], [False, False, True])
+        gen = GeoJSONGenerator(latitudes=latitudes, longitudes=longitudes)
+
+        box = gen.generate_bounding_box(False)
+
+        self.assert_type_and_coords(box, False, 1.1, 3.1, 0, 120)
+
+    def test_GIVEN_masked_entries_for_lats_and_lons_THEN_summary_does_not_contain_elements(self):
+        latitudes = ma.masked_array([3, 5.1, 1.1, 6.5], [False, True, False, False])
+        longitudes = ma.masked_array([0, 120,  -120, 100], [False, False, True, False])
+        gen = GeoJSONGenerator(latitudes=latitudes, longitudes=longitudes)
+
+        geojson = gen.calc_spatial_geometries()
+
+        for result, expected in zip(geojson["geometries"]["summary"]["coordinates"], [(0, 3.0), (100, 6.5)]):
+            assert_that(result[0], close_to(expected[0], 0.01), "lat" )
+            assert_that(result[1], close_to(expected[1], 0.01), "lon")

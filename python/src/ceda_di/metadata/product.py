@@ -8,6 +8,8 @@ import simplejson as json
 import logging
 import math
 import re
+import numpy.ma as ma
+import numpy as np
 from pyhull.convex_hull import qconvex
 
 
@@ -24,8 +26,8 @@ class GeoJSONGenerator(object):
     """
 
     def __init__(self, latitudes, longitudes):
-        self.latitudes = filter(self.valid_lat, latitudes)
-        self.longitudes = filter(self.valid_lon, longitudes)
+        self.latitudes = ma.array(latitudes)
+        self.longitudes = ma.array(longitudes)
 
     def calc_spatial_geometries(self):
         """
@@ -56,9 +58,25 @@ class GeoJSONGenerator(object):
             "type": "LineString"
         }
 
-        step = int(math.ceil(len(self.longitudes) / num_points))
-        summary_lons = self.longitudes[::step]
-        summary_lats = self.latitudes[::step]
+        lon_values = self.longitudes[
+            (self.longitudes >= -180) &
+            (self.longitudes <= 180) &
+            (self.latitudes >= -90) &
+            (self.latitudes <= 90) &
+            (ma.getmaskarray(self.latitudes) == False) &
+            (ma.getmaskarray(self.longitudes) == False)]
+
+        lat_values = self.latitudes[
+            (self.longitudes >= -180) &
+            (self.longitudes <= 180) &
+            (self.latitudes >= -90) &
+            (self.latitudes <= 90) &
+            (ma.getmaskarray(self.latitudes) == False) &
+            (ma.getmaskarray(self.longitudes) == False)]
+
+        step = int(math.ceil(np.size(lon_values) / num_points))
+        summary_lons = lon_values[::step]
+        summary_lats = lat_values[::step]
 
         summ["coordinates"] = zip(summary_lons, summary_lats)
 
@@ -143,7 +161,7 @@ class GeoJSONGenerator(object):
 
         # Filter out ignore_value (useful for _FillValue, etc)
         if filter_func is not None:
-            filtered_items = [i for i in item_list if filter_func(i)]
+            filtered_items = [i for i in ma.compressed(item_list) if filter_func(i)]
         else:
             filtered_items = item_list
 
