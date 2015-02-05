@@ -75,7 +75,7 @@ class Extract(object):
     def __init__(self, conf):
         self.configuration = conf
         try:
-            self.make_dirs()
+            self.make_dirs(conf)
             self.logger = self.prepare_logging()
             self.handler_factory = HandlerFactory(self.conf("handlers"))
         except KeyError as k:
@@ -92,13 +92,15 @@ class Extract(object):
             raise AttributeError(
                 "Mandatory configuration option not found: %s" % conf_opt)
 
-    def make_dirs(self):
+    def make_dirs(self, conf):
         """
         Create directories for output files.
         """
-        json_out = os.path.join(self.conf("output-path"), self.conf("json-path"))
-        if not os.path.isdir(json_out):
-            os.makedirs(json_out)
+        if not conf["no-create-files"]:
+            json_out = os.path.join(self.conf("output-path"),
+                                    self.conf("json-path"))
+            if not os.path.isdir(json_out):
+                os.makedirs(json_out)
 
         log_out = os.path.join(self.conf("output-path"), self.conf("log-path"))
         if not os.path.isdir(log_out):
@@ -108,13 +110,16 @@ class Extract(object):
         """
         Initial logging setup
         """
-        fname = os.path.join(self.conf("output-path"),
+        log_fname = (self.conf("es-index") + "_" +
+                     datetime.datetime.now().isoformat() +
+                     ".log")
+        fpath = os.path.join(self.conf("output-path"),
                              self.conf("log-path"),
-                             self.conf("log-file"))
+                             log_fname)
 
-        logging.basicConfig(filename=fname,
+        logging.basicConfig(filename=fpath,
                             format=self.conf("logging")["format"],
-                            level=logging.INFO)
+                            level=logging.WARNING)
 
         log = logging.getLogger(__name__)
 
@@ -140,7 +145,7 @@ class Extract(object):
         if props is not None:
             self.es.index(index=self.conf('es-index'),
                           doc_type=self.conf('es-mapping'),
-                          body=str(props), 
+                          body=str(props),
                           id=props.properties["_id"])
 
     def write_properties(self, fname, _geospatial_obj):
