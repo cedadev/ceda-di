@@ -103,10 +103,12 @@ class CISProductTests(object):
         assert_that(dataformat, is_(self.cis_test_file.file_format), "data format")
         assert_that(indexer, contains_string(self.cis_test_file.product_name), "data format")
 
+
 class TestCloudsatRVODsdata(CISProductTests, TestCase):
     @classmethod
     def setUpClass(cls):
         cls.setUpForTest("CloudsatRVODsdata")
+
 
 class TestCloudSat(CISProductTests, TestCase):
 

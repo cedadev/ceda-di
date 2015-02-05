@@ -74,9 +74,14 @@ class GeoJSONGenerator(object):
             (ma.getmaskarray(self.latitudes) == False) &
             (ma.getmaskarray(self.longitudes) == False)]
 
-        step = int(math.ceil(np.size(lon_values) / num_points))
-        summary_lons = lon_values[::step]
-        summary_lats = lat_values[::step]
+        point_count = np.size(lon_values)
+        if point_count <= num_points:
+            summary_lons = lon_values
+            summary_lats = lat_values
+        else:
+            step = int(math.ceil(point_count / num_points))
+            summary_lons = lon_values[::step]
+            summary_lats = lat_values[::step]
 
         summ["coordinates"] = zip(summary_lons, summary_lats)
 
