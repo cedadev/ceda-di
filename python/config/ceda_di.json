@@ -23,9 +23,6 @@
     "_option": "log-path: log dir path, relative to 'outputpath'",
     "log-path": "log/",
 
-    "_option": "log-file: log file path, relative to 'logpath'",
-    "log-file": "ceda-di.log",
-
     "_option": "json-path: directory for JSON metadata, relative to 'outputpath'",
     "json-path": "json/",
 
