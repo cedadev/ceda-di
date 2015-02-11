@@ -13,6 +13,8 @@ from ceda_di._dataset import _geospatial
 from ceda_di.metadata import product
 from ceda_di.metadata.product import Parameter, FileFormatError
 import numpy as np
+import numpy.ma as ma
+
 
 # noinspection PyMissingConstructor
 class JasCisDataProduct(_geospatial):
@@ -56,7 +58,6 @@ class JasCisDataProduct(_geospatial):
         """
         pass
 
-
     def _get_coords(self):
         """
         Return the coordinates, loading them first if needed
@@ -73,7 +74,8 @@ class JasCisDataProduct(_geospatial):
 
         coords = self._get_coords()
         lat = coords.get_coordinates_points().latitudes
-        lon = coords.get_coordinates_points().longitudes
+        lon = ma.mod(coords.get_coordinates_points().longitudes, 360)
+        lon[lon > 180] -= 360
         return {
             'lat': lat,
             'lon': lon
