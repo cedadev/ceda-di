@@ -205,10 +205,10 @@ class Extract(object):
                     pool.append(p)
                     p.start()
 
-            while len(pool) >= self.conf("num-cores"):
-                for p in pool:
-                    if p.exitcode is not None:
-                        pool.remove(p)
+                while len(pool) >= self.conf("num-cores"):
+                    for p in pool:
+                        if p.exitcode is not None:
+                            pool.remove(p)
 
             for p in pool:
                 p.join()
