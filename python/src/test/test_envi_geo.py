@@ -4,10 +4,11 @@ Test module for ceda_di.envi_geo
 
 import unittest
 
-from ceda_di.envi_geo import BIL
-from ceda_di.envi_geo import BSQ
-from ceda_di.envi_geo import ENVI
+from ceda_di.providers.arsf.envi import BIL
+from ceda_di.providers.arsf.envi import BSQ
+from ceda_di.providers.arsf.envi import ENVI
 from ceda_di.metadata.product import Parameter
+
 
 class ENVIStub(object):
     """Stub ENVI object"""
@@ -22,6 +23,7 @@ class ENVIStub(object):
         return [["start_time", "end_time"], ["lat"], ["lon"],
                 ["alt"], ["roll"], ["pitch"], ["heading"]]
 
+
 class TestENVI(unittest.TestCase):
     """Test class for ceda_di.exif_geo.EXIF"""
     def setUp(self):
@@ -34,10 +36,8 @@ class TestENVI(unittest.TestCase):
         envi.b = self.envi_stub
         envi._load_data()
 
-        assert envi.get_parameters()[0].__dict__ == \
-                    Parameter("velocity").__dict__
-        assert envi.get_parameters()[1].__dict__ == \
-                    Parameter("spam").__dict__
+        assert envi.get_parameters()[0].__dict__ == Parameter("velocity").__dict__
+        assert envi.get_parameters()[1].__dict__ == Parameter("spam").__dict__
 
     def test_get_geospatial(self):
         envi = ENVI(self.path)

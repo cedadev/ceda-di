@@ -4,7 +4,7 @@ Test module for ceda_di.netcdf_geo
 
 import unittest
 
-from ceda_di.netcdf_geo import NetCDF_Base
+from ceda_di.filetypes.netcdf import NetCDF_Base
 from ceda_di.metadata.product import Parameter
 
 class NetCDFStub(object):
@@ -75,7 +75,9 @@ class Test_NetCDF_Base(unittest.TestCase):
         )
 
         assert NetCDF_Base.find_var_by_standard_name(
-            self.nc_stub, "spammity spam"
+            self.nc_stub,
+            "/path/to/blergs",
+            "spammity spam",
         ) == "spam"
 
     def test_find_var_by_regex(self):
