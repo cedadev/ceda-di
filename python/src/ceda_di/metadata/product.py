@@ -7,7 +7,6 @@ import hashlib
 import simplejson as json
 import logging
 import math
-import re
 import numpy.ma as ma
 import numpy as np
 from pyhull.convex_hull import qconvex
@@ -24,10 +23,10 @@ class GeoJSONGenerator(object):
     """
     A class that can generate various geometric objects based on latitudes and longitudes
     """
-
-    def __init__(self, latitudes, longitudes):
-        self.latitudes = ma.array(latitudes)
+    def __init__(self, latitudes, longitudes, shape_type=None):
         self.longitudes = ma.array(longitudes)
+        self.latitudes = ma.array(latitudes)
+        self.shape_type = shape_type
 
     def calc_spatial_geometries(self):
         """
@@ -46,34 +45,44 @@ class GeoJSONGenerator(object):
             return geojson
         return None
 
-    def _gen_coord_summary(self):
+    def _sanitise_geometry(self, lons, lats):
+        """
+        Sanitise geometry by removing any masked points.
+        :param lons:
+        :param lats:
+        :returns: A tuple containing arrays of (lon, lat)
+        """
+        sane_lons = lons[
+            (lons >= -180) &
+            (lons <= 180) &
+            (lats >= -90) &
+            (lats <= 90) &
+            (ma.getmaskarray(lats) == False) &
+            (ma.getmaskarray(lons) == False)
+        ]
+
+        sane_lats = lats[
+            (lons >= -180) &
+            (lons <= 180) &
+            (lats >= -90) &
+            (lats <= 90) &
+            (ma.getmaskarray(lats) == False) &
+            (ma.getmaskarray(lons) == False)
+        ]
+
+        return (sane_lons, sane_lats)
+
+    def _gen_coord_summary(self, num_points=30):
         """
         Pull 30 evenly-spaced coordinates
 
         :returns: A summary formatted in the GeoJSON style
         """
-
-        num_points = 30
         summ = {
             "type": "LineString"
         }
 
-        lon_values = self.longitudes[
-            (self.longitudes >= -180) &
-            (self.longitudes <= 180) &
-            (self.latitudes >= -90) &
-            (self.latitudes <= 90) &
-            (ma.getmaskarray(self.latitudes) == False) &
-            (ma.getmaskarray(self.longitudes) == False)]
-
-        lat_values = self.latitudes[
-            (self.longitudes >= -180) &
-            (self.longitudes <= 180) &
-            (self.latitudes >= -90) &
-            (self.latitudes <= 90) &
-            (ma.getmaskarray(self.latitudes) == False) &
-            (ma.getmaskarray(self.longitudes) == False)]
-
+        lon_values, lat_values = self._sanitise_geometry(self.longitudes, self.latitudes)
         point_count = np.size(lon_values)
         if point_count <= num_points:
             summary_lons = lon_values
@@ -97,26 +106,33 @@ class GeoJSONGenerator(object):
         """
 
         lon_left, lon_right = self._get_bounds(self.longitudes, filter_func=self.valid_lon, wrapped_coords=True)
-
         lat_bottom, lat_top = self._get_bounds(self.latitudes, filter_func=self.valid_lat)
 
         if lon_left is None or lon_right is None or lat_bottom is None or lat_top is None:
             return None
 
         if generate_polygon:
-            corners = [[
-                       [lon_right, lat_top],
-                       [lon_left, lat_top],
-                       [lon_left, lat_bottom],
-                       [lon_right, lat_bottom],
-                       [lon_right, lat_top]]]
+            corners = [
+                [
+                    [lon_right, lat_top],
+                    [lon_left, lat_top],
+                    [lon_left, lat_bottom],
+                    [lon_right, lat_bottom],
+                    [lon_right, lat_top]
+                ]
+            ]
+
             bbox = {
                 "type": "polygon",
                 "orientation": "counterclockwise",
                 "coordinates": corners
             }
         else:
-            corners = [[lon_left, lat_top], [lon_right, lat_bottom]]
+            corners = [
+                [lon_left, lat_top],
+                [lon_right, lat_bottom]
+            ]
+
             bbox = {
                 "type": "envelope",
                 "coordinates": corners
@@ -166,7 +182,8 @@ class GeoJSONGenerator(object):
 
         # Filter out ignore_value (useful for _FillValue, etc)
         if filter_func is not None:
-            filtered_items = [i for i in ma.compressed(item_list) if filter_func(i)]
+            filtered_items = [i for i in ma.compressed(item_list)
+                              if filter_func(i)]
         else:
             filtered_items = item_list
 
