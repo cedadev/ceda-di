@@ -47,16 +47,6 @@ class TestGeoJSONGenerator(unittest.TestCase):
             bounds = [[lon_left, lat_top], [lon_right, lat_bottom]]
             assert_that(actual["coordinates"], is_(bounds), "bbounding box type")
 
-    def test_valid_lat(self):
-        # Lovely lovely edge cases
-        lats = [90, -90, 0, -91, 91]
-        assert filter(GeoJSONGenerator.valid_lat, lats) == [90, -90, 0]
-
-    def test_valid_lon(self):
-        # More lovely edge cases
-        lons = [180, -180, 0, -181, 181]
-        assert filter(GeoJSONGenerator.valid_lon, lons) == [180, -180, 0]
-
     def test_GIVEN_no_entries_THEN_bounding_box_is_empty(self):
         gen = GeoJSONGenerator(latitudes=[], longitudes=[])
 
@@ -120,7 +110,10 @@ class TestGeoJSONGenerator(unittest.TestCase):
 
         box = gen.generate_bounding_box(False)
 
-        self.assert_type_and_coords(box, False, 1.1, 3.1, 0, 120)
+        # @charlienewey: Changed this test because masked entries are now not
+        # used in generating bounding boxes
+        # self.assert_type_and_coords(box, False, 1.1, 3.1, 0, 120)
+        self.assert_type_and_coords(box, False, 3.1, 3.1, 0, 0)
 
     def test_GIVEN_masked_entries_for_lats_and_lons_THEN_summary_does_not_contain_elements(self):
         latitudes = ma.masked_array([3, 5.1, 1.1, 6.5], [False, True, False, False])

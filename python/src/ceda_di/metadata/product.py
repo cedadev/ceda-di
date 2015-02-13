@@ -9,7 +9,6 @@ import logging
 import math
 import numpy.ma as ma
 import numpy as np
-from pyhull.convex_hull import qconvex
 
 
 class FileFormatError(Exception):
@@ -24,26 +23,12 @@ class GeoJSONGenerator(object):
     A class that can generate various geometric objects based on latitudes and longitudes
     """
     def __init__(self, latitudes, longitudes, shape_type=None):
-        self.longitudes = ma.array(longitudes)
-        self.latitudes = ma.array(latitudes)
+        self.longitudes, self.latitudes = self._sanitise_geometry(
+            ma.array(longitudes),
+            ma.array(latitudes)
+        )
+
         self.shape_type = shape_type
-
-    def calc_spatial_geometries(self):
-        """
-        Calculate the spatial geometries geojson
-        :return: geojson object
-        """
-
-        if len(self.latitudes) > 0 and len(self.longitudes) > 0:
-            geojson = {
-                "geometries": {
-                    "bbox": self.generate_bounding_box(False),
-                    "summary": self._gen_coord_summary()
-                }
-            }
-
-            return geojson
-        return None
 
     def _sanitise_geometry(self, lons, lats):
         """
@@ -71,6 +56,22 @@ class GeoJSONGenerator(object):
         ]
 
         return (sane_lons, sane_lats)
+
+    def calc_spatial_geometries(self):
+        """
+        Calculate the spatial geometries geojson
+        :return: geojson object
+        """
+        if len(self.latitudes) > 0 and len(self.longitudes) > 0:
+            geojson = {
+                "geometries": {
+                    "bbox": self.generate_bounding_box(False),
+                    "summary": self._gen_coord_summary()
+                }
+            }
+
+            return geojson
+        return None
 
     def _gen_coord_summary(self, num_points=30):
         """
@@ -102,11 +103,10 @@ class GeoJSONGenerator(object):
         If there are no data points then bounding box is none
 
         :param generate_polygon: if True bounding box is for a polygon, otherwise for an envelope
-        :returns: A bounding-box formatted in the GeoJSON style
+        :returns: A bounding-box formatted as GeoJSON
         """
-
-        lon_left, lon_right = self._get_bounds(self.longitudes, filter_func=self.valid_lon, wrapped_coords=True)
-        lat_bottom, lat_top = self._get_bounds(self.latitudes, filter_func=self.valid_lat)
+        lon_left, lon_right = self._get_bounds(self.longitudes, wrapped_coords=True)
+        lat_bottom, lat_top = self._get_bounds(self.latitudes)
 
         if lon_left is None or lon_right is None or lat_bottom is None or lat_top is None:
             return None
@@ -141,31 +141,7 @@ class GeoJSONGenerator(object):
         return bbox
 
     @staticmethod
-    def valid_lat(num):
-        """
-        Return true if 'num' is a valid latitude.
-
-        :param float num: Number to test
-        :returns: True if 'num' is valid, else False
-        """
-        if num < -90 or num > 90:
-            return False
-        return True
-
-    @staticmethod
-    def valid_lon(num):
-        """
-        Return true if 'num' is a valid longitude.
-
-        :param float num: Number to test
-        :returns: True if 'num' is valid, else False
-        """
-        if num < -180 or num > 180:
-            return False
-        return True
-
-    @staticmethod
-    def _get_bounds(item_list, filter_func=None, wrapped_coords=False):
+    def _get_bounds(item_list, wrapped_coords=False):
         """
         Return a tuple containing the first and secound bound in the list.
         For No values it returns None, None
@@ -175,47 +151,39 @@ class GeoJSONGenerator(object):
         For Multiple values wrapped co-ordinates it returns the value around the largest gap in values
 
         :param list item_list: List of comparable data items
-        :param function filter_func: Function that returns True for good values
         :param wrapped_coords: is this a coordinate which wraps at 360 back to 0, e.g. longitude
         :returns: Tuple of (first bound, second bound for values in the list)
         """
-
-        # Filter out ignore_value (useful for _FillValue, etc)
-        if filter_func is not None:
-            filtered_items = [i for i in ma.compressed(item_list)
-                              if filter_func(i)]
-        else:
-            filtered_items = item_list
-
-        if len(filtered_items) < 1:
+        items = ma.compressed(item_list)
+        if len(items) < 1:
             return None, None
 
-        if len(filtered_items) == 1:
-            return filtered_items[0], filtered_items[0]
+        if len(items) == 1:
+            return items[0], items[0]
 
         if wrapped_coords:
-            if len(filtered_items) is 2:
+            if len(items) is 2:
                 first_bound_index = 0
                 second_bound_index = 1
             else:
                 # find the largest angle between closest points and exclude this from the bounding box ensuring that
                 # this includes going across the zero line
-                filtered_items = sorted(filtered_items)
+                items = sorted(items)
                 first_bound_index = 0
-                second_bound_index = len(filtered_items) - 1
-                max_diff = (filtered_items[first_bound_index] - filtered_items[second_bound_index]) % 360
-                for i in range(1, len(filtered_items)):
-                    diff = (filtered_items[i] - filtered_items[i-1]) % 360
+                second_bound_index = len(items) - 1
+                max_diff = (items[first_bound_index] - items[second_bound_index]) % 360
+                for i in range(1, len(items)):
+                    diff = (items[i] - items[i-1]) % 360
                     if diff > max_diff:
                         max_diff = diff
                         first_bound_index = i
                         second_bound_index = i-1
 
-            first_bound = filtered_items[first_bound_index]
-            second_bound = filtered_items[second_bound_index]
+            first_bound = items[first_bound_index]
+            second_bound = items[second_bound_index]
         else:
-            second_bound = max(filtered_items)
-            first_bound = min(filtered_items)
+            first_bound = min(items)
+            second_bound = max(items)
 
         return float(first_bound), float(second_bound)
 
@@ -269,31 +237,6 @@ class Properties(object):
             "spatial": self.spatial,
             "temporal": self.temporal,
         }
-
-    def _gen_hull(self, coord_list):
-        """
-        Generate and return a convex hull for the given geospatial data.
-
-        :param list coord_list: Normalised and uniquified set of coordinates
-        :returns: A convex hull formatted in the GeoJSON style
-        """
-
-        chull = {
-            "type": "Polygon"
-        }
-
-        qhull_output = qconvex('p', coord_list)
-        hull_coords = []
-        for point in qhull_output[2:]:
-            coords = point.split(" ")
-            try:
-                hull_coords.append((float(coords[0]), float(coords[1])))
-            except ValueError as val:
-                self.logger.error("Cannot convert to float: (%s) [%s]",
-                                  val, str(coords))
-
-        chull["coordinates"] = hull_coords
-        return chull
 
     @staticmethod
     def _to_wkt(spatial):

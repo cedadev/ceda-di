@@ -5,7 +5,7 @@ Test module for ceda_di.netcdf_geo
 import unittest
 
 from ceda_di.filetypes.netcdf import NetCDF_Base
-from ceda_di.metadata.product import Parameter
+
 
 class NetCDFStub(object):
     """Stub for netCDF4.Dataset"""
@@ -39,6 +39,7 @@ class NetCDFStub(object):
         """Add a variable to self.variables"""
         self.variables[name] = self.VarStub(attributes)
 
+
 class Test_NetCDF_Base(unittest.TestCase):
     """
     Test class for the main NetCDF_Base class.
@@ -48,25 +49,15 @@ class Test_NetCDF_Base(unittest.TestCase):
         self.nc_stub = NetCDFStub(fpath)
 
     def test_get_params(self):
-        self.nc_stub.add_variable("spam",
-                             {"nobody expects": "the spanish inquisition"})
+        self.nc_stub.add_variable("spam", {"nobody expects": "the spanish inquisition"})
 
         assert NetCDF_Base.params(self.nc_stub)[0].__dict__ == {
             "name": "spam",
             "items": [{
                 "name": "nobody expects",
-                 "value": "the spanish inquisition"
+                "value": "the spanish inquisition"
             }]
         }
-
-    @unittest.skip
-    def test_get_temporal(self):
-        self.nc_stub.add_variable(
-            "time",
-            {"units": "seconds since 1970-01-01 00:00:00"}
-        )
-
-        NetCDF_Base.temporal(self.nc_stub, "time")
 
     def test_find_var_by_standard_name(self):
         self.nc_stub.add_variable(
