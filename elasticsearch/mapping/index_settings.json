@@ -33,7 +33,7 @@
         }
     },
     "mappings": {
-        "eufar": {
+        "geo_metadata": {
             "_all": {
                 "enabled": true
             },
