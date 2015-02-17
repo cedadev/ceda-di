@@ -20,22 +20,82 @@ class FileFormatError(Exception):
 
 class GeoJSONGenerator(object):
     """
-    A class that can generate various geometric objects based on latitudes and longitudes
+    A class to translate between different scientific data types and GeoJSON.
+
+        * Flight tracks => GeoJSON "LineString"
+        * Photography / stationary observation points => GeoJSON "Point"
+        * Satellite swaths => GeoJSON "MultiPolygon"
     """
     def __init__(self, latitudes, longitudes, shape_type=None):
         self.longitudes, self.latitudes = self._sanitise_geometry(
             ma.array(longitudes),
             ma.array(latitudes)
         )
-
         self.shape_type = shape_type
+
+    def get_elasticsearch_geojson(self):
+        """
+        Returns the specified GeoJSON object, constructed from the geometry
+        supplied at construction-time. This can be provided from the
+        "shape_type" parameter. Can be one of the following values:
+
+            * None (returns a "LineString" type) [defaults to "track"]
+            * "track" (returns a "LineString" type) [default]
+            * "point" (returns a "Point" type)
+            * "swath" (returns a "MultiPolygon" type)
+
+        :return: Specified GeoJSON object.
+        """
+        geojson = None
+        if len(self.latitudes) > 0 and len(self.longitudes) > 0:
+            if self.shape_type == "point" or self._num_points() == 1:
+                geojson = {
+                    "geometries": {
+                        "search": self._gen_point(),
+                        "display": self._gen_point()
+                    }
+                }
+            elif self.shape_type == "swath":
+                geojson = {
+                    "geometries": {
+                       "search": self._gen_swath(),
+                       "display": self._gen_track()
+                    }
+                }
+            elif self.shape_type == "track" or self.shape_type is None:
+                geojson = {
+                    "geometries": {
+                        "search": self._gen_track(),
+                        "display": self._gen_track()
+                    }
+                }
+
+        return geojson
+
+    def _num_points(self):
+        """
+        Return the number of coordinates in the SHORTEST list out of:
+            * self.latitudes
+            * self.longitudes
+
+        This returns the length of the SHORTEST list.
+
+        :return int: The length of the shortest coordinate list.
+        """
+        len_lons = np.size(self.longitudes)
+        len_lats = np.size(self.latitudes)
+
+        if len_lons > len_lats:
+            return len_lats
+        else:
+            return len_lons
 
     def _sanitise_geometry(self, lons, lats):
         """
         Sanitise geometry by removing any masked points.
         :param lons:
         :param lats:
-        :returns: A tuple containing arrays of (lon, lat)
+        :return: A tuple containing arrays of (lon, lat)
         """
         sane_lons = lons[
             (lons >= -180) &
@@ -57,86 +117,125 @@ class GeoJSONGenerator(object):
 
         return (sane_lons, sane_lats)
 
-    def calc_spatial_geometries(self):
+    def _gen_point(self):
         """
-        Calculate the spatial geometries geojson
-        :return: geojson object
-        """
-        if len(self.latitudes) > 0 and len(self.longitudes) > 0:
-            geojson = {
-                "geometries": {
-                    "bbox": self.generate_bounding_box(False),
-                    "summary": self._gen_coord_summary()
-                }
-            }
+        Returns a GeoJSON 'Point' type.
 
-            return geojson
-        return None
-
-    def _gen_coord_summary(self, num_points=30):
+        :return: A GeoJSON 'Point' type in a dictionary.
         """
-        Pull 30 evenly-spaced coordinates
+        geojson = {
+            "type": "Point",
+            "coordinates": [self.longitudes[0], self.latitudes[0]]
+        }
 
-        :returns: A summary formatted in the GeoJSON style
+        return geojson
+
+    def _gen_swath(self, num_polygons=30):
         """
-        summ = {
+        Returns a GeoJSON 'MultiPolygon' type.
+
+        :return: A GeoJSON 'MultiPolygon' type in a dictionary.
+        """
+        geojson = {
+            "type": "MultiPolygon",
+            "coordinates": []
+        }
+
+        track = self._gen_track(num_polygons + 1)["coordinates"]
+        for i in xrange(0, len(track) - 1):
+            lo = track[i]
+            hi = track[i + 1]
+
+            polygon = self._gen_polygon(lo[0], lo[1], hi[0], hi[1])
+            geojson["coordinates"].append(polygon["coordinates"])
+
+        return geojson
+
+    def _gen_track(self, num_points=30):
+        """
+        Creates a LineString from a summary of the file's latitudes and
+        longitudes. Samples a coordinate every 'num_points'.
+
+        :return: A GeoJSON LineString containing a sample of points from the
+                  flight track.
+        """
+        track = {
             "type": "LineString"
         }
 
-        lon_values, lat_values = self._sanitise_geometry(self.longitudes, self.latitudes)
-        point_count = np.size(lon_values)
+        point_count = self._num_points()
         if point_count <= num_points:
-            summary_lons = lon_values
-            summary_lats = lat_values
+            track_lons = self.longitudes
+            track_lats = self.latitudes
         else:
             step = int(math.ceil(point_count / num_points))
-            summary_lons = lon_values[::step]
-            summary_lats = lat_values[::step]
+            track_lons = self.longitudes[::step]
+            track_lats = self.latitudes[::step]
 
-        summ["coordinates"] = zip(summary_lons, summary_lats)
+        track["coordinates"] = zip(track_lons, track_lats)
 
-        return summ
+        return track
 
-    def generate_bounding_box(self, generate_polygon):
+    def _gen_envelope(self):
+        lon_left, lon_right = self._get_bounds(self.longitudes,
+                                               wrapped_coords=True)
+        lat_bottom, lat_top = self._get_bounds(self.latitudes)
+
+        if (lon_left is None or lon_right is None or
+                lat_bottom is None or lat_top is None):
+            return None
+
+        envelope = {
+            "type": "envelope",
+            "coordinates": [
+                [lon_left, lat_top],
+                [lon_right, lat_bottom]
+            ]
+        }
+
+        return envelope
+
+    def _gen_bbox(self):
         """
         Generate and return a bounding box for the given geospatial data.
         If there are no data points then bounding box is none
 
-        :param generate_polygon: if True bounding box is for a polygon, otherwise for an envelope
-        :returns: A bounding-box formatted as GeoJSON
+        :return: A bounding-box formatted as GeoJSON
         """
-        lon_left, lon_right = self._get_bounds(self.longitudes, wrapped_coords=True)
+        lon_left, lon_right = self._get_bounds(self.longitudes,
+                                               wrapped_coords=True)
         lat_bottom, lat_top = self._get_bounds(self.latitudes)
 
-        if lon_left is None or lon_right is None or lat_bottom is None or lat_top is None:
+        if (lon_left is None or lon_right is None or
+                lat_bottom is None or lat_top is None):
             return None
 
-        if generate_polygon:
-            corners = [
-                [
-                    [lon_right, lat_top],
-                    [lon_left, lat_top],
-                    [lon_left, lat_bottom],
-                    [lon_right, lat_bottom],
-                    [lon_right, lat_top]
-                ]
-            ]
+        bbox = self._gen_polygon(lon_left, lon_right, lat_bottom, lat_top)
 
-            bbox = {
-                "type": "polygon",
-                "orientation": "counterclockwise",
-                "coordinates": corners
-            }
-        else:
-            corners = [
-                [lon_left, lat_top],
-                [lon_right, lat_bottom]
-            ]
+        return bbox
 
-            bbox = {
-                "type": "envelope",
-                "coordinates": corners
-            }
+    @staticmethod
+    def _gen_polygon(lon_l, lon_r, lat_b, lat_t):
+        """
+        Generate and return a polygon from two provided sets of coordinates.
+
+        :return: A GeoJSON bounding box
+        """
+        corners = [
+            [
+                [lon_r, lat_t],
+                [lon_l, lat_t],
+                [lon_l, lat_b],
+                [lon_r, lat_b],
+                [lon_r, lat_t]
+            ]
+        ]
+
+        bbox = {
+            "type": "polygon",
+            "orientation": "counterclockwise",
+            "coordinates": corners
+        }
 
         return bbox
 
@@ -144,15 +243,18 @@ class GeoJSONGenerator(object):
     def _get_bounds(item_list, wrapped_coords=False):
         """
         Return a tuple containing the first and secound bound in the list.
-        For No values it returns None, None
-        For One value it returns the that value twice
-        For Two values it returns those low, high for unwrapped co-ordinates or in the order given for wrapped
-        For Multiple values unwrapped co-ordinates this returns min and max
-        For Multiple values wrapped co-ordinates it returns the value around the largest gap in values
+            * For 0 values it returns (None, None).
+            * For 1 value it returns that value twice
+            * For 2 values it returns those (low, high) for unwrapped
+              co-ordinates or in the order given for wrapped
+            * For Multiple values unwrapped, this returns min and max
+            * For Multiple values wrapped co-ordinates, this
+              returns the value around the largest gap in values
 
         :param list item_list: List of comparable data items
-        :param wrapped_coords: is this a coordinate which wraps at 360 back to 0, e.g. longitude
-        :returns: Tuple of (first bound, second bound for values in the list)
+        :param wrapped_coords: is this a coordinate which wraps at 360 back to
+                               0, e.g. longitude
+        :return: Tuple of (first bound, second bound for values in the list)
         """
         items = ma.compressed(item_list)
         if len(items) < 1:
@@ -166,12 +268,14 @@ class GeoJSONGenerator(object):
                 first_bound_index = 0
                 second_bound_index = 1
             else:
-                # find the largest angle between closest points and exclude this from the bounding box ensuring that
-                # this includes going across the zero line
+                # find the largest angle between closest points and exclude
+                # this from the bounding box ensuring that this includes going
+                # across the zero line
                 items = sorted(items)
                 first_bound_index = 0
                 second_bound_index = len(items) - 1
-                max_diff = (items[first_bound_index] - items[second_bound_index]) % 360
+                max_diff = (items[first_bound_index] -
+                            items[second_bound_index]) % 360
                 for i in range(1, len(items)):
                     diff = (items[i] - items[i-1]) % 360
                     if diff > max_diff:
@@ -209,7 +313,6 @@ class Properties(object):
         """
 
         self.logger = logging.getLogger(__name__)
-
         self.filesystem = filesystem
         self.temporal = temporal
         self.data_format = data_format
@@ -224,8 +327,12 @@ class Properties(object):
         if spatial is None:
             self.spatial = None
         else:
-            geo_json_generator = GeoJSONGenerator(spatial["lat"], spatial["lon"])
-            self.spatial = geo_json_generator.calc_spatial_geometries()
+            if "type" not in spatial:
+                gj = GeoJSONGenerator(spatial["lat"], spatial["lon"])
+            else:
+                gj = GeoJSONGenerator(spatial["lat"], spatial["lon"],
+                                      spatial["type"])
+            self.spatial = gj.get_elasticsearch_geojson()
 
         self.misc = kwargs
         self.properties = {
@@ -237,27 +344,6 @@ class Properties(object):
             "spatial": self.spatial,
             "temporal": self.temporal,
         }
-
-    @staticmethod
-    def _to_wkt(spatial):
-        """
-        Convert lats and lons to a WKT linestring.
-
-        :param dict spatial: A dict with keys 'lat' and 'lon' (as lists)
-        :returns: A Python string representing a WKT linestring
-        """
-        lats = spatial["lat"]
-        lons = spatial["lon"]
-
-        coord_list = set()
-        for lat, lon in zip(lats, lons):
-            coord_list.add("%f %f" % (lat, lon))
-
-        sep = ", "
-        coord_string = sep.join(coord_list)
-        linestring = "LINESTRING (%s)" % coord_string
-
-        return linestring
 
     def __str__(self):
         """
@@ -308,7 +394,7 @@ class Parameter(object):
 
         :param str name: Name of the parameter item (e.g. "long_name_fr", etc)
         :param str value: Value of the parameter item (e.g. "Radiance")
-        :returns: Dict containing name:value information
+        :return: Dict containing name:value information
         """
         return {"name": name,
                 "value": value}
