@@ -9,7 +9,7 @@
     "es-index": "cis_test",
 
     "_option": "es_mapping: Elasticsearch document type to index data as",
-    "es-mapping": "eufar",
+    "es-mapping": "geo_metadata",
 
     "_option": "es_index_settings: Path to Elasticsearch index settings config",
     "es-index-settings": "../../elasticsearch/mapping/index_settings.json",
