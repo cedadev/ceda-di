@@ -146,7 +146,7 @@ class GeoJSONGenerator(object):
             lo = track[i]
             hi = track[i + 1]
 
-            polygon = self._gen_polygon(lo[0], lo[1], hi[0], hi[1])
+            polygon = self._gen_polygon(lo[0], hi[0], lo[1], hi[1])
             geojson["coordinates"].append(polygon["coordinates"])
 
         return geojson
