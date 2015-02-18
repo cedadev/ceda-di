@@ -27,10 +27,7 @@ class GeoJSONGenerator(object):
         * Satellite swaths => GeoJSON "MultiPolygon"
     """
     def __init__(self, latitudes, longitudes, shape_type=None):
-        self.longitudes, self.latitudes = self._sanitise_geometry(
-            ma.array(longitudes),
-            ma.array(latitudes)
-        )
+        self._sanitise_geometry(ma.array(longitudes), ma.array(latitudes))
         self.shape_type = shape_type
 
     def get_elasticsearch_geojson(self):
@@ -48,7 +45,8 @@ class GeoJSONGenerator(object):
         """
         geojson = None
         if len(self.latitudes) > 0 and len(self.longitudes) > 0:
-            if self.shape_type == "point" or self._num_points() == 1:
+            if (self.shape_type == "point" or
+                    self._num_points(self.longitudes, self.latitudes) == 1):
                 geojson = {
                     "geometries": {
                         "search": self._gen_point(),
@@ -72,7 +70,7 @@ class GeoJSONGenerator(object):
 
         return geojson
 
-    def _num_points(self):
+    def _num_points(self, lons, lats):
         """
         Return the number of coordinates in the SHORTEST list out of:
             * self.latitudes
@@ -82,13 +80,25 @@ class GeoJSONGenerator(object):
 
         :return int: The length of the shortest coordinate list.
         """
-        len_lons = np.size(self.longitudes)
-        len_lats = np.size(self.latitudes)
+        len_lons = np.size(lons)
+        len_lats = np.size(lats)
 
         if len_lons > len_lats:
             return len_lats
         else:
             return len_lons
+
+    def __align_lons_lats(self, lons, lats):
+        """
+        Ensure "lons" and "lats" are the same length.
+        """
+        size = self._num_points(lons, lats)
+        if np.size(lons) > size:
+            lons = lons[0:size]
+        elif np.size(lats) > size:
+            lats = lats[0:size]
+
+        return (lons, lats)
 
     def _sanitise_geometry(self, lons, lats):
         """
@@ -97,25 +107,31 @@ class GeoJSONGenerator(object):
         :param lats:
         :return: A tuple containing arrays of (lon, lat)
         """
-        sane_lons = lons[
+        # Align the arrays
+        lons, lats = self.__align_lons_lats(lons, lats)
+
+        # Get masks
+        lon_mask = ma.getmaskarray(lons)
+        lat_mask = ma.getmaskarray(lats)
+
+        # Filter the arrays
+        self.longitudes = lons[
             (lons >= -180) &
             (lons <= 180) &
             (lats >= -90) &
             (lats <= 90) &
-            (ma.getmaskarray(lats) == False) &
-            (ma.getmaskarray(lons) == False)
+            (lon_mask == False) &
+            (lat_mask == False)
         ]
 
-        sane_lats = lats[
+        self.latitudes = lats[
             (lons >= -180) &
             (lons <= 180) &
             (lats >= -90) &
             (lats <= 90) &
-            (ma.getmaskarray(lats) == False) &
-            (ma.getmaskarray(lons) == False)
+            (lon_mask == False) &
+            (lat_mask == False)
         ]
-
-        return (sane_lons, sane_lats)
 
     def _gen_point(self):
         """
@@ -163,7 +179,7 @@ class GeoJSONGenerator(object):
             "type": "LineString"
         }
 
-        point_count = self._num_points()
+        point_count = self._num_points(self.longitudes, self.latitudes)
         if point_count <= num_points:
             track_lons = self.longitudes
             track_lats = self.latitudes
