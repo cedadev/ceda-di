@@ -193,6 +193,10 @@ class GeoJSONGenerator(object):
         return track
 
     def _gen_envelope(self):
+        """
+        Generate and return an Elasticsearch envelope type.
+        :return: A bounding box as an envelope.
+        """
         lon_left, lon_right = self._get_bounds(self.longitudes,
                                                wrapped_coords=True)
         lat_bottom, lat_top = self._get_bounds(self.latitudes)
