@@ -153,6 +153,7 @@ class HDF4(_geospatial):
 
                 if vg._name == "Navigation":
                     geospatial = self._get_coords(self.vs, self.fname)
+                    geospatial["type"] = "track"  # Type annotation
                     vg.detach()
                     return geospatial
 
