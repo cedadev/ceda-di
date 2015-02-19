@@ -4,7 +4,7 @@ Test module for ceda_di.exif_geo
 
 import unittest
 
-from ceda_di.exif_geo import EXIF
+from ceda_di.providers.arsf.exif import EXIF
 
 class TestEXIF(unittest.TestCase):
     """Test class for ceda_di.exif_geo.EXIF"""

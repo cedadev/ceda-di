@@ -104,6 +104,7 @@ class NetCDF_Base(_geospatial):
         lons = filter(NetCDF_Base.clean_coordinate,
                       ncdf.variables[lon_name][:].ravel())
         return {
+            "type": "track",
             "lat": lats,
             "lon": lons
         }

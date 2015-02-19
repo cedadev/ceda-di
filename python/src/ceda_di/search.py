@@ -87,7 +87,10 @@ class JsonQueryBuilder(object):
         :return: nothing
         """
         generator = GeoJSONGenerator(latitudes, longitudes)
-        bbox = generator.generate_bounding_box(from_file)
+        if from_file:
+            bbox = generator._gen_bbox()
+        else:
+            bbox = generator._gen_envelope()
         if bbox is None:
             raise ValueError("No bounding box generated when reading the file.")
         constraint = {

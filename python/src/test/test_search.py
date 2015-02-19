@@ -308,7 +308,7 @@ class TestJsonQueryBuilder(unittest.TestCase):
         lon_hi = 10
         lat_lo = 0
         lat_hi = 4
-        lats = [lat_lo, 1, 2, 3, lat_hi]
+        lats = [lat_lo, 1, lat_hi]
         lons = [lon_lo, 0, lon_hi]
 
         file_handle_factory.get_handler = MagicMock(return_value=file_handler)

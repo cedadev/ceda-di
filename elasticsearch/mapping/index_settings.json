@@ -33,7 +33,7 @@
         }
     },
     "mappings": {
-        "eufar": {
+        "geo_metadata": {
             "_all": {
                 "enabled": true
             },
@@ -100,13 +100,13 @@
                     "properties": {
                         "geometries": {
                             "properties": {
-                                "bbox": {
+                                "search": {
                                     "type": "geo_shape",
                                     "tree": "quadtree",
                                     "precision": "50m",
                                     "store": "yes"
                                 },
-                                "summary": {
+                                "display": {
                                     "properties": {
                                         "coordinates": {
                                             "type": "double",
