@@ -63,7 +63,7 @@ class GeoJSONGenerator(object):
             elif self.shape_type == "track" or self.shape_type is None:
                 geojson = {
                     "geometries": {
-                        "search": self._gen_track(),
+                        "search": self._gen_envelope(),
                         "display": self._gen_track()
                     }
                 }
