@@ -6,10 +6,10 @@
     "es-port": 9200,
 
     "_option": "es_index: Elasticsearch index to use",
-    "es-index": "badc-stable",
+    "es-index": "ceda-di-testing",
 
     "_option": "es_mapping: Elasticsearch document type to index data as",
-    "es-mapping": "eufar",
+    "es-mapping": "geo_metadata",
 
     "_option": "es_index_settings: Path to Elasticsearch index settings config",
     "es-index-settings": "../../elasticsearch/mapping/index_settings.json",
@@ -18,7 +18,7 @@
     "max-results": 100,
 
     "_option": "output-path: main output directory",
-    "output-path": "/work/scratch/ccnewey/ceda-di/",
+    "output-path": "/home/ccnewey/netcdfs/output",
 
     "_option": "log-path: log dir path, relative to 'outputpath'",
     "log-path": "log/",
@@ -27,10 +27,10 @@
     "json-path": "json/",
 
     "_option": "input-path: data input path (where to extract metadata from)",
-    "input-path": "/badc/eufar/data/projects",
+    "input-path": "/home/ccnewey/netcdfs",
 
     "_option": "num-cores: number of processes to use in parallel",
-    "num-cores": 16,
+    "num-cores": 1,
 
     "_option": "logging: options for the 'logging' module",
     "_ref": "(see: https://docs.python.org/2/library/logging.html)",
@@ -54,12 +54,8 @@
             "priority": 10
         },
         ".nc$": {
-            "class": "ceda_di.filetypes.netcdf.NetCDFFactory",
+            "class": "ceda_di.providers.faam.faam.FAAMNetCDF",
             "priority": 10
-        },
-        ".*": {
-            "class": "ceda_di.providers.jascis.JasCisDataProduct",
-            "priority": 1
         }
     }
 }

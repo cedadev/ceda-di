@@ -4,7 +4,7 @@ Test module for hdf4_geo
 
 import unittest
 from pyhdf.error import HDF4Error
-from ceda_di.hdf4_geo import HDF4
+from ceda_di.providers.arsf.hdf4 import HDF4
 
 
 class StubAttachedVData(object):
@@ -61,8 +61,8 @@ class TestHDF4(unittest.TestCase):
         }
 
         assert self.hdf._parse_timestamps(time_dict) == {
-                "start_time": "1993-01-01T10:15:32",
-                "end_time": "1993-01-01T12:02:12"
+            "start_time": "1993-01-01T10:15:32",
+            "end_time": "1993-01-01T12:02:12"
         }
 
     def test_parse_timestamps_ddmmyy(self):
@@ -74,8 +74,8 @@ class TestHDF4(unittest.TestCase):
         }
 
         assert self.hdf._parse_timestamps(time_dict) == {
-                "start_time": "1993-01-01T10:15:32",
-                "end_time": "1993-01-01T12:02:12"
+            "start_time": "1993-01-01T10:15:32",
+            "end_time": "1993-01-01T12:02:12"
         }
 
     def test_parse_timestamps_bad(self):
@@ -90,8 +90,6 @@ class TestHDF4(unittest.TestCase):
                           time_dict)
 
     def test_get_temporal(self):
-        hdf = HDF4(self.path)
-
         m = StubVData({
             "MIdate": [[ord(x)] for x in "19/07/10"],
             "MIstime": [["100419"]],

@@ -41,7 +41,7 @@ class EnviFile(object):
         self.hdr = self.process_hdr()
 
         # Calculate pixels per line
-        if not "pixperline" in self.hdr:
+        if "pixperline" not in self.hdr:
             self.calc_from_xy()
 
     def check_valid_fmt_string(self):

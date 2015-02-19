@@ -50,6 +50,7 @@ class ENVI(_geospatial):
         :returns: A dict containing geospatial information
         """
         spatial = {
+            "type": "track",
             "lat": self.data[1],
             "lon": self.data[2],
             "alt": self.data[3],

@@ -56,7 +56,6 @@ class EXIF(_geospatial):
 
         :returns: Dictionary containing geospatial extent metadata.
         """
-
         # Traverse XML
         try:
             pos = self.xml["Camera_Image"]["Plane_info"]
@@ -66,6 +65,7 @@ class EXIF(_geospatial):
                 pos = pos["Position"]
 
             geospatial = {
+                "type": "point",
                 "lat": [float(pos["Latitude"])],
                 "lon": [float(pos["Longitude"])],
                 "alt": [float(pos["Height"])],
