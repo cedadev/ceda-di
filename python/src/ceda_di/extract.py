@@ -72,14 +72,31 @@ class Extract(object):
     File crawler and metadata extractor class.
     Part of core functionality of ceda_di.
     """
-    def __init__(self, conf):
+    def __init__(self, conf, file_list=None):
         self.configuration = conf
         try:
             self.make_dirs(conf)
             self.logger = self.prepare_logging()
             self.handler_factory = HandlerFactory(self.conf("handlers"))
+
+            if file_list is None:
+                self.file_list = self._build_file_list()
+            else:
+                self.file_list = file_list
         except KeyError as k:
             sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
+
+    def _build_file_list(self):
+        """
+        Return file list
+        :return: A list of file paths
+        """
+        file_list = []
+        for root, _, files in os.walk(self.conf("input-path"), followlinks=True):
+            for each_file in files:
+                file_list.append((root, each_file))
+
+        return file_list
 
     def conf(self, conf_opt):
         """
@@ -184,17 +201,11 @@ class Extract(object):
                 else:
                     raise TransportError(te)
 
-        # Build list of file paths
-        data_files = []
-        for root, _, files in os.walk(self.conf("input-path"), followlinks=True):
-            for each_file in files:
-                data_files.append((root, each_file))
-
-        if len(data_files) > 0:
+        if len(self.file_list) > 0:
             # Process files
             pool = []
 
-            for f in data_files:
+            for f in self.file_list:
                 # HDF libraries don't seem to like unicode strings,
                 # which the filenames will be if the configuration paths
                 # loaded from JSON end up in unicode

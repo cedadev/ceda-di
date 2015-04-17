@@ -6,6 +6,7 @@ Usage:
     di.py search <extents> [options] [--file-paths | --json]
     di.py extract [options] [--send-to-index]
                   [<input-path> (<output-path> | --no-create-files)]
+    di.py extract-from-paths [options] <path-list>
     di.py test
 
 Options:
