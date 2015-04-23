@@ -37,3 +37,26 @@ def read_conf(conf_path):
         sys.stderr.write(  # Continued on next line
             "Can't read configuration file\n%s\n\n" % str(ioe))
         return {}
+
+
+def get_settings(conf_path, args):
+    # Default configuration options
+    # These are overridden by the config file and command-line arguments
+    defaults = {
+        "json-path": "json/",
+        "log-path": "log/",
+        "log-file": "log/",
+        "logging": {
+            "format": "[%(levelname)s] (%(name)s) %(message)s"
+        }
+    }
+
+    conf_file = read_conf(conf_path)
+
+    # Apply updates to CONFIG dictionary in priority order
+    # Configuration priority: CONFIG < CONF_FILE < ARGS
+    # (CONFIG being lowest, ARGS being highest)
+    defaults.update(conf_file)
+    defaults.update(args)
+
+    return defaults

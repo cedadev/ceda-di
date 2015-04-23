@@ -46,43 +46,25 @@ from ceda_di.index import BulkIndexer
 from ceda_di.search import Searcher
 
 
-# Default configuration options
-# These are overridden by the config file and command-line arguments
-CONFIG = {
-    "json-path": "json/",
-    "log-path": "log/",
-    "log-file": "log/",
-    "logging": {
-        "format": "[%(levelname)s] (%(name)s) %(message)s"
-    }
-}
-
-
 def main():
-    CONF_ARGS = cmd.sanitise_args(docopt(__doc__, version=__version__))
-    if 'config' not in CONF_ARGS or not CONF_ARGS["config"]:
+    conf_args = cmd.sanitise_args(docopt(__doc__, version=__version__))
+    if 'config' not in conf_args or not conf_args["config"]:
         direc = os.path.dirname(__file__)
-        conf_path = os.path.join(direc, '../../config/ceda_di.json')
-        CONF_ARGS['config'] = conf_path
+        conf_path = os.path.join(direc, "../../config/ceda_di.json")
+        conf_args["config"] = conf_path
 
-    CONF_FILE = cmd.read_conf(CONF_ARGS["config"])
+    config = cmd.get_settings(conf_args["config"], conf_args)
 
-    # Apply updates to CONFIG dictionary in priority order
-    # Configuration priority: CONFIG < CONF_FILE < ARGS
-    # (CONFIG being lowest, ARGS being highest)
-    CONFIG.update(CONF_FILE)
-    CONFIG.update(CONF_ARGS)
-
-    if CONF_ARGS["extract"]:
-        extract = Extract(CONFIG)
+    if conf_args["extract"]:
+        extract = Extract(config)
         extract.run()
-    elif CONF_ARGS["index"]:
+    elif conf_args["index"]:
         # Opening the BulkIndexer as a context manager ensures all docs get
         # submitted properly to the index (all pools get submitted)
-        with BulkIndexer(CONFIG) as index:
-            index.index_directory(CONFIG["path-to-json-docs"])
-    elif CONF_ARGS["search"]:
-        searcher = Searcher(CONFIG)
+        with BulkIndexer(config) as index:
+            index.index_directory(config["path-to-json-docs"])
+    elif conf_args["search"]:
+        searcher = Searcher(config)
         searcher.run()
 
 if __name__ == "__main__":
