@@ -50,7 +50,7 @@ def main():
     conf_args = cmd.sanitise_args(docopt(__doc__, version=__version__))
     if 'config' not in conf_args or not conf_args["config"]:
         direc = os.path.dirname(__file__)
-        conf_path = os.path.join(direc, "../../config/ceda_di.json")
+        conf_path = os.path.join(direc, "../config/ceda_di.json")
         conf_args["config"] = conf_path
 
     config = cmd.get_settings(conf_args["config"], conf_args)

@@ -2,6 +2,7 @@
 Module containing useful functions for the command-line interfaces.
 """
 
+import os
 import sys
 
 import simplejson as json
@@ -33,9 +34,10 @@ def read_conf(conf_path):
     try:
         with open(conf_path, "r") as conf:
             return json.load(conf)
-    except IOError as ioe:
+    except IOError:
+        err_path = os.path.abspath(conf_path)
         sys.stderr.write(  # Continued on next line
-            "Can't read configuration file\n%s\n\n" % str(ioe))
+            "Can't read configuration file\n%s\n\n" % err_path)
         return {}
 
 

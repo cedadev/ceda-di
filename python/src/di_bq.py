@@ -9,7 +9,7 @@ This tool has two main functions:
 
 Usage:
     di_bq.py (--help | --version)
-    di_bq.py gen-list <input-dir> <file-list-output-dir> --num=<num>
+    di_bq.py gen-list <input-dir> <file-list-output-dir> [--num=<num>]
     di_bq.py submit-jobs <dir-containing-file-lists> [--delete-after]
     di_bq.py submit-job <individual-file-list> [--delete-after]
 
@@ -45,7 +45,7 @@ def dump_to_json(output_directory, seq, file_list):
         json.dump(file_list, out_f)
 
 
-def construct_bsub_command(path, params=None):
+def construct_bsub_command(path, params={}):
     # Mapping of "bsub" command parameters to what they mean
     bsub_param = {
         "stdout": "-o",
@@ -56,20 +56,23 @@ def construct_bsub_command(path, params=None):
         "jobname": "-J"
     }
 
+    """
     command = "bsub"
     for k, v in params.iteritems():
         if k in bsub_param:
             opt = " {option} {value}".format(option=bsub_param[k], value=v)
             command += opt
-
+    """
+    command = "" ## RMEOVE
+    print("PATH: " + path)
     command += " python {script} submit-job {args}".format(script=__file__,
                                                            args=path)
-
     return command
 
 
 def bsub(path, params={}):
     """
+    Submit job to batch queue for processing.
     """
     defaults = {
         "stdout": "%J.o",
@@ -82,6 +85,7 @@ def bsub(path, params={}):
     defaults.update(params)
 
     bsub_cmd = construct_bsub_command(path, defaults)
+    os.system(bsub_cmd)
     print(bsub_cmd)
 
 
@@ -90,7 +94,7 @@ def main():
     args = cmd.sanitise_args(docopt(__doc__, version=__version__))
     if 'config' not in args or not args["config"]:
         direc = os.path.dirname(__file__)
-        conf_path = os.path.join(direc, "../../config/ceda_di.json")
+        conf_path = os.path.join(direc, "../config/ceda_di.json")
         args["config"] = conf_path
 
     config = cmd.get_settings(args["config"], args)
@@ -123,10 +127,9 @@ def main():
         for root, dirs, files in os.walk(input_directory):
             for f in files:
                 fp = os.path.join(root, f)
-                construct_bsub_command(fp)
 
-        # Submit job to batch queue
-        bsub(input_directory)
+                # Submit job to batch queue
+                bsub(fp)
 
     elif args["submit-job"]:
         file_list = args["individual-file-list"]
