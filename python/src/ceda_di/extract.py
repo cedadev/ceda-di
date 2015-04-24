@@ -117,11 +117,18 @@ class Extract(object):
             json_out = os.path.join(self.conf("output-path"),
                                     self.conf("json-path"))
             if not os.path.isdir(json_out):
-                os.makedirs(json_out)
+                try:
+                    os.makedirs(json_out)
+                except OSError:
+                    pass  # Directory already exists!
 
         log_out = os.path.join(self.conf("output-path"), self.conf("log-path"))
         if not os.path.isdir(log_out):
-            os.makedirs(log_out)
+            try:
+                os.makedirs(log_out)
+            except OSError:
+                pass  # Directory already exists!
+
 
     def prepare_logging(self):
         """
