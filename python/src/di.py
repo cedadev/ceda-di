@@ -5,7 +5,7 @@ Usage:
     di.py index [options] <path-to-json-docs>
     di.py search <extents> [options] [--file-paths | --json]
     di.py extract [options] [--send-to-index]
-                  [<input-path> (<output-path> | --no-create-files)]
+                  [<input-path> [(<output-path> | --no-create-files)]]
     di.py test
 
 Options:

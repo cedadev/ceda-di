@@ -18,7 +18,7 @@
     "max-results": 100,
 
     "_option": "output-path: main output directory",
-    "output-path": "/home/ccnewey/netcdfs/output",
+    "output-path": "/home/ccnewey/data/na/out",
 
     "_option": "log-path: log dir path, relative to 'outputpath'",
     "log-path": "log/",
@@ -27,10 +27,16 @@
     "json-path": "json/",
 
     "_option": "input-path: data input path (where to extract metadata from)",
-    "input-path": "/home/ccnewey/netcdfs",
+    "input-path": "/home/ccnewey/data/na",
 
     "_option": "num-cores: number of processes to use in parallel",
-    "num-cores": 1,
+    "num-cores": 8,
+
+    "_option": "no-create-files: don't create JSON documents on disk",
+    "no-create-files": false,
+
+    "_option": "send-to-index: send documents to Elasticsearch",
+    "send-to-index": true,
 
     "_option": "logging: options for the 'logging' module",
     "_ref": "(see: https://docs.python.org/2/library/logging.html)",

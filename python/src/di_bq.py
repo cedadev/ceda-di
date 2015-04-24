@@ -56,17 +56,18 @@ def construct_bsub_command(path, params={}):
         "jobname": "-J"
     }
 
-    """
     command = "bsub"
     for k, v in params.iteritems():
         if k in bsub_param:
             opt = " {option} {value}".format(option=bsub_param[k], value=v)
             command += opt
-    """
-    command = "" ## RMEOVE
-    print("PATH: " + path)
-    command += " python {script} submit-job {args}".format(script=__file__,
-                                                           args=path)
+
+    command += " \""
+    command += "source ../bin/activate; "
+    command += "python {script} submit-job {args}".format(script=__file__,
+                                                          args=path)
+    command += "\""
+
     return command
 
 
@@ -85,8 +86,8 @@ def bsub(path, params={}):
     defaults.update(params)
 
     bsub_cmd = construct_bsub_command(path, defaults)
-    os.system(bsub_cmd)
     print(bsub_cmd)
+    os.system(bsub_cmd)
 
 
 def main():
