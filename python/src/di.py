@@ -5,7 +5,7 @@ Usage:
     di.py index [options] <path-to-json-docs>
     di.py search <extents> [options] [--file-paths | --json]
     di.py extract [options] [--send-to-index]
-                  [<input-path> (<output-path> | --no-create-files)]
+                  [<input-path> [(<output-path> | --no-create-files)]]
     di.py test
 
 Options:
@@ -35,90 +35,37 @@ Options:
     bb_from_file=[filename]       contains some data from the region in the file
 """
 
-import simplejson as json
 import os
-import sys
 
 from docopt import docopt
 
+import ceda_di.util.cmd as cmd
 from ceda_di import __version__  # Grab version from package __init__.py
 from ceda_di.extract import Extract
 from ceda_di.index import BulkIndexer
 from ceda_di.search import Searcher
 
 
-def sanitise_args(config):
-    """
-    Sanitise command-line configuration.
-
-    :param config: Config dictionary (from docopt)
-    :returns: Config dictionary with all keys stripped of '<' '>' and '--'
-    """
-    sane_conf = {}
-    for key, value in config.iteritems():
-        if value is not None:
-            key = key.lstrip("-><").rstrip("><")
-            sane_conf[key] = value
-
-    return sane_conf
-
-
-def read_conf(conf_path):
-    """
-    Read configuration file into a dictionary.
-
-    :param conf_path: Path to the JSON configuration file
-    :returns: Dict containing parsed JSON conf
-    """
-    try:
-        with open(conf_path, "r") as conf:
-            return json.load(conf)
-    except IOError as ioe:
-        sys.stderr.write(  # Continued on next line
-            "Can't read configuration file\n%s\n\n" % str(ioe))
-        return {}
-
-
-# Default configuration options
-# These are overridden by the config file and command-line arguments
-CONFIG = {
-    "json-path": "json/",
-    "log-path": "log/",
-    "log-file": "log/",
-    "logging": {
-        "format": "[%(levelname)s] (%(name)s) %(message)s"
-    }
-}
-
-
 def main():
-    CONF_ARGS = sanitise_args(docopt(__doc__, version=__version__))
-    if 'config' not in CONF_ARGS or not CONF_ARGS["config"]:
+    conf_args = cmd.sanitise_args(docopt(__doc__, version=__version__))
+    if 'config' not in conf_args or not conf_args["config"]:
         direc = os.path.dirname(__file__)
-        conf_path = os.path.join(direc, '../../config/ceda_di.json')
-        CONF_ARGS['config'] = conf_path
-    CONF_FILE = read_conf(CONF_ARGS["config"])
+        conf_path = os.path.join(direc, "../config/ceda_di.json")
+        conf_args["config"] = conf_path
 
-    # Apply updates to CONFIG dictionary in priority order
-    # Configuration priority: CONFIG < CONF_FILE < ARGS
-    # (CONFIG being lowest, ARGS being highest)
-    CONFIG.update(CONF_FILE)
-    CONFIG.update(CONF_ARGS)
+    config = cmd.get_settings(conf_args["config"], conf_args)
 
-    if CONF_ARGS["extract"]:
-        extract = Extract(CONFIG)
+    if conf_args["extract"]:
+        extract = Extract(config)
         extract.run()
-    elif CONF_ARGS["index"]:
+    elif conf_args["index"]:
         # Opening the BulkIndexer as a context manager ensures all docs get
         # submitted properly to the index (all pools get submitted)
-        with BulkIndexer(CONFIG) as index:
-            index.index_directory(CONFIG["path-to-json-docs"])
-    elif CONF_ARGS["search"]:
-        searcher = Searcher(CONFIG)
+        with BulkIndexer(config) as index:
+            index.index_directory(config["path-to-json-docs"])
+    elif conf_args["search"]:
+        searcher = Searcher(config)
         searcher.run()
-    elif CONF_ARGS["test"]:
-        # TODO Would be nice to run unit tests from here later on
-        pass
 
 if __name__ == "__main__":
     main()

@@ -1,3 +1,5 @@
+import simplejson as json
+
 from elasticsearch import Elasticsearch
 from elasticsearch import ElasticsearchException
 from elasticsearch.exceptions import TransportError
@@ -101,7 +103,7 @@ class BulkIndexer(object):
             for file_name in files:
                 path = os.path.join(root, file_name)
                 with open(path, 'r') as file_handle:
-                    self.add_to_index_pool(file_handle.read(), mapping)
+                    self.add_to_index_pool(json.load(file_handle), mapping)
 
         # Make sure all documents are submitted to the index
         self.submit_pool(mapping)
