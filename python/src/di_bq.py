@@ -75,19 +75,18 @@ def construct_bsub_command(path, params={}):
     return command
 
 
-def bsub(path, params={}):
+def bsub(path, config):
     """
     Submit job to batch queue for processing.
     """
+    out = config["output-path"]
     defaults = {
-        "stdout": "%J.o",
-        "stderr": "%J.e",
-        "num-cores": 10,
+        "stdout": os.path.join(out, "%J.o"),
+        "stderr": os.path.join(out, "%J.e"),
+        "num-cores": config["num-cores"],
         "queue": "lotus",
-        "walltime": 45,
         "jobname": "ceda-di"
     }
-    defaults.update(params)
 
     bsub_script = construct_bsub_command(path, defaults)
     print(bsub_script)
