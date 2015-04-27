@@ -11,7 +11,7 @@ Usage:
     di_bq.py (--help | --version)
     di_bq.py gen-list <input-dir> <file-list-output-dir> [--num=<num>]
     di_bq.py submit-jobs <dir-containing-file-lists> [--delete-after]
-    di_bq.py submit-job <individual-file-list> [--delete-after]
+    di_bq.py process <individual-file-list> [--delete-after]
 
 Options:
     --help              Show this screen.
@@ -56,17 +56,21 @@ def construct_bsub_command(path, params={}):
         "jobname": "-J"
     }
 
-    command = "bsub"
+    command = "\'"
+    command += "#! /bin/sh\n"
     for k, v in params.iteritems():
         if k in bsub_param:
-            opt = " {option} {value}".format(option=bsub_param[k], value=v)
+            opt = "#BSUB {option} {value}\n".format(option=bsub_param[k], value=v)
             command += opt
 
-    command += " \""
-    command += "source ../bin/activate; "
-    command += "python {script} submit-job {args}".format(script=__file__,
-                                                          args=path)
-    command += "\""
+    # Multi-line string assignment here
+    command += (
+        "cd ~/ceda-di/python\n" +
+        "source bin/activate\n" +
+        "cd ~/ceda-di/python/src\n" +
+        "python {script} process {path}".format(script=__file__, path=path)
+    )
+    command += "\'"
 
     return command
 
@@ -85,9 +89,9 @@ def bsub(path, params={}):
     }
     defaults.update(params)
 
-    bsub_cmd = construct_bsub_command(path, defaults)
-    print(bsub_cmd)
-    os.system(bsub_cmd)
+    bsub_script = construct_bsub_command(path, defaults)
+    print(bsub_script)
+    os.system("bsub <<<{bsub_cmd}".format(bsub_cmd=bsub_script))
 
 
 def main():
@@ -108,7 +112,7 @@ def main():
 
         # Begin sweeping for files
         flist = []
-        for root, dirs, files in os.walk(path):
+        for root, dirs, files in os.walk(path, followlinks=True):
             for f in files:
                 fp = os.path.join(root, f)
                 flist.append(fp)
@@ -132,7 +136,7 @@ def main():
                 # Submit job to batch queue
                 bsub(fp)
 
-    elif args["submit-job"]:
+    elif args["process"]:
         file_list = args["individual-file-list"]
         with open(file_list, "r") as f:
             files = json.load(f)

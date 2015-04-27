@@ -94,7 +94,7 @@ class Extract(object):
         file_list = []
         for root, _, files in os.walk(self.conf("input-path"), followlinks=True):
             for each_file in files:
-                file_list.append((root, each_file))
+                file_list.append(os.path.join(root, each_file))
 
         return file_list
 
@@ -216,7 +216,7 @@ class Extract(object):
                 # HDF libraries don't seem to like unicode strings,
                 # which the filenames will be if the configuration paths
                 # loaded from JSON end up in unicode
-                path = str(os.path.join(*f))
+                path = f
                 if "raw" not in path:
                     p = multiprocessing.Process(target=self.process_file,
                                                 args=(path,))

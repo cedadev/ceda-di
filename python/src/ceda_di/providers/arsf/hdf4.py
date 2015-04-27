@@ -70,10 +70,7 @@ class HDF4(_geospatial):
             while True:
                 try:
                     coord = float(vd.read()[0][0])
-                    if coord < 0:
-                        coord /= 10**6
-                    else:
-                        coord /= 10**7
+                    coord /= 10**7
                     coords[v].append(coord)
                 except HDF4Error:  # End of file
                     break
