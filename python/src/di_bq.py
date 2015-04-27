@@ -64,10 +64,12 @@ def construct_bsub_command(path, params={}):
             command += opt
 
     # Multi-line string assignment here
+    srcdir = os.getcwd()
+    cedadir = "/".join(srcdir.split("/")[:-1])  # Get dir one level up
     command += (
-        "cd ~/ceda-di/python\n" +
+        "cd {cedadir}\n".format(cedadir=cedadir) +
         "source bin/activate\n" +
-        "cd ~/ceda-di/python/src\n" +
+        "cd {srcdir}\n".format(srcdir=srcdir) +
         "python {script} process {path}".format(script=__file__, path=path)
     )
     command += "\'"
@@ -84,8 +86,8 @@ def bsub(path, config):
         "stdout": os.path.join(out, "%J.o"),
         "stderr": os.path.join(out, "%J.e"),
         "num-cores": config["num-cores"],
-        "queue": "lotus",
-        "jobname": "ceda-di"
+        "queue": config["batch-queue"],
+        "jobname": "ceda-di {index}".format(index=config["es-index"])
     }
 
     bsub_script = construct_bsub_command(path, defaults)
