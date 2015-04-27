@@ -91,7 +91,6 @@ def bsub(path, config):
     }
 
     bsub_script = construct_bsub_command(path, defaults)
-    print(bsub_script)
     os.system("bsub <<<{bsub_cmd}".format(bsub_cmd=bsub_script))
 
 
