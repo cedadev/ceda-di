@@ -1,6 +1,6 @@
 import iris
 
-from ceda_di.dataset import _geospatial
+from ceda_di._dataset import _geospatial
 from ceda_di.metadata import product
 
 class GRIB_PP(_geospatial):
@@ -10,9 +10,9 @@ class GRIB_PP(_geospatial):
         """
         self.fname = fname
         self.cubes = iris.load(self.fname)
-
         self.param_properties = ["origin", "long_name",
                                  "standard_name", "var_name"]
+        self.unit_properties = ["origin", "name", "symbol", "definition"]
 
     def get_temporal(self):
         return {}
@@ -26,23 +26,46 @@ class GRIB_PP(_geospatial):
         }
 
     def get_parameters(self):
-        def _get_param_meta(obj):
-            param_info = {}
-            for key in param_properties:
+        def _get_meta(obj):
+            """
+            Helper function to help extract variable names and unit metadata.
+            """
+            names = ["long_name", "standard_name", "var_name"]
+
+            metadata = {}
+            for key in names:
                 try:
                     value = getattr(obj, key)
                     if value is not None:
-                        param_info[key] = value
+                        metadata[key] = value
                 except AttributeError:
-                    pass  # Ignore the error, the property doesn't exist
-            return param_info
+                    pass  # This attribute doesn't exist, ignore
+
+            # Try to get unit information, too
+            try:
+                units = obj.units
+                units_meta = {
+                    "origin": units.origin,
+                    "name": units.name,
+                    "symbol": units.symbol,
+                    "definition": units.definition
+                }
+            except AttributeError:
+                units_meta = None
+
+            if units_meta is not None:
+                metadata.update(units_meta)
+
+            return product.Parameter(name=obj.name(unknown="unknown"),
+                                     other_params=metadata)
 
         params = []
         for cube in self.cubes:
+            params.append(_get_meta(cube))
             for coords in cube.coords():
-                other_params = _get_param_meta(coords, self.param_properties)
-                param = product.Parameter(coords.name(),
-                                          other_params=other_params)
+                params.append(_get_meta(coords))
+
+        return params
 
     def get_properties(self):
         """
