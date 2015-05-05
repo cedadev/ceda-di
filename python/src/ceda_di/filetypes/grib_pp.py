@@ -14,11 +14,23 @@ class GRIB_PP(_geospatial):
                                  "standard_name", "var_name"]
         self.unit_properties = ["origin", "name", "symbol", "definition"]
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        pass
+
     def get_temporal(self):
-        return {}
+        return {
+            "start": None,
+            "end": None
+        }
 
     def get_geospatial(self):
-        return {}
+        return {
+            "lat": [],
+            "lon": []
+        }
 
     def get_data_format(self):
         data_format = {
@@ -56,7 +68,7 @@ class GRIB_PP(_geospatial):
             if units_meta is not None:
                 metadata.update(units_meta)
 
-            return product.Parameter(name=obj.name(unknown="unknown"),
+            return product.Parameter(name=obj.name(),
                                      other_params=metadata)
 
         params = []
