@@ -134,7 +134,7 @@ def main():
                 fp = os.path.join(root, f)
 
                 # Submit job to batch queue
-                bsub(fp)
+                bsub(fp, config)
 
     elif args["process"]:
         file_list = args["individual-file-list"]
