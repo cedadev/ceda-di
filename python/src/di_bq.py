@@ -57,7 +57,7 @@ def construct_bsub_command(path, params={}):
     }
 
     command = "\'"
-    command += "#! /bin/sh\n"
+    command += "#!/bin/sh\n"
     for k, v in params.iteritems():
         if k in bsub_param:
             opt = "#BSUB {option} {value}\n".format(option=bsub_param[k], value=v)
