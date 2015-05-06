@@ -56,23 +56,24 @@ def construct_bsub_command(path, params={}):
         "jobname": "-J"
     }
 
-    command = "\'"
-    command += "#!/bin/sh\n"
+    command = "bsub"
     for k, v in params.iteritems():
         if k in bsub_param:
-            opt = "#BSUB {option} {value}\n".format(option=bsub_param[k], value=v)
+            opt = " {option} {value}".format(option=bsub_param[k], value=v)
             command += opt
+    command += "<<<"
 
     # Multi-line string assignment here
     srcdir = os.getcwd()
     cedadir = "/".join(srcdir.split("/")[:-1])  # Get dir one level up
     command += (
+        "\'" +
         "cd {cedadir}\n".format(cedadir=cedadir) +
         "source bin/activate\n" +
         "cd {srcdir}\n".format(srcdir=srcdir) +
-        "python {script} process {path}".format(script=__file__, path=path)
+        "python {script} process {path}".format(script=__file__, path=path) +
+        "\'"
     )
-    command += "\'"
 
     return command
 
@@ -85,13 +86,13 @@ def bsub(path, config):
     defaults = {
         "stdout": os.path.join(out, "%J.o"),
         "stderr": os.path.join(out, "%J.e"),
-        "num-cores": config["num-cores"],
+        "num-cores": int(config["num-cores"]) + 1,  # 1 extra core for main thread
         "queue": config["batch-queue"],
-        "jobname": "ceda-di {index}".format(index=config["es-index"])
+        "jobname": "ceda-di-{index}".format(index=config["es-index"])
     }
 
     bsub_script = construct_bsub_command(path, defaults)
-    os.system("bsub <<<{bsub_cmd}".format(bsub_cmd=bsub_script))
+    os.system(bsub_script)
 
 
 def main():
