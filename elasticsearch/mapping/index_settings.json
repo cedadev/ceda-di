@@ -85,8 +85,9 @@
                     "type": "object"
                 },
                 "parameters": {
+                    "include_in_parent": true,
+                    "type": "nested",
                     "properties": {
-                        "type": "nested",
                         "name": {
                             "type": "string",
                             "analyzer": "variable_name_analyzer"
