@@ -9,13 +9,12 @@
   "_source": {
     "include": [
       "temporal",
-      "file",
-      "spatial.geometries.bbox"
+      "file"
     ]
   },
   "filter": {
     "geo_shape": {
-      "bbox": {
+      "spatial.geometries.search": {
         "shape": {
           "type": "envelope",
           "coordinates" : [[5, 60], [-5, 40]]
