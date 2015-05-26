@@ -1,10 +1,10 @@
 #! /bin/bash
 
 # Configure these to suit your ElasticSearch setup
-MASTER_LOCATION="http://fatcat-test.jc.rl.ac.uk"
+MASTER_LOCATION="http://jasmin-es1.ceda.ac.uk"
 MASTER_PORT="9200"
-INDEX="badc"
-MAPPING="eufar"
+INDEX="eufar"
+MAPPING="geospatial"
 QUERY="$1"
 
 # Begin script, check arguments
@@ -16,5 +16,15 @@ then
     exit
 fi
 
-BASE_URL="$MASTER_LOCATION:$MASTER_PORT/$INDEX/$MAPPING/_search/?pretty=true"
-curl -XGET "$BASE_URL" -d @"$QUERY"
+BASE_URL="$MASTER_LOCATION:$MASTER_PORT"
+
+if [ ! -z $INDEX ] && [ ! -z $MAPPING ]
+then
+    BASE_URL="$BASE_URL/$INDEX"
+    BASE_URL="$BASE_URL/$MAPPING"
+fi
+
+BASE_URL="$BASE_URL/_search/?pretty=true"
+echo $BASE_URL
+
+# curl -XGET "$BASE_URL" -d @"$QUERY"
