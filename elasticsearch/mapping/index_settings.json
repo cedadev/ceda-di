@@ -85,14 +85,26 @@
                     "type": "object"
                 },
                 "parameters": {
+                    "include_in_parent": true,
+                    "type": "nested",
                     "properties": {
                         "name": {
                             "type": "string",
                             "analyzer": "variable_name_analyzer"
                         },
                         "value": {
-                            "type": "string",
-                            "analyzer": "variable_name_analyzer"
+                            "type": "multi_field",
+                            "fields": {
+                                "value": {
+                                    "type": "string",
+                                    "analyzer": "variable_name_analyzer"
+                                },
+                                "autocomplete": {
+                                    "type": "completion",
+                                    "index_analyzer": "variable_name_analyzer",
+                                    "search_analyzer": "simple"
+                                }
+                            }
                         }
                     }
                 },

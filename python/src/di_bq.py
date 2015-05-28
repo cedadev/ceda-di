@@ -56,42 +56,43 @@ def construct_bsub_command(path, params={}):
         "jobname": "-J"
     }
 
-    command = "\'"
-    command += "#! /bin/sh\n"
+    command = "bsub"
     for k, v in params.iteritems():
         if k in bsub_param:
-            opt = "#BSUB {option} {value}\n".format(option=bsub_param[k], value=v)
+            opt = " {option} {value}".format(option=bsub_param[k], value=v)
             command += opt
+    command += "<<<"
 
     # Multi-line string assignment here
+    srcdir = os.getcwd()
+    cedadir = "/".join(srcdir.split("/")[:-1])  # Get dir one level up
     command += (
-        "cd ~/ceda-di/python\n" +
+        "\'" +
+        "cd {cedadir}\n".format(cedadir=cedadir) +
         "source bin/activate\n" +
-        "cd ~/ceda-di/python/src\n" +
-        "python {script} process {path}".format(script=__file__, path=path)
+        "cd {srcdir}\n".format(srcdir=srcdir) +
+        "python {script} process {path}".format(script=__file__, path=path) +
+        "\'"
     )
-    command += "\'"
 
     return command
 
 
-def bsub(path, params={}):
+def bsub(path, config):
     """
     Submit job to batch queue for processing.
     """
+    out = config["output-path"]
     defaults = {
-        "stdout": "%J.o",
-        "stderr": "%J.e",
-        "num-cores": 10,
-        "queue": "lotus",
-        "walltime": 45,
-        "jobname": "ceda-di"
+        "stdout": os.path.join(out, "%J.o"),
+        "stderr": os.path.join(out, "%J.e"),
+        "num-cores": int(config["num-cores"]) + 1,  # 1 extra core for main thread
+        "queue": config["batch-queue"],
+        "jobname": "ceda-di-{index}".format(index=config["es-index"])
     }
-    defaults.update(params)
 
     bsub_script = construct_bsub_command(path, defaults)
-    print(bsub_script)
-    os.system("bsub <<<{bsub_cmd}".format(bsub_cmd=bsub_script))
+    os.system(bsub_script)
 
 
 def main():
@@ -134,7 +135,7 @@ def main():
                 fp = os.path.join(root, f)
 
                 # Submit job to batch queue
-                bsub(fp)
+                bsub(fp, config)
 
     elif args["process"]:
         file_list = args["individual-file-list"]
