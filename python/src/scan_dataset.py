@@ -10,11 +10,15 @@ Usage:
 
 Options:
     -h --help                 Show this screen.
-    -d --dataset=<id>         Dataset id. [default: id]
-    -l --level=<level>        Level.
-    -m --makelist=<m>         Makelist.
-    -c --config=<name>        Configuration file.[default: kannel.conf]
-    -n --num-files=<n_files>  Max number of files to search.    
+    -d --dataset=<id>         Specify the dataset to be scanned. [default: id]
+    -l --level=<level>        Specify the Level of information being retrieved about the files in the dataset, as follows:     
+                              Level 1: File names and sizes
+                              Level 2: File names, sizes and phenomena (e.g. "air temperature")
+                              Level 3: File names, sizes, phenomena and geospatial metadata 
+                              <level> is an integer of value 1, 2 or 3. 
+    -m --makelist=<m>         Make a list of files for the given dataset.
+    -c --config=<name>        Specify the main configuration directory.
+    -n --num-files=<n_files>  Specify the number of files to scan within each job.    
 """
 
 
