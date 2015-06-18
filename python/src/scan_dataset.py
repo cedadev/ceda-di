@@ -10,7 +10,7 @@ Usage:
 
 Options:
     -h --help                 Show this screen.
-    -d --dataset=<id>         Specify the dataset to be scanned. [default: id]
+    -d --dataset=<id>         Specify the dataset to be scanned wirhin the file datasets.ini.
     -l --level=<level>        Specify the Level of information being retrieved about the files in the dataset, as follows:     
                               Level 1: File names and sizes
                               Level 2: File names, sizes and phenomena (e.g. "air temperature")
