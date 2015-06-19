@@ -37,6 +37,15 @@ from ceda_di.extract import Extract
 from ceda_di.index import BulkIndexer
 from ceda_di.search import Searcher
 
+def check_args(args_dict):
+    """
+    check the validity of command line arguments and set 
+    operation status. 
+    
+    :param dictionary containing ags.
+    :returns: structure of params...
+    """
+
 def main():
     conf_args = cmd.sanitise_args(docopt(__doc__, version=__version__))
           
