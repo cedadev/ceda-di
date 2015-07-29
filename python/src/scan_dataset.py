@@ -5,11 +5,11 @@ Usage:
   scan_dataset.py -h | --help
   scan_dataset.py --version
   scan_dataset.py (-f <filename> | --filename <filename>) (-d <dataset_id> | --dataset <dataset_id> ) 
-  scan_dataset.py (-l <level> | --level <level>)
-  scan_dataset.py -m | --make-list
-  scan_dataset.py -c <path_to_config_dir> | --config <path_to_config_dir>
-  scan_dataset.py -n <n_files> | --num-files <n_files>
-  scan_dataset.py -s <start_number> | --start <start_number>
+                  (-l <level> | --level <level>) 
+                  [-m | --make-list]  
+                  [-c <path_to_config_dir> | --config <path_to_config_dir>] 
+                  [-n <n_files> | --num-files <n_files>] 
+                  [-s <start_number> | --start <start_number>]
   
 Options:
   -h --help                           Show this screen.
@@ -22,7 +22,7 @@ Options:
                                       Level 3: File names, sizes, phenomena and geospatial metadata.
   -m --make-list                      Stores the list of filenames to a file [default: file_lists.txt].
   -c --config=<path_to_config_dir>    Specify the main configuration directory.
-  -n  --num-files=<n_files>           Number of files to scan.
+  -n --num-files=<n_files>           Number of files to scan.
   -s --start=<start_number>           Starting point within the cache file containing filenames [default: 10].
   
  """
@@ -36,30 +36,117 @@ from ceda_di import __version__  # Grab version from package __init__.py
 from ceda_di.extract import Extract
 from ceda_di.index import BulkIndexer
 from ceda_di.search import Searcher
+from operator import or_
 
-def check_args(args_dict):
+import glob
+import logging
+import logging.handlers
+   
+
+
+def sd_args_validity_ckeck(args_dict):
     """
-    check the validity of command line arguments and set 
-    operation status. 
-    
+    checks the validity of command line arguments
     :param dictionary containing ags.
-    :returns: structure of params...
+    :returns: 
     """
+    level = int(args_dict.get("level"))
+    if level < 1  or level > 3:
+        raise NameError('value out of range')
+ 
+    num_files = args_dict.get("num-files")
+    if num_files:
+        num_files = int(num_files)
+         
+    start_number = args_dict.get("start")
+    if start_number:
+        start_number = int(args_dict.get("start"))
+     #TODO : Add more cases here...    
 
+def sd_init_log():
+    
+    """
+    Creates the logger object that is going to be used.
+    Levels available :
+    logger.debug("")
+    logger.info("")
+    logger.warning("")
+    logger.error("")
+    logger.critical("")    
+    """
+    
+    logger = logging.getLogger( __name__)
+    hdlr = logging.FileHandler("scan_dataset.log")
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr) 
+    logger.setLevel(logging.DEBUG)
+    
+    return logger
+
+def sd_find_dataset(file, dataset_id):
+    """
+     Returns the path of the given dataset id. 
+    """
+    vars = {}
+    with open(file) as l_file:
+        for line in l_file:
+            name, var = line.partition("=")[::2]
+            vars[name.strip()] = var.strip()
+    
+    return vars[dataset_id]        
+
+def sd_scan_and_store_to_db(conf_args, log):
+    
+    """
+    Reads from the filesystem and outputs to database.
+    """
+         
+    dataset_ids_file_path = conf_args.get("filename")
+    dataset_id = conf_args.get("dataset")
+    search_level = conf_args.get("level")
+    
+    # Searches for the configuration file.
+    if 'config' not in conf_args or not conf_args["config"]:
+        direc = os.path.dirname(__file__)
+        conf_path = os.path.join(direc, "../config/ceda_di.json")
+        conf_args["config"] = conf_path
+
+    #Creates a dictionary with default settings some of them where loaded from th edefaults file.
+    config = cmd.get_settings(conf_args["config"], conf_args)
+
+    path = sd_find_dataset(dataset_ids_file_path, dataset_id) #derectory where the files to be searched are.
+    
+    if dataset_ids_file_path and dataset_id and search_level :
+        extract = Extract(config, path)
+        extract.run_secuential(search_level);
+    
+    
+    
 def main():
-    conf_args = cmd.sanitise_args(docopt(__doc__, version=__version__))
-          
+    
     """
     Basic algorithm :
         Validate input
-        Implement command line options. 
-    """
-    
-    #Argument validation.    
-    
-    print "These are all the arguments :"
-    for keys,values in conf_args.items():
-        print(keys, " -->", values)
+        Create file list
+        Extract data
+        Post data. 
+    """    
+        
+    log = sd_init_log()
+    conf_args = cmd.sanitise_args(docopt(__doc__, version=__version__))
+          
+         
+    try: 
+        sd_args_validity_ckeck(conf_args)
+    except ValueError as verr:
+        log.error("Error in configuration.")
+        return  
+    except Exception as ex:
+        log.error("Error in configuration")
+        return 
+            
+    sd_scan_and_store_to_db(conf_args, log)    
                
         
 if __name__ == '__main__':

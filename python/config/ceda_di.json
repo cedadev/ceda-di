@@ -54,10 +54,6 @@
             "class": "ceda_di.providers.arsf.envi.BIL",
             "priority": 10
         },
-        ".hdf$": {
-            "class": "ceda_di.providers.arsf.hdf4.HDF4",
-            "priority": 10
-        },
         ".tif$": {
             "class": "ceda_di.providers.arsf.exif.EXIF",
             "priority": 10

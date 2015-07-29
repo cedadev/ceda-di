@@ -72,27 +72,28 @@ class Extract(object):
     File crawler and metadata extractor class.
     Part of core functionality of ceda_di.
     """
-    def __init__(self, conf, file_list=None):
+    def __init__(self, conf, path=None):
         self.configuration = conf
         try:
             self.make_dirs(conf)
             self.logger = self.prepare_logging()
             self.handler_factory = HandlerFactory(self.conf("handlers"))
-
-            if file_list is None:
+            
+            if path is None:
                 self.file_list = self._build_file_list()
             else:
-                self.file_list = file_list
+                self.file_list = self._build_file_list(path)
         except KeyError as k:
             sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
 
-    def _build_file_list(self):
+    def _build_file_list(self, path=None):
         """
         Return file list
         :return: A list of file paths
         """
+            
         file_list = []
-        for root, _, files in os.walk(self.conf("input-path"), followlinks=True):
+        for root, _, files in os.walk((path if path else self.conf("input-path")) , followlinks=True):
             for each_file in files:
                 file_list.append(os.path.join(root, each_file))
 
@@ -237,3 +238,41 @@ class Extract(object):
                          end.isoformat())
         self.logger.info("Start: %s, End: %s, Total: %s",
                          start.isoformat(), end.isoformat(), end - start)
+        
+        
+    def run_secuential(self, search_level):      
+        # Log beginning of processing
+        start = datetime.datetime.now()
+        self.logger.info("Metadata extraction started at: %s",
+                         start.isoformat())
+
+        # Create index if necessary
+        if self.conf("send-to-index"):
+            es_factory = ElasticsearchClientFactory()
+            self.es = es_factory.get_client(self.configuration)
+
+            try:
+                index.create_index(self.configuration, self.es)
+            except TransportError as te:
+                if te[0] == 400:
+                    pass
+                else:
+                    raise TransportError(te)
+
+        if len(self.file_list) > 0:
+            
+            for f in self.file_list:
+                # HDF libraries don't seem to like unicode strings,
+                # which the filenames will be if the configuration paths
+                # loaded from JSON end up in unicode
+                path = f
+                if "raw" not in path:
+                    self.process_file(path)
+                    
+        # Log end of processing
+        end = datetime.datetime.now()
+        self.logger.info("Metadata extraction completed at: %s",
+                         end.isoformat())
+        self.logger.info("Start: %s, End: %s, Total: %s",
+                         start.isoformat(), end.isoformat(), end - start)
+

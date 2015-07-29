@@ -15,7 +15,6 @@ coverage==3.7.1
 docopt==0.6.2
 docutils==0.12
 git+https://github.com/SciTools/iris.git#egg=Iris
-svn+http://proj.badc.rl.ac.uk/svn/cows/cows_support/nappy/trunk/#egg=nappy
 elasticsearch==1.2.0
 flake8==2.3.0
 h5py==2.3.1
