@@ -9,12 +9,16 @@ import multiprocessing
 import os
 import sys
 import re
-
+#kltsa
+import requests
+import json
+########
 from elasticsearch.exceptions import TransportError
 
 from ceda_di.search import ElasticsearchClientFactory
 from ceda_di import index
 from ceda_di.metadata.product import FileFormatError
+from mhlib import PATH
 
 
 class HandlerFactory(object):
@@ -186,6 +190,15 @@ class Extract(object):
         if props is not None:
             with open(out_fname, 'w') as j:
                 j.write(str(props))
+                
+    def post_data(self, url, body):
+        try :
+            r = requests.post(url, data=body)
+                    
+        except requests.exceptions.RequestException as e:    # This is the correct syntax
+            print e
+                
+        print "http response:" + r.content            
 
     def run(self):
         """
@@ -247,27 +260,24 @@ class Extract(object):
                          start.isoformat())
 
         # Create index if necessary
-        if self.conf("send-to-index"):
-            es_factory = ElasticsearchClientFactory()
-            self.es = es_factory.get_client(self.configuration)
-
-            try:
-                index.create_index(self.configuration, self.es)
-            except TransportError as te:
-                if te[0] == 400:
-                    pass
-                else:
-                    raise TransportError(te)
-
+        doc = {}
+        host = self.configuration['es-host']
+        port = self.configuration['es-port']
+        url = "http://" + host + ":" + str(port) + "/test-files-db/file-table/"
+        
         if len(self.file_list) > 0:
             
             for f in self.file_list:
-                # HDF libraries don't seem to like unicode strings,
-                # which the filenames will be if the configuration paths
-                # loaded from JSON end up in unicode
-                path = f
-                if "raw" not in path:
-                    self.process_file(path)
+                file_path = f
+                #TODO : Create file handler for this type of file.
+                doc["filename"] = file_path
+                size = os.path.getsize(file_path)
+                doc["size"] = size/(1024*1024)
+                es_query = json.dumps(doc)
+                
+                self.post_data(url, es_query)
+                                
+                print "Created record for file" + file_path    
                     
         # Log end of processing
         end = datetime.datetime.now()

@@ -1,6 +1,6 @@
 {
     "_option": "es_host: hostname of Elasticsearch node to use",
-    "es-host": "jasmin-es1.ceda.ac.uk",
+    "es-host": "localhost",
 
     "_option": "es_port: port number of Elasticsearch node to use",
     "es-port": 9200,
