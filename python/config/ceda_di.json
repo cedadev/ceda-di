@@ -61,6 +61,11 @@
         ".nc$": {
             "class": "ceda_di.providers.faam.faam.FAAMNetCDF",
             "priority": 10
+        },
+        ".$": {
+            "class": "ceda_di.providers.Generic_file_handler.GENERIC",
+            "priority": 11
         }
+        
     }
 }

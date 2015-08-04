@@ -191,15 +191,6 @@ class Extract(object):
             with open(out_fname, 'w') as j:
                 j.write(str(props))
                 
-    def post_data(self, url, body):
-        try :
-            r = requests.post(url, data=body)
-                    
-        except requests.exceptions.RequestException as e:    # This is the correct syntax
-            print e
-                
-        print "http response:" + r.content            
-
     def run(self):
         """
         Run main metadata extraction suite.
@@ -251,9 +242,31 @@ class Extract(object):
                          end.isoformat())
         self.logger.info("Start: %s, End: %s, Total: %s",
                          start.isoformat(), end.isoformat(), end - start)
+       
+       
+       
+    def index_properties_seq(self, url, body):
+    
         
-        
-    def run_secuential(self, search_level):      
+        try :
+            r = requests.post(url, data=body)
+                    
+        except requests.exceptions.RequestException as e:    # This is the correct syntax
+            print e
+                
+        print "http response:" + r.content          
+            
+    def process_file_seq(self, filename):
+        """
+        Instantiate a handler for a file and extract metadata.
+        """
+        handler = self.handler_factory.get_handler(filename)
+        if handler is not None:
+            with handler as hand:
+                return hand.get_properties(filename)    
+               
+                                    
+    def run_seq(self, search_level):      
         # Log beginning of processing
         start = datetime.datetime.now()
         self.logger.info("Metadata extraction started at: %s",
@@ -263,21 +276,21 @@ class Extract(object):
         doc = {}
         host = self.configuration['es-host']
         port = self.configuration['es-port']
-        url = "http://" + host + ":" + str(port) + "/test-files-db/file-table/"
+        es_index = self.configuration['es-index']
+        es_type =  self.configuration['es-mapping']     
+                
+        url = "http://" + host + ":" + str(port) + "/" + es_index + "/" + es_type + "/"
         
         if len(self.file_list) > 0:
             
             for f in self.file_list:
                 file_path = f
-                #TODO : Create file handler for this type of file.
-                doc["filename"] = file_path
-                size = os.path.getsize(file_path)
-                doc["size"] = size/(1024*1024)
-                es_query = json.dumps(doc)
                 
-                self.post_data(url, es_query)
-                                
-                print "Created record for file" + file_path    
+                doc = self.process_file_seq(file_path)    
+                
+                es_query = json.dumps(doc)
+                self.index_properties_seq(url, es_query)             
+                print "Created record for file" + file_path
                     
         # Log end of processing
         end = datetime.datetime.now()

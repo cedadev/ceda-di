@@ -4,6 +4,7 @@ Also contains methods for extracting metadata (geospatial/temporal).
 """
 
 import logging
+import os
 
 from ceda_di.filetypes.file_io import envi_io
 from ceda_di.providers import arsf

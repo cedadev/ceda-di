@@ -120,7 +120,7 @@ def sd_scan_and_store_to_db(conf_args, log):
     
     if dataset_ids_file_path and dataset_id and search_level :
         extract = Extract(config, path)
-        extract.run_secuential(search_level);
+        extract.run_seq(search_level);
     
     
     
