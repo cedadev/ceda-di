@@ -1,0 +1,22 @@
+﻿{
+  "mappings" :  
+  {
+    "geo_metadata" :
+    {
+      "properties":
+      {
+        "directory": {"type":"string"},
+        "format":{"type":"string"},
+        "md5":{"type":"string"},
+        "name":{"type":"string"},
+        "size":{"type":"long"},
+        "type":{"type":"string"}
+      }
+    }
+  }
+}
+ 
+
+   
+   
+

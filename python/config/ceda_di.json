@@ -12,7 +12,7 @@
     "es-mapping": "geo_metadata",
 
     "_option": "es_index_settings: Path to Elasticsearch index settings config",
-    "es-index-settings": "../../elasticsearch/mapping/index_settings.json",
+    "es-index-settings": "../../elasticsearch/mapping/archive_level_1.json",
 
     "_option": "max_results: max number of search results to request",
     "max-results": 100,
@@ -64,7 +64,7 @@
         },
         ".$": {
             "class": "ceda_di.providers.Generic_file_handler.GENERIC",
-            "priority": 11
+            "priority": 9
         }
         
     }

@@ -12,6 +12,7 @@ import re
 #kltsa
 import requests
 import json
+import hashlib
 ########
 from elasticsearch.exceptions import TransportError
 
@@ -45,7 +46,25 @@ class HandlerFactory(object):
         handler_class = self.get_handler_class(filename)
         if handler_class is not None:
             return handler_class(filename)
-
+        
+    def get_handler_by_level(self, level, filename = None):
+        """
+        Return instance of correct file handler class for 
+        the specified level.
+        """
+        if level is "1" :
+            handler = self.handlers[".$"]
+            handler_class = handler['class']
+            return handler_class("inst") 
+        else :
+            return None
+                
+        
+        """
+        handler_class = self.get_handler_class(filename)
+        if handler_class is not None:
+            return handler_class(filename)
+        """
     def get_handler_class(self, filename):
         """
         Return the class of the correct file handler (un-instantiated).
@@ -94,8 +113,7 @@ class Extract(object):
         """
         Return file list
         :return: A list of file paths
-        """
-            
+        """            
         file_list = []
         for root, _, files in os.walk((path if path else self.conf("input-path")) , followlinks=True):
             for each_file in files:
@@ -245,52 +263,71 @@ class Extract(object):
        
        
        
-    def index_properties_seq(self, url, body):
-    
-        
-        try :
-            r = requests.post(url, data=body)
-                    
-        except requests.exceptions.RequestException as e:    # This is the correct syntax
-            print e
-                
-        print "http response:" + r.content          
+    def index_properties_seq(self, body, id):
+        """
+        Index the file in Elasticsearch.
+        """
+        self.es.index(index=self.conf('es-index'),
+                      doc_type=self.conf('es-mapping'),
+                      body=body,
+                      id=id) 
             
-    def process_file_seq(self, filename):
+    def process_file_seq(self, filename, level):
         """
-        Instantiate a handler for a file and extract metadata.
+         Instantiates a handler for a file and extracts metadata.
         """
-        handler = self.handler_factory.get_handler(filename)
+        
+        handler = self.handler_factory.get_handler_by_level(level)  
+          
         if handler is not None:
             with handler as hand:
-                return hand.get_properties(filename)    
-               
+                return handler.get_properties(filename)    
+        else :
+            return None       
                                     
     def run_seq(self, search_level):      
+        
+        """
+         Extracts metadata information from files in directory and posts them in elastic search.
+        """
+                
         # Log beginning of processing
         start = datetime.datetime.now()
         self.logger.info("Metadata extraction started at: %s",
                          start.isoformat())
 
+
         # Create index if necessary
+        es_factory = ElasticsearchClientFactory()
+        self.es = es_factory.get_client(self.configuration)
+
+        try:
+            index.create_index(self.configuration, self.es)
+        except TransportError as te:
+            if te[0] == 400:
+                pass
+            else:
+                raise TransportError(te)
+ 
+         
+        
         doc = {}
-        host = self.configuration['es-host']
-        port = self.configuration['es-port']
-        es_index = self.configuration['es-index']
-        es_type =  self.configuration['es-mapping']     
-                
-        url = "http://" + host + ":" + str(port) + "/" + es_index + "/" + es_type + "/"
+        level = self.configuration['level']
         
         if len(self.file_list) > 0:
             
             for f in self.file_list:
                 file_path = f
                 
-                doc = self.process_file_seq(file_path)    
+                self.logger.info("Metadata extraction started for file %s", file_path)
+
+                doc = self.process_file_seq(file_path, level)    
                 
                 es_query = json.dumps(doc)
-                self.index_properties_seq(url, es_query)             
-                print "Created record for file" + file_path
+                id = hashlib.sha1(file_path).hexdigest()      
+                
+                self.index_properties_seq(es_query, id)             
+                
                     
         # Log end of processing
         end = datetime.datetime.now()

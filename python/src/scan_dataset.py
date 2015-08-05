@@ -64,26 +64,6 @@ def sd_args_validity_ckeck(args_dict):
         start_number = int(args_dict.get("start"))
      #TODO : Add more cases here...    
 
-def sd_init_log():
-    
-    """
-    Creates the logger object that is going to be used.
-    Levels available :
-    logger.debug("")
-    logger.info("")
-    logger.warning("")
-    logger.error("")
-    logger.critical("")    
-    """
-    
-    logger = logging.getLogger( __name__)
-    hdlr = logging.FileHandler("scan_dataset.log")
-    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-    hdlr.setFormatter(formatter)
-    logger.addHandler(hdlr) 
-    logger.setLevel(logging.DEBUG)
-    
-    return logger
 
 def sd_find_dataset(file, dataset_id):
     """
@@ -97,16 +77,12 @@ def sd_find_dataset(file, dataset_id):
     
     return vars[dataset_id]        
 
-def sd_scan_and_store_to_db(conf_args, log):
+def sd_scan_and_store_to_db(conf_args):
     
     """
-    Reads from the filesystem and outputs to database.
+    Reads files from the filesystem and outputs metadata to database.
     """
          
-    dataset_ids_file_path = conf_args.get("filename")
-    dataset_id = conf_args.get("dataset")
-    search_level = conf_args.get("level")
-    
     # Searches for the configuration file.
     if 'config' not in conf_args or not conf_args["config"]:
         direc = os.path.dirname(__file__)
@@ -116,8 +92,13 @@ def sd_scan_and_store_to_db(conf_args, log):
     #Creates a dictionary with default settings some of them where loaded from th edefaults file.
     config = cmd.get_settings(conf_args["config"], conf_args)
 
+    # Finds the directory to be scanned 
+    dataset_ids_file_path = conf_args.get("filename")
+    dataset_id = conf_args.get("dataset")
     path = sd_find_dataset(dataset_ids_file_path, dataset_id) #derectory where the files to be searched are.
     
+    # Extracts metadata and stores then in elastic search.
+    search_level = conf_args.get("level")
     if dataset_ids_file_path and dataset_id and search_level :
         extract = Extract(config, path)
         extract.run_seq(search_level);
@@ -129,14 +110,14 @@ def main():
     """
     Basic algorithm :
         Validate input
+        Locate directory to be scanned
         Create file list
         Extract data
-        Post data. 
-    """    
-        
-    log = sd_init_log()
+        Post data to elastic search.. 
+    """            
+   
     conf_args = cmd.sanitise_args(docopt(__doc__, version=__version__))
-          
+        
          
     try: 
         sd_args_validity_ckeck(conf_args)
@@ -147,7 +128,7 @@ def main():
         log.error("Error in configuration")
         return 
             
-    sd_scan_and_store_to_db(conf_args, log)    
+    sd_scan_and_store_to_db(conf_args)    
                
         
 if __name__ == '__main__':
