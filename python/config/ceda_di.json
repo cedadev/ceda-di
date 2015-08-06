@@ -9,7 +9,7 @@
     "es-index": "archive_level_1",
 
     "_option": "es_mapping: Elasticsearch document type to index data as",
-    "es-mapping": "archive_level_1_type",
+    "es-mapping": "file",
 
     "_option": "es_index_settings: Path to Elasticsearch index settings config",
     "es-index-settings": "../../elasticsearch/mapping/level_1_settings.json",
