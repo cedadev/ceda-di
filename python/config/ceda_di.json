@@ -21,7 +21,7 @@
     "output-path": "/work/scratch/ceda-di",
 
     "_option": "log-path: log dir path, relative to 'outputpath'",
-    "log-path": "log/",
+    "log-path": "/home/kleanthis/Dev/python_dev/ceda-di/log/",
 
     "_option": "json-path: directory for JSON metadata, relative to 'outputpath'",
     "json-path": "json/",
@@ -41,6 +41,9 @@
     "_option": "send-to-index: send documents to Elasticsearch",
     "send-to-index": true,
 
+    "_option": "log-level: Sets teh logging level",
+    "log-level": "info",
+        
     "_option": "logging: options for the 'logging' module",
     "_ref": "(see: https://docs.python.org/2/library/logging.html)",
     "logging": {

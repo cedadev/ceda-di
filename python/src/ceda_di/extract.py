@@ -13,6 +13,9 @@ import re
 import requests
 import json
 import hashlib
+import socket
+import logging
+logging.basicConfig()
 ########
 from elasticsearch.exceptions import TransportError
 
@@ -95,19 +98,30 @@ class Extract(object):
     File crawler and metadata extractor class.
     Part of core functionality of ceda_di.
     """
-    def __init__(self, conf, path=None):
+    def __init__(self, conf, path=None, seq=None):
         self.configuration = conf
-        try:
-            self.make_dirs(conf)
-            self.logger = self.prepare_logging()
-            self.handler_factory = HandlerFactory(self.conf("handlers"))
-            
-            if path is None:
-                self.file_list = self._build_file_list()
-            else:
+        
+        if seq is not None :
+            try:            
+                self.logger = self.prepare_logging_seq()
+                self.handler_factory = HandlerFactory(self.conf("handlers"))
                 self.file_list = self._build_file_list(path)
-        except KeyError as k:
-            sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
+            except KeyError as k:
+                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
+        
+        else : 
+        
+            try: 
+                self.make_dirs(conf)
+                self.logger = self.prepare_logging()
+                self.handler_factory = HandlerFactory(self.conf("handlers"))
+            
+                if path is None:
+                    self.file_list = self._build_file_list()
+                else:
+                    self.file_list = path
+            except KeyError as k:
+                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
 
     def _build_file_list(self, path=None):
         """
@@ -158,7 +172,7 @@ class Extract(object):
         Initial logging setup
         """
         log_fname = (self.conf("es-index") + "_" +
-                     datetime.datetime.now().isoformat() +
+                     datetime.datetime.now().isoformat() + "_" +
                      ".log")
         fpath = os.path.join(self.conf("output-path"),
                              self.conf("log-path"),
@@ -166,12 +180,51 @@ class Extract(object):
 
         logging.basicConfig(filename=fpath,
                             format=self.conf("logging")["format"],
-                            level=logging.WARNING)
+                            level=logging.INFO)
 
         log = logging.getLogger(__name__)
 
+        
         return log
+    
+    def prepare_logging_seq(self):
+        """
+        Initial logging setup
+        """
+        
+        log_fname = (self.conf("es-index") + "_" +
+                     datetime.datetime.now().isoformat() + "_" +
+                     socket.gethostname() +
+                     ".log")
+        
+        fpath = os.path.join(self.conf("output-path"),
+                             self.conf("log-path"),
+                             log_fname)
+        
+        LEVELS = { 'debug'   : logging.DEBUG,
+                   'info'    : logging.INFO,
+                   'warning' : logging.WARNING,
+                   'error'   : logging.ERROR,
+                   'critical': logging.CRITICAL
+                 }
 
+        conf_log_level = self.conf("log-level")
+        
+        format = self.conf("logging")["format"]
+        
+        level = LEVELS.get(conf_log_level, logging.NOTSET)
+        
+        logging.basicConfig(filename="/home/kleanthis/Dev/python_dev/ceda-di/python/src/this.log",
+                        #format=format,
+                        level=level)
+        
+        log = logging.getLogger(__name__)
+        
+        return log
+        
+        
+ 
+    
     def process_file(self, filename):
         """
         Instantiate a handler for a file and extract metadata.

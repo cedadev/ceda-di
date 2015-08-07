@@ -100,7 +100,7 @@ def sd_scan_and_store_to_db(conf_args):
     # Extracts metadata and stores then in elastic search.
     search_level = conf_args.get("level")
     if dataset_ids_file_path and dataset_id and search_level :
-        extract = Extract(config, path)
+        extract = Extract(config, path, "1")
         extract.run_seq(search_level);
     
     
