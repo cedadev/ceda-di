@@ -9,13 +9,13 @@ import multiprocessing
 import os
 import sys
 import re
+
 #kltsa
 import requests
 import json
 import hashlib
 import socket
-import logging
-logging.basicConfig()
+
 ########
 from elasticsearch.exceptions import TransportError
 
@@ -58,10 +58,9 @@ class HandlerFactory(object):
         if level is "1" :
             handler = self.handlers[".$"]
             handler_class = handler['class']
-            return handler_class("inst") 
+            return handler_class() 
         else :
-            return None
-                
+            return None                
         
         """
         handler_class = self.get_handler_class(filename)
@@ -91,7 +90,6 @@ class HandlerFactory(object):
             except AttributeError:
                 return handler_class
         return None
-
 
 class Extract(object):
     """
@@ -129,7 +127,7 @@ class Extract(object):
         :return: A list of file paths
         """            
         file_list = []
-        for root, _, files in os.walk((path if path else self.conf("input-path")) , followlinks=True):
+        for root, _, files in os.walk((path if path else self.conf("input-path")) , ("followlinks=false" if path else "followlinks=True")):
             for each_file in files:
                 file_list.append(os.path.join(root, each_file))
 
@@ -166,7 +164,6 @@ class Extract(object):
             except OSError:
                 pass  # Directory already exists!
 
-
     def prepare_logging(self):
         """
         Initial logging setup
@@ -182,9 +179,7 @@ class Extract(object):
                             format=self.conf("logging")["format"],
                             level=logging.INFO)
 
-        log = logging.getLogger(__name__)
-
-        
+        log = logging.getLogger(__name__)        
         return log
     
     def prepare_logging_seq(self):
@@ -214,17 +209,20 @@ class Extract(object):
         
         level = LEVELS.get(conf_log_level, logging.NOTSET)
         
-        logging.basicConfig(filename="/home/kleanthis/Dev/python_dev/ceda-di/python/src/this.log",
-                        #format=format,
+        logging.basicConfig(filename=fpath,
+                        format=format,
                         level=level)
         
-        log = logging.getLogger(__name__)
+        #Also set log level in loger used by elastic search.
+        tracer = logging.getLogger('elasticsearch.trace')
+        tracer.setLevel(level)
+        tracer.addHandler(logging.FileHandler(fpath))
         
+        log = logging.getLogger(__name__)         
+              
+              
         return log
-        
-        
- 
-    
+       
     def process_file(self, filename):
         """
         Instantiate a handler for a file and extract metadata.
@@ -313,9 +311,7 @@ class Extract(object):
                          end.isoformat())
         self.logger.info("Start: %s, End: %s, Total: %s",
                          start.isoformat(), end.isoformat(), end - start)
-       
-       
-       
+            
     def index_properties_seq(self, body, id):
         """
         Index the file in Elasticsearch.
@@ -345,9 +341,9 @@ class Extract(object):
         """
                 
         # Log beginning of processing
-        start = datetime.datetime.now()
-        self.logger.info("Metadata extraction started at: %s",
-                         start.isoformat())
+        
+        #self.logger.info("Metadata extraction started at: %s",
+        #                 start.isoformat())
 
 
         # Create index if necessary
@@ -372,20 +368,19 @@ class Extract(object):
             for f in self.file_list:
                 file_path = f
                 
-                self.logger.info("Metadata extraction started for file %s", file_path)
-
+                #self.logger.info("Metadata extraction started for file %s", file_path)
+                start = datetime.datetime.now()
+                
                 doc = self.process_file_seq(file_path, level)    
                 
+                end = datetime.datetime.now()
+                self.logger.info( "Metadata extraction for " + "\"" + os.path.basename(file_path) + "\"" + " in " +  "\""+ os.path.dirname(file_path)+ "\"" 
+                          + " at level " + "\"" + level + "\"" + " took scan time: %s ms" , end - start)
+            
+                                
                 es_query = json.dumps(doc)
                 id = hashlib.sha1(file_path).hexdigest()      
                 
                 self.index_properties_seq(es_query, id)             
                 
-                    
-        # Log end of processing
-        end = datetime.datetime.now()
-        self.logger.info("Metadata extraction completed at: %s",
-                         end.isoformat())
-        self.logger.info("Start: %s, End: %s, Total: %s",
-                         start.isoformat(), end.isoformat(), end - start)
-
+               

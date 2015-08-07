@@ -1,14 +1,13 @@
 import logging
 import os
+import ntpath
 
 class GENERIC:
     """
     Simple class for returning basic information about a file.
     """
           
-    def __init__(self, header_path, path=None):
-        self.path = path
-        self.id = 1
+    def __init__(self):      
         self.doc={}
         
             
@@ -20,13 +19,18 @@ class GENERIC:
         if file_path is None :
             return
         
-        self.doc["directory"] = file_path
-        self.doc["format"] = "file"
+        
+        
+        self.doc["directory"] = os.path.dirname(file_path)
+        self.doc["format"] = "data file"
         self.doc["md5"] = ""
-        self.doc["name"] = file_path
+        self.doc["name"] = os.path.basename(file_path) #ntpath.basename(file_path)
+        
         self.size = os.path.getsize(file_path)
-        self.doc["size"] = self.size
-        self.doc["type"] = "file type"
+        self.size_h = self.size/(1024*1024.0)
+        self.doc["size"] = self.size_h
+        
+        self.doc["type"] = ("simlink" if os.path.islink(file_path) else "file") 
          
          
                 

@@ -40,9 +40,7 @@ from operator import or_
 
 import glob
 import logging
-import logging.handlers
-
-   
+import logging.handlers   
 
 
 def sd_args_validity_ckeck(args_dict):
@@ -62,8 +60,8 @@ def sd_args_validity_ckeck(args_dict):
     start_number = args_dict.get("start")
     if start_number:
         start_number = int(args_dict.get("start"))
-     #TODO : Add more cases here...    
-
+       
+    #TODO : Add more cases here...    
 
 def sd_find_dataset(file, dataset_id):
     """
@@ -100,10 +98,8 @@ def sd_scan_and_store_to_db(conf_args):
     # Extracts metadata and stores then in elastic search.
     search_level = conf_args.get("level")
     if dataset_ids_file_path and dataset_id and search_level :
-        extract = Extract(config, path, "1")
-        extract.run_seq(search_level);
-    
-    
+        extract = Extract(config, path, "seq")
+        extract.run_seq(search_level);    
     
 def main():
     
