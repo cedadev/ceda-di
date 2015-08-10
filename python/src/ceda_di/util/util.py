@@ -4,6 +4,7 @@ Module containing useful functions for the command-line interfaces.
 
 import os
 import sys
+import csv
 
 import simplejson as json
 
@@ -62,3 +63,27 @@ def get_settings(conf_path, args):
     defaults.update(args)
 
     return defaults
+
+
+def build_file_list(path, followlinks=None):
+    """
+    :Return Directory 
+    :return: A list of file paths
+    """            
+    file_list = []
+    for root, _, files in os.walk(path, ("followlinks=false" if followlinks else "followlinks=True")):
+        for each_file in files:
+            file_list.append(os.path.join(root, each_file))
+
+    return file_list
+
+def write_list_to_file(list, file):
+    f = open(file, 'w')
+    
+    for item in list:
+        f.writelines(item)
+        f.write("\n")
+    
+    f.close()
+
+

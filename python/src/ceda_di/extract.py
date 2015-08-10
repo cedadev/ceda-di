@@ -15,6 +15,7 @@ import requests
 import json
 import hashlib
 import socket
+import ceda_di.util.util as util
 
 ########
 from elasticsearch.exceptions import TransportError
@@ -126,13 +127,13 @@ class Extract(object):
         Return file list
         :return: A list of file paths
         """            
-        file_list = []
-        for root, _, files in os.walk((path if path else self.conf("input-path")) , ("followlinks=false" if path else "followlinks=True")):
-            for each_file in files:
-                file_list.append(os.path.join(root, each_file))
-
-        return file_list
-
+        if path == None :
+            path_l = self.conf("input-path")
+            followlinks = True
+            return util.build_file_list(path_l, followlinks)
+        else:
+            return util.build_file_list(path)    
+        
     def conf(self, conf_opt):
         """
         Return configuration option or raise exception if it doesn't exist.
@@ -334,18 +335,12 @@ class Extract(object):
         else :
             return None       
                                     
-    def run_seq(self, search_level):      
+    def run_seq(self, search_level, num_files):      
         
         """
          Extracts metadata information from files in directory and posts them in elastic search.
         """
-                
-        # Log beginning of processing
-        
-        #self.logger.info("Metadata extraction started at: %s",
-        #                 start.isoformat())
-
-
+              
         # Create index if necessary
         es_factory = ElasticsearchClientFactory()
         self.es = es_factory.get_client(self.configuration)
@@ -361,6 +356,7 @@ class Extract(object):
          
         
         doc = {}
+        count = 0
         level = self.configuration['level']
         
         if len(self.file_list) > 0:
@@ -374,13 +370,18 @@ class Extract(object):
                 doc = self.process_file_seq(file_path, level)    
                 
                 end = datetime.datetime.now()
-                self.logger.info( "Metadata extraction for " + "\"" + os.path.basename(file_path) + "\"" + " in " +  "\""+ os.path.dirname(file_path)+ "\"" 
-                          + " at level " + "\"" + level + "\"" + " took scan time: %s ms" , end - start)
+                
+                self.logger.info( os.path.basename(file_path) + "|" + os.path.dirname(file_path)+ "|" 
+                          + level + "|" + "%sms" , end - start)
             
                                 
                 es_query = json.dumps(doc)
                 id = hashlib.sha1(file_path).hexdigest()      
                 
                 self.index_properties_seq(es_query, id)             
+                
+                count = count +1
+                if count > num_files :
+                    break
                 
                

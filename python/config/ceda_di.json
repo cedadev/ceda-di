@@ -43,7 +43,10 @@
 
     "_option": "log-level: Sets teh logging level",
     "log-level": "debug",
-        
+    
+    "_option": "num-files: Maximum numbers of fiels to scan.",
+    "num-files": 1000,
+                
     "_option": "logging: options for the 'logging' module",
     "_ref": "(see: https://docs.python.org/2/library/logging.html)",
     "logging": {
