@@ -78,7 +78,7 @@ def sd_find_dataset(file, dataset_id):
     
     return vars[dataset_id]        
 
-def sd_scan_and_store_to_db(conf):
+def sd_scan_dir_and_store_to_db(conf):
     
     """
     Reads files from the filesystem and outputs metadata to database.
@@ -96,7 +96,7 @@ def sd_scan_and_store_to_db(conf):
         extract = Extract(conf, path, "seq")
         extract.run_seq(search_level, num_files);
               
-def sd_scan_and_store_to_file(conf_args):
+def sd_scan_dir_and_store_filenames_to_file(conf_args):
     """
     Reads files from filesystem and stores their filenames to a file.
     """ 
@@ -159,9 +159,9 @@ def main():
     config_file = sd_set_program_op_status_and_defaults(conf_args)
     
     if search_dir_and_store_to_file :
-        sd_scan_and_store_to_file(config_file)
+        sd_scan_dir_and_store_filenames_to_file(config_file)
     elif  search_dir_and_store_to_database :
-         sd_scan_and_store_to_db(config_file)     
+        sd_scan_dir_and_store_to_db(config_file)     
                
         
 if __name__ == '__main__':
