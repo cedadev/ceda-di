@@ -5,11 +5,11 @@ Usage:
   scan_dataset.py -h | --help
   scan_dataset.py --version
   scan_dataset.py (-f <filename> | --filename <filename>) (-d <dataset_id> | --dataset <dataset_id> ) 
-                  (-l <level> | --level <level>) 
-                  [-m <location> | --make-list <location>]  
+                  (-l <level> | --level <level>) [-c <path_to_config_dir> | --config <path_to_config_dir>]
+  scan_dataset.py [ -f <filename> | --filename <filename> -d <dataset_id> | --dataset <dataset_id> -m <location> | --make-list <location>]  
                   [-c <path_to_config_dir> | --config <path_to_config_dir>] 
-                  [-n <n_files> | --num-files <n_files>] 
-                  [-s <start_number> | --start <start_number>]
+  scan_dataset.py [ (-f <filename> | --filename <filename>) (-n <n_files> | --num-files <n_files>) (-s <start_number> | --start <start_number>)
+                   (-l <level> | --level <level>) ] [-c <path_to_config_dir> | --config <path_to_config_dir>] 
   
 Options:
   -h --help                           Show this screen.
@@ -43,10 +43,11 @@ import logging
 import logging.handlers   
 
 
-search_dir_and_store_to_file = None 
-search_dir_and_store_to_database = None 
+search_dir_and_store_names_to_file = None 
+search_dir_and_store_metadata_to_db = None 
+read_file_paths_and_store_metadata_to_db = None
 
-def sd_args_validity_ckeck(args_dict):
+def sd_ckeck_args_validity(args_dict):
     """
     checks the validity of command line arguments
     :param dictionary containing ags.
@@ -78,7 +79,7 @@ def sd_find_dataset(file, dataset_id):
     
     return vars[dataset_id]        
 
-def sd_scan_dir_and_store_to_db(conf):
+def sd_scan_dir_and_store_metadata_to_db(conf):
     
     """
     Reads files from the filesystem and outputs metadata to database.
@@ -87,14 +88,14 @@ def sd_scan_dir_and_store_to_db(conf):
     # Finds the directory to be scanned 
     dataset_ids_file_path = conf.get("filename")
     dataset_id = conf.get("dataset")
-    path = sd_find_dataset(dataset_ids_file_path, dataset_id) #derectory where the files to be searched are.
-    num_files = conf.get("num-files")
+    path_to_files = sd_find_dataset(dataset_ids_file_path, dataset_id) #derectory where the files to be searched are.
+    search_level = conf.get("level")
     
     # Extracts metadata and stores then in elastic search.
-    search_level = conf.get("level")
+    
     if dataset_ids_file_path and dataset_id and search_level :
-        extract = Extract(conf, path, "seq")
-        extract.run_seq(search_level, num_files);
+        extract = Extract(conf, path_to_files, "seq")
+        extract.run_seq(search_level);
               
 def sd_scan_dir_and_store_filenames_to_file(conf_args):
     """
@@ -105,15 +106,39 @@ def sd_scan_dir_and_store_filenames_to_file(conf_args):
     dataset_id = conf_args.get("dataset")
     path_to_files = sd_find_dataset(dataset_ids_file_path, dataset_id) #derectory where the files to be searched are.
     file_to_store_filenames = conf_args.get("make-list")
-    list = util.build_file_list(path_to_files)
-    util.write_list_to_file(list, file_to_store_filenames)         
+    file_list = util.build_file_list(path_to_files)
+    util.write_list_to_file(file_list, file_to_store_filenames)         
                 
+        
+def sd_read_file_paths_and_store_metadata_to_db(config_file) :
+    """
+    Reads file paths form a given file extracts metadata and posts results to elastic search.  
+    """
+            
+    file_containing_paths = config_file.get("filename")
+    start_file = config_file.get("start")
+    num_of_files = config_file.get("num-files")
+    level = config_file.get("level")
+    
+    with open(file_containing_paths) as f:
+        content = f.readlines()
+        
+    end_file = int(start_file) + int(num_of_files)
+    
+    file_list = content[int(start_file):end_file] 
+           
+          
+    extract = Extract(config_file, file_containing_paths, "seq", file_list)
+    extract.run_seq(level);   
+    
+      
         
 def sd_set_program_op_status_and_defaults(conf_args):
     
-    global search_dir_and_store_to_file
-    global search_dir_and_store_to_database
-    
+    global search_dir_and_store_names_to_file 
+    global search_dir_and_store_metadata_to_db 
+    global read_file_paths_and_store_metadata_to_db
+   
     
     # Searches for the configuration file.
     if 'config' not in conf_args or not conf_args["config"]:
@@ -127,9 +152,13 @@ def sd_set_program_op_status_and_defaults(conf_args):
     
        
     if ("make-list" in conf_args) and ("dataset" in conf_args) and  ("filename" in conf_args) :
-        search_dir_and_store_to_file = True
+        search_dir_and_store_names_to_file = True
     elif  ("dataset" in conf_args) and  ("filename" in conf_args) and ("level" in conf_args) :
-        search_dir_and_store_to_database = True 
+        search_dir_and_store_metadata_to_db = True 
+    elif  ("filename" in conf_args) and ("start" in conf_args) and \
+          ("num-files" in conf_args) and ("level" in conf_args)  :     
+        read_file_paths_and_store_metadata_to_db = True        
+    
     
     return config 
     
@@ -145,24 +174,31 @@ def main():
         Also handle other options.
     """   
      
+    #Get command line arguments. 
     conf_args = util.sanitise_args(docopt(__doc__, version=__version__))        
-         
+    
+    """     
+    #Check validity     
     try: 
-        sd_args_validity_ckeck(conf_args)
+        sd_ckeck_args_validity(conf_args)
     except ValueError as verr:
-        log.error("Error in configuration.")
+        print "Error in configuration."
         return  
     except Exception as ex:
-        log.error("Error in configuration")
+        print "Error in configuration"
         return 
+    """
     
+    #Insert defaults
     config_file = sd_set_program_op_status_and_defaults(conf_args)
     
-    if search_dir_and_store_to_file :
+    #Manage the options given. 
+    if search_dir_and_store_names_to_file :
         sd_scan_dir_and_store_filenames_to_file(config_file)
-    elif  search_dir_and_store_to_database :
-        sd_scan_dir_and_store_to_db(config_file)     
-               
+    elif  search_dir_and_store_metadata_to_db :
+        sd_scan_dir_and_store_metadata_to_db(config_file)     
+    elif read_file_paths_and_store_metadata_to_db :
+        sd_read_file_paths_and_store_metadata_to_db(config_file)           
         
 if __name__ == '__main__':
     main()

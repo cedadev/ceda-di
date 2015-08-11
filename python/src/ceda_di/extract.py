@@ -97,14 +97,18 @@ class Extract(object):
     File crawler and metadata extractor class.
     Part of core functionality of ceda_di.
     """
-    def __init__(self, conf, path=None, seq=None):
+    def __init__(self, conf, path=None, seq=None, file_list=None):
         self.configuration = conf
         
         if seq is not None :
             try:            
                 self.logger = self.prepare_logging_seq()
                 self.handler_factory = HandlerFactory(self.conf("handlers"))
-                self.file_list = self._build_file_list(path)
+                if file_list is None :
+                    self.file_list = self._build_file_list(path)
+                else :
+                    self.file_list = file_list  
+                      
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
         
@@ -335,7 +339,7 @@ class Extract(object):
         else :
             return None       
                                     
-    def run_seq(self, search_level, num_files):      
+    def run_seq(self, search_level):      
         
         """
          Extracts metadata information from files in directory and posts them in elastic search.
@@ -355,14 +359,13 @@ class Extract(object):
  
          
         
-        doc = {}
-        count = 0
+        doc = {}       
         level = self.configuration['level']
         
         if len(self.file_list) > 0:
             
             for f in self.file_list:
-                file_path = f
+                file_path = f.rstrip()
                 
                 #self.logger.info("Metadata extraction started for file %s", file_path)
                 start = datetime.datetime.now()
@@ -378,10 +381,8 @@ class Extract(object):
                 es_query = json.dumps(doc)
                 id = hashlib.sha1(file_path).hexdigest()      
                 
-                self.index_properties_seq(es_query, id)             
+                self.index_properties_seq(es_query, id)   
                 
-                count = count +1
-                if count > num_files :
-                    break
+               
                 
                
