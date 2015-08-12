@@ -92,7 +92,7 @@ def scan_dir_and_store_metadata_to_db(conf):
     # Finds the directory to be scanned 
     dataset_ids_file_path = conf.get("filename")
     dataset_id = conf.get("dataset")
-    path_to_files = sd_find_dataset(dataset_ids_file_path, dataset_id) #derectory where the files to be searched are.
+    path_to_files = find_dataset(dataset_ids_file_path, dataset_id) #derectory where the files to be searched are.
     search_level = conf.get("level")
     
     # Extracts metadata and stores then in elastic search.
@@ -111,7 +111,7 @@ def scan_dir_and_store_filenames_to_file(conf_args):
         
     dataset_ids_file_path = conf_args.get("filename")
     dataset_id = conf_args.get("dataset")
-    path_to_files = sd_find_dataset(dataset_ids_file_path, dataset_id) #derectory where the files to be searched are.
+    path_to_files = find_dataset(dataset_ids_file_path, dataset_id) #derectory where the files to be searched are.
     file_to_store_filenames = conf_args.get("make-list")
     file_list = util.build_file_list(path_to_files)
     util.write_list_to_file(file_list, file_to_store_filenames)         
@@ -156,9 +156,9 @@ def read_file_paths_and_store_metadata_to_db(config_file) :
         
 def set_program_op_status_and_defaults(conf_args):
     
-    global search_dir_and_store_names_to_file 
-    global search_dir_and_store_metadata_to_db 
-    global read_file_paths_and_store_metadata_to_db
+    global search_dir_and_store_names_to_file_p
+    global search_dir_and_store_metadata_to_db_p 
+    global read_file_paths_and_store_metadata_to_db_p
    
     
     # Searches for the configuration file.
@@ -173,12 +173,12 @@ def set_program_op_status_and_defaults(conf_args):
     
        
     if ("make-list" in conf_args) and ("dataset" in conf_args) and  ("filename" in conf_args) :
-        search_dir_and_store_names_to_file = True
+        search_dir_and_store_names_to_file_p = True
     elif  ("dataset" in conf_args) and  ("filename" in conf_args) and ("level" in conf_args) :
-        search_dir_and_store_metadata_to_db = True 
+        search_dir_and_store_metadata_to_db_p = True 
     elif  ("filename" in conf_args) and ("start" in conf_args) and \
           ("num-files" in conf_args) and ("level" in conf_args)  :     
-        read_file_paths_and_store_metadata_to_db = True        
+        read_file_paths_and_store_metadata_to_db_p = True        
     
     
     return config 
@@ -199,15 +199,15 @@ def main():
     conf_args = util.sanitise_args(docopt(__doc__, version=__version__))        
        
     #Insert defaults
-    config_file = sd_set_program_op_status_and_defaults(conf_args)
+    config_file = set_program_op_status_and_defaults(conf_args)
     
     #Manage the options given. 
-    if search_dir_and_store_names_to_file :
-        sd_scan_dir_and_store_filenames_to_file(config_file)
-    elif  search_dir_and_store_metadata_to_db :
-        sd_scan_dir_and_store_metadata_to_db(config_file)     
+    if search_dir_and_store_names_to_file_p :
+        scan_dir_and_store_filenames_to_file(config_file)
+    elif  search_dir_and_store_metadata_to_db_p :
+        scan_dir_and_store_metadata_to_db(config_file)     
     elif read_file_paths_and_store_metadata_to_db :
-        sd_read_file_paths_and_store_metadata_to_db(config_file)           
+        read_file_paths_and_store_metadata_to_db_p(config_file)           
         
         
 if __name__ == '__main__':
