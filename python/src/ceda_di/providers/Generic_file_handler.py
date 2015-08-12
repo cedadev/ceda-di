@@ -17,7 +17,7 @@ class GENERIC:
         """         
         
         if file_path is None :
-            return
+            return None
         
         if os.path.isfile(file_path):
             

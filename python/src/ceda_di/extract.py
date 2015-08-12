@@ -341,10 +341,14 @@ class Extract(object):
         """
         Index the file in Elasticsearch.
         """
-        self.es.index(index=self.conf('es-index'),
+
+        try:
+            self.es.index(index=self.conf('es-index'),
                       doc_type=self.conf('es-mapping'),
                       body=body,
                       id=id) 
+        except ElasticsearchException :
+            return -1   
             
     def process_file_seq(self, filename, level):
         """
@@ -394,16 +398,23 @@ class Extract(object):
                 
                 if doc is not None :
                     end = datetime.datetime.now()
-                
-                    self.logger.info( os.path.basename(file_path) + "|" + os.path.dirname(file_path)+ "|" 
-                              + level + "|" + str(end - start) + "ms")
-            
-                                
+                                           
                     es_query = json.dumps(doc)
                     id = hashlib.sha1(file_path).hexdigest()      
                 
-                    self.index_properties_seq(es_query, id)   
+                    ret = self.index_properties_seq(es_query, id)
+                    
+                    if ret == -1 :
+                        self.logger.info( os.path.basename(file_path) + "|" + os.path.dirname(file_path)+ "|" 
+                              + str(ret) + "|" + str(end - start) + "ms")
+                    else:
+                        self.logger.info( os.path.basename(file_path) + "|" + os.path.dirname(file_path)+ "|" 
+                              + level + "|" + str(end - start) + "ms")
+                    
+                       
                 else :
+                    self.logger.info( os.path.basename(file_path) + "|" + os.path.dirname(file_path)+ "|" 
+                              + "0" + "|" + str(end - start) + "ms")
                     continue
                
                 
