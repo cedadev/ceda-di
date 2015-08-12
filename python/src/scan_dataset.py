@@ -68,6 +68,7 @@ def ckeck_args_validity(args_dict):
        
     #TODO : Add more cases here...    
 
+
 def find_dataset(file, dataset_id):
     """
      Returns the path of the given dataset id. 
@@ -79,6 +80,7 @@ def find_dataset(file, dataset_id):
             vars[name.strip()] = var.strip()
     
     return vars[dataset_id]        
+
 
 def scan_dir_and_store_metadata_to_db(conf):
     
@@ -98,6 +100,7 @@ def scan_dir_and_store_metadata_to_db(conf):
     if dataset_ids_file_path and dataset_id and search_level :
         extract = Extract(conf, path_to_files, "seq")
         extract.run_seq(search_level);
+      
               
 def scan_dir_and_store_filenames_to_file(conf_args):
     
@@ -180,6 +183,7 @@ def set_program_op_status_and_defaults(conf_args):
     
     return config 
     
+    
 def main():
         
     """
@@ -204,6 +208,7 @@ def main():
         sd_scan_dir_and_store_metadata_to_db(config_file)     
     elif read_file_paths_and_store_metadata_to_db :
         sd_read_file_paths_and_store_metadata_to_db(config_file)           
+        
         
 if __name__ == '__main__':
     main()
