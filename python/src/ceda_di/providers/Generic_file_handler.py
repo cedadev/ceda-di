@@ -29,9 +29,14 @@ class GENERIC:
         self.doc["name"] = filename 
         self.doc["autocomplete"] = filename
         
-        self.size = os.path.getsize(file_path)
-        self.size_h = self.size/(1024*1024.0)
-        self.doc["size"] = self.size_h
+        if not filename.startswith('.'):
+            self.size = os.path.getsize(file_path)
+            self.size_h = self.size/(1024*1024.0)
+            self.doc["size"] = self.size_h
+        else
+            self.doc["size"] = 0
+        
+        
         
         self.doc["type"] = ("simlink" if os.path.islink(file_path) else "file") 
          

@@ -43,9 +43,9 @@ import logging
 import logging.handlers   
 
 
-search_dir_and_store_names_to_file = None 
-search_dir_and_store_metadata_to_db = None 
-read_file_paths_and_store_metadata_to_db = None
+search_dir_and_store_names_to_file_p = None 
+search_dir_and_store_metadata_to_db_p = None 
+read_file_paths_and_store_metadata_to_db_p = None
 
 def ckeck_args_validity(args_dict):
     
@@ -206,8 +206,8 @@ def main():
         scan_dir_and_store_filenames_to_file(config_file)
     elif  search_dir_and_store_metadata_to_db_p :
         scan_dir_and_store_metadata_to_db(config_file)     
-    elif read_file_paths_and_store_metadata_to_db :
-        read_file_paths_and_store_metadata_to_db_p(config_file)           
+    elif read_file_paths_and_store_metadata_to_db_p :
+        read_file_paths_and_store_metadata_to_db(config_file)           
         
         
 if __name__ == '__main__':
