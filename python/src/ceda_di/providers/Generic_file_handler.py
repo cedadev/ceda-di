@@ -19,30 +19,31 @@ class GENERIC:
         if file_path is None :
             return
         
+        if os.path.isfile(file_path):
+            
+            self.doc["directory"] = os.path.dirname(file_path)
+            self.doc["format"] = "data file"
+            self.doc["md5"] = ""
+        
+            filename = os.path.basename(file_path) #ntpath.basename(file_path)
+            self.doc["name"] = filename 
+            self.doc["autocomplete"] = filename
+        
+            if not filename.startswith('.'):
+                self.size = os.path.getsize(file_path)
+                self.size_h = self.size/(1024*1024.0)
+                self.doc["size"] = self.size_h
+            else:
+                self.doc["size"] = 0
         
         
-        self.doc["directory"] = os.path.dirname(file_path)
-        self.doc["format"] = "data file"
-        self.doc["md5"] = ""
         
-        filename = os.path.basename(file_path) #ntpath.basename(file_path)
-        self.doc["name"] = filename 
-        self.doc["autocomplete"] = filename
-        
-        if not filename.startswith('.'):
-            self.size = os.path.getsize(file_path)
-            self.size_h = self.size/(1024*1024.0)
-            self.doc["size"] = self.size_h
-        else
-            self.doc["size"] = 0
-        
-        
-        
-        self.doc["type"] = ("simlink" if os.path.islink(file_path) else "file") 
+            self.doc["type"] = ("simlink" if os.path.islink(file_path) else "file") 
          
-         
-                
-        return self.doc
+            return self.doc
+        
+        else :
+            return None
     
     def __enter__(self):
         return self

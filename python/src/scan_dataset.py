@@ -194,7 +194,8 @@ def main():
         Post data to elastic search. 
         Also handle other options.
     """   
-     
+    
+    print "Script started.\n." 
     #Get command line arguments. 
     conf_args = util.sanitise_args(docopt(__doc__, version=__version__))        
        
@@ -209,6 +210,7 @@ def main():
     elif read_file_paths_and_store_metadata_to_db_p :
         read_file_paths_and_store_metadata_to_db(config_file)           
         
+    print "Script ended.\n"
         
 if __name__ == '__main__':
     main()

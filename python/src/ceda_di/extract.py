@@ -392,17 +392,19 @@ class Extract(object):
                 
                 doc = self.process_file_seq(file_path, level)    
                 
-                end = datetime.datetime.now()
+                if doc is not None :
+                    end = datetime.datetime.now()
                 
-                self.logger.info( os.path.basename(file_path) + "|" + os.path.dirname(file_path)+ "|" 
-                          + level + "|" + "%sms" , end - start)
+                    self.logger.info( os.path.basename(file_path) + "|" + os.path.dirname(file_path)+ "|" 
+                              + level + "|" + str(end - start) + "ms")
             
                                 
-                es_query = json.dumps(doc)
-                id = hashlib.sha1(file_path).hexdigest()      
+                    es_query = json.dumps(doc)
+                    id = hashlib.sha1(file_path).hexdigest()      
                 
-                self.index_properties_seq(es_query, id)   
-                
+                    self.index_properties_seq(es_query, id)   
+                else :
+                    continue
                
                 
                
