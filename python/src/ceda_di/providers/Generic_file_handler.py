@@ -24,7 +24,10 @@ class GENERIC:
         self.doc["directory"] = os.path.dirname(file_path)
         self.doc["format"] = "data file"
         self.doc["md5"] = ""
-        self.doc["name"] = os.path.basename(file_path) #ntpath.basename(file_path)
+        
+        filename = os.path.basename(file_path) #ntpath.basename(file_path)
+        self.doc["name"] = filename 
+        self.doc["autocomplete"] = filename
         
         self.size = os.path.getsize(file_path)
         self.size_h = self.size/(1024*1024.0)

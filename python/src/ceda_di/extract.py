@@ -197,9 +197,19 @@ class Extract(object):
                      socket.gethostname() +
                      ".log")
         
-        fpath = os.path.join(self.conf("output-path"),
-                             self.conf("log-path"),
+        log_fname_es = (self.conf("es-index") + "_" +
+                     datetime.datetime.now().isoformat() + "_" +
+                     socket.gethostname() + "_es" +
+                     ".log")
+        
+        
+        
+        fpath = os.path.join(os.getcwd(),
                              log_fname)
+        
+        fpath_es = os.path.join(os.getcwd(),
+                             log_fname_es)
+        
         
         LEVELS = { 'debug'   : logging.DEBUG,
                    'info'    : logging.INFO,
@@ -210,18 +220,28 @@ class Extract(object):
 
         conf_log_level = self.conf("log-level")
         
+        
         format = self.conf("logging")["format"]
-        
         level = LEVELS.get(conf_log_level, logging.NOTSET)
-        
         logging.basicConfig(filename=fpath,
                         format=format,
                         level=level)
         
-        #Also set log level in loger used by elastic search.
+        """
+        #Also set log level in loger used by elastic search.       
         tracer = logging.getLogger('elasticsearch.trace')
         tracer.setLevel(level)
-        tracer.addHandler(logging.FileHandler(fpath))
+        tracer.addHandler(logging.FileHandler(fpath_es))
+        """
+              
+        es_log = logging.getLogger("elasticsearch")
+        es_log.setLevel(logging.CRITICAL)
+        #es_log.addHandler(logging.FileHandler(fpath_es))
+        
+        urllib3_log = logging.getLogger("urllib3")
+        urllib3_log.setLevel(logging.CRITICAL)
+        #urllib3_log.addHandler(logging.FileHandler(fpath_es))
+        
         
         log = logging.getLogger(__name__)         
               
@@ -365,7 +385,7 @@ class Extract(object):
         if len(self.file_list) > 0:
             
             for f in self.file_list:
-                file_path = f.rstrip()
+                file_path = f
                 
                 #self.logger.info("Metadata extraction started for file %s", file_path)
                 start = datetime.datetime.now()
