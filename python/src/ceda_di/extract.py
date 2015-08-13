@@ -186,7 +186,96 @@ class Extract(object):
 
         log = logging.getLogger(__name__)        
         return log
-    
+           
+    def process_file(self, filename):
+        """
+        Instantiate a handler for a file and extract metadata.
+        """
+        handler = self.handler_factory.get_handler(filename)
+        if handler is not None:
+            with handler as hand:
+                if self.conf('send-to-index'):
+                    self.index_properties(filename, hand)
+                if not self.conf('no-create-files'):
+                    self.write_properties(filename, hand)
+
+    def index_properties(self, filename, handler):
+        """
+        Index the file in Elasticsearch
+        """
+        props = handler.get_properties()
+        if props is not None:
+            self.es.index(index=self.conf('es-index'),
+                          doc_type=self.conf('es-mapping'),
+                          body=str(props),
+                          id=props.properties["_id"])
+
+    def write_properties(self, fname, _geospatial_obj):
+        """
+        Write module properties to an output file.
+        """
+        # Construct JSON path
+        fname = os.path.basename(fname)
+        json_path = os.path.join(self.conf("output-path"), self.conf("json-path"))
+        out_fname = "%s/%s.json" % (json_path, os.path.splitext(fname)[0])
+
+        props = _geospatial_obj.get_properties()
+        if props is not None:
+            with open(out_fname, 'w') as j:
+                j.write(str(props))
+                
+    def run(self):
+        """
+        Run main metadata extraction suite.
+        """
+        # Log beginning of processing
+        start = datetime-bg_flat_0_aaaa.datetime.now()
+        self.logger.info("Metadata extraction started at: %s",
+                         start.isoformat())
+
+        # Create index if necessary
+        if self.conf("send-to-index"):
+            es_factory = ElasticsearchClientFactory()
+            self.es = es_factory.get_client(self.configuration)
+
+            try:
+                index.create_index(self.configuration, self.es)
+            except TransportError as te:
+                if te[0] == 400:
+                    pass
+                else:
+                    raise TransportError(te)
+
+        if len(self.file_list) > 0:
+            # Process files
+            pool = []
+
+            for f in self.file_list:
+                # HDF libraries don't seem to like unicode strings,
+                # which the filenames will be if the configuration paths
+                # loaded from JSON end up in unicode
+                path = f
+                if "raw" not in path:
+                    p = multiprocessing.Process(target=self.process_file,
+                                                args=(path,))
+                    pool.append(p)
+                    p.start()
+
+                while len(pool) >= self.conf("num-cores"):
+                    for p in pool:
+                        if p.exitcode is not None:
+                            pool.remove(p)
+
+            for p in pool:
+                p.join()
+
+        # Log end of processing
+        end = datetime.datetime.now()
+        self.logger.info("Metadata extraction completed at: %s",
+                         end.isoformat())
+        self.logger.info("Start: %s, End: %s, Total: %s",
+                         start.isoformat(), end.isoformat(), end - start)
+        
     def prepare_logging_seq(self):
         """
         Initial logging setup
@@ -233,7 +322,8 @@ class Extract(object):
         tracer.setLevel(level)
         tracer.addHandler(logging.FileHandler(fpath_es))
         """
-              
+          
+        #Enable only logging from within this module.      
         es_log = logging.getLogger("elasticsearch")
         es_log.setLevel(logging.CRITICAL)
         #es_log.addHandler(logging.FileHandler(fpath_es))
@@ -243,99 +333,9 @@ class Extract(object):
         #urllib3_log.addHandler(logging.FileHandler(fpath_es))
         
         
-        log = logging.getLogger(__name__)         
+        log = logging.getLogger(__name__)             
               
-              
-        return log
-       
-    def process_file(self, filename):
-        """
-        Instantiate a handler for a file and extract metadata.
-        """
-        handler = self.handler_factory.get_handler(filename)
-        if handler is not None:
-            with handler as hand:
-                if self.conf('send-to-index'):
-                    self.index_properties(filename, hand)
-                if not self.conf('no-create-files'):
-                    self.write_properties(filename, hand)
-
-    def index_properties(self, filename, handler):
-        """
-        Index the file in Elasticsearch
-        """
-        props = handler.get_properties()
-        if props is not None:
-            self.es.index(index=self.conf('es-index'),
-                          doc_type=self.conf('es-mapping'),
-                          body=str(props),
-                          id=props.properties["_id"])
-
-    def write_properties(self, fname, _geospatial_obj):
-        """
-        Write module properties to an output file.
-        """
-        # Construct JSON path
-        fname = os.path.basename(fname)
-        json_path = os.path.join(self.conf("output-path"), self.conf("json-path"))
-        out_fname = "%s/%s.json" % (json_path, os.path.splitext(fname)[0])
-
-        props = _geospatial_obj.get_properties()
-        if props is not None:
-            with open(out_fname, 'w') as j:
-                j.write(str(props))
-                
-    def run(self):
-        """
-        Run main metadata extraction suite.
-        """
-        # Log beginning of processing
-        start = datetime.datetime.now()
-        self.logger.info("Metadata extraction started at: %s",
-                         start.isoformat())
-
-        # Create index if necessary
-        if self.conf("send-to-index"):
-            es_factory = ElasticsearchClientFactory()
-            self.es = es_factory.get_client(self.configuration)
-
-            try:
-                index.create_index(self.configuration, self.es)
-            except TransportError as te:
-                if te[0] == 400:
-                    pass
-                else:
-                    raise TransportError(te)
-
-        if len(self.file_list) > 0:
-            # Process files
-            pool = []
-
-            for f in self.file_list:
-                # HDF libraries don't seem to like unicode strings,
-                # which the filenames will be if the configuration paths
-                # loaded from JSON end up in unicode
-                path = f
-                if "raw" not in path:
-                    p = multiprocessing.Process(target=self.process_file,
-                                                args=(path,))
-                    pool.append(p)
-                    p.start()
-
-                while len(pool) >= self.conf("num-cores"):
-                    for p in pool:
-                        if p.exitcode is not None:
-                            pool.remove(p)
-
-            for p in pool:
-                p.join()
-
-        # Log end of processing
-        end = datetime.datetime.now()
-        self.logger.info("Metadata extraction completed at: %s",
-                         end.isoformat())
-        self.logger.info("Start: %s, End: %s, Total: %s",
-                         start.isoformat(), end.isoformat(), end - start)
+        return log 
             
     def index_properties_seq(self, body, id):
         """
@@ -347,12 +347,15 @@ class Extract(object):
                       doc_type=self.conf('es-mapping'),
                       body=body,
                       id=id) 
-        except ElasticsearchException :
-            return -1   
+        except :
+            return -1 
+        
+        return 1  
             
     def process_file_seq(self, filename, level):
         """
-         Instantiates a handler for a file and extracts metadata.
+         Instantiates a handler for a file and is using it to 
+         extracts metadata from the file.
         """
         
         handler = self.handler_factory.get_handler_by_level(level)  
@@ -366,7 +369,8 @@ class Extract(object):
     def run_seq(self, search_level):      
         
         """
-         Extracts metadata information from files in directory and posts them in elastic search.
+         Extracts metadata information from files within the file list
+         and posts them in elastic search.
         """
               
         # Create index if necessary
@@ -388,32 +392,29 @@ class Extract(object):
         
         if len(self.file_list) > 0:
             
-            for f in self.file_list:
-                file_path = f
+            for file in self.file_list:
+                #file_path = f
                 
                 #self.logger.info("Metadata extraction started for file %s", file_path)
                 start = datetime.datetime.now()
                 
-                doc = self.process_file_seq(file_path, level)    
+                doc = self.process_file_seq(file, level)    
                 
                 if doc is not None :
-                    end = datetime.datetime.now()
-                                           
+                                                               
                     es_query = json.dumps(doc)
-                    id = hashlib.sha1(file_path).hexdigest()      
+                    id = hashlib.sha1(file).hexdigest()      
                 
                     ret = self.index_properties_seq(es_query, id)
                     
-                    if ret == -1 :
-                        self.logger.info( os.path.basename(file_path) + "|" + os.path.dirname(file_path)+ "|" 
-                              + str(ret) + "|" + str(end - start) + "ms")
-                    else:
-                        self.logger.info( os.path.basename(file_path) + "|" + os.path.dirname(file_path)+ "|" 
-                              + level + "|" + str(end - start) + "ms")
+                    end = datetime.datetime.now()
                     
+                    self.logger.info( os.path.basename(file) + "|" + os.path.dirname(file)+ "|" 
+                              + str(ret) + "|" + str(end - start) + "ms")
                        
                 else :
-                    self.logger.info( os.path.basename(file_path) + "|" + os.path.dirname(file_path)+ "|" 
+                    end = datetime.datetime.now()
+                    self.logger.info( os.path.basename(file) + "|" + os.path.dirname(file)+ "|" 
                               + "0" + "|" + str(end - start) + "ms")
                     continue
                

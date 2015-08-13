@@ -9,18 +9,28 @@ class GENERIC:
           
     def __init__(self):      
         self.doc={}
-        
-            
+                
     def get_properties(self, file_path=None):
         """
-        :returns: A dict containing a summary of the file's data.
+         Scans the given file and returns information about its properties and data.
+        :returns: A dict containing a summary information.
         """         
         
-        if file_path is None :
+        #exclude tmp files.
+        if (file_path is None):
             return None
+                
+        file_exists = True
+        is_simlink = True
+                        
+        #check if file exists  
+        file_exists = os.path.islink(file_path)
+        is_simlink = os.path.islink(file_path)
         
-        if os.path.isfile(file_path):
-            
+        
+        
+        if(file_exists or is_simlink):
+            #if file exists.
             self.doc["directory"] = os.path.dirname(file_path)
             self.doc["format"] = "data file"
             self.doc["md5"] = ""
@@ -29,25 +39,22 @@ class GENERIC:
             self.doc["name"] = filename 
             self.doc["autocomplete"] = filename
         
-            if not filename.startswith('.'):
+        
+            if not is_simlink:
                 self.size = os.path.getsize(file_path)
                 self.size_h = self.size/(1024*1024.0)
                 self.doc["size"] = self.size_h
-            else:
+                self.doc["type"] = "file"              
+            else:                 
                 self.doc["size"] = 0
-        
-        
-        
-            self.doc["type"] = ("simlink" if os.path.islink(file_path) else "file") 
+                self.doc["type"] = "symlink" 
          
             return self.doc
-        
         else :
-            return None
-    
+            return None        
+                
     def __enter__(self):
         return self
-    
-    
+        
     def __exit__(self, *args):
         pass

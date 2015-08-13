@@ -40,7 +40,8 @@ from operator import or_
 
 import glob
 import logging
-import logging.handlers   
+import logging.handlers
+import datetime   
 
 
 search_dir_and_store_names_to_file_p = None 
@@ -71,7 +72,7 @@ def ckeck_args_validity(args_dict):
 
 def find_dataset(file, dataset_id):
     """
-     Returns the path of the given dataset id. 
+     :Returns: The path of the given dataset id. 
     """
     vars = {}
     with open(file) as l_file:
@@ -106,7 +107,7 @@ def scan_dir_and_store_filenames_to_file(conf_args):
     
     """
     Reads files from a specific directory in filesystem 
-    and stores their filenames to a file.
+    and stores their filenames and path to a file.
     """ 
         
     dataset_ids_file_path = conf_args.get("filename")
@@ -120,8 +121,8 @@ def scan_dir_and_store_filenames_to_file(conf_args):
 def read_file_paths_and_store_metadata_to_db(config_file) :
     
     """
-    Reads file paths form a given file,  extracts metadata 
-    and posts results to elastic search.  
+    Reads file paths form a given file, extracts metadata 
+    for each file and posts results to elastic search.  
     """
             
     file_containing_paths = config_file.get("filename")
@@ -155,6 +156,10 @@ def read_file_paths_and_store_metadata_to_db(config_file) :
       
         
 def set_program_op_status_and_defaults(conf_args):
+    
+    """
+    Set global variables that determine the operations to be performed. 
+    """
     
     global search_dir_and_store_names_to_file_p
     global search_dir_and_store_metadata_to_db_p 
@@ -194,8 +199,10 @@ def main():
         Post data to elastic search. 
         Also handle other options.
     """   
+    start = datetime.datetime.now()              
+    print "Script started at:" +str(start) +".\n." 
     
-    print "Script started.\n." 
+    
     #Get command line arguments. 
     conf_args = util.sanitise_args(docopt(__doc__, version=__version__))        
        
@@ -209,8 +216,9 @@ def main():
         scan_dir_and_store_metadata_to_db(config_file)     
     elif read_file_paths_and_store_metadata_to_db_p :
         read_file_paths_and_store_metadata_to_db(config_file)           
-        
-    print "Script ended.\n"
+     
+    end = datetime.datetime.now()    
+    print "Script ended at :" + str(end) + " it ran for :" + str(end - start) + ".\n"
         
 if __name__ == '__main__':
     main()
