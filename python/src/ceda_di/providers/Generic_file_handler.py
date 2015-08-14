@@ -24,10 +24,9 @@ class GENERIC:
         is_simlink = True
                         
         #check if file exists  
-        file_exists = os.path.islink(file_path)
         is_simlink = os.path.islink(file_path)
-        
-        
+        file_exists = os.path.isfile(file_path)
+                
         
         if(file_exists or is_simlink):
             #if file exists.

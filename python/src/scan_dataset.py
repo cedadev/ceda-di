@@ -33,7 +33,7 @@ from docopt import docopt
 
 import ceda_di.util.util as util
 from ceda_di import __version__  # Grab version from package __init__.py
-from ceda_di.extract import Extract
+from ceda_di.extract import Extract_seq
 from ceda_di.index import BulkIndexer
 from ceda_di.search import Searcher
 from operator import or_
@@ -42,11 +42,16 @@ import glob
 import logging
 import logging.handlers
 import datetime   
+from enum import Enum
 
 
-search_dir_and_store_names_to_file_p = None 
-search_dir_and_store_metadata_to_db_p = None 
-read_file_paths_and_store_metadata_to_db_p = None
+
+Script_status = Enum( "Script_status",
+                      "search_dir_and_store_names_to_file \
+                       search_dir_and_store_metadata_to_db \
+                       read_file_paths_and_store_metadata_to_db\
+                      "
+                    )
 
 def ckeck_args_validity(args_dict):
     
@@ -69,90 +74,35 @@ def ckeck_args_validity(args_dict):
        
     #TODO : Add more cases here...    
 
-
-def find_dataset(file, dataset_id):
-    """
-     :Returns: The path of the given dataset id. 
-    """
-    vars = {}
-    with open(file) as l_file:
-        for line in l_file:
-            name, var = line.partition("=")[::2]
-            vars[name.strip()] = var.strip()
-    
-    return vars[dataset_id]        
-
-
 def scan_dir_and_store_metadata_to_db(conf):
     
     """
     Reads files from a specific directory in filesystem 
     and outputs metadata to elastic search database.    
-    """ 
-    
-    # Finds the directory to be scanned 
-    dataset_ids_file_path = conf.get("filename")
-    dataset_id = conf.get("dataset")
-    path_to_files = find_dataset(dataset_ids_file_path, dataset_id) #derectory where the files to be searched are.
-    search_level = conf.get("level")
-    
-    # Extracts metadata and stores then in elastic search.
-    
-    if dataset_ids_file_path and dataset_id and search_level :
-        extract = Extract(conf, path_to_files, "seq")
-        extract.run_seq(search_level);
+    """     
+    extract = Extract_seq(conf)
+    extract.run_seq();
       
               
-def scan_dir_and_store_filenames_to_file(conf_args):
+def scan_dir_and_store_filenames_to_file(conf):
     
     """
     Reads files from a specific directory in filesystem 
     and stores their filenames and path to a file.
     """ 
-        
-    dataset_ids_file_path = conf_args.get("filename")
-    dataset_id = conf_args.get("dataset")
-    path_to_files = find_dataset(dataset_ids_file_path, dataset_id) #derectory where the files to be searched are.
-    file_to_store_filenames = conf_args.get("make-list")
-    file_list = util.build_file_list(path_to_files)
-    util.write_list_to_file(file_list, file_to_store_filenames)         
+    extract = Extract_seq(conf)
+    extract.store_filenames_to_file();         
                 
         
-def read_file_paths_and_store_metadata_to_db(config_file) :
+def read_file_paths_and_store_metadata_to_db(conf) :
     
     """
     Reads file paths form a given file, extracts metadata 
     for each file and posts results to elastic search.  
     """
-            
-    file_containing_paths = config_file.get("filename")
-    start_file = config_file.get("start")
-    num_of_files = config_file.get("num-files")
-    level = config_file.get("level")
-    
-    with open(file_containing_paths) as f:
-        content = f.readlines()
-       
-    list_len = len(content)
-    
-    if int(start_file) < 1 or int(start_file) > list_len :
-        print "please correct start parameter value."
-        return
-            
-    end_file = int(start_file) + int(num_of_files)
-    
-    if end_file > list_len :
-        print "please correct num-files parameter value."
-        return
-   
-    file_list = content[int(start_file):end_file] 
-    
-    new_file_list = []
-    for p in file_list:
-        new_file_list.append(p.rstrip())    
-          
-    extract = Extract(config_file, file_containing_paths, "seq", new_file_list)
-    extract.run_seq(level);      
+                          
+    extract = Extract_seq(conf)
+    extract.run_seq();      
       
         
 def set_program_op_status_and_defaults(conf_args):
@@ -160,12 +110,8 @@ def set_program_op_status_and_defaults(conf_args):
     """
     Set global variables that determine the operations to be performed. 
     """
-    
-    global search_dir_and_store_names_to_file_p
-    global search_dir_and_store_metadata_to_db_p 
-    global read_file_paths_and_store_metadata_to_db_p
-   
-    
+     
+    status_and_defaults = []   
     # Searches for the configuration file.
     if 'config' not in conf_args or not conf_args["config"]:
         direc = os.path.dirname(__file__)
@@ -175,18 +121,18 @@ def set_program_op_status_and_defaults(conf_args):
     #Creates a dictionary with default settings some of them where loaded from th edefaults file.
     config = util.get_settings(conf_args["config"], conf_args)
 
-    
+    status_and_defaults.append(config)
        
     if ("make-list" in conf_args) and ("dataset" in conf_args) and  ("filename" in conf_args) :
-        search_dir_and_store_names_to_file_p = True
+        status_and_defaults.append(Script_status.search_dir_and_store_names_to_file)
     elif  ("dataset" in conf_args) and  ("filename" in conf_args) and ("level" in conf_args) :
-        search_dir_and_store_metadata_to_db_p = True 
+        status_and_defaults.append(Script_status.search_dir_and_store_metadata_to_db)  
     elif  ("filename" in conf_args) and ("start" in conf_args) and \
           ("num-files" in conf_args) and ("level" in conf_args)  :     
-        read_file_paths_and_store_metadata_to_db_p = True        
+        status_and_defaults.append(Script_status.read_file_paths_and_store_metadata_to_db)        
     
     
-    return config 
+    return status_and_defaults 
     
     
 def main():
@@ -198,6 +144,8 @@ def main():
         Extract data
         Post data to elastic search. 
         Also handle other options.
+        Relevant to ticket :
+        http://team.ceda.ac.uk/trac/ceda/ticket/23203
     """   
     start = datetime.datetime.now()              
     print "Script started at:" +str(start) +".\n." 
@@ -207,14 +155,17 @@ def main():
     conf_args = util.sanitise_args(docopt(__doc__, version=__version__))        
        
     #Insert defaults
-    config_file = set_program_op_status_and_defaults(conf_args)
+    status_and_defaults = set_program_op_status_and_defaults(conf_args)      
+    
+    config_file = status_and_defaults[0] 
+    status = status_and_defaults[1]
     
     #Manage the options given. 
-    if search_dir_and_store_names_to_file_p :
+    if status == Script_status.search_dir_and_store_names_to_file :
         scan_dir_and_store_filenames_to_file(config_file)
-    elif  search_dir_and_store_metadata_to_db_p :
+    elif status == Script_status.search_dir_and_store_metadata_to_db :
         scan_dir_and_store_metadata_to_db(config_file)     
-    elif read_file_paths_and_store_metadata_to_db_p :
+    elif status == Script_status.read_file_paths_and_store_metadata_to_db :
         read_file_paths_and_store_metadata_to_db(config_file)           
      
     end = datetime.datetime.now()    

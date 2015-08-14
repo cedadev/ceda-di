@@ -97,47 +97,31 @@ class Extract(object):
     File crawler and metadata extractor class.
     Part of core functionality of ceda_di.
     """
-    def __init__(self, conf, path=None, seq=None, file_list=None):
-        self.configuration = conf
+    def __init__(self, conf, path=None):
+        if conf is None:
+            return
         
-        if seq is not None :
-            try:            
-                self.logger = self.prepare_logging_seq()
-                self.handler_factory = HandlerFactory(self.conf("handlers"))
-                if file_list is None :
-                    self.file_list = self._build_file_list(path)
-                else :
-                    self.file_list = file_list  
-                      
-            except KeyError as k:
-                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
-        
-        else : 
-        
-            try: 
-                self.make_dirs(conf)
-                self.logger = self.prepare_logging()
-                self.handler_factory = HandlerFactory(self.conf("handlers"))
+        try: 
+            self.make_dirs(conf)
+            self.logger = self.prepare_logging()
+            self.handler_factory = HandlerFactory(self.conf("handlers"))
             
-                if path is None:
-                    self.file_list = self._build_file_list()
-                else:
-                    self.file_list = path
-            except KeyError as k:
-                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
+            if path is None:
+                self.file_list = self._build_file_list()
+            else:
+                self.file_list = path
+        except KeyError as k:
+            sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
 
-    def _build_file_list(self, path=None):
+    def _build_file_list(self):
         """
         Return file list
         :return: A list of file paths
         """            
-        if path == None :
-            path_l = self.conf("input-path")
-            followlinks = True
-            return util.build_file_list(path_l, followlinks)
-        else:
-            return util.build_file_list(path)    
-        
+        path_l = self.conf("input-path")
+        followlinks = True
+        return util.build_file_list(path_l, followlinks)
+          
     def conf(self, conf_opt):
         """
         Return configuration option or raise exception if it doesn't exist.
@@ -275,7 +259,47 @@ class Extract(object):
                          end.isoformat())
         self.logger.info("Start: %s, End: %s, Total: %s",
                          start.isoformat(), end.isoformat(), end - start)
+    
+            
+  
+#kltsa 14/08/2015 issue #23203.    
+class Extract_seq(Extract):    
         
+    """
+    File crawler and metadata extractor class.
+    Part of core functionality of ceda_di.
+    """
+    def __init__(self, conf, path=None):
+        
+        Extract.__init__(self, None, path)        
+        
+        self.configuration = conf
+            
+        if ("dataset" in self.configuration)  and ("filename" in self.configuration) \
+            and ("level" in self.configuration):
+            try:            
+                self.logger = self.prepare_logging_seq()
+                self.handler_factory = HandlerFactory(self.conf("handlers"))
+                self.file_list = self._build_file_list_from_path()
+            except KeyError as k:
+                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))        
+            
+        elif ("make-list" in self.configuration) :
+            try:            
+                self.logger = self.prepare_logging_seq()                         
+            except KeyError as k:
+                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
+        
+        elif ("start" in self.configuration ) and ("num-files" in self.configuration) :     
+            try:            
+                self.logger = self.prepare_logging_seq()
+                self.handler_factory = HandlerFactory(self.conf("handlers"))
+                self.file_list = self._build_list_from_file()
+            
+            except KeyError as k:
+                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
+    
+                         
     def prepare_logging_seq(self):
         """
         Initial logging setup
@@ -336,6 +360,51 @@ class Extract(object):
         log = logging.getLogger(__name__)             
               
         return log 
+   
+    
+    def  _build_file_list_from_path(self):
+         # Finds the directory to be scanned 
+         dataset_ids_file = self.conf("filename")
+         dataset_id = self.conf("dataset")
+         #derectory where the files to be searched are.
+         path_to_files = util.find_dataset(dataset_ids_file, dataset_id) 
+         
+         return util.build_file_list(path_to_files)
+                
+        
+    def _build_list_from_file(self):
+        
+        """
+        Reads file paths form a given file, extracts metadata 
+        for each file and posts results to elastic search.  
+        """
+            
+        file_containing_paths = self.conf("filename")
+        start_file = self.conf("start")
+        num_of_files = self.conf("num-files")
+        
+        with open(file_containing_paths) as f:
+            content = f.readlines()
+       
+        list_len = len(content)
+        if int(start_file) < 0 or int(start_file) > list_len :
+            print "please correct start parameter value."
+            return
+            
+        end_file = int(start_file) + int(num_of_files)
+    
+        if end_file > list_len :
+            print "please correct num-files parameter value."
+            return
+   
+        file_list = content[int(start_file):end_file] 
+    
+        new_file_list = []
+        for p in file_list:
+            new_file_list.append(p.rstrip()) 
+             
+        return new_file_list       
+   
             
     def index_properties_seq(self, body, id):
         """
@@ -365,8 +434,25 @@ class Extract(object):
                 return handler.get_properties(filename)    
         else :
             return None       
-                                    
-    def run_seq(self, search_level):      
+    
+    def store_filenames_to_file(self):
+        """
+        Reads files from a specific directory in filesystem 
+        and stores their filenames and path to a file.
+        """ 
+              
+        dataset_ids_file = self.conf("filename")
+        dataset_id = self.conf("dataset")
+        path_to_files = util.find_dataset(dataset_ids_file, dataset_id) 
+        file_to_store_paths = self.conf("make-list")
+        
+        self.logger.info("Creating file \"" + file_to_store_paths + "\" with paths to files belonging to" + "\"" + dataset_id + "\" dataset." )
+        file_list = util.build_file_list(path_to_files)
+        
+        util.write_list_to_file(file_list, file_to_store_paths)
+        self.logger.info("file \"" + file_to_store_paths + "\" containing paths to files in given dataset has been created.")         
+                                          
+    def run_seq(self):      
         
         """
          Extracts metadata information from files within the file list
@@ -416,7 +502,5 @@ class Extract(object):
                     end = datetime.datetime.now()
                     self.logger.info( os.path.basename(file) + "|" + os.path.dirname(file)+ "|" 
                               + "0" + "|" + str(end - start) + "ms")
-                    continue
-               
-                
-               
+                    continue   
+         

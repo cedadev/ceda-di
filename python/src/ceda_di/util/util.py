@@ -85,5 +85,18 @@ def write_list_to_file(list, file):
         f.write("\n")
     
     f.close()
+    
+    
+def find_dataset(file, dataset_id):
+    """
+    :Returns: The path of the given dataset id. 
+    """
+    vars = {}
+    with open(file) as l_file:
+        for line in l_file:
+            name, var = line.partition("=")[::2]
+            vars[name.strip()] = var.strip()
+    
+    return vars[dataset_id]   
 
 
