@@ -269,9 +269,9 @@ class Extract_seq(Extract):
     File crawler and metadata extractor class.
     Part of core functionality of ceda_di.
     """
-    def __init__(self, conf, path=None):
+    def __init__(self, conf):
         
-        Extract.__init__(self, None, path)        
+        Extract.__init__(self, None)        
         
         self.configuration = conf
             
@@ -385,16 +385,18 @@ class Extract_seq(Extract):
         
         with open(file_containing_paths) as f:
             content = f.readlines()
+            
+        self.logger.info( str(len(content)) + " lines read from file " + "\"" + file_containing_paths + "\"." )   
        
         list_len = len(content)
         if int(start_file) < 0 or int(start_file) > list_len :
-            print "please correct start parameter value."
+            self.logger.info("please correct start parameter value.")
             return
             
         end_file = int(start_file) + int(num_of_files)
     
         if end_file > list_len :
-            print "please correct num-files parameter value."
+            self.logger.info("please correct num-files parameter value.")
             return
    
         file_list = content[int(start_file):end_file] 
@@ -474,7 +476,7 @@ class Extract_seq(Extract):
          
         
         doc = {}       
-        level = self.configuration['level']
+        level = self.conf("level")
         
         if len(self.file_list) > 0:
             
