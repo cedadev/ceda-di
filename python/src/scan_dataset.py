@@ -138,14 +138,8 @@ def set_program_op_status_and_defaults(conf_args):
 def main():
         
     """
-    Basic algorithm :
-        Locate directory to be scanned
-        Create file list
-        Extract data
-        Post data to elastic search. 
-        Also handle other options.
-        Relevant to ticket :
-        http://team.ceda.ac.uk/trac/ceda/ticket/23203
+    Relevant to ticket :
+    http://team.ceda.ac.uk/trac/ceda/ticket/23203
     """   
     start = datetime.datetime.now()              
     print "Script started at:" +str(start) +".\n." 
