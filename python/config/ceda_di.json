@@ -69,7 +69,7 @@
             "priority": 10
         },
         ".$": {
-            "class": "ceda_di.providers.Generic_file_handler.GENERIC",
+            "class": "ceda_di.providers.file_handler.GENERIC",
             "priority": 9
         }
         
