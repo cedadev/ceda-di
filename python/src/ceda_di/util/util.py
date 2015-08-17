@@ -77,10 +77,10 @@ def build_file_list(path, followlinks=None):
 
     return file_list
 
-def write_list_to_file(list, file):
+def write_list_to_file(file_list, file):
     f = open(file, 'w')
     
-    for item in list:
+    for item in file_list:
         f.writelines(item)
         f.write("\n")
     
