@@ -8,7 +8,7 @@ Usage:
                   (-l <level> | --level <level>) [-c <path_to_config_dir> | --config <path_to_config_dir>]
   scan_dataset.py (-f <filename> | --filename <filename>) (-d <dataset_id> | --dataset <dataset_id>)
                   (-m <location> | --make-list <location>) [-c <path_to_config_dir> | --config <path_to_config_dir>] 
-  scan_dataset.py (-f <filename> | --filename <filename>) (-n <n_files> | --num-files <n_files>) (-s <start_number> | --start <start_number>)
+  scan_dataset.py (-f <filename> | --filename <filename>) [-n <n_files> | --num-files <n_files>] [-s <start_number> | --start <start_number>]
                   (-l <level> | --level <level>) [-c <path_to_config_dir> | --config <path_to_config_dir>] 
   
 Options:
@@ -23,7 +23,7 @@ Options:
   -m --make-list=<location>           Stores the list of filenames to a file.
   -c --config=<path_to_config_dir>    Specify the main configuration directory.
   -n --num-files=<n_files>            Number of files to scan.
-  -s --start=<start_number>           Starting point within the cache file containing filenames [default: 10].
+  -s --start=<start_number>           Starting point within the cache file containing filenames.
   
  """
 
@@ -123,12 +123,12 @@ def set_program_op_status_and_defaults(conf_args):
 
     status_and_defaults.append(config)
        
-    if ("make-list" in conf_args) and ("dataset" in conf_args) and  ("filename" in conf_args) :
+    if ("make-list" in config) and ("dataset" in config) and  ("filename" in config) :
         status_and_defaults.append(Script_status.search_dir_and_store_names_to_file)
-    elif  ("dataset" in conf_args) and  ("filename" in conf_args) and ("level" in conf_args) :
+    elif  ("dataset" in config) and  ("filename" in config) and ("level" in config) :
         status_and_defaults.append(Script_status.search_dir_and_store_metadata_to_db)  
-    elif  ("filename" in conf_args) and ("start" in conf_args) and \
-          ("num-files" in conf_args) and ("level" in conf_args)  :     
+    elif  ("filename" in config) and ("start" in config) and \
+          ("num-files" in config) and ("level" in config)  :     
         status_and_defaults.append(Script_status.read_file_paths_and_store_metadata_to_db)        
     
     

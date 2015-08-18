@@ -460,6 +460,11 @@ class Extract_seq(Extract):
          Extracts metadata information from files within the file list
          and posts them in elastic search.
         """
+            
+        #Sanity check.    
+        if self.file_list is None:
+            self.logger.info( "File list is empty.") 
+            return
               
         # Create index if necessary
         es_factory = ElasticsearchClientFactory()

@@ -44,8 +44,11 @@
     "_option": "log-level: Sets teh logging level",
     "log-level": "debug",
     
+    "_option": "start: Specify the start number (i.e. the first file to be scanned).",
+    "start": 1,
+    
     "_option": "num-files: Maximum numbers of fiels to scan.",
-    "num-files": 1000,
+    "num-files": 100,
                 
     "_option": "logging: options for the 'logging' module",
     "_ref": "(see: https://docs.python.org/2/library/logging.html)",
