@@ -43,6 +43,7 @@ import logging
 import logging.handlers
 import datetime   
 from enum import Enum
+import sys
 
 
 
@@ -135,16 +136,21 @@ def set_program_op_status_and_defaults(conf_args):
     return status_and_defaults 
     
     
-def main():
+def main(argv=None):
         
     """
     Relevant to ticket :
     http://team.ceda.ac.uk/trac/ceda/ticket/23203
     """   
+   
+    if argv is None:
+        argv = sys.argv
+    
+   
     start = datetime.datetime.now()              
     print "Script started at:" +str(start) +".\n." 
-    
-    
+   
+   
     #Get command line arguments. 
     conf_args = util.sanitise_args(docopt(__doc__, version=__version__))        
        
