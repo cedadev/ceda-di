@@ -106,7 +106,7 @@ def read_file_paths_and_store_metadata_to_db(conf) :
     extract.run_seq();      
       
         
-def set_program_op_status_and_defaults(conf_args):
+def set_program_op_status_and_defaults(com_args):
     
     """
     Set global variables that determine the operations to be performed. 
@@ -114,13 +114,13 @@ def set_program_op_status_and_defaults(conf_args):
      
     status_and_defaults = []   
     # Searches for the configuration file.
-    if 'config' not in conf_args or not conf_args["config"]:
+    if 'config' not in com_args or not com_args["config"]:
         direc = os.path.dirname(__file__)
         conf_path = os.path.join(direc, "../config/ceda_di.json")
-        conf_args["config"] = conf_path
+        com_args["config"] = conf_path
 
     #Creates a dictionary with default settings some of them where loaded from th edefaults file.
-    config = util.get_settings(conf_args["config"], conf_args)
+    config = util.get_settings(com_args["config"], com_args)
 
     status_and_defaults.append(config)
        
@@ -152,10 +152,10 @@ def main(argv=None):
    
    
     #Get command line arguments. 
-    conf_args = util.sanitise_args(docopt(__doc__, version=__version__))        
+    com_args = util.sanitise_args(docopt(__doc__, version=__version__))        
        
     #Insert defaults
-    status_and_defaults = set_program_op_status_and_defaults(conf_args)      
+    status_and_defaults = set_program_op_status_and_defaults(com_args)      
     
     config_file = status_and_defaults[0] 
     status = status_and_defaults[1]
