@@ -65,7 +65,7 @@ def set_program_op_status_and_defaults(com_args):
         com_args["config"] = conf_path
 
     #Creates a dictionary with default settings some of them where loaded from th edefaults file.
-    config = util.get_settings(conf_args["config"], com_args)
+    config = util.get_settings(com_args["config"], com_args)
 
     status_and_defaults.append(config)
        
@@ -87,28 +87,28 @@ def set_program_op_status_and_defaults(com_args):
     return status_and_defaults 
      
      
-def scan_files_in_lotus(config_file):
+def scan_files_in_lotus(config, scan_status):
     
-    
-    bsub_script = construct_bsub_command(path, defaults)
-    os.system(bsub_script) 
     #Get basic options.
-    filename = config_file["filename"]
-    level = config_file["level"]
+    filename = config["filename"]
+    level = config["level"]
+    current_dir = os.getcwd() 
           
     #Manage the options given. 
     if scan_status == Script_status.scan_specific_dataset_id :
-        dataset = config_file["dataset"]
-        command = "bsub python scan_dataset.py -f " + filename + "-d " + dataset + "level " + level
-        os.system(command)
+        dataset_id = config["dataset"]
+        command = "bsub python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
+        print "executng :" + command
+        #os.system(command)
 
-    elif status == Script_status.scan_all_dataset_ids :
-        dataset_ids = util.find_dataset(dataset_ids_file, "all")
+    elif scan_status == Script_status.scan_all_dataset_ids :
+        dataset_ids = util.find_dataset(filename, "all")
         
         for key, value in dataset_ids.iteritems():
-            dataset = value
-            command = "bsub python scan_dataset.py -f " + filename + "-d " + dataset + "level " + level
-            os.system(command)
+            dataset_id = key
+            command = "bsub python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
+            print "executng :" + command
+            #os.system(command)
     
     else :
         return    
@@ -117,21 +117,24 @@ def scan_files_in_lotus(config_file):
 def scan_files_in_localhost(config, scan_status):
         
     #Get basic options.
-    filename = config_file["filename"]
-    level = config_file["level"]
+    filename = config["filename"]
+    level = config["level"]
+    current_dir = os.getcwd()    
           
     #Manage the options given. 
     if scan_status == Script_status.scan_specific_dataset_id :
-        dataset = config_file["dataset"]
-        command = "python scan_dataset.py -f " + filename + "-d " + dataset + "level " + level 
+        dataset_id = config["dataset"]
+        command = "python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
+        print "executng :" + command
         os.system(command)
-    elif status == Script_status.scan_all_dataset_ids :
-        dataset_ids = util.find_dataset(dataset_ids_file, "all")
+    elif scan_status == Script_status.scan_all_dataset_ids :
+        dataset_ids = util.find_dataset(filename, "all")       
         
         for key, value in dataset_ids.iteritems():
-            dataset = value
-            command = "python scan_dataset.py -f " + filename + "-d " + dataset + "level " + level 
-            scan_dataset.main(command)    
+            dataset_id = key
+            command = "python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
+            print "executng :" + command
+            os.system(command)   
     else :
         return 
 
@@ -158,9 +161,9 @@ def main():
     scan_status = status_and_defaults[2]
   
      #Manage the options given. 
-    if status == Script_status.run_script_in_lotus :
+    if run_status == Script_status.run_script_in_lotus :
         scan_files_in_lotus(config_file, scan_status)
-    elif status == Script_status.run_script_in_lotus :   
+    elif run_status == Script_status.run_script_in_localhost :   
         scan_files_in_localhost(config_file, scan_status)
     else :
         return
