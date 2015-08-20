@@ -30,17 +30,9 @@ from docopt import docopt
 
 import ceda_di.util.util as util
 from ceda_di import __version__  # Grab version from package __init__.py
-from ceda_di.extract import Extract_seq
-from ceda_di.index import BulkIndexer
-from ceda_di.search import Searcher
-from operator import or_
 
-import glob
-import logging
-import logging.handlers
 import datetime   
 from enum import Enum
-import scan_dataset
 
 import subprocess
 
