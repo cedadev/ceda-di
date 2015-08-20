@@ -49,7 +49,11 @@
     
     "_option": "num-files: Maximum numbers of fiels to scan.",
     "num-files": 100,
-                
+                    
+    "_option": "num-processes: Number of processes to use for each task.",
+    "num-processes": 200,
+                   
+               
     "_option": "logging: options for the 'logging' module",
     "_ref": "(see: https://docs.python.org/2/library/logging.html)",
     "logging": {

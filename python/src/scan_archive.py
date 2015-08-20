@@ -19,9 +19,9 @@ Options:
                                              Level 2: File names, sizes and phenomena (e.g. "air temperature")
                                              Level 3: File names, sizes, phenomena and geospatial metadata.
   -c --config=<path_to_config_dir>           Specify the main configuration directory.
-  --num-files=<n_files>                   Number of files to scan.
+  -n --num-files=<n_files>                   Number of files to scan.
   -h --host=<hostname>                       The name of the host where the script will run.
-  -n --num-processes=<number_of_processes>   Number of processes to use.
+  --num-processes=<number_of_processes>   Number of processes to use.
  """
 
 import os
@@ -41,6 +41,8 @@ import logging.handlers
 import datetime   
 from enum import Enum
 import scan_dataset
+
+import subprocess
 
 Script_status = Enum( "Script_status",
                       "run_script_in_lotus \
@@ -103,10 +105,11 @@ def scan_files_in_lotus(config, scan_status):
 
     elif scan_status == Script_status.scan_all_dataset_ids :
         dataset_ids = util.find_dataset(filename, "all")
-        
+        number_of_processes  = config["num-processes"]
         for key, value in dataset_ids.iteritems():
             dataset_id = key
-            command = "bsub python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
+            command = "bsub python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level \
+                       + " -n " + str(number_of_processes)
             print "executng :" + command
             #os.system(command)
     
@@ -126,7 +129,8 @@ def scan_files_in_localhost(config, scan_status):
         dataset_id = config["dataset"]
         command = "python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
         print "executng :" + command
-        os.system(command)
+        subprocess.call(command, shell=True)
+        #os.system(command)
     elif scan_status == Script_status.scan_all_dataset_ids :
         dataset_ids = util.find_dataset(filename, "all")       
         
@@ -134,7 +138,7 @@ def scan_files_in_localhost(config, scan_status):
             dataset_id = key
             command = "python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
             print "executng :" + command
-            os.system(command)   
+            subprocess.call(command, shell=True)   
     else :
         return 
 
@@ -147,20 +151,22 @@ def main():
     http://team.ceda.ac.uk/trac/ceda/ticket/23204
     """   
 
-    print "Script started.\n." 
+    start = datetime.datetime.now()              
+    print "Script started at:" +str(start) +".\n." 
+        
     
     #Get command line arguments. 
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))        
   
   
-   #Insert defaults
+    #Set default values and determione what operations the script will perform.
     status_and_defaults = set_program_op_status_and_defaults(com_args)      
     
     config_file = status_and_defaults[0] 
     run_status =  status_and_defaults[1]
     scan_status = status_and_defaults[2]
   
-     #Manage the options given. 
+     #Calls appropriate functions. 
     if run_status == Script_status.run_script_in_lotus :
         scan_files_in_lotus(config_file, scan_status)
     elif run_status == Script_status.run_script_in_localhost :   
@@ -168,7 +174,8 @@ def main():
     else :
         return
         
-    print "Script ended.\n"
+    end = datetime.datetime.now()    
+    print "Script ended at :" + str(end) + " it ran for :" + str(end - start) + ".\n"
 
 
 if __name__ == '__main__':
