@@ -99,11 +99,13 @@ def scan_files_in_lotus(config, scan_status):
           
     #Manage the options given. 
     if scan_status == Script_status.scan_specific_dataset_id :
-        dataset_id = config["dataset"]
-        command = "bsub" + " -n " + str(number_of_processes) + " python " + current_dir + "/scan_dataset.py -f "\
-        + filename + " -d " + dataset_id + " -l " + level 
-        print "executng :" + command
-        subprocess.call(command, shell=True)
+        dataset_ids = config["dataset"]
+        dataset_ids_list = dataset_ids.split(",")
+        for dataset_id in dataset_ids_list: 
+            command = "bsub" + " -n " + str(number_of_processes) + " python " + current_dir + "/scan_dataset.py -f "\
+                      + filename + " -d " + dataset_id + " -l " + level 
+            print "executng :" + command
+            subprocess.call(command, shell=True)
 
     elif scan_status == Script_status.scan_all_dataset_ids :
         dataset_ids = util.find_dataset(filename, "all")
@@ -139,10 +141,12 @@ def scan_files_in_localhost(config, scan_status):
     #Manage the options given. 
     if scan_status == Script_status.scan_specific_dataset_id :
         dataset_id = config["dataset"]
-        command = "python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
-        print "executng :" + command
-        subprocess.call(command, shell=True)
-        #os.system(command)
+        dataset_ids_list = dataset_ids.split(",")
+        for dataset_id in dataset_ids_list: 
+            command = "python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
+            print "executng :" + command
+            subprocess.call(command, shell=True)
+            #os.system(command)
     elif scan_status == Script_status.scan_all_dataset_ids :
         dataset_ids = util.find_dataset(filename, "all")       
         
