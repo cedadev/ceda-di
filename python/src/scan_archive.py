@@ -6,7 +6,12 @@ Usage:
   scan_archive.py --version
   scan_archive.py (-f <filename> | --filename <filename>) (-d <dataset_id> | --dataset <dataset_id> ) 
                   (-l <level> | --level <level>)  (-h <hostname> | --host <hostname>) [--num-processes <number_of_processes>] 
-                  [-n <n_files> | --num-files <n_files>] [-c <path_to_config_dir> | --config <path_to_config_dir>] 
+                  [-c <path_to_config_dir> | --config <path_to_config_dir>] 
+ scan_archive.py  (-f <filename> | --filename <filename>) (-l <level> | --level <level>)  (-h <hostname> | --host <hostname>)
+                  [--num-processes <number_of_processes>] [-n <n_files> | --num-files <n_files>] 
+                  [-c <path_to_config_dir> | --config <path_to_config_dir>] 
+                 
+                  
                   
   
 Options:
@@ -41,6 +46,7 @@ Script_status = Enum( "Script_status",
                        run_script_in_localhost \
                        scan_specific_dataset_id \
                        scan_all_dataset_ids \
+                       scan_filenames_from_file \
                        stay_idle"
                     )
 
@@ -63,6 +69,7 @@ def set_program_op_status_and_defaults(com_args):
 
     status_and_defaults.append(config)
        
+            
     if ("host" in config) and (config["host"] == "lotus"):
         status_and_defaults.append(Script_status.run_script_in_lotus)
     elif ("host" in config) and config["host"] == "localhost": 
@@ -70,8 +77,9 @@ def set_program_op_status_and_defaults(com_args):
     else :
         status_and_defaults.append(Script_status.stay_idle)
        
-              
-    if  ("dataset" in config) and  config["dataset"] == "all" :
+    if ("level" in config) and not ("dataset" in config):
+        status_and_defaults.append(Script_status.scan_filenames_from_file)       
+    elif ("dataset" in config) and  config["dataset"] == "all" :
         status_and_defaults.append(Script_status.scan_all_dataset_ids)  
     elif ("dataset" in config) and  config["dataset"] != "all" :
         status_and_defaults.append(Script_status.scan_specific_dataset_id)
@@ -107,6 +115,16 @@ def scan_files_in_lotus(config, scan_status):
             print "executng :" + command
             subprocess.call(command, shell=True)
     
+    elif scan_status == Script_status.scan_filenames_from_file :
+        num_files = config["num-files"]
+        start = config["start"]
+        
+        command = "bsub" + " -n " + str(number_of_processes) + " python " + current_dir + "/scan_dataset.py -f "\
+                   + filename + " --num-files " +  str(num_files) + " --start " + str(start)  + " -l " + level 
+        
+        print "executng :" + command
+        subprocess.call(command, shell=True)       
+    
     else :
         return    
     
@@ -133,6 +151,14 @@ def scan_files_in_localhost(config, scan_status):
             command = "python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
             print "executng :" + command
             subprocess.call(command, shell=True)   
+    elif scan_status == Script_status.scan_filenames_from_file :
+        num_files = config["num-files"]
+        start = config["start"]
+        
+        command = "python " + current_dir + "/scan_dataset.py -f " + filename + " --num-files " +  str(num_files) + " --start " \
+                  + str(start)  + " -l " + level 
+        print "executng :" + command
+        subprocess.call(command, shell=True)    
     else :
         return 
 
