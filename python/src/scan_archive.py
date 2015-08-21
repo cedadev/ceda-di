@@ -87,23 +87,25 @@ def scan_files_in_lotus(config, scan_status):
     filename = config["filename"]
     level = config["level"]
     current_dir = os.getcwd() 
+    number_of_processes  = config["num-processes"]
           
     #Manage the options given. 
     if scan_status == Script_status.scan_specific_dataset_id :
         dataset_id = config["dataset"]
-        command = "bsub python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
+        command = "bsub" + " -n " + str(number_of_processes) + " python " + current_dir + "/scan_dataset.py -f "\
+        + filename + " -d " + dataset_id + " -l " + level 
         print "executng :" + command
-        #os.system(command)
+        subprocess.call(command, shell=True)
 
     elif scan_status == Script_status.scan_all_dataset_ids :
         dataset_ids = util.find_dataset(filename, "all")
-        number_of_processes  = config["num-processes"]
+        
         for key, value in dataset_ids.iteritems():
             dataset_id = key
-            command = "bsub python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level \
-                       + " -n " + str(number_of_processes)
+            command = "bsub" + " -n " + str(number_of_processes) + " python " + current_dir + "/scan_dataset.py -f "\
+            + filename + " -d " + dataset_id + " -l " + level 
             print "executng :" + command
-            #os.system(command)
+            subprocess.call(command, shell=True)
     
     else :
         return    
