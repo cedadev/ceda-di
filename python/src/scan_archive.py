@@ -10,10 +10,7 @@ Usage:
  scan_archive.py  (-f <filename> | --filename <filename>) (-l <level> | --level <level>)  (-h <hostname> | --host <hostname>)
                   [--num-processes <number_of_processes>] [-n <n_files> | --num-files <n_files>] 
                   [-c <path_to_config_dir> | --config <path_to_config_dir>] 
-                 
-                  
-                  
-  
+
 Options:
   --help                                     Show this screen.
   --version                                  Show version.
