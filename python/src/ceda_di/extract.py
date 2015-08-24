@@ -258,9 +258,7 @@ class Extract(object):
         self.logger.info("Metadata extraction completed at: %s",
                          end.isoformat())
         self.logger.info("Start: %s, End: %s, Total: %s",
-                         start.isoformat(), end.isoformat(), end - start)
-    
-            
+                         start.isoformat(), end.isoformat(), end - start)             
   
 #kltsa 14/08/2015 issue #23203.    
 class Extract_seq(Extract):    
