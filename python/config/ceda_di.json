@@ -45,7 +45,7 @@
     "log-level": "debug",
     
     "_option": "start: Specify the start number (i.e. the first file to be scanned).",
-    "start": 1,
+    "start": 0,
     
     "_option": "num-files: Maximum numbers of fiels to scan.",
     "num-files": 100,

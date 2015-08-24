@@ -82,8 +82,7 @@ def scan_dir_and_store_metadata_to_db(conf):
     and outputs metadata to elastic search database.    
     """     
     extract = Extract_seq(conf)
-    extract.run_seq();
-      
+    extract.run_seq();      
               
 def scan_dir_and_store_filenames_to_file(conf):
     
@@ -92,8 +91,7 @@ def scan_dir_and_store_filenames_to_file(conf):
     and stores their filenames and path to a file.
     """ 
     extract = Extract_seq(conf)
-    extract.store_filenames_to_file();         
-                
+    extract.store_filenames_to_file();                
         
 def read_file_paths_and_store_metadata_to_db(conf) :
     
@@ -104,7 +102,6 @@ def read_file_paths_and_store_metadata_to_db(conf) :
                           
     extract = Extract_seq(conf)
     extract.run_seq();      
-      
         
 def set_program_op_status_and_defaults(com_args):
     
@@ -133,8 +130,7 @@ def set_program_op_status_and_defaults(com_args):
         status_and_defaults.append(Script_status.read_file_paths_and_store_metadata_to_db)        
     
     
-    return status_and_defaults 
-    
+    return status_and_defaults     
     
 def main(argv=None):
         

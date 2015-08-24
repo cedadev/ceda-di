@@ -49,7 +49,6 @@ Script_status = Enum( "Script_status",
                        scan_filenames_from_file \
                        stay_idle"
                     )
-
  
 def set_program_op_status_and_defaults(com_args):
     
@@ -86,8 +85,7 @@ def set_program_op_status_and_defaults(com_args):
     else :
         status_and_defaults.append(Script_status.stay_idle)
        
-    return status_and_defaults 
-     
+    return status_and_defaults     
      
 def scan_files_in_lotus(config, scan_status):
     
@@ -99,13 +97,19 @@ def scan_files_in_lotus(config, scan_status):
           
     #Manage the options given. 
     if scan_status == Script_status.scan_specific_dataset_id :
-        dataset_ids = config["dataset"]
-        dataset_ids_list = dataset_ids.split(",")
-        for dataset_id in dataset_ids_list: 
+        dataset_id = config["dataset"]
+        if ',' in dataset_id :
+            dataset_ids_list = dataset_id.split(",")
+            for dataset_id_item in dataset_ids_list: 
+                command = "bsub" + " -n " + str(number_of_processes) + " python " + current_dir + "/scan_dataset.py -f "\
+                          + filename + " -d " + dataset_id_item + " -l " + level 
+                print "executng :" + command
+                subprocess.call(command, shell=True)
+        else:
             command = "bsub" + " -n " + str(number_of_processes) + " python " + current_dir + "/scan_dataset.py -f "\
                       + filename + " -d " + dataset_id + " -l " + level 
             print "executng :" + command
-            subprocess.call(command, shell=True)
+            subprocess.call(command, shell=True)      
 
     elif scan_status == Script_status.scan_all_dataset_ids :
         dataset_ids = util.find_dataset(filename, "all")
@@ -125,11 +129,7 @@ def scan_files_in_lotus(config, scan_status):
                    + filename + " --num-files " +  str(num_files) + " --start " + str(start)  + " -l " + level 
         
         print "executng :" + command
-        subprocess.call(command, shell=True)       
-    
-    else :
-        return    
-    
+        subprocess.call(command, shell=True)    
 
 def scan_files_in_localhost(config, scan_status):
         
@@ -141,12 +141,18 @@ def scan_files_in_localhost(config, scan_status):
     #Manage the options given. 
     if scan_status == Script_status.scan_specific_dataset_id :
         dataset_id = config["dataset"]
-        dataset_ids_list = dataset_ids.split(",")
-        for dataset_id in dataset_ids_list: 
+        if ',' in dataset_id :
+            dataset_ids_list = dataset_id.split(",")
+            for dataset_id_item in dataset_ids_list: 
+                command = "python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id_item + " -l " + level 
+                print "executng :" + command
+                subprocess.call(command, shell=True)
+                #os.system(command)
+        else :
             command = "python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
             print "executng :" + command
-            subprocess.call(command, shell=True)
-            #os.system(command)
+            subprocess.call(command, shell=True)                  
+                    
     elif scan_status == Script_status.scan_all_dataset_ids :
         dataset_ids = util.find_dataset(filename, "all")       
         
@@ -162,11 +168,7 @@ def scan_files_in_localhost(config, scan_status):
         command = "python " + current_dir + "/scan_dataset.py -f " + filename + " --num-files " +  str(num_files) + " --start " \
                   + str(start)  + " -l " + level 
         print "executng :" + command
-        subprocess.call(command, shell=True)    
-    else :
-        return 
-
-
+        subprocess.call(command, shell=True) 
  
 def main():
         
@@ -196,7 +198,7 @@ def main():
     elif run_status == Script_status.run_script_in_localhost :   
         scan_files_in_localhost(config_file, scan_status)
     else :
-        return
+        print "Some options could not be recognized.\n"
         
     end = datetime.datetime.now()    
     print "Script ended at :" + str(end) + " it ran for :" + str(end - start) + ".\n"
