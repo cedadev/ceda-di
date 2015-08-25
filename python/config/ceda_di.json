@@ -1,6 +1,6 @@
 {
     "_option": "es_host: hostname of Elasticsearch node to use",
-    "es-host": "localhost",
+    "es-host": "mist.badc.rl.ac.uk",
 
     "_option": "es_port: port number of Elasticsearch node to use",
     "es-port": 9200,
