@@ -367,7 +367,7 @@ class Extract_seq(Extract):
          #derectory where the files to be searched are.
          path_to_files = util.find_dataset(dataset_ids_file, dataset_id) 
          
-         return util.build_file_list(path_to_files)
+         return util.build_file_list(path_to_files, "followlinks")
                 
         
     def _build_list_from_file(self):
