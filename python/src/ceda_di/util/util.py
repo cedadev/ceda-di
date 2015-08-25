@@ -65,13 +65,13 @@ def get_settings(conf_path, args):
     return defaults
 
 
-def build_file_list(path, followlinks=None):
+def build_file_list(path):
     """
     :Return Directory 
     :return: A list of file paths
     """            
     file_list = []
-    for root, _, files in os.walk(path, ("followlinks=false" if followlinks else "followlinks=True")):
+    for root, _, files in os.walk(path, followlinks=True):
         for each_file in files:
             file_list.append(os.path.join(root, each_file))
 
