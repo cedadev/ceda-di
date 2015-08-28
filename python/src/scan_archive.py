@@ -37,6 +37,7 @@ import datetime
 from enum import Enum
 
 import subprocess
+import time
 
 Script_status = Enum( "Script_status",
                       "run_script_in_lotus \
@@ -111,12 +112,37 @@ def scan_files_in_lotus(config, scan_status):
     elif scan_status == Script_status.scan_all_dataset_ids :
         dataset_ids = util.find_dataset(filename, "all")
         
-        for key, value in dataset_ids.iteritems():
-            dataset_id = key
-            command = "bsub" + " -n " + str(number_of_processes) + " python " + current_dir + "/scan_dataset.py -f "\
-            + filename + " -d " + dataset_id + " -l " + level 
-            print "executng :" + command
-            subprocess.call(command, shell=True)
+        keys = dataset_ids.keys()
+        max_number_of_jobs_to_submit = config["num-files"]
+        num_of_jobs_to_submit = max_number_of_jobs 
+        wait_time = 10
+        start_wait_time = 10
+        inc = 1
+        while (keys_list_len =  len(keys)) > 0 :
+            
+            #Send window size requests.
+            for i in range(0, num_of_jobs_to_submit):
+                dataset_id = keys.get()
+                keys.remove(dataset_id)
+            
+                command = "bsub" + " -n " + str(number_of_processes) + " python " + current_dir + "/scan_dataset.py -f "\
+                          + filename + " -d " + dataset_id + " -l " + level 
+                print "executng :" + command
+                subprocess.call(command, shell=True)
+            
+            #Wait in case some process terminates. 
+            time.sleep(start_wait_time)
+            
+            #Find out if other jobs can be submitted.
+            num_of_running_jobs = subprocess.check_output('bjobs').count("\n") -1  
+            num_of_jobs_to_submit = max_number_of_jobs_to_submit - num_of_running_jobs             
+            
+            #If nothing to submit wait again.
+            if num_of_jobs_to_submit == 0
+                start_wait_time = start_wait_time + inc 
+                time.sleep(start_wait_time)   
+            else
+                start_wait_time = wait_time     
     
     elif scan_status == Script_status.scan_filenames_from_file :
         num_files = config["num-files"]
