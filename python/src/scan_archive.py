@@ -116,9 +116,9 @@ def scan_files_in_lotus(config, scan_status):
         max_number_of_jobs_to_submit = config["num-files"]
         num_of_jobs_to_submit = max_number_of_jobs 
         wait_time = 10
-        start_wait_time = 10
+        init_wait_time = 10
         inc = 1
-        while (keys_list_len =  len(keys)) > 0 :
+        while len(keys) > 0 :
             
             #Send window size requests.
             for i in range(0, num_of_jobs_to_submit):
@@ -131,19 +131,19 @@ def scan_files_in_lotus(config, scan_status):
                 subprocess.call(command, shell=True)
             
             #Wait in case some process terminates. 
-            time.sleep(start_wait_time)
+            time.sleep(wait_time)
             
             #Find out if other jobs can be submitted.
             num_of_running_jobs = subprocess.check_output('bjobs').count("\n") -1  
             num_of_jobs_to_submit = max_number_of_jobs_to_submit - num_of_running_jobs             
             
             #If nothing to submit wait again.
-            if num_of_jobs_to_submit == 0
-                start_wait_time = start_wait_time + inc 
+            if num_of_jobs_to_submit == 0:
+                wait_time = wait_time + inc
+                if (wait_time > init_wait_time * 6):
+                    wait_time = init_wait_time  
                 time.sleep(start_wait_time)   
-            else
-                start_wait_time = wait_time     
-    
+            
     elif scan_status == Script_status.scan_filenames_from_file :
         num_files = config["num-files"]
         start = config["start"]
