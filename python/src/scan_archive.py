@@ -116,7 +116,7 @@ def scan_files_in_lotus(config, scan_status):
         max_number_of_jobs_to_submit = config["num-files"]
         num_of_jobs_to_submit = max_number_of_jobs 
         wait_time = 10
-        init_wait_time = 10
+        init_wait_time = 60
         inc = 1
         while len(keys) > 0 :
             
@@ -139,8 +139,8 @@ def scan_files_in_lotus(config, scan_status):
             
             #If nothing to submit wait again.
             if num_of_jobs_to_submit == 0:
-                wait_time = wait_time + inc
-                if (wait_time > init_wait_time * 6):
+                wait_time = wait_time - inc
+                if (wait_time == 0):
                     wait_time = init_wait_time  
                 time.sleep(start_wait_time)   
             
