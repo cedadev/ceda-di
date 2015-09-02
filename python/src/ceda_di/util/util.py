@@ -94,8 +94,9 @@ def find_dataset(file, dataset_id):
     vars = {}
     with open(file) as l_file:
         for line in l_file:
-            name, var = line.partition("=")[::2]
-            vars[name.strip()] = var.strip()
+            if not line.startswith("#") :
+                name, var = line.partition("=")[::2]
+                vars[name.strip()] = var.strip()
     if dataset_id == "all" :
         return vars
     else :
