@@ -113,36 +113,55 @@ def scan_files_in_lotus(config, scan_status):
         dataset_ids = util.find_dataset(filename, "all")
         
         keys = dataset_ids.keys()
-        max_number_of_jobs_to_submit = config["num-files"]
-        num_of_jobs_to_submit = max_number_of_jobs 
-        wait_time = 10
-        init_wait_time = 60
-        inc = 1
+        max_number_of_jobs_to_submit = int(number_of_processes)       
+        num_of_jobs_to_submit = int(number_of_processes) 
+        
+        print "Number of jobs to submit in each step :" + str(max_number_of_jobs_to_submit) \
+            + "\n total number of datasets :" + str(len(keys))  
+        
+        init_wait_time = 15
+        wait_time = init_wait_time
+        dec = 1
+                       
         while len(keys) > 0 :
             
+            print "Number of jobs to submit in this step :" + str(num_of_jobs_to_submit)
             #Send window size requests.
             for i in range(0, num_of_jobs_to_submit):
-                dataset_id = keys.get()
+                if len(keys) == 0 : 
+                    break
+                dataset_id = keys[0]
                 keys.remove(dataset_id)
-            
-                command = "bsub" + " -n " + str(number_of_processes) + " python " + current_dir + "/scan_dataset.py -f "\
+                                            
+                command = "bsub" + " python " + current_dir + "/scan_dataset.py -f "\
                           + filename + " -d " + dataset_id + " -l " + level 
                 print "executng :" + command
                 subprocess.call(command, shell=True)
             
+            
+            print "Number of jobs waiting to be submitted :" + str(len(keys))            
+                        
             #Wait in case some process terminates. 
+            print "Waiting for  :" + str(wait_time)
+            
             time.sleep(wait_time)
             
             #Find out if other jobs can be submitted.
-            num_of_running_jobs = subprocess.check_output('bjobs').count("\n") -1  
+            num_of_running_jobs = subprocess.check_output('bjobs').count("\n") 
+            
+            if num_of_running_jobs > 0 :
+                num_of_running_jobs = num_of_running_jobs   - 1
+            
+            print "Number of jobs running  :" + str(num_of_running_jobs)
+            
             num_of_jobs_to_submit = max_number_of_jobs_to_submit - num_of_running_jobs             
+                        
             
             #If nothing to submit wait again.
             if num_of_jobs_to_submit == 0:
-                wait_time = wait_time - inc
+                wait_time = wait_time - dec
                 if (wait_time == 0):
-                    wait_time = init_wait_time  
-                time.sleep(start_wait_time)   
+                    wait_time = init_wait_time                   
             
     elif scan_status == Script_status.scan_filenames_from_file :
         num_files = config["num-files"]
