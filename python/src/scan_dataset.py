@@ -54,6 +54,7 @@ Script_status = Enum( "Script_status",
                       "
                     )
 
+
 def ckeck_args_validity(args_dict):
     
     """
@@ -75,6 +76,7 @@ def ckeck_args_validity(args_dict):
        
     #TODO : Add more cases here...    
 
+
 def scan_dir_and_store_metadata_to_db(conf):
     
     """
@@ -83,6 +85,7 @@ def scan_dir_and_store_metadata_to_db(conf):
     """     
     extract = Extract_seq(conf)
     extract.run_seq();      
+      
               
 def scan_dir_and_store_filenames_to_file(conf):
     
@@ -92,6 +95,7 @@ def scan_dir_and_store_filenames_to_file(conf):
     """ 
     extract = Extract_seq(conf)
     extract.store_filenames_to_file();                
+   
         
 def read_file_paths_and_store_metadata_to_db(conf) :
     
@@ -102,6 +106,7 @@ def read_file_paths_and_store_metadata_to_db(conf) :
                           
     extract = Extract_seq(conf)
     extract.run_seq();      
+    
         
 def set_program_op_status_and_defaults(com_args):
     
@@ -131,6 +136,7 @@ def set_program_op_status_and_defaults(com_args):
     
     
     return status_and_defaults     
+    
     
 def main(argv=None):
         
@@ -166,6 +172,7 @@ def main(argv=None):
      
     end = datetime.datetime.now()    
     print "Script ended at :" + str(end) + " it ran for :" + str(end - start) + ".\n"
+        
         
 if __name__ == '__main__':
     main()
