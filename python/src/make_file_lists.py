@@ -33,48 +33,89 @@ from enum import Enum
 import sys
 
 
-
 Script_status = Enum( "Script_status",
-                      "search_dir_and_store_names_to_file \
-                       search_dir_and_store_metadata_to_db \
-                       read_file_paths_and_store_metadata_to_db\
-                      "
-                    )
+                      "create_lists"
+                    )    
+    
 
+def set_program_op_status_and_defaults(com_args):
+    
+    """
+    Set global variables that determine the operations to be performed. 
+    """
+     
+    status_and_defaults = []   
+    # Searches for the configuration file.
+    if 'config' not in com_args or not com_args["config"]:
+        direc = os.path.dirname(__file__)
+        conf_path = os.path.join(direc, "../config/ceda_di.json")
+        com_args["config"] = conf_path
 
+    #Creates a dictionary with default settings some of them where loaded from th edefaults file.
+    config = util.get_settings(com_args["config"], com_args)
+
+    status_and_defaults.append(config)
+       
+    status_and_defaults.append(Script_status.create_lists)
     
     
+    return status_and_defaults
+
+
+def create_lists(config):
+    
+    """
+    Find and store all files belonging to each dataset. 
+    """
+    
+    #Get file.
+    filename = config["filename"]
+    #Extract datasets ids and paths.
+    datasets =  find_dataset(filename, "all")
+    datasets_ids = dataset.keys()
+    num_datasets = len(datasets_ids)
+    scan_commands = []
+    current_dir = os.getcwd() 
+    
+    #Create the commands that will create the files containing the paths to data files. 
+    for i in range(0, num_datasets):
+            
+        command = "bsub" + " python " + current_dir + "/scan_dataset.py -f "\
+                  + filename + " -d " + datasets[i] + " --make-list " + datasets[i] + "_files.txt"   
+        
+        scan_commands.append(command)          
+  
+    
+    lotus_max_processes = config["num-processes"] 
+    
+    #Run each command in lotus.
+    run_tasks_in_lotus(scan_commands, lotus_max_processes)
+  
 def main():
         
     """
     Relevant to ticket :
     http://team.ceda.ac.uk/trac/ceda/ticket/23217
     """   
-   
-    """
-     Extract dataset paths from file
-     Create list of commands needed in order to create the file containing the paths.
-     submit commands to lotus. 
-    """
-    
-   
-    start = datetime.datetime.now()              
-    print "Script started at:" +str(start) +".\n." 
-   
-   
+      
     #Get command line arguments. 
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))        
        
     #Insert defaults
     status_and_defaults = set_program_op_status_and_defaults(com_args)      
-    
-    
-    config_file = status_and_defaults[0] 
+     
+   
+   
+    start = datetime.datetime.now()              
+    print "Script started at:" +str(start) 
+       
     status = status_and_defaults[1]
-    
+    config = status_and_defaults[0]   
+     
+    create_lists(config)
      
     end = datetime.datetime.now()    
-    print "Script ended at :" + str(end) + " it ran for :" + str(end - start) + ".\n"
+    print "Script ended at :" + str(end) + " it ran for :" + str(end - start) 
         
         
 if __name__ == '__main__':
