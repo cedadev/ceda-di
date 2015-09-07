@@ -23,8 +23,7 @@ Options:
   -m --make-list=<location>           Stores the list of filenames to a file.
   -c --config=<path_to_config_dir>    Specify the main configuration directory.
   -n --num-files=<n_files>            Number of files to scan.
-  -s --start=<start_number>           Starting point within the cache file containing filenames.
-  
+  -s --start=<start_number>           Starting point within the cache file containing filenames.  
  """
 
 import os
@@ -44,6 +43,7 @@ import logging.handlers
 import datetime   
 from enum import Enum
 import sys
+from Cython.Shadow import NULL
 
 
 
@@ -55,28 +55,20 @@ Script_status = Enum( "Script_status",
                     )
 
 
-def ckeck_args_validity(args_dict):
+def ckeck_com_args_validity(com_args):
     
     """
     checks the validity of command line arguments
     :param dictionary containing ags.
     :returns:
     """
-    level = int(args_dict.get("level"))
+        
+    level = int(com_args.get("level")) 
+        
     if level < 1  or level > 3:
-        raise NameError('value out of range')
- 
-    num_files = args_dict.get("num-files")
-    if num_files:
-        num_files = int(num_files)
-         
-    start_number = args_dict.get("start")
-    if start_number:
-        start_number = int(args_dict.get("start"))
-       
-    #TODO : Add more cases here...    
-
-
+        raise ValueError("Level value is out of range, please use value between 1-3.")   
+           
+    
 def scan_dir_and_store_metadata_to_db(conf):
     
     """
@@ -138,27 +130,30 @@ def set_program_op_status_and_defaults(com_args):
     return status_and_defaults     
     
     
-def main(argv=None):
+def main():
         
     """
     Relevant to ticket :
     http://team.ceda.ac.uk/trac/ceda/ticket/23203
     """   
-   
-    if argv is None:
-        argv = sys.argv
-    
-   
-    start = datetime.datetime.now()              
-    print "Script started at:" +str(start) +".\n." 
-   
-   
+      
     #Get command line arguments. 
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))        
        
+    #checks the validity of command line arguments.
+    try:
+        ckeck_com_args_validity(com_args)
+    except ValueError as err:
+        print err 
+        return  
+       
     #Insert defaults
-    status_and_defaults = set_program_op_status_and_defaults(com_args)      
-    
+    status_and_defaults = set_program_op_status_and_defaults(com_args)   
+   
+   
+    start = datetime.datetime.now()              
+    print "Script started at:" +str(start) 
+         
     config_file = status_and_defaults[0] 
     status = status_and_defaults[1]
     
@@ -171,7 +166,7 @@ def main(argv=None):
         read_file_paths_and_store_metadata_to_db(config_file)           
      
     end = datetime.datetime.now()    
-    print "Script ended at :" + str(end) + " it ran for :" + str(end - start) + ".\n"
+    print "Script ended at :" + str(end) + " it ran for :" + str(end - start)
         
         
 if __name__ == '__main__':

@@ -213,7 +213,7 @@ class Extract(object):
         Run main metadata extraction suite.
         """
         # Log beginning of processing
-        start = datetime-bg_flat_0_aaaa.datetime.now()
+        start = datetime.datetime.now()
         self.logger.info("Metadata extraction started at: %s",
                          start.isoformat())
 
@@ -303,8 +303,14 @@ class Extract_seq(Extract):
         Initial logging setup
         """
         
+        #datetime.datetime.now().isoformat()
+        date_and_time = datetime.datetime.now().strftime("%c")
+        date_and_time_formated = date_and_time.replace(":", "_").replace(" ", "_")
+       
+        
         log_fname = (self.conf("es-index") + "_" +
-                     datetime.datetime.now().isoformat() + "_" +
+                     self.conf("dataset") + "_" +
+                     date_and_time_formated + "_" +
                      socket.gethostname() +
                      ".log")
         
@@ -317,10 +323,7 @@ class Extract_seq(Extract):
         
         fpath = os.path.join(os.getcwd(),
                              log_fname)
-        
-        fpath_es = os.path.join(os.getcwd(),
-                             log_fname_es)
-        
+               
         
         LEVELS = { 'debug'   : logging.DEBUG,
                    'info'    : logging.INFO,
@@ -338,13 +341,7 @@ class Extract_seq(Extract):
                         format=format,
                         level=level)
         
-        """
-        #Also set log level in loger used by elastic search.       
-        tracer = logging.getLogger('elasticsearch.trace')
-        tracer.setLevel(level)
-        tracer.addHandler(logging.FileHandler(fpath_es))
-        """
-          
+                  
         #Enable only logging from within this module.      
         es_log = logging.getLogger("elasticsearch")
         es_log.setLevel(logging.CRITICAL)
@@ -353,8 +350,7 @@ class Extract_seq(Extract):
         urllib3_log = logging.getLogger("urllib3")
         urllib3_log.setLevel(logging.CRITICAL)
         #urllib3_log.addHandler(logging.FileHandler(fpath_es))
-        
-        
+                
         log = logging.getLogger(__name__)             
               
         return log 
