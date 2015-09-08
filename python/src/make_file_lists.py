@@ -77,12 +77,13 @@ def create_lists(config):
     num_datasets = len(datasets_ids)
     scan_commands = []
     current_dir = os.getcwd() 
+    directroy_to_save_files = config["make-list"]
     
     #Create the commands that will create the files containing the paths to data files. 
     for i in range(0, num_datasets):
             
         command = "python " + current_dir + "/scan_dataset.py -f "\
-                  + filename + " -d " + datasets_ids[i] + " --make-list " + datasets_ids[i] + "_files.txt"   
+                  + filename + " -d " + datasets_ids[i] + " --make-list " + directroy_to_save_files + "/" + datasets_ids[i] + "_dataset__files.txt"   
         
         scan_commands.append(command)          
   
