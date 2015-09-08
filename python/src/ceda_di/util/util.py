@@ -138,7 +138,7 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
     if user_wait_time is None:
         init_wait_time = 15
     else :
-        user_wait_time = init_wait_time
+        init_wait_time = user_wait_time
     
     wait_time = init_wait_time
     dec = 1
