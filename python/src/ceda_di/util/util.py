@@ -128,14 +128,18 @@ def get_number_of_running_lotus_tasks() :
     return num_of_running_tasks
     
     
-def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit):
+def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=None, logger=None):
     
     """
     Submits the commands supplied in lotus making sure that
     max_number_of_jobs is not exceeded. 
     """
         
-    init_wait_time = 15
+    if user_wait_time is None:
+        init_wait_time = 15
+    else :
+        user_wait_time = init_wait_time
+    
     wait_time = init_wait_time
     dec = 1
     iterations_counter = 0

@@ -91,7 +91,7 @@ def create_lists(config):
     lotus_max_processes = config["num-processes"] 
     
     #Run each command in lotus.
-    util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes))
+    util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes), user_wait_time=3)
   
 def main():
         
