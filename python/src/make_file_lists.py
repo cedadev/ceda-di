@@ -63,7 +63,7 @@ def set_program_op_status_and_defaults(com_args):
     return status_and_defaults
 
 
-def create_lists(config):
+def create_lists(status, config):
     
     """
     Find and store all files belonging to each dataset. 
@@ -115,7 +115,7 @@ def main():
     config = status_and_defaults[0]   
      
     #Create files containing files  
-    create_lists(config)
+    create_lists(status, config)
      
     end = datetime.datetime.now()    
     print "Script ended at :" + str(end) + " it ran for :" + str(end - start) 
