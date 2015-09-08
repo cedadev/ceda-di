@@ -5,8 +5,10 @@ Module containing useful functions for the command-line interfaces.
 import os
 import sys
 import csv
+import subprocess
 
 import simplejson as json
+import time
 
 
 def sanitise_args(config):
@@ -108,15 +110,21 @@ def get_number_of_running_lotus_tasks() :
     """
     Returns the number of running jobs in lotus. 
     Counting is based on the observation that if there are not any jobs running then the system
-    returns a single line of text otherwise returns a line with headers and a list of running processes.  
-    TODO : Add some regex matching in order to identify the output.     
+    returns a single line of text otherwise returns a line with headers and a list of running processes.       
     """
     
-    num_of_running_tasks = subprocess.check_output('bjobs', stderr=subprocess.STDOUT, shell=True).count("\n") 
-            
-    if num_of_running_tasks > 0 :
-        num_of_running_tasks = num_of_running_tasks   - 1
-                 
+    empty_task_queue_string = "No unfinished job found\n"
+    non_empty_task_queue_string = "JOBID     USER    STAT  QUEUE      FROM_HOST   EXEC_HOST   JOB_NAME   SUBMIT_TIME"    
+    
+    command_output  = subprocess.check_output('bjobs', stderr=subprocess.STDOUT, shell=True)
+       
+    if command_output == empty_task_queue_string :
+        num_of_running_tasks = 0   
+    elif command_output.startswith(non_empty_task_queue_string) : 
+        num_of_running_tasks = command_output.count("\n") -1 
+    else :    
+        num_of_running_tasks = -1
+                    
     return num_of_running_tasks
     
     
@@ -143,6 +151,7 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit):
         
         #Find out if other jobs can be submitted.
         num_of_running_tasks = get_number_of_running_lotus_tasks() 
+        #num_of_running_tasks = 0
         num_of_tasks_to_submit = max_number_of_tasks_to_submit - num_of_running_tasks             
         iterations_counter = iterations_counter + 1             
            
@@ -175,7 +184,7 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit):
                                         
                               
         #If nothing can be submitted wait again.
-        if num_of_jobs_to_submit == 0:
+        if num_of_tasks_to_submit == 0:
             wait_time = wait_time - dec
             if (wait_time == 0):
                 wait_time = init_wait_time

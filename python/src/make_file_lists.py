@@ -6,6 +6,7 @@ Usage:
   make_file_lists.py --version
   make_file_lists.py (-f <filename> | --filename <filename>) (-m <location> | --make-list <location>)
                      [-p <number_of_processes> | --num-processes <number_of_processes>]  
+                     
 Options:
   -h --help                                  Show this screen.
   --version                                  Show version.
@@ -71,8 +72,8 @@ def create_lists(config):
     #Get file.
     filename = config["filename"]
     #Extract datasets ids and paths.
-    datasets =  find_dataset(filename, "all")
-    datasets_ids = dataset.keys()
+    datasets =  util.find_dataset(filename, "all")
+    datasets_ids = datasets.keys()
     num_datasets = len(datasets_ids)
     scan_commands = []
     current_dir = os.getcwd() 
@@ -80,8 +81,8 @@ def create_lists(config):
     #Create the commands that will create the files containing the paths to data files. 
     for i in range(0, num_datasets):
             
-        command = "bsub" + " python " + current_dir + "/scan_dataset.py -f "\
-                  + filename + " -d " + datasets[i] + " --make-list " + datasets[i] + "_files.txt"   
+        command = "python " + current_dir + "/scan_dataset.py -f "\
+                  + filename + " -d " + datasets_ids[i] + " --make-list " + datasets_ids[i] + "_files.txt"   
         
         scan_commands.append(command)          
   
@@ -89,7 +90,7 @@ def create_lists(config):
     lotus_max_processes = config["num-processes"] 
     
     #Run each command in lotus.
-    run_tasks_in_lotus(scan_commands, lotus_max_processes)
+    util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes))
   
 def main():
         
@@ -112,6 +113,7 @@ def main():
     status = status_and_defaults[1]
     config = status_and_defaults[0]   
      
+    #Create files containing files  
     create_lists(config)
      
     end = datetime.datetime.now()    
