@@ -55,13 +55,16 @@ Script_status = Enum( "Script_status",
                     )
 
 
-def ckeck_com_args_validity(com_args):
+def ckeck_com_args_validity(config, status):
     
     """
     checks the validity of command line arguments
     :param dictionary containing ags.
     :returns:
     """
+    
+    if status == Script_status.search_dir_and_store_names_to_file :
+        return
         
     level = int(com_args.get("level")) 
         
@@ -139,31 +142,32 @@ def main():
       
     #Get command line arguments. 
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))        
-       
-    #checks the validity of command line arguments.
-    try:
-        ckeck_com_args_validity(com_args)
-    except ValueError as err:
-        print err 
-        return  
-       
+           
     #Insert defaults
     status_and_defaults = set_program_op_status_and_defaults(com_args)   
    
+    config = status_and_defaults[0] 
+    status = status_and_defaults[1]
+       
+    #checks the validity of command line arguments.
+    try:
+        ckeck_com_args_validity(config, status)
+    except ValueError as err:
+        print err 
+        return  
+      
    
     start = datetime.datetime.now()              
     print "Script started at:" +str(start) 
          
-    config_file = status_and_defaults[0] 
-    status = status_and_defaults[1]
     
     #Manage the options given. 
     if status == Script_status.search_dir_and_store_names_to_file :
-        scan_dir_and_store_filenames_to_file(config_file)
+        scan_dir_and_store_filenames_to_file(config)
     elif status == Script_status.search_dir_and_store_metadata_to_db :
-        scan_dir_and_store_metadata_to_db(config_file)     
+        scan_dir_and_store_metadata_to_db(config)     
     elif status == Script_status.read_file_paths_and_store_metadata_to_db :
-        read_file_paths_and_store_metadata_to_db(config_file)           
+        read_file_paths_and_store_metadata_to_db(config)           
      
     end = datetime.datetime.now()    
     print "Script ended at :" + str(end) + " it ran for :" + str(end - start)
