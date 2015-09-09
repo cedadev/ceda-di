@@ -290,7 +290,7 @@ class Extract_seq(Extract):
         
         elif ("start" in self.configuration ) and ("num-files" in self.configuration) :     
             try:            
-                self.logger = self.prepare_logging_seq()
+                self.logger = self.prepare_logging_seq("do_not_format")
                 self.handler_factory = HandlerFactory(self.conf("handlers"))
                 self.file_list = self._build_list_from_file()
             
@@ -298,7 +298,7 @@ class Extract_seq(Extract):
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
     
                          
-    def prepare_logging_seq(self):
+    def prepare_logging_seq(self, format_log_name = None):
         """
         Initial logging setup
         """
@@ -308,12 +308,22 @@ class Extract_seq(Extract):
         date_and_time_formated = date_and_time.replace(":", "_").replace(" ", "_")
        
         
-        log_fname = (self.conf("es-index") + "_" +
-                     self.conf("dataset") + "_" +
-                     date_and_time_formated + "_" +
-                     socket.gethostname() +
-                     ".log")
+        if format_log_name is None :
+            
+            log_fname = (self.conf("es-index") + "_" +
+                         self.conf("dataset") + "_" +
+                         date_and_time_formated + "_" +
+                         socket.gethostname() +
+                         ".log")
         
+        else :
+            log_fname = (self.conf("es-index") + "_" +
+                         date_and_time_formated + "_" +
+                         socket.gethostname() +
+                         ".log")
+            
+          
+            
         log_fname_es = (self.conf("es-index") + "_" +
                      datetime.datetime.now().isoformat() + "_" +
                      socket.gethostname() + "_es" +
@@ -376,7 +386,8 @@ class Extract_seq(Extract):
         file_containing_paths = self.conf("filename")
         start_file = self.conf("start")
         num_of_files = self.conf("num-files")
-        
+       
+        #TODO: Make this a library function and make it more efficient.  
         with open(file_containing_paths) as f:
             content = f.readlines()
             

@@ -105,6 +105,15 @@ def find_dataset(file, dataset_id):
         return vars[dataset_id]
 
 
+def find_num_lines_in_file(file):
+    num_lines = 0 
+       
+    with open(file) as infp:
+        for line in infp:
+            num_lines += 1
+    return num_lines        
+
+
 def get_number_of_running_lotus_tasks() :
     
     """

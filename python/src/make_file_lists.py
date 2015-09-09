@@ -54,9 +54,7 @@ def set_program_op_status_and_defaults(com_args):
 
     #Creates a dictionary with default settings some of them where loaded from th edefaults file.
     config = util.get_settings(com_args["config"], com_args)
-
-    status_and_defaults.append(config)
-       
+    status_and_defaults.append(config)       
     status_and_defaults.append(Script_status.create_lists)
     
     

@@ -66,7 +66,7 @@ def ckeck_com_args_validity(config, status):
     if status == Script_status.search_dir_and_store_names_to_file :
         return
         
-    level = int(com_args.get("level")) 
+    level = int(config.get("level")) 
         
     if level < 1  or level > 3:
         raise ValueError("Level value is out of range, please use value between 1-3.")   

@@ -195,19 +195,55 @@ def scan_specific_datasets_in_lotus(config):
         
 
 def scan_filenames_from_file_in_lotus(config):
+    
+    """
+    basic algorithm:
+    
+    1. Go to the directory containing the files.
+    2. Create a file list.
+    3. Scan each file and determine the number of files contained.
+    4. create the appropriate commands by calling the scan_dataset.py
+    5. Store commands to the list
+    6. Go to the next file.
+    7. Submit all files in lotus.    
+    """
+        
     #Get basic options.
-    filename = config["filename"]
+    filename_path = config["filename"]
     level = config["level"]
     num_files = config["num-files"]
     start = config["start"]
     current_dir = os.getcwd() 
-            
-    command = "bsub" + " python " + current_dir + "/scan_dataset.py -f "\
-               + filename + " --num-files " +  str(num_files) + " --start " + str(start)  + " -l " + level 
-        
-    print "executng :" + command
-    subprocess.call(command, shell=True) 
+    
+    
+    #Go to directory and create the file list.
+    list_of_cache_files = util.build_file_list(filename_path)
+    
+    for file in list_of_cache_files :
+        num_of_lines = util.find_num_lines_in_file(file)    
        
+        #calculate number of jobs. 
+        number_of_jobs = num_of_lines  / int(num_files)
+        remainder = num_of_lines  % int(num_files)   -1
+    
+        start = 0
+        step = int(num_files)
+        commands = []
+        for i in range(0, number_of_jobs):
+            
+            command = " python " + current_dir + "/scan_dataset.py -f "\
+                      + file + " --num-files " +  num_files + " --start " + str(start)  + " -l " + level 
+        
+            start += step
+            
+            
+            commands.append(command)
+            print "created command :" + command
+    
+        #include remaning files
+        command = " python " + current_dir + "/scan_dataset.py -f "\
+                  + file + " --num-files " +  str(remainder) + " --start " + str(start)  + " -l " + level 
+        print "created command :" + command
           
 def scan_files_in_lotus(config, scan_status):
     
