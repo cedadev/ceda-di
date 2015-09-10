@@ -214,6 +214,58 @@ def scan_files_in_lotus(config, scan_status):
         scan_filenames_from_file_in_lotus(config)   
                  
 
+def scan_filenames_from_file_in_localhost(config):
+            
+    #Get basic options.
+    filename_path = config["filename"]
+    level = config["level"]
+    num_files = config["num-files"]
+    start = config["start"]
+    current_dir = os.getcwd() 
+    
+    
+    #Go to directory and create the file list.
+    list_of_cache_files = util.build_file_list(filename_path)
+    commands = []
+    step = int(num_files)
+    
+    for file in list_of_cache_files :
+        
+        num_of_lines = util.find_num_lines_in_file(file) 
+        
+        if num_of_lines == 0 :
+           continue
+       
+        #calculate number of jobs. 
+        number_of_tasks = num_of_lines  / int(num_files)
+        remainder = num_of_lines  % int(num_files)
+    
+        start = 0
+        for i in range(0, number_of_tasks):
+            
+            command = " python " + current_dir + "/scan_dataset.py -f "\
+                      + file + " --num-files " +  num_files + " --start " + str(start)  + " -l " + level 
+        
+            start += step
+            
+            print "created command :" + command
+            commands.append(command)
+            
+        #include remaning files
+        command = " python " + current_dir + "/scan_dataset.py -f "\
+                  + file + " --num-files " +  str(remainder) + " --start " + str(start)  + " -l " + level 
+        
+        print "created command :" + command
+        commands.append(command)
+    
+        
+    #Run each command in localhost.
+    number_of_commands = len(commands)
+    for i in range(0, number_of_commands): 
+        subprocess.call(command[i], shell=True) 
+    
+    
+
 def scan_files_in_localhost(config, scan_status):
     
     """
@@ -249,13 +301,7 @@ def scan_files_in_localhost(config, scan_status):
             print "executng :" + command
             subprocess.call(command, shell=True)   
     elif scan_status == Script_status.scan_filenames_from_file :
-        num_files = config["num-files"]
-        start = config["start"]
-        
-        command = "python " + current_dir + "/scan_dataset.py -f " + filename + " --num-files " +  str(num_files) + " --start " \
-                  + str(start)  + " -l " + level 
-        print "executng :" + command
-        subprocess.call(command, shell=True) 
+        scan_filenames_from_file_in_localhost(config) 
         
  
 def main():
