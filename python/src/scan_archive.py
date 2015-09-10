@@ -86,23 +86,6 @@ def set_program_op_status_and_defaults(com_args):
        
     return status_and_defaults     
 
-     
-def get_number_of_running_lotus_jobs() :
-    
-    """
-    Returns the number of running jobs in lotus. 
-    Counting is based on the observation that if there are not any jobs running then the system
-    returns a single line of text otherwise returns a line with headers and a list of running processes.  
-    TODO : Add some regex matching in order to identify the output.     
-    """
-    
-    num_of_running_jobs = subprocess.check_output('bjobs', stderr=subprocess.STDOUT, shell=True).count("\n") 
-            
-    if num_of_running_jobs > 0 :
-        num_of_running_jobs = num_of_running_jobs   - 1
-                 
-    return num_of_running_jobs
-
 
 def scan_all_datasets_in_lotus(config):
     
@@ -159,11 +142,11 @@ def scan_filenames_from_file_in_lotus(config):
     
     1. Go to the directory containing the files.
     2. Create a file list.
-    3. Scan each file and determine the number of files contained.
-    4. create the appropriate commands by calling the scan_dataset.py
-    5. Store commands to the list
+    3. Scan each file and determine the number of lines contained.
+    4. create the appropriate commands.
+    5. Store commands in a list.
     6. Go to the next file.
-    7. Submit all files in lotus.    
+    7. Submit all commands in lotus.    
     """
         
     #Get basic options.
