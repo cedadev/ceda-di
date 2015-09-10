@@ -218,8 +218,11 @@ def scan_filenames_from_file_in_lotus(config):
     
     #Go to directory and create the file list.
     list_of_cache_files = util.build_file_list(filename_path)
+    commands = []
+    step = int(num_files)
     
     for file in list_of_cache_files :
+        
         num_of_lines = util.find_num_lines_in_file(file)    
        
         #calculate number of jobs. 
@@ -227,8 +230,6 @@ def scan_filenames_from_file_in_lotus(config):
         remainder = num_of_lines  % int(num_files)
     
         start = 0
-        step = int(num_files)
-        commands = []
         for i in range(0, number_of_jobs):
             
             command = " python " + current_dir + "/scan_dataset.py -f "\
@@ -249,7 +250,7 @@ def scan_filenames_from_file_in_lotus(config):
         
     #Run each command in lotus.
     lotus_max_processes = config["num-processes"] 
-    util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes), user_wait_time=3)
+    util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes), user_wait_time=5)
         
           
 def scan_files_in_lotus(config, scan_status):
