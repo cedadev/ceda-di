@@ -8,7 +8,7 @@ Usage:
                   (-l <level> | --level <level>)  (-h <hostname> | --host <hostname>) [-p <number_of_processes> | --num-processes <number_of_processes>] 
                   [-c <path_to_config_dir> | --config <path_to_config_dir>] 
  scan_archive.py  (-f <filename> | --filename <filename>) (-l <level> | --level <level>)  (-h <hostname> | --host <hostname>)
-                  [--num-processes <number_of_processes>] [-n <n_files> | --num-files <n_files>] 
+                  [-p <number_of_processes> | --num-processes <number_of_processes>] [-n <n_files> | --num-files <n_files>] 
                   [-c <path_to_config_dir> | --config <path_to_config_dir>] 
 
 Options:
@@ -108,71 +108,29 @@ def scan_all_datasets_in_lotus(config):
     
     filename = config["filename"]
     level = config["level"]
-    number_of_processes  = config["num-processes"]
-    max_number_of_jobs_to_submit = int(number_of_processes)       
     
     current_dir = os.getcwd() 
     
-    init_wait_time = 15
-    wait_time = init_wait_time
-    dec = 1
-    iterations_counter = 0
         
     dataset_ids = util.find_dataset(filename, "all")
     keys = dataset_ids.keys()
-          
+    number_of_datasets= len(keys)
+    commands  = []      
         
-    print "Max number of jobs to submit in each step :" + str(max_number_of_jobs_to_submit) + ". "\
-        + "\nTotal number of datasets in file " + filename +  " :" + str(len(keys)) + ". " 
-                    
-    print "==============================="
-      
         
-    while len(keys) > 0 :            
-        
-        #Find out if other jobs can be submitted.
-        num_of_running_jobs = get_number_of_running_lotus_jobs() 
-        num_of_jobs_to_submit = max_number_of_jobs_to_submit - num_of_running_jobs             
-        iterations_counter = iterations_counter + 1             
-           
-        print "Iteration :" + str(iterations_counter) + ". " 
-        print "Number of jobs running  :" + str(num_of_running_jobs) + ". "    
-        print "Number of jobs to submit in this step :" + str(num_of_jobs_to_submit) + ". "
+    for i in range(0, number_of_datasets):
             
-        #Submit jobs according to availability.
-        for i in range(0, num_of_jobs_to_submit):
-            
-            if len(keys) == 0 : 
-                break
-            
-            #Is there an extract op ?
-            dataset_id = keys[0]
-            keys.remove(dataset_id)
-                                            
-            command = "bsub" + " python " + current_dir + "/scan_dataset.py -f "\
-                      + filename + " -d " + dataset_id + " -l " + level 
+        command =  "python " + current_dir + "/scan_dataset.py -f "\
+                   + filename + " -d " +  keys[i] + " -l " + level 
             
             
-            print str(i +1) + ". " +"Executng :" + command
-            subprocess.call(command, shell=True)
+        print "created command :" + command
+        commands.append(command)
+    
+    lotus_max_processes = config["num-processes"] 
+    util.run_tasks_in_lotus(commands, int(lotus_max_processes), user_wait_time=5)        
+    
             
-            
-        print "Number of jobs waiting to be submitted :" + str(len(keys)) + ". "           
-                        
-        #Wait in case some process terminates. 
-        print "Waiting for :" + str(wait_time) + " secs."            
-        time.sleep(wait_time)
-                                        
-                              
-        #If nothing can be submitted wait again.
-        if num_of_jobs_to_submit == 0:
-            wait_time = wait_time - dec
-            if (wait_time == 0):
-                wait_time = init_wait_time
-        
-        print "==============================="
-        
-
 def scan_specific_datasets_in_lotus(config):
     #Get basic options.
     filename = config["filename"]
