@@ -223,7 +223,10 @@ def scan_filenames_from_file_in_lotus(config):
     
     for file in list_of_cache_files :
         
-        num_of_lines = util.find_num_lines_in_file(file)    
+        num_of_lines = util.find_num_lines_in_file(file) 
+        
+        if num_of_lines == 0 :
+           continue
        
         #calculate number of jobs. 
         number_of_jobs = num_of_lines  / int(num_files)
