@@ -103,10 +103,10 @@ def scan_all_datasets_in_lotus(config):
         
     for i in range(0, number_of_datasets):
             
-        command =  "python " + current_dir + "/scan_dataset.py -f "\
-                   + filename + " -d " +  keys[i] + " -l " + level 
-            
-            
+        command =  "python %s/scan_dataset.py -f  %s -d  %s  -l  %s" \
+                   %(current_dir, filename, keys[i], level) 
+                            
+                                   
         print "created command :" + command
         commands.append(command)
     
@@ -124,14 +124,18 @@ def scan_specific_datasets_in_lotus(config):
     if ',' in dataset_id :
         dataset_ids_list = dataset_id.split(",")
         for dataset_id_item in dataset_ids_list: 
-            command = "bsub" + " python " + current_dir + "/scan_dataset.py -f "\
-                      + filename + " -d " + dataset_id_item + " -l " + level 
-            print "executng :" + command
+            
+            command = "bsub python %s/scan_dataset.py -f %s -d %s -l %s" \
+                      %(current_dir, filename, dataset_id_item, level) 
+              
+            print "executng : %s" %(command)
             subprocess.call(command, shell=True)
     else:
-        command = "bsub" + " python " + current_dir + "/scan_dataset.py -f "\
-                  + filename + " -d " + dataset_id + " -l " + level 
-        print "executng :" + command
+        command = "bsub python %s/scan_dataset.py -f %s -d  %s -l %s" \
+                  %(current_dir, filename, dataset_id, level) 
+        
+                   
+        print "executng : %s" %(command)
         subprocess.call(command, shell=True)
         
 
@@ -176,19 +180,19 @@ def scan_filenames_from_file_in_lotus(config):
         start = 0
         for i in range(0, number_of_jobs):
             
-            command = " python " + current_dir + "/scan_dataset.py -f "\
-                      + file + " --num-files " +  num_files + " --start " + str(start)  + " -l " + level 
-        
+            command = " python %s/scan_dataset.py -f %s --num-files %s --start %d  -l %s" \
+                        %(current_dir, file, num_files, start, level)
+            
             start += step
             
-            print "created command :" + command
+            print "created command : %s" %(command)
             commands.append(command)
             
         #include remaning files
-        command = " python " + current_dir + "/scan_dataset.py -f "\
-                  + file + " --num-files " +  str(remainder) + " --start " + str(start)  + " -l " + level 
+        command = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s" \
+                  %(current_dir, file, remainder, start, level)
         
-        print "created command :" + command
+        print "created command : %s" %(command)
         commands.append(command)
     
         
@@ -243,19 +247,20 @@ def scan_filenames_from_file_in_localhost(config):
         start = 0
         for i in range(0, number_of_tasks):
             
-            command = " python " + current_dir + "/scan_dataset.py -f "\
-                      + file + " --num-files " +  num_files + " --start " + str(start)  + " -l " + level 
-        
+            command = " python %s/scan_dataset.py -f %s --num-files %s  --start $d  -l %s"\
+                      %(current_dir, file, num_files, start, level) 
+               
             start += step
             
             print "created command :" + command
             commands.append(command)
             
         #include remaning files
-        command = " python " + current_dir + "/scan_dataset.py -f "\
-                  + file + " --num-files " +  str(remainder) + " --start " + str(start)  + " -l " + level 
+        command = "python %s/scan_dataset.py -f %s --num-files %d  --start %d -l %s" \
+                  %(current_dir, file, remainder, start,  level) 
         
-        print "created command :" + command
+        
+        print "created command : %s" %(command)
         commands.append(command)
     
         
@@ -283,13 +288,19 @@ def scan_files_in_localhost(config, scan_status):
         if ',' in dataset_id :
             dataset_ids_list = dataset_id.split(",")
             for dataset_id_item in dataset_ids_list: 
-                command = "python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id_item + " -l " + level 
-                print "executng :" + command
+                command = "python %s/scan_dataset.py -f %s -d %s -l %s"\
+                          %(current_dir, filename, dataset_id_item, level) 
+                
+                
+                print "executng : %s" %(command)
                 subprocess.call(command, shell=True)
                 #os.system(command)
         else :
-            command = "python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
-            print "executng :" + command
+            command = "python %s/scan_dataset.py -f %s -d %s -l %s" \
+                      %(current_dir, filename, dataset_id,  level) 
+            
+            
+            print "executng : %s"  %(command)
             subprocess.call(command, shell=True)                  
                     
     elif scan_status == Script_status.scan_all_dataset_ids :
@@ -297,8 +308,9 @@ def scan_files_in_localhost(config, scan_status):
         
         for key, value in dataset_ids.iteritems():
             dataset_id = key
-            command = "python " + current_dir + "/scan_dataset.py -f " + filename + " -d " + dataset_id + " -l " + level 
-            print "executng :" + command
+            command = "python  %s/scan_dataset.py -f %s -d  %s -l %s" %(current_dir, filename, dataset_id, level) 
+            
+            print "executng : %s" %(command)
             subprocess.call(command, shell=True)   
     elif scan_status == Script_status.scan_filenames_from_file :
         scan_filenames_from_file_in_localhost(config) 
@@ -311,9 +323,9 @@ def main():
     http://team.ceda.ac.uk/trac/ceda/ticket/23204
     """   
 
-    start = datetime.datetime.now() 
+    start = datetime.datetime.now()    
     print "==============================="             
-    print "Script started at:" +str(start) + ". "
+    print "Script started at: %s." %(str(start))
         
     
     #Get command line arguments. 
@@ -336,7 +348,8 @@ def main():
    
     
     end = datetime.datetime.now() 
-    print "Script ended at :" + str(end) + " it ran for :" + str(end - start) + ". "
+    print "Script ended at : %s  it ran for : %s." \
+          %(str(end), str(end - start)) 
     print "==============================="   
     
 
