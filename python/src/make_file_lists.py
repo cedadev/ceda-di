@@ -80,8 +80,8 @@ def create_file_lists(status, config):
     #Create the commands that will create the files containing the paths to data files. 
     for i in range(0, num_datasets):
             
-        command = "python " + current_dir + "/scan_dataset.py -f "\
-                  + filename + " -d " + datasets_ids[i] + " --make-list " + directroy_to_save_files + "/" + datasets_ids[i] + "_dataset__files.txt"   
+        command = "python %s/scan_dataset.py -f %s -d  %s --make-list %s/%s_dataset__files.txt" \
+                  %(current_dir, filename, datasets_ids[i], directroy_to_save_files, datasets_ids[i])
         
         scan_commands.append(command)          
   
@@ -107,7 +107,7 @@ def main():
    
    
     start = datetime.datetime.now()              
-    print "Script started at:" +str(start) 
+    print "Script started at: %s" %(str(start)) 
        
     status = status_and_defaults[1]
     config = status_and_defaults[0]   
@@ -116,7 +116,7 @@ def main():
     create_file_lists(status, config)
      
     end = datetime.datetime.now()    
-    print "Script ended at :" + str(end) + " it ran for :" + str(end - start) 
+    print "Script ended at : %s it ran for : %s" %(str(end), str(end - start)) 
         
         
 if __name__ == '__main__':

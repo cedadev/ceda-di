@@ -310,27 +310,17 @@ class Extract_seq(Extract):
         
         if format_log_name is None :
             
-            log_fname = (self.conf("es-index") + "_" +
-                         self.conf("dataset") + "_" +
-                         date_and_time_formated + "_" +
-                         socket.gethostname() +
-                         ".log")
+            log_fname = "%s_%s_%s_%s.log" \
+                        %(self.conf("es-index"), self.conf("dataset"), date_and_time_formated, socket.gethostname())
         
         else :
-            log_fname = (self.conf("es-index") + "_" +
-                         date_and_time_formated + "_" +
-                         socket.gethostname() +
-                         ".log")
+            log_fname = "%s_%s_%s.log" %(self.conf("es-index"), date_and_time_formated, socket.gethostname())
+   
             
-          
-            
-        log_fname_es = (self.conf("es-index") + "_" +
-                     datetime.datetime.now().isoformat() + "_" +
-                     socket.gethostname() + "_es" +
-                     ".log")
+        log_fname_es = "%s_%s_%s_es.log" \
+                       %( self.conf("es-index"), datetime.datetime.now().isoformat(), socket.gethostname())
         
-        
-        
+                
         fpath = os.path.join(os.getcwd(),
                              log_fname)
                
@@ -390,8 +380,8 @@ class Extract_seq(Extract):
         #TODO: Make this a library function and make it more efficient.  
         with open(file_containing_paths) as f:
             content = f.readlines()
-            
-        self.logger.info( str(len(content)) + " lines read from file " + "\"" + file_containing_paths + "\"." )   
+                    
+        self.logger.info(("%s lines read from file \"%s\"."  %(str(len(content)), file_containing_paths)))   
        
         list_len = len(content)
         if int(start_file) < 0 or int(start_file) > list_len :
@@ -452,12 +442,14 @@ class Extract_seq(Extract):
         dataset_id = self.conf("dataset")
         path_to_files = util.find_dataset(dataset_ids_file, dataset_id) 
         file_to_store_paths = self.conf("make-list")
-        
-        self.logger.info("Creating file \"" + file_to_store_paths + "\" with paths to files belonging to" + "\"" + dataset_id + "\" dataset." )
+                
+        self.logger.info(("Creating file \%s\ with paths to files belonging to \"%s\" dataset." %(file_to_store_paths, dataset_id ) ) )
         file_list = util.build_file_list(path_to_files)
         
         util.write_list_to_file(file_list, file_to_store_paths)
-        self.logger.info("file \"" + file_to_store_paths + "\" containing paths to files in given dataset has been created.")         
+        
+                
+        self.logger.info(("file \"%s\" containing paths to files in given dataset has been created." %(file_to_store_paths)))         
                                           
     def run_seq(self):      
         
@@ -506,13 +498,12 @@ class Extract_seq(Extract):
                     ret = self.index_properties_seq(es_query, id)
                     
                     end = datetime.datetime.now()
-                    
-                    self.logger.info( os.path.basename(file) + "|" + os.path.dirname(file)+ "|" 
-                              + str(ret) + "|" + str(end - start) + "ms")
+                                        
+                    self.logger.info(("%s|%s|%s|%s ms" %(os.path.basename(file), os.path.dirname(file), str(ret), str(end - start))))
                        
                 else :
-                    end = datetime.datetime.now()
-                    self.logger.info( os.path.basename(file) + "|" + os.path.dirname(file)+ "|" 
-                              + "0" + "|" + str(end - start) + "ms")
+                    end = datetime.datetime.now()              
+                    
+                    self.logger.info("%s|%s|0|%s ms" %(os.path.basename(file), os.path.dirname(file), str(end - start)))
                     continue   
          

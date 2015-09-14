@@ -158,7 +158,7 @@ def main():
       
    
     start = datetime.datetime.now()              
-    print "Script started at:" +str(start) 
+    print "Script started at: %s" %(str(start)) 
          
     
     #Manage the options given. 
@@ -170,7 +170,7 @@ def main():
         read_file_paths_and_store_metadata_to_db(config)           
      
     end = datetime.datetime.now()    
-    print "Script ended at :" + str(end) + " it ran for :" + str(end - start)
+    print "Script ended at : %s it ran for : %s" %(str(end), str(end - start))
         
         
 if __name__ == '__main__':

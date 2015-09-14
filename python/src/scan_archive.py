@@ -62,7 +62,7 @@ def set_program_op_status_and_defaults(com_args):
         conf_path = os.path.join(direc, "../config/ceda_di.json")
         com_args["config"] = conf_path
 
-    #Creates a dictionary with default settings some of them where loaded from th edefaults file.
+    #Creates a dictionary with default settings.
     config = util.get_settings(com_args["config"], com_args)
 
     status_and_defaults.append(config)
