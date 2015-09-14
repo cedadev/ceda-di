@@ -52,7 +52,7 @@ Script_status = Enum( "Script_status",
 def set_program_op_status_and_defaults(com_args):
     
     """
-    Set global variables that determine the operations to be performed. 
+    Sets global variables that determine the operations to be performed. 
     """
      
     status_and_defaults = []   
