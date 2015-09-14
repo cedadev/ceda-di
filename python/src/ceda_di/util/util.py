@@ -154,8 +154,9 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
     iterations_counter = 0
              
         
-    print "Max number of jobs to submit in each step :" + str(max_number_of_tasks_to_submit) + ". "\
-        + "\nTotal number commands to run " + str(len(task_list)) + ". " 
+    print "Max number of jobs to submit in each step : %s.\
+          \nTotal number commands to run : %s." \
+          %(str(max_number_of_tasks_to_submit), str(len(task_list)))                    
                     
     print "==============================="
       
@@ -168,9 +169,9 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
         num_of_tasks_to_submit = max_number_of_tasks_to_submit - num_of_running_tasks             
         iterations_counter = iterations_counter + 1             
            
-        print "Iteration :" + str(iterations_counter) + ". " 
-        print "Number of jobs running  :" + str(num_of_running_tasks) + ". "    
-        print "Number of jobs to submit in this step :" + str(num_of_tasks_to_submit) + ". "
+        print "Iteration : %s." %(str(iterations_counter)) 
+        print "Number of jobs running  : %s." %(str(num_of_running_tasks))    
+        print "Number of jobs to submit in this step : %s." %(str(num_of_tasks_to_submit))
             
         #Submit jobs according to availability.
         for i in range(0, num_of_tasks_to_submit):
@@ -182,17 +183,17 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
             task = task_list[0]
             task_list.remove(task)
                                             
-            command = "bsub " + task 
+            command = "bsub %s" %(task) 
             
             
-            print str(i +1) + ". " +"Executng :" + command
+            print "%s. Executng : %s" %(str(i +1), command)
             subprocess.call(command, shell=True)
             
             
-        print "Number of tasks waiting to be submitted :" + str(len(task_list)) + ". "           
+        print "Number of tasks waiting to be submitted : %s." %(str(len(task_list)))           
                         
         #Wait in case some process terminates. 
-        print "Waiting for :" + str(wait_time) + " secs."            
+        print "Waiting for : %s secs." %(str(wait_time))            
         time.sleep(wait_time)
                                         
                               
