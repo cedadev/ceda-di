@@ -267,63 +267,62 @@ class Extract_seq(Extract):
     File crawler and metadata extractor class.
     Part of core functionality of ceda_di.
     """
-    def __init__(self, conf):
+    def __init__(self, conf, status):
         
         Extract.__init__(self, None)        
         
         self.configuration = conf
-            
-        if ("dataset" in self.configuration)  and ("filename" in self.configuration) \
-            and ("level" in self.configuration):
+        self.status = status   
+        
+        
+        if status == util.Script_status.search_dir_and_store_names_to_file :
+            try:            
+                self.logger = self.prepare_logging_seq()                         
+            except KeyError as k:
+                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
+        elif status == util.Script_status.search_dir_and_store_metadata_to_db :
             try:            
                 self.logger = self.prepare_logging_seq()
                 self.handler_factory = HandlerFactory(self.conf("handlers"))
                 self.file_list = self._build_file_list_from_path()
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))        
-            
-        elif ("make-list" in self.configuration) :
+        elif status == util.Script_status.read_file_paths_and_store_metadata_to_db :
             try:            
-                self.logger = self.prepare_logging_seq()                         
-            except KeyError as k:
-                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
-        
-        elif ("start" in self.configuration ) and ("num-files" in self.configuration) :     
-            try:            
-                self.logger = self.prepare_logging_seq("do_not_format")
+                self.logger = self.prepare_logging_seq()
                 self.handler_factory = HandlerFactory(self.conf("handlers"))
                 self.file_list = self._build_list_from_file()
             
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
-    
-                         
-    def prepare_logging_seq(self, format_log_name = None):
+           
+                            
+    def prepare_logging_seq(self):
+        
         """
-        Initial logging setup
+        Logging setup
         """
+           
+        #Check if logging directory exists and if necessary create it.
+        log_dir = self.conf("log-path")
         
-        #datetime.datetime.now().isoformat()
-        date_and_time = datetime.datetime.now().strftime("%c")
-        date_and_time_formated = date_and_time.replace(":", "_").replace(" ", "_")
-       
-        
-        if format_log_name is None :
-            
-            log_fname = "%s_%s_%s_%s.log" \
-                        %(self.conf("es-index"), self.conf("dataset"), date_and_time_formated, socket.gethostname())
-        
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)   
+                   
+        #kltsa 15/09/2015 changes for issue :23221.
+        if self.status == util.Script_status.read_file_paths_and_store_metadata_to_db : 
+            log_fname = "%s_%s_%s_%s_%s.log" \
+                        %(self.conf("es-index"), self.conf("filename"), self.conf("start"), self.conf("num-files"), socket.gethostname())
         else :
-            log_fname = "%s_%s_%s.log" %(self.conf("es-index"), date_and_time_formated, socket.gethostname())
-   
-            
-        log_fname_es = "%s_%s_%s_es.log" \
-                       %( self.conf("es-index"), datetime.datetime.now().isoformat(), socket.gethostname())
-        
-                
-        fpath = os.path.join(os.getcwd(),
-                             log_fname)
-               
+            log_fname = "%s_%s_%s.log" \
+                        %(self.conf("es-index"), self.conf("dataset"), socket.gethostname())
+         
+         
+        #create the path where to create the log files.               
+        fpath = os.path.join(log_dir,
+                             log_fname
+                            )
+             
         
         LEVELS = { 'debug'   : logging.DEBUG,
                    'info'    : logging.INFO,
@@ -332,14 +331,17 @@ class Extract_seq(Extract):
                    'critical': logging.CRITICAL
                  }
 
+        
         conf_log_level = self.conf("log-level")
         
         
         format = self.conf("logging")["format"]
         level = LEVELS.get(conf_log_level, logging.NOTSET)
-        logging.basicConfig(filename=fpath,
-                        format=format,
-                        level=level)
+        logging.basicConfig( filename=fpath,
+                             filemode="a",   
+                             format=format,
+                             level=level
+                           )
         
                   
         #Enable only logging from within this module.      

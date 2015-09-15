@@ -9,6 +9,21 @@ import subprocess
 
 import simplejson as json
 import time
+from enum import Enum
+
+
+#some globals.
+Script_status = Enum( "Script_status",
+                      "search_dir_and_store_names_to_file \
+                       search_dir_and_store_metadata_to_db \
+                       read_file_paths_and_store_metadata_to_db\
+                       run_script_in_lotus \
+                       run_script_in_localhost \
+                       scan_specific_dataset_id \
+                       scan_all_dataset_ids \
+                       scan_filenames_from_file \
+                       stay_idle"
+                    )
 
 
 def sanitise_args(config):

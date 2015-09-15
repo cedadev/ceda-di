@@ -39,15 +39,6 @@ from enum import Enum
 import subprocess
 import time
 
-Script_status = Enum( "Script_status",
-                      "run_script_in_lotus \
-                       run_script_in_localhost \
-                       scan_specific_dataset_id \
-                       scan_all_dataset_ids \
-                       scan_filenames_from_file \
-                       stay_idle"
-                    )
- 
  
 def set_program_op_status_and_defaults(com_args):
     
@@ -69,20 +60,20 @@ def set_program_op_status_and_defaults(com_args):
        
             
     if ("host" in config) and (config["host"] == "lotus"):
-        status_and_defaults.append(Script_status.run_script_in_lotus)
+        status_and_defaults.append(util.Script_status.run_script_in_lotus)
     elif ("host" in config) and config["host"] == "localhost": 
-        status_and_defaults.append(Script_status.run_script_in_localhost)
+        status_and_defaults.append(util.Script_status.run_script_in_localhost)
     else :
-        status_and_defaults.append(Script_status.stay_idle)
+        status_and_defaults.append(util.Script_status.stay_idle)
        
     if ("level" in config) and not ("dataset" in config):
-        status_and_defaults.append(Script_status.scan_filenames_from_file)       
+        status_and_defaults.append(util.Script_status.scan_filenames_from_file)       
     elif ("dataset" in config) and  config["dataset"] == "all" :
-        status_and_defaults.append(Script_status.scan_all_dataset_ids)  
+        status_and_defaults.append(util.Script_status.scan_all_dataset_ids)  
     elif ("dataset" in config) and  config["dataset"] != "all" :
-        status_and_defaults.append(Script_status.scan_specific_dataset_id)
+        status_and_defaults.append(util.Script_status.scan_specific_dataset_id)
     else :
-        status_and_defaults.append(Script_status.stay_idle)
+        status_and_defaults.append(util.Script_status.stay_idle)
        
     return status_and_defaults     
 
@@ -208,13 +199,13 @@ def scan_files_in_lotus(config, scan_status):
     """
         
     #Scan given dataset ids  or file. 
-    if scan_status == Script_status.scan_specific_dataset_id :
+    if scan_status == util.Script_status.scan_specific_dataset_id :
         scan_specific_datasets_in_lotus(config)      
 
-    elif scan_status == Script_status.scan_all_dataset_ids :
+    elif scan_status == util.Script_status.scan_all_dataset_ids :
         scan_all_datasets_in_lotus(config)
                                 
-    elif scan_status == Script_status.scan_filenames_from_file :
+    elif scan_status == util.Script_status.scan_filenames_from_file :
         scan_filenames_from_file_in_lotus(config)   
                  
 
@@ -283,7 +274,7 @@ def scan_files_in_localhost(config, scan_status):
     current_dir = os.getcwd()    
           
     #Manage the options given. 
-    if scan_status == Script_status.scan_specific_dataset_id :
+    if scan_status == util.Script_status.scan_specific_dataset_id :
         dataset_id = config["dataset"]
         if ',' in dataset_id :
             dataset_ids_list = dataset_id.split(",")
@@ -303,7 +294,7 @@ def scan_files_in_localhost(config, scan_status):
             print "executng : %s"  %(command)
             subprocess.call(command, shell=True)                  
                     
-    elif scan_status == Script_status.scan_all_dataset_ids :
+    elif scan_status == util.Script_status.scan_all_dataset_ids :
         dataset_ids = util.find_dataset(filename, "all")       
         
         for key, value in dataset_ids.iteritems():
@@ -312,7 +303,7 @@ def scan_files_in_localhost(config, scan_status):
             
             print "executng : %s" %(command)
             subprocess.call(command, shell=True)   
-    elif scan_status == Script_status.scan_filenames_from_file :
+    elif scan_status == util.Script_status.scan_filenames_from_file :
         scan_filenames_from_file_in_localhost(config) 
         
  
@@ -339,9 +330,9 @@ def main():
     scan_status = status_and_defaults[2]
   
      #Calls appropriate functions. 
-    if run_status == Script_status.run_script_in_lotus :
+    if run_status == util.Script_status.run_script_in_lotus :
         scan_files_in_lotus(config_file, scan_status)
-    elif run_status == Script_status.run_script_in_localhost :   
+    elif run_status == util.Script_status.run_script_in_localhost :   
         scan_files_in_localhost(config_file, scan_status)
     else :
         print "Some options could not be recognized.\n"

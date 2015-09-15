@@ -46,15 +46,6 @@ import sys
 from Cython.Shadow import NULL
 
 
-
-Script_status = Enum( "Script_status",
-                      "search_dir_and_store_names_to_file \
-                       search_dir_and_store_metadata_to_db \
-                       read_file_paths_and_store_metadata_to_db\
-                      "
-                    )
-
-
 def ckeck_com_args_validity(config, status):
     
     """
@@ -63,7 +54,7 @@ def ckeck_com_args_validity(config, status):
     :returns:
     """
     
-    if status == Script_status.search_dir_and_store_names_to_file :
+    if status == util.Script_status.search_dir_and_store_names_to_file :
         return
         
     level = int(config.get("level")) 
@@ -72,34 +63,34 @@ def ckeck_com_args_validity(config, status):
         raise ValueError("Level value is out of range, please use value between 1-3.")   
            
     
-def scan_dir_and_store_metadata_to_db(conf):
+def scan_dir_and_store_metadata_to_db(conf, status):
     
     """
     Reads files from a specific directory in filesystem 
     and outputs metadata to elastic search database.    
     """     
-    extract = Extract_seq(conf)
+    extract = Extract_seq(conf, status)
     extract.run_seq();      
       
               
-def scan_dir_and_store_filenames_to_file(conf):
+def scan_dir_and_store_filenames_to_file(conf, status):
     
     """
     Reads files from a specific directory in filesystem 
     and stores their filenames and path to a file.
     """ 
-    extract = Extract_seq(conf)
+    extract = Extract_seq(conf, status)
     extract.store_filenames_to_file();                
    
         
-def read_file_paths_and_store_metadata_to_db(conf) :
+def read_file_paths_and_store_metadata_to_db(conf, status) :
     
     """
     Reads file paths form a given file, extracts metadata 
     for each file and posts results to elastic search.  
     """
                           
-    extract = Extract_seq(conf)
+    extract = Extract_seq(conf, status)
     extract.run_seq();      
     
         
@@ -122,12 +113,12 @@ def set_program_op_status_and_defaults(com_args):
     status_and_defaults.append(config)
        
     if ("make-list" in config) and ("dataset" in config) and  ("filename" in config) :
-        status_and_defaults.append(Script_status.search_dir_and_store_names_to_file)
+        status_and_defaults.append(util.Script_status.search_dir_and_store_names_to_file)
     elif  ("dataset" in config) and  ("filename" in config) and ("level" in config) :
-        status_and_defaults.append(Script_status.search_dir_and_store_metadata_to_db)  
+        status_and_defaults.append(util.Script_status.search_dir_and_store_metadata_to_db)  
     elif  ("filename" in config) and ("start" in config) and \
           ("num-files" in config) and ("level" in config)  :     
-        status_and_defaults.append(Script_status.read_file_paths_and_store_metadata_to_db)        
+        status_and_defaults.append(util.Script_status.read_file_paths_and_store_metadata_to_db)        
     
     
     return status_and_defaults     
@@ -162,12 +153,12 @@ def main():
          
     
     #Manage the options given. 
-    if status == Script_status.search_dir_and_store_names_to_file :
-        scan_dir_and_store_filenames_to_file(config)
-    elif status == Script_status.search_dir_and_store_metadata_to_db :
-        scan_dir_and_store_metadata_to_db(config)     
-    elif status == Script_status.read_file_paths_and_store_metadata_to_db :
-        read_file_paths_and_store_metadata_to_db(config)           
+    if status == util.Script_status.search_dir_and_store_names_to_file :
+        scan_dir_and_store_filenames_to_file(config, status)
+    elif status == util.Script_status.search_dir_and_store_metadata_to_db :
+        scan_dir_and_store_metadata_to_db(config, status)     
+    elif status == util.Script_status.read_file_paths_and_store_metadata_to_db :
+        read_file_paths_and_store_metadata_to_db(config, status)           
      
     end = datetime.datetime.now()    
     print "Script ended at : %s it ran for : %s" %(str(end), str(end - start))

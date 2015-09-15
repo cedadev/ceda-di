@@ -58,7 +58,7 @@
     "_ref": "(see: https://docs.python.org/2/library/logging.html)",
     "logging": {
         "_option": "format: log entry format string",
-        "format": "[%(levelname)s] (%(name)s) %(message)s"
+        "format": "[%(levelname)s] %(asctime)s (%(name)s) %(message)s"
     },
 
     "_option": "handlers: python classes to handle data files",
