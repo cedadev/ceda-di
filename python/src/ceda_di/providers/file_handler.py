@@ -19,7 +19,7 @@ class GENERIC:
         if file_path is None:
             return None
         
-        #check if file still exists  
+        #check if file still exists.  
         file_exists = os.path.isfile(file_path) 
         
         if not file_exists :
