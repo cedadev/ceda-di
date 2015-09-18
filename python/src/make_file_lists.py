@@ -64,7 +64,7 @@ def set_program_op_status_and_defaults(com_args):
 def create_file_lists(status, config):
     
     """
-    Find and store all files belonging to each dataset. 
+    Finds and stores all files belonging to each dataset. 
     """
     
     #Get file.

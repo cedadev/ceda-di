@@ -43,10 +43,11 @@ import time
 def set_program_op_status_and_defaults(com_args):
     
     """
-    Sets global variables that determine the operations to be performed. 
+    Determines the operations to be performed by the script. 
     """
      
     status_and_defaults = []   
+    
     # Searches for the configuration file.
     if 'config' not in com_args or not conf_args["config"]:
         direc = os.path.dirname(__file__)
@@ -58,7 +59,7 @@ def set_program_op_status_and_defaults(com_args):
 
     status_and_defaults.append(config)
        
-            
+    #Determines if script will run on lotus or local host.        
     if ("host" in config) and (config["host"] == "lotus"):
         status_and_defaults.append(util.Script_status.run_script_in_lotus)
     elif ("host" in config) and config["host"] == "localhost": 
@@ -66,6 +67,8 @@ def set_program_op_status_and_defaults(com_args):
     else :
         status_and_defaults.append(util.Script_status.stay_idle)
        
+    #Determines if script will read paths from file or if it will search for
+    #files using a dataset id.    
     if ("level" in config) and not ("dataset" in config):
         status_and_defaults.append(util.Script_status.scan_filenames_from_file)       
     elif ("dataset" in config) and  config["dataset"] == "all" :

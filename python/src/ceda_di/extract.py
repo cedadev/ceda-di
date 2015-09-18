@@ -371,8 +371,8 @@ class Extract_seq(Extract):
     def _build_list_from_file(self):
         
         """
-        Reads file paths form a given file, extracts metadata 
-        for each file and posts results to elastic search.  
+        Reads file paths form a given file and returns a list
+        of files.  
         """
             
         file_containing_paths = self.conf("filename")
