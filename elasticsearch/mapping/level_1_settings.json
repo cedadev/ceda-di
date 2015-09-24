@@ -1,59 +1,17 @@
 ﻿{
-  "settings": 
-  {
-    "analysis": 
-    {
-      "filter": 
-      {
-        "min_length_5_filter": 
-        {
-          "type": "length",
-          "min": 5,
-          "max": 256
-        },
-        "path_filter": 
-        {
-          "type": "word_delimiter",
-          "generate_word_parts": "yes",
-          "generate_number_parts": "no",
-          "split_on_numerics": "no"
-        }
-      },
-      "analyzer": 
-      {
-        "variable_name_analyzer": 
-        {
-          "type": "custom",
-          "tokenizer": "keyword",
-          "filter": ["min_length_5_filter"]
-        },
-        "path_hierarchy_analyzer": 
-        {
-          "type": "custom",
-          "tokenizer": "path_hierarchy"
-        },
-        "path_analyzer": 
-        {
-          "type": "custom",
-          "tokenizer": "standard",
-          "filter": ["path_filter"]
-        }
-      }
-    }
-  },
   "mappings" :  
   {
     "file" :
     {
       "properties":
       {
-        "directory": {"type":"string"},
+        "directory": {"type":"string", "index" : "not_analyzed"},
         "format":{"type":"string"},
         "md5":{"type":"string"},
         "name":{"type":"string"},
-        "size":{"type":"long"},
+        "size":{"type":"float"},
         "type":{"type":"string"},
-        "autocomplete": { "type": "completion", "index_analyzer": "variable_name_analyzer", "search_analyzer": "simple"}
+        "name_auto": { "type": "completion", "search_analyzer": "simple", "index_analyzer": "simple", "payloads": false}
       }
     }
   }

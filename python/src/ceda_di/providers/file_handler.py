@@ -1,6 +1,7 @@
 import logging
 import os
 import ntpath
+import json
 
 class GENERIC:
     """
@@ -9,6 +10,7 @@ class GENERIC:
           
     def __init__(self):      
         self.doc={}
+        self.subdoc={}
                 
     def get_properties(self, file_path):
         """
@@ -38,7 +40,13 @@ class GENERIC:
         
         filename = os.path.basename(file_path) #ntpath.basename(file_path)
         self.doc["name"] = filename 
-        self.doc["autocomplete"] = filename
+        
+        #self.subdoc[input] = filename
+        
+        #subval = json.dumps(self.subdoc)
+             
+        self.doc["name_auto"] = filename    
+        
         
         self.size = os.path.getsize(file_path)
         self.size_h = self.size/(1024*1024.0)
