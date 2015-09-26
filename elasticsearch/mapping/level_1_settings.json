@@ -8,7 +8,7 @@
         "directory": {"type":"string", "index" : "not_analyzed"},
         "format":{"type":"string"},
         "md5":{"type":"string"},
-        "name":{"type":"string"},
+        "name":{"type":"string", "index" : "not_analyzed"},
         "size":{"type":"float"},
         "type":{"type":"string"},
         "name_auto": { "type": "completion", "search_analyzer": "simple", "index_analyzer": "simple", "payloads": false}
