@@ -261,7 +261,7 @@ class Extract(object):
                          start.isoformat(), end.isoformat(), end - start)             
   
 #kltsa 14/08/2015 issue #23203.    
-class Extract_seq(Extract):    
+class ExtractSeq(Extract): 
         
     """
     File crawler and metadata extractor class.

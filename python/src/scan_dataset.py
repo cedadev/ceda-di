@@ -32,7 +32,7 @@ from docopt import docopt
 
 import ceda_di.util.util as util
 from ceda_di import __version__  # Grab version from package __init__.py
-from ceda_di.extract import Extract_seq
+from ceda_di.extract import ExtractSeq
 from ceda_di.index import BulkIndexer
 from ceda_di.search import Searcher
 from operator import or_
@@ -69,7 +69,7 @@ def scan_dir_and_store_metadata_to_db(conf, status):
     Reads files from a specific directory in filesystem 
     and outputs metadata to elastic search database.    
     """     
-    extract = Extract_seq(conf, status)
+    extract = ExtractSeq(conf, status)
     extract.run_seq();      
       
               
@@ -79,7 +79,7 @@ def scan_dir_and_store_filenames_to_file(conf, status):
     Reads files from a specific directory in filesystem 
     and stores their filenames and path to a file.
     """ 
-    extract = Extract_seq(conf, status)
+    extract = ExtractSeq(conf, status)
     extract.store_filenames_to_file();                
    
         
@@ -90,7 +90,7 @@ def read_file_paths_and_store_metadata_to_db(conf, status) :
     for each file and posts results to elastic search.  
     """
                           
-    extract = Extract_seq(conf, status)
+    extract = ExtractSeq(conf, status)
     extract.run_seq();      
     
         
