@@ -3,7 +3,7 @@ import os
 import ntpath
 import json
 
-class GENERIC:
+class Generic:
     """
     Simple class for returning basic information about a file.
     """
