@@ -497,7 +497,7 @@ class ExtractSeq(Extract):
                     es_query = json.dumps(doc)
                     id = hashlib.sha1(file).hexdigest()      
                 
-                    ret = self.index_properties_seq(es_query, id)
+                    ret = self.index_properties_seq(doc, id)
                     
                     end = datetime.datetime.now()
                                         

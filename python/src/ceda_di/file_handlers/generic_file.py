@@ -3,14 +3,14 @@ import os
 import ntpath
 import json
 
-class  GenericFile:
+class  GenericFile(object):
     """
     Simple class for returning basic information about a file.
     """
           
     def __init__(self):      
         self.doc={}
-        self.subdoc={}
+        self.subdoc={}        
                 
     def get_properties(self, file_path):
         """
@@ -20,6 +20,8 @@ class  GenericFile:
                 
         if file_path is None:
             return None
+        else : 
+            self.file_path = file_path
         
         #check if file still exists.  
         file_exists = os.path.isfile(file_path) 
