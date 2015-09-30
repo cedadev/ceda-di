@@ -18,7 +18,7 @@
     "max-results": 100,
 
     "_option": "output-path: main output directory",
-    "output-path": "/work/scratch/ceda-di",
+    "output-path": ".i",
 
     "_option": "log-path: log dir path, relative to 'outputpath'",
     "log-path": "/home/kleanthis/Dev/python_dev/ceda-di/log/",
@@ -77,7 +77,7 @@
         },
         ".$": {
             "class": "ceda_di.providers.file_handler.Generic",
-            "priority": 9
+            "priority": 100
         }
         
     }

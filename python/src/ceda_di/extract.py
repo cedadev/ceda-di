@@ -102,6 +102,7 @@ class Extract(object):
             return
         
         try: 
+            self.configuration = conf
             self.make_dirs(conf)
             self.logger = self.prepare_logging()
             self.handler_factory = HandlerFactory(self.conf("handlers"))
@@ -119,8 +120,7 @@ class Extract(object):
         :return: A list of file paths
         """            
         path_l = self.conf("input-path")
-        followlinks = True
-        return util.build_file_list(path_l, followlinks)
+        return util.build_file_list(path_l)
           
     def conf(self, conf_opt):
         """
@@ -240,10 +240,14 @@ class Extract(object):
                 # loaded from JSON end up in unicode
                 path = f
                 if "raw" not in path:
-                    p = multiprocessing.Process(target=self.process_file,
-                                                args=(path,))
-                    pool.append(p)
-                    p.start()
+                    #lets do that sequentially 
+                    
+                    self.process_file(path)
+                    
+                    #p = multiprocessing.Process(target=self.process_file,
+                    #                            args=(path,))
+                    #pool.append(p)
+                    #p.start()
 
                 while len(pool) >= self.conf("num-cores"):
                     for p in pool:
