@@ -5,12 +5,10 @@ import netCDF4
 import json
 
 from ceda_di.file_handlers.netcdf_file import NetCDFFile  
+from elasticsearch import Elasticsearch
  
 def main():
     
-    #29/09/2015 Test code delete after done.
-    
-    from elasticsearch import Elasticsearch
     es = Elasticsearch()   
     
     print "script started."  
