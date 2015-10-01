@@ -83,17 +83,17 @@ class  GenericFile(object):
         #Extra information.
         netcdf_file_content_dict = {}
         for item in set(self.netcdf_common_variables):
-               netcdf_file_content_dict[item] = ""
+            netcdf_file_content_dict[item] = ""
                
         netcdf_file_content_dict["unknown_vars"] = ""       
         
         
-        file_summary_dict = {}        
-        file_summary_dict["basic_file_info"] = self.get_properties()
-        file_summary_dict["netcdf_variables_info"] = netcdf_file_content_dict 
+        summary_info = {}        
+        summary_info["basic_file_info"] = self.get_properties()
+        summary_info["netcdf_variables_info"] = netcdf_file_content_dict 
     
                            
-        return file_summary_dict
+        return summary_info
         
                    
     def __enter__(self):

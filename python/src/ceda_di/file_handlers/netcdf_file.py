@@ -41,17 +41,17 @@ class   NetCDFFile(GenericFile):
            and its contents.            
         """
         
-        doc_file_info    = self.get_properties()
-        doc_content_info = self.phenomena() 
+        file_info = self.get_properties()
+        netcdf_phenomena = self.phenomena() 
         unknown_vars = []    
             
-        file_content_dict = {}
-        for item in doc_content_info:
+        netcdf_file_content = {}
+        for item in netcdf_phenomena:
             for inner_item in item.get() :
                 key = inner_item["name"]
                 value = inner_item["value"]
                 if key in self.netcdf_common_variables :
-                    file_content_dict[key] = value
+                    netcdf_file_content[key] = value
                 else :
                     unknown_vars.append(key)
                     unknown_vars.append(" : ")    
@@ -61,15 +61,15 @@ class   NetCDFFile(GenericFile):
         if len(unknown_vars) > 0 :            
             unknown_vars_str = ""
                 
-            file_content_dict["unknown_vars"] = unknown_vars_str.join(unknown_vars)
+            netcdf_file_content["unknown_vars"] = unknown_vars_str.join(unknown_vars)
             
                      
-        file_summary_dict = {}        
-        file_summary_dict["basic_file_info"] = doc_file_info
-        file_summary_dict["netcdf_variables_info"] = file_content_dict 
+        summary_info = {}        
+        summary_info["basic_file_info"] = file_info
+        summary_info["netcdf_variables_info"] = netcdf_file_content 
     
        
-        return file_summary_dict      
+        return summary_info      
               
                 
     def __enter__(self):
