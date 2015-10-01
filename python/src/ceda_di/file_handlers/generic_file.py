@@ -75,8 +75,7 @@ class  GenericFile(object):
         doc["size"] = size_h
         doc["type"] = "file"              
         
-        return doc
-              
+        return doc              
               
               
     def get_properties_generic(self):           

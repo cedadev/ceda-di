@@ -279,22 +279,30 @@ class ExtractSeq(Extract):
         Extract.__init__(self, None)        
         
         self.configuration = conf
-        self.status = status   
+        self.status = status 
+        self.logger = None
+        self.handler_factory = None
+        self.file_list = None       
+           
+           
+    def prepare_run(self):
         
-        
-        if status == util.Script_status.search_dir_and_store_names_to_file :
+        """
+         Prepares data structures needed for the extraction.
+        """
+        if self.status == util.Script_status.search_dir_and_store_names_to_file :
             try:            
                 self.logger = self.prepare_logging_seq()                         
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
-        elif status == util.Script_status.search_dir_and_store_metadata_to_db :
+        elif self.status == util.Script_status.search_dir_and_store_metadata_to_db :
             try:            
                 self.logger = self.prepare_logging_seq()
                 self.handler_factory = HandlerFactory(self.conf("handlers"))
                 self.file_list = self._build_file_list_from_path()
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))        
-        elif status == util.Script_status.read_file_paths_and_store_metadata_to_db :
+        elif self.status == util.Script_status.read_file_paths_and_store_metadata_to_db :
             try:            
                 self.logger = self.prepare_logging_seq()
                 self.handler_factory = HandlerFactory(self.conf("handlers"))
@@ -302,12 +310,12 @@ class ExtractSeq(Extract):
             
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
-           
+         
                             
     def prepare_logging_seq(self):
         
         """
-        Logging setup
+        Logging setup.
         """
            
         #Check if logging directory exists and if necessary create it.
@@ -342,11 +350,11 @@ class ExtractSeq(Extract):
         conf_log_level = self.conf("log-level")
         
         
-        format = self.conf("logging")["format"]
+        log_format = self.conf("logging")["format"]
         level = LEVELS.get(conf_log_level, logging.NOTSET)
         logging.basicConfig( filename=fpath,
                              filemode="a",   
-                             format=format,
+                             format=log_format,
                              level=level
                            )
         
@@ -366,15 +374,15 @@ class ExtractSeq(Extract):
    
     
     def  _build_file_list_from_path(self):
-         # Finds the directory to be scanned 
-         dataset_ids_file = self.conf("filename")
-         dataset_id = self.conf("dataset")
-         #derectory where the files to be searched are.
-         path_to_files = util.find_dataset(dataset_ids_file, dataset_id) 
+        # Finds the directory to be scanned 
+        dataset_ids_file = self.conf("filename")
+        dataset_id = self.conf("dataset")
+        #derectory where the files to be searched are.
+        path_to_files = util.find_dataset(dataset_ids_file, dataset_id) 
          
-         test = util.build_file_list(path_to_files)
+        test = util.build_file_list(path_to_files)
          
-         return test
+        return test
                 
         
     def _build_list_from_file(self):
@@ -414,16 +422,17 @@ class ExtractSeq(Extract):
         return new_file_list       
    
             
-    def index_properties_seq(self, body, id):
+    def index_properties_seq(self, body, es_id):
+        
         """
         Index the file in Elasticsearch.
         """
-
+        
         try:
             self.es.index(index=self.conf('es-index'),
                       doc_type=self.conf('es-mapping'),
                       body=body,
-                      id=id) 
+                      id=es_id) 
         except :
             return -1 
         
@@ -445,8 +454,8 @@ class ExtractSeq(Extract):
             
     def process_file_seq(self, filename, level):
         """
-         Instantiates a handler for a file and is using it to 
-         extracts metadata from the file.
+        Returns metadata from file depending on
+        file extension.
         """
         
         metadata = self.get_metadata_by_level(level, filename)  
@@ -479,6 +488,9 @@ class ExtractSeq(Extract):
          and posts them in elastic search.
         """
             
+        #Create all data structures needed.
+        self.prepare_run(self)    
+                    
         #Sanity check.    
         if self.file_list is None:
             self.logger.info( "File list is empty.") 
@@ -494,29 +506,27 @@ class ExtractSeq(Extract):
             if te[0] == 400:
                 pass
             else:
-                raise TransportError(te)
- 
-         
+                raise TransportError(te)         
         
         doc = {}       
         level = self.conf("level")
         
         if len(self.file_list) > 0:
             
-            for file in self.file_list:
+            for filename in self.file_list:
                 #file_path = f
                 
                 #self.logger.info("Metadata extraction started for file %s", file_path)
                 start = datetime.datetime.now()
                 
-                doc = self.process_file_seq(file, level)    
+                doc = self.process_file_seq(filename, level)    
                 
                 if doc is not None :
                                                                
                     es_query = json.dumps(doc)
-                    id = hashlib.sha1(file).hexdigest()      
+                    es_id = hashlib.sha1(file).hexdigest()      
                 
-                    ret = self.index_properties_seq(doc, id)
+                    ret = self.index_properties_seq(doc, es_id)
                     
                     end = datetime.datetime.now()
                                         
@@ -526,5 +536,4 @@ class ExtractSeq(Extract):
                     end = datetime.datetime.now()              
                     
                     self.logger.info("%s|%s|0|%s ms" %(os.path.basename(file), os.path.dirname(file), str(end - start)))
-                    continue   
-         
+                    continue
