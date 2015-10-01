@@ -17,6 +17,9 @@ import hashlib
 import socket
 import ceda_di.util.util as util
 
+import ceda_di.file_handlers.generic_file as generic_file
+import ceda_di.file_handlers.netcdf_file as netcdf_file
+
 ########
 from elasticsearch.exceptions import TransportError
 
@@ -51,7 +54,7 @@ class HandlerFactory(object):
         if handler_class is not None:
             return handler_class(filename)
         
-    def get_handler_by_level(self, level, filename = None):
+    def get_handler_by_level(self, level, file_path = None):
         """
         Return instance of correct file handler class for 
         the specified level.
@@ -59,7 +62,7 @@ class HandlerFactory(object):
         if level is "1" :
             handler = self.handlers[".$"]
             handler_class = handler['class']
-            return handler_class() 
+            return handler_class(file_path) 
         else :
             return None                
         
@@ -369,7 +372,9 @@ class ExtractSeq(Extract):
          #derectory where the files to be searched are.
          path_to_files = util.find_dataset(dataset_ids_file, dataset_id) 
          
-         return util.build_file_list(path_to_files)
+         test = util.build_file_list(path_to_files)
+         
+         return test
                 
         
     def _build_list_from_file(self):
@@ -422,7 +427,21 @@ class ExtractSeq(Extract):
         except :
             return -1 
         
-        return 1  
+        return 1
+    
+    def get_metadata_by_level(self, level, filename) :
+            
+        extension = os.path.splitext(filename)[1]
+                    
+        if level is "1" :
+            if extension == ".nc" :
+                handle = netcdf_file.NetCDFFile(filename) 
+                return handle.get_properties_netcdf()
+            else :
+                handle = generic_file.GenericFile(filename)
+                return handle.get_properties_generic()
+        else :
+            return None
             
     def process_file_seq(self, filename, level):
         """
@@ -430,14 +449,10 @@ class ExtractSeq(Extract):
          extracts metadata from the file.
         """
         
-        handler = self.handler_factory.get_handler_by_level(level)  
+        metadata = self.get_metadata_by_level(level, filename)  
           
-        if handler is not None:
-            with handler as hand:
-                return handler.get_properties(filename)    
-        else :
-            return None       
-    
+        return metadata    
+        
     def store_filenames_to_file(self):
         """
         Reads files from a specific directory in filesystem 
