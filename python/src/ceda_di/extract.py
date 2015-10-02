@@ -445,6 +445,7 @@ class ExtractSeq(Extract):
         if level is "1" :
             if extension == ".nc" :
                 handle = netcdf_file.NetCDFFile(filename) 
+                #return handle.get_properties_netcdf()
                 return handle.get_properties_netcdf()
             else :
                 handle = generic_file.GenericFile(filename)
@@ -500,6 +501,7 @@ class ExtractSeq(Extract):
         es_factory = ElasticsearchClientFactory()
         self.es = es_factory.get_client(self.configuration)
 
+       
         try:
             index.create_index(self.configuration, self.es)
         except TransportError as te:

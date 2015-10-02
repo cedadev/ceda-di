@@ -10,27 +10,7 @@ class  GenericFile(object):
           
     def __init__(self, file_path):      
         self.file_path = file_path
-        
-        self.netcdf_common_variables = set(
-                                     [
-                                       "_FillValue", 
-                                       "associated_files",
-                                       "axis", 
-                                       "bounds",
-                                       "calendar",
-                                       "cell_measures",
-                                       "cell_methods",
-                                       "formula",
-                                       "formula_terms",
-                                       "history",
-                                       "long_name",
-                                       "missing_value",
-                                       "positive",
-                                       "standard_name",
-                                       "units"
-                                     ]
-                                   )                  
-                
+    
                 
     def get_properties(self):
         """
@@ -53,47 +33,43 @@ class  GenericFile(object):
         if is_symlink :
             return None  
                 
-        doc = {}        
+        file_info = {}        
                 
         #This is a regular file.       
-        doc["directory"] = os.path.dirname(self.file_path)
-        doc["format"] = "data file"
-        doc["md5"] = ""
+        file_info["directory"] = os.path.dirname(self.file_path)
+        file_info["format"] = "data file"
+        file_info["md5"] = ""
         
         filename = os.path.basename(self.file_path) #ntpath.basename(file_path)
-        doc["name"] = filename 
+        file_info["name"] = filename 
         
         #self.subdoc[input] = filename
         
         #subval = json.dumps(self.subdoc)
              
-        doc["name_auto"] = filename    
+        file_info["name_auto"] = filename    
         
         
         size = os.path.getsize(self.file_path)
         size_h = size/(1024*1024.0)
-        doc["size"] = size_h
-        doc["type"] = "file"              
+        file_info["size"] = size_h
+        file_info["type"] = "file"              
         
-        return doc              
-              
-              
-    def get_properties_generic(self):           
-        #Extra information.
-        netcdf_file_content_dict = {}
-        for item in set(self.netcdf_common_variables):
-            netcdf_file_content_dict[item] = ""
-               
-        netcdf_file_content_dict["unknown_vars"] = ""       
+        return file_info              
+      
+    def get_properties_generic(self):
         
-        
+        file_info = self.get_properties()          
+          
+        if file_info is None :
+            return None
+                                 
         summary_info = {}        
-        summary_info["basic_file_info"] = self.get_properties()
-        summary_info["netcdf_variables_info"] = netcdf_file_content_dict 
-    
-                           
-        return summary_info
-        
+        summary_info["info"] = file_info
+        summary_info["phenomena"] = [{"name" : "None", "value" : "None"}] 
+            
+        return summary_info    
+            
                    
     def __enter__(self):
         return self
