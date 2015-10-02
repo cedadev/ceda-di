@@ -489,7 +489,7 @@ class ExtractSeq(Extract):
         """
             
         #Create all data structures needed.
-        self.prepare_run(self)    
+        self.prepare_run()    
                     
         #Sanity check.    
         if self.file_list is None:
@@ -523,17 +523,17 @@ class ExtractSeq(Extract):
                 
                 if doc is not None :
                                                                
-                    es_query = json.dumps(doc)
-                    es_id = hashlib.sha1(file).hexdigest()      
+                    #es_query = json.dumps(doc)
+                    es_id = hashlib.sha1(filename).hexdigest()      
                 
                     ret = self.index_properties_seq(doc, es_id)
                     
                     end = datetime.datetime.now()
                                         
-                    self.logger.info(("%s|%s|%s|%s ms" %(os.path.basename(file), os.path.dirname(file), str(ret), str(end - start))))
+                    self.logger.info(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), str(ret), str(end - start))))
                        
                 else :
                     end = datetime.datetime.now()              
                     
-                    self.logger.info("%s|%s|0|%s ms" %(os.path.basename(file), os.path.dirname(file), str(end - start)))
+                    self.logger.info("%s|%s|0|%s ms" %(os.path.basename(filename), os.path.dirname(filename), str(end - start)))
                     continue

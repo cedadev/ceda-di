@@ -46,23 +46,35 @@ class   NetCDFFile(GenericFile):
         unknown_vars = []    
             
         netcdf_file_content = {}
+        found_vars = []
         for item in netcdf_phenomena:
             for inner_item in item.get() :
                 key = inner_item["name"]
                 value = inner_item["value"]
                 if key in self.netcdf_common_variables :
                     netcdf_file_content[key] = value
+                    found_vars.append(key)
                 else :
                     unknown_vars.append(key)
                     unknown_vars.append(" : ")    
                     unknown_vars.append(value)
                     unknown_vars.append(" ")
+        
          
+        #insert an empty string for the variables that was not found. 
+        vars_found_set  = set(found_vars)
+        known_vars_not_found = self.netcdf_common_variables - vars_found_set
+        
+        for item in known_vars_not_found:
+            netcdf_file_content[item] = ""    
+        
+        
         if len(unknown_vars) > 0 :            
             unknown_vars_str = ""
                 
             netcdf_file_content["unknown_vars"] = unknown_vars_str.join(unknown_vars)
-            
+        else :
+            netcdf_file_content["unknown_vars"] = ""        
                      
         summary_info = {}        
         summary_info["basic_file_info"] = file_info
