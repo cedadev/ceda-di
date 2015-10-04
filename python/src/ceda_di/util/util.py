@@ -44,10 +44,10 @@ def sanitise_args(config):
 
 def read_conf(conf_path):
     """
-    Read configuration file into a dictionary.
+    Reads configuration file into a dictionary.
 
-    :param conf_path: Path to the JSON configuration file
-    :returns: Dict containing parsed JSON conf
+    :param conf_path: Path to the JSON configuration file.
+    :returns: Dict containing parsed JSON conf.
     """
     try:
         with open(conf_path, "r") as conf:
@@ -84,8 +84,7 @@ def get_settings(conf_path, args):
 
 def build_file_list(path):
     """
-    :Return Directory 
-    :return: A list of file paths
+    :Return: A list of file paths.
     """            
     file_list = []
     for root, _, files in os.walk(path, followlinks=True):
@@ -94,8 +93,13 @@ def build_file_list(path):
 
     return file_list
 
-def write_list_to_file(file_list, file):
-    f = open(file, 'w')
+def write_list_to_file(file_list, filename):
+    
+    """
+    Saves content of a list to a file.
+    """
+        
+    f = open(filename, 'w')
     
     for item in file_list:
         f.writelines(item)
@@ -104,26 +108,30 @@ def write_list_to_file(file_list, file):
     f.close()
     
     
-def find_dataset(file, dataset_id):
+def find_dataset(filename, dataset_id):
     """
     :Returns: The path of the given dataset id. 
     """
-    vars = {}
-    with open(file) as l_file:
+    var_dict = {}
+    with open(filename) as l_file:
         for line in l_file:
             if not line.startswith("#") :
                 name, var = line.partition("=")[::2]
-                vars[name.strip()] = var.strip()
+                var_dict[name.strip()] = var.strip()
     if dataset_id == "all" :
-        return vars
+        return var_dict
     else :
-        return vars[dataset_id]
+        return var_dict[dataset_id]
 
 
-def find_num_lines_in_file(file):
+def find_num_lines_in_file(filename):
+    
+    """
+    :Returns: The number of lines in the given file. 
+    """
     num_lines = 0 
        
-    with open(file) as infp:
+    with open(filename) as infp:
         for line in infp:
             num_lines += 1
     return num_lines        

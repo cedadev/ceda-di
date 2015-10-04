@@ -160,12 +160,12 @@ def scan_filenames_from_file_in_lotus(config):
     commands = []
     step = int(num_files)
     
-    for file in list_of_cache_files :
+    for filename in list_of_cache_files :
         
-        num_of_lines = util.find_num_lines_in_file(file) 
+        num_of_lines = util.find_num_lines_in_file(filename) 
         
         if num_of_lines == 0 :
-           continue
+            continue
        
         #calculate number of jobs. 
         number_of_jobs = num_of_lines  / int(num_files)
@@ -175,7 +175,7 @@ def scan_filenames_from_file_in_lotus(config):
         for i in range(0, number_of_jobs):
             
             command = " python %s/scan_dataset.py -f %s --num-files %s --start %d  -l %s" \
-                        %(current_dir, file, num_files, start, level)
+                        %(current_dir, filename, num_files, start, level)
             
             start += step
             
@@ -184,7 +184,7 @@ def scan_filenames_from_file_in_lotus(config):
             
         #include remaning files
         command = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s" \
-                  %(current_dir, file, remainder, start, level)
+                  %(current_dir, filename, remainder, start, level)
         
         print "created command : %s" %(command)
         commands.append(command)
@@ -227,12 +227,12 @@ def scan_filenames_from_file_in_localhost(config):
     commands = []
     step = int(num_files)
     
-    for file in list_of_cache_files :
+    for filename in list_of_cache_files :
         
-        num_of_lines = util.find_num_lines_in_file(file) 
+        num_of_lines = util.find_num_lines_in_file(filename) 
         
         if num_of_lines == 0 :
-           continue
+            continue
        
         #calculate number of jobs. 
         number_of_tasks = num_of_lines  / int(num_files)
@@ -242,7 +242,7 @@ def scan_filenames_from_file_in_localhost(config):
         for i in range(0, number_of_tasks):
             
             command = " python %s/scan_dataset.py -f %s --num-files %s  --start $d  -l %s"\
-                      %(current_dir, file, num_files, start, level) 
+                      %(current_dir, filename, num_files, start, level) 
                
             start += step
             
@@ -251,7 +251,7 @@ def scan_filenames_from_file_in_localhost(config):
             
         #include remaning files
         command = "python %s/scan_dataset.py -f %s --num-files %d  --start %d -l %s" \
-                  %(current_dir, file, remainder, start,  level) 
+                  %(current_dir, filename, remainder, start,  level) 
         
         
         print "created command : %s" %(command)
@@ -313,8 +313,7 @@ def scan_files_in_localhost(config, scan_status):
 def main():
         
     """
-    Relevant to ticket :
-    http://team.ceda.ac.uk/trac/ceda/ticket/23204
+    Relevant ticket : http://team.ceda.ac.uk/trac/ceda/ticket/23204
     """   
 
     start = datetime.datetime.now()    
@@ -322,17 +321,17 @@ def main():
     print "Script started at: %s." %(str(start))
         
     
-    #Get command line arguments. 
+    #Gets command line arguments. 
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))        
     
-    #Set default values and determione what operations the script will perform.
+    #Sets default values and determione what operations the script will perform.
     status_and_defaults = set_program_op_status_and_defaults(com_args)      
     
     config_file = status_and_defaults[0] 
     run_status =  status_and_defaults[1]
     scan_status = status_and_defaults[2]
   
-     #Calls appropriate functions. 
+    #Calls appropriate functions. 
     if run_status == util.Script_status.run_script_in_lotus :
         scan_files_in_lotus(config_file, scan_status)
     elif run_status == util.Script_status.run_script_in_localhost :   
