@@ -127,8 +127,7 @@ def set_program_op_status_and_defaults(com_args):
 def main():
         
     """
-    Relevant to ticket :
-    http://team.ceda.ac.uk/trac/ceda/ticket/23203
+    Relevant ticket : http://team.ceda.ac.uk/trac/ceda/ticket/23203
     """   
       
     #Get command line arguments. 

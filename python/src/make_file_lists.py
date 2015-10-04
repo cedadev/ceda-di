@@ -94,8 +94,7 @@ def create_file_lists(status, config):
 def main():
         
     """
-    Relevant to ticket :
-    http://team.ceda.ac.uk/trac/ceda/ticket/23217
+    Relevant ticket : http://team.ceda.ac.uk/trac/ceda/ticket/23217
     """   
       
     #Get command line arguments. 
