@@ -37,8 +37,8 @@ class   NetCDFFile(GenericFile):
     
     def get_properties_netcdf(self):
         """
-           Returns a dict containig information about the properties of a netcdf file
-           and its contents.            
+        Returns a dict containig information about the properties of a netcdf file
+        and its contents.            
         """
         
         file_info = self.get_properties()
@@ -47,16 +47,12 @@ class   NetCDFFile(GenericFile):
         all_param = []               
         for item in netcdf_phenomena :              
             for inet_item in item.get() :  
-               all_param.append(inet_item)
-               
-               
+                all_param.append(inet_item)           
                              
         summary_info = {}        
-        summary_info["info"] = file_info
+        summary_info["info"] = file_info        
         
-        
-        summary_info["phenomena"] = all_param
-    
+        summary_info["phenomena"] = all_param    
        
         return summary_info      
               

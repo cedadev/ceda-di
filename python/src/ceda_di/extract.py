@@ -272,7 +272,8 @@ class ExtractSeq(Extract):
         
     """
     File crawler and metadata extractor class.
-    Part of core functionality of ceda_di.
+    Part of core functionality of FBS.
+    Files are scanned sequentially.
     """
     def __init__(self, conf, status):
         
@@ -288,7 +289,7 @@ class ExtractSeq(Extract):
     def prepare_run(self):
         
         """
-         Prepares data structures needed for the extraction.
+         Prepares login and file list to be scanned.
         """
         if self.status == util.Script_status.search_dir_and_store_names_to_file :
             try:            
@@ -299,14 +300,14 @@ class ExtractSeq(Extract):
             try:            
                 self.logger = self.prepare_logging_seq()
                 self.handler_factory = HandlerFactory(self.conf("handlers"))
-                self.file_list = self._build_file_list_from_path()
+                self.file_list = self.build_file_list_from_path()
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))        
         elif self.status == util.Script_status.read_file_paths_and_store_metadata_to_db :
             try:            
                 self.logger = self.prepare_logging_seq()
                 self.handler_factory = HandlerFactory(self.conf("handlers"))
-                self.file_list = self._build_list_from_file()
+                self.file_list = self.build_list_from_file()
             
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
@@ -315,7 +316,7 @@ class ExtractSeq(Extract):
     def prepare_logging_seq(self):
         
         """
-        Logging setup.
+        initializes  logging.
         """
            
         #Check if logging directory exists and if necessary create it.
@@ -373,19 +374,21 @@ class ExtractSeq(Extract):
         return log 
    
     
-    def  _build_file_list_from_path(self):
-        # Finds the directory to be scanned 
+    def  build_file_list_from_path(self):
+        
+        """
+        Returns the files contained within a dataset.
+        """    
+       
         dataset_ids_file = self.conf("filename")
         dataset_id = self.conf("dataset")
         #derectory where the files to be searched are.
         path_to_files = util.find_dataset(dataset_ids_file, dataset_id) 
          
-        test = util.build_file_list(path_to_files)
-         
-        return test
-                
+        return util.build_file_list(path_to_files)
+                        
         
-    def _build_list_from_file(self):
+    def build_list_from_file(self):
         
         """
         Reads file paths form a given file and returns a list
@@ -425,7 +428,7 @@ class ExtractSeq(Extract):
     def index_properties_seq(self, body, es_id):
         
         """
-        Index the file in Elasticsearch.
+        Indexes metadata in Elasticsearch.
         """
         
         try:
@@ -439,6 +442,11 @@ class ExtractSeq(Extract):
         return 1
     
     def get_metadata_by_level(self, level, filename) :
+        
+        """
+        Returns metadata from file depending on
+        file extension.
+        """
             
         extension = os.path.splitext(filename)[1]
                     
@@ -454,9 +462,9 @@ class ExtractSeq(Extract):
             return None
             
     def process_file_seq(self, filename, level):
+        
         """
-        Returns metadata from file depending on
-        file extension.
+        Returns metadata from the given file.
         """
         
         metadata = self.get_metadata_by_level(level, filename)  
@@ -485,10 +493,9 @@ class ExtractSeq(Extract):
     def run_seq(self):      
         
         """
-         Extracts metadata information from files within the file list
-         and posts them in elastic search.
+         Extracts metadata information from files and posts them in elastic search.
         """
-            
+                    
         #Create all data structures needed.
         self.prepare_run()    
                     
@@ -500,7 +507,6 @@ class ExtractSeq(Extract):
         # Create index if necessary
         es_factory = ElasticsearchClientFactory()
         self.es = es_factory.get_client(self.configuration)
-
        
         try:
             index.create_index(self.configuration, self.es)
