@@ -44,15 +44,22 @@ class   NetCDFFile(GenericFile):
         file_info = self.get_properties()
         netcdf_phenomena = self.phenomena() 
                         
-        all_param = []               
-        for item in netcdf_phenomena :              
-            for inet_item in item.get() :  
-                all_param.append(inet_item)           
+        all_phenomena = []
+        phenomeno_params_and_name = {}
+               
+        for item in netcdf_phenomena :                                      #get all parameter objects.            
+              
+            phenomeno_params_and_name["phenomeno_name"] = item.get_name()   #get phenomena name. 
+            phenomeno_params_and_name["phenomeno_parameters"] = item.get()  #get phenomena params.
+            
+            all_phenomena.append(phenomeno_params_and_name.copy())
+            phenomeno_params_and_name.clear()
+        
                              
         summary_info = {}        
         summary_info["info"] = file_info        
         
-        summary_info["phenomena"] = all_param    
+        summary_info["phenomena"] = all_phenomena    
        
         return summary_info      
               

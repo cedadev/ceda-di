@@ -422,3 +422,8 @@ class Parameter(object):
     def get(self):
         """Return the list of parameter items"""
         return self.items
+    
+    #kltsa : 04/10/2015
+    def get_name(self):
+        """Return the name of the phenomeno."""
+        return self.name

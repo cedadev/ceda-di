@@ -66,7 +66,12 @@ class  GenericFile(object):
                                  
         summary_info = {}        
         summary_info["info"] = file_info
-        summary_info["phenomena"] = [{"name" : "None", "value" : "None"}] 
+        
+        phenomeno_params_and_name = {}        
+        phenomeno_params_and_name["phenomeno_name"] = "File_without_phenomena"   
+        phenomeno_params_and_name["phenomeno_parameters"] = [{"name" : "None", "value" : "None"}]  
+                
+        summary_info["phenomena"] = phenomeno_params_and_name 
             
         return summary_info    
             
