@@ -391,8 +391,8 @@ class ExtractSeq(Extract):
     def build_list_from_file(self):
         
         """
-        Reads file paths form a given file and returns a list
-        of files.  
+        Reads file paths form a given file and returns a subset of them 
+        in a list.  
         """
             
         file_containing_paths = self.conf("filename")
@@ -444,7 +444,7 @@ class ExtractSeq(Extract):
     def get_metadata_by_level(self, level, filename) :
         
         """
-        Returns metadata from file depending on
+        Returns metadata of a file depending on
         file extension.
         """
             
@@ -473,8 +473,7 @@ class ExtractSeq(Extract):
         
     def store_filenames_to_file(self):
         """
-        Reads files from a specific directory in filesystem 
-        and stores their filenames and path to a file.
+        Stores filenames of files within a dataset to a file.
         """ 
               
         dataset_ids_file = self.conf("filename")

@@ -59,6 +59,11 @@ class  GenericFile(object):
       
     def get_properties_generic(self):
         
+        """
+         Wrapper for method get_properties().
+        :returns: A dict containing information compatible with current es index.
+        """ 
+        
         file_info = self.get_properties()          
           
         if file_info is None :

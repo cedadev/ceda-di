@@ -11,7 +11,7 @@ from ceda_di.metadata import product
 
 class   NetCDFFile(GenericFile):
     """
-    Simple class for returning basic information about a file about the content
+    Simple class for returning basic information about the content
     of an NetCDF file.
     """
               
@@ -22,8 +22,7 @@ class   NetCDFFile(GenericFile):
     
         """
         Construct list of Phenomena based on variables in NetCDF file.
-        :param Dataset ncdf: Reference to an opened netcdf4.Dataset object
-        :returns list: List of metadata.product.Parameter objects
+        :returns : List of metadata.product.Parameter objects.
         """        
         
         with netCDF4.Dataset(self.file_path) as netcdf_object:
@@ -37,8 +36,8 @@ class   NetCDFFile(GenericFile):
     
     def get_properties_netcdf(self):
         """
-        Returns a dict containig information about the properties of a netcdf file
-        and its contents.            
+        Wrapper for method phenomena().
+        :returns:  A dict containing information compatible with current es index.            
         """
         
         file_info = self.get_properties()

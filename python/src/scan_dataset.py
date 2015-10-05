@@ -50,8 +50,6 @@ def ckeck_com_args_validity(config, status):
     
     """
     checks the validity of command line arguments
-    :param dictionary containing ags.
-    :returns:
     """
     
     if status == util.Script_status.search_dir_and_store_names_to_file :
