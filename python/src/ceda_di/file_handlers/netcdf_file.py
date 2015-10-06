@@ -44,8 +44,7 @@ class   NetCDFFile(GenericFile):
         netcdf_phenomena = self.phenomena() 
                         
         phenomena_list = []
-        phenomeno_params_and_name = {}
-        
+         
         var_id_dict = {}
         phenomenon_parameters_dict = {}
                
