@@ -34,32 +34,45 @@ class   NetCDFFile(GenericFile):
         return phens  
     
     
-    def get_properties_netcdf(self):
+    def get_properties_level2(self):
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index.            
         """
         
-        file_info = self.get_properties()
+        file_info = self.get_properties_level1()
         netcdf_phenomena = self.phenomena() 
                         
-        all_phenomena = []
+        phenomena_list = []
         phenomeno_params_and_name = {}
+        
+        var_id_dict = {}
+        phenomenon_parameters_dict = {}
                
         for item in netcdf_phenomena :                                      #get all parameter objects.            
               
-            phenomeno_params_and_name["phenomeno_name"] = item.get_name()   #get phenomena name. 
-            phenomeno_params_and_name["phenomeno_parameters"] = item.get()  #get phenomena params.
-            
-            all_phenomena.append(phenomeno_params_and_name.copy())
-            phenomeno_params_and_name.clear()
+            name = item.get_name()   #get phenomena name.             
+                
+            var_id_dict["name"] = "var_id"
+            var_id_dict["value"] = name            
+                
+            list_of_phenomenon_parameters = item.get()
+            list_of_phenomenon_parameters.append(var_id_dict.copy())            
+            phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters 
+                                   
+            phenomena_list.append(phenomenon_parameters_dict.copy())
         
+            var_id_dict.clear()
+            phenomenon_parameters_dict.clear()
+         
                              
         summary_info = {}        
         summary_info["info"] = file_info        
-        
-        summary_info["phenomena"] = all_phenomena    
-       
+        summary_info["phenomena"] = phenomena_list    
+              
+        #doc = json.dumps(summary_info) 
+        #print summary_info
+              
         return summary_info      
               
                 

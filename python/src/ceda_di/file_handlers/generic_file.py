@@ -12,7 +12,7 @@ class  GenericFile(object):
         self.file_path = file_path
     
                 
-    def get_properties(self):
+    def get_properties_level1(self):
         """
          Scans the given file and returns information about the file not the content.
         :returns: A dict containing a summary information.
@@ -57,27 +57,35 @@ class  GenericFile(object):
         
         return file_info              
       
-    def get_properties_generic(self):
+    def get_properties_level2(self):
         
         """
          Wrapper for method get_properties().
         :returns: A dict containing information compatible with current es index.
         """ 
         
-        file_info = self.get_properties()          
+        file_info = self.get_properties_level1()          
           
         if file_info is None :
             return None
-                                 
+         
+        #creates the nested json structure.        
+        phenomenon_parameters_dict = {}
+        var_id_dict = {}
+        var_id_dict["name"] = "var_id"
+        var_id_dict["value"] = "None"            
+                
+        list_of_phenomenon_parameters = []
+        list_of_phenomenon_parameters.append(var_id_dict.copy())            
+                                
+        phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters 
+        phenomena_list = [] 
+        phenomena_list.append(phenomenon_parameters_dict.copy())
+                
         summary_info = {}        
         summary_info["info"] = file_info
-        
-        phenomeno_params_and_name = {}        
-        phenomeno_params_and_name["phenomeno_name"] = "File_without_phenomena"   
-        phenomeno_params_and_name["phenomeno_parameters"] = [{"name" : "None", "value" : "None"}]  
-                
-        summary_info["phenomena"] = phenomeno_params_and_name 
-            
+        summary_info["phenomena"] = phenomena_list
+                     
         return summary_info    
             
                    

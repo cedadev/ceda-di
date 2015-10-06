@@ -17,8 +17,26 @@
             "size" : { "type" : "double" },
             "type" : { "type" : "string" }
           }
+        },
+        "phenomena": 
+        {        
+          "include_in_parent": true,
+          "type": "nested",        
+          "properties": 
+          {
+            "phenomenon_parameters":
+            {
+              "include_in_parent": true,
+              "type": "nested",        
+              "properties": 
+              {
+                "name":  { "type": "string" },
+                "value": { "type": "string" }
+              }
+            } 
+          }
         }
-      }   
-    }
+      }
+    }   
   }
 }

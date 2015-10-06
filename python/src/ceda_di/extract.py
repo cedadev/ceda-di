@@ -451,15 +451,18 @@ class ExtractSeq(Extract):
         extension = os.path.splitext(filename)[1]
                     
         if level is "1" :
+            handle = generic_file.GenericFile(filename)
+            return handle.get_properties_level1()
+        elif level is "2" : 
             if extension == ".nc" :
                 handle = netcdf_file.NetCDFFile(filename) 
                 #return handle.get_properties_netcdf()
-                return handle.get_properties_netcdf()
+                return handle.get_properties_level2()
             else :
                 handle = generic_file.GenericFile(filename)
-                return handle.get_properties_generic()
-        else :
-            return None
+                return handle.get_properties_level2()
+            
+        return None
             
     def process_file_seq(self, filename, level):
         

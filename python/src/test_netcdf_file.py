@@ -22,18 +22,13 @@ def main():
     #Index properties.     
     
     #basic info
-    file_info = {}    
-    file_info["file_size"]  = "some_size"
-    file_info["location"] = "some_location"
+    info = {}    
+    info["file_size"]  = "some_size"
+    info["location"] = "some_location"
     
     
     #nested section phenomeno 1:
     phenomeno1 = {}    
-    phenomeno_parameters1  = {}
-   
-    #the phenomeno and its name.
-    phenomeno1["name_of_phenomeno"]  = "some_phenomeno_name"
-    
     phenomeno1_parameters_list = []
     phenomeno1_parameters1 = {}    
     phenomeno1_parameters2 = {}    
@@ -60,11 +55,7 @@ def main():
     #phenomeno 2 :
     #nested section
     phenomeno2   = {}
-    phenomeno2_parameters  = {}
-   
-    #the phenomeno and its name.
-    phenomeno2["name_of_phenomeno"]  = "some_phenomeno_name"
-    
+     
     phenomeno2_parameters_list = []
     phenomeno2_parameters1 = {}    
     phenomeno2_parameters2 = {}    
@@ -90,13 +81,13 @@ def main():
     
     all_phenomena = []  
     
-    all_phenomena.append(phenomeno1) 
-    all_phenomena.append(phenomeno2) 
+    all_phenomena.append(phenomeno1_parameters_list) 
+    all_phenomena.append(phenomeno2_parameters_list) 
     
     
     #final request   
     json_doc = {}  
-    json_doc["info"] = file_info 
+    json_doc["info"] = info 
     json_doc["Phenomena"] = all_phenomena    
         
         
