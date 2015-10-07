@@ -85,11 +85,13 @@ class  GenericFile(object):
         phenomena_list = [] 
         phenomena_list.append(phenomenon_parameters_dict.copy())
                 
-        summary_info = {}        
-        summary_info["info"] = file_info
-        summary_info["phenomena"] = phenomena_list
-                     
-        return summary_info    
+        #summary_info = {}        
+        #summary_info["info"] = file_info["info"]
+        #summary_info["phenomena"] = phenomena_list
+         
+        file_info["phenomena"] = phenomena_list 
+                             
+        return file_info    
             
                    
     def __enter__(self):
