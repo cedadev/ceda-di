@@ -34,27 +34,30 @@ class  GenericFile(object):
             return None  
                 
         file_info = {}        
+        info = {}        
                 
         #This is a regular file.       
-        file_info["directory"] = os.path.dirname(self.file_path)
-        file_info["format"] = "data file"
-        file_info["md5"] = ""
+        info["directory"] = os.path.dirname(self.file_path)
+        info["format"] = "data file"
+        info["md5"] = ""
         
         filename = os.path.basename(self.file_path) #ntpath.basename(file_path)
-        file_info["name"] = filename 
+        info["name"] = filename 
         
         #self.subdoc[input] = filename
         
         #subval = json.dumps(self.subdoc)
              
-        file_info["name_auto"] = filename    
+        info["name_auto"] = filename    
         
         
         size = os.path.getsize(self.file_path)
         size_h = size/(1024*1024.0)
-        file_info["size"] = size_h
-        file_info["type"] = "file"              
+        info["size"] = size_h
+        info["type"] = "file"              
         
+        file_info["info"] = info
+         
         return file_info              
       
     def get_properties_level2(self):
