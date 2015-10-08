@@ -19,6 +19,7 @@ import ceda_di.util.util as util
 
 import ceda_di.file_handlers.generic_file as generic_file
 import ceda_di.file_handlers.netcdf_file as netcdf_file
+import ceda_di.file_handlers.handler_picker as handler_picker
 
 ########
 from elasticsearch.exceptions import TransportError
@@ -300,6 +301,12 @@ class ExtractSeq(Extract):
             try:            
                 self.logger = self.prepare_logging_seq()
                 self.handler_factory = HandlerFactory(self.conf("handlers"))
+                
+                ###########################################################
+                self.handler_factory = handler_picker.HandlerPicker(self.conf("level"), self.conf("handlers"))
+                self.handler_factory.get_configured_handlers()
+                ###########################################################
+                
                 self.file_list = self.build_file_list_from_path()
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))        
@@ -441,14 +448,14 @@ class ExtractSeq(Extract):
         
         return 1
     
-    def get_metadata_by_level(self, level, filename) :
+    def get_metadata(self, level, filename) :
         
         """
         Returns metadata of a file depending on
         file extension.
         """
             
-        extension = os.path.splitext(filename)[1]
+        handler = self.handler_factory.get_handler(filename)   
                     
         if level is "1" :
             handle = generic_file.GenericFile(filename)
@@ -469,8 +476,8 @@ class ExtractSeq(Extract):
         """
         Returns metadata from the given file.
         """
-        
-        metadata = self.get_metadata_by_level(level, filename)  
+                   
+        metadata = self.get_metadata(level, filename)  
           
         return metadata    
         
