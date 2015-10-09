@@ -2,15 +2,18 @@ import logging
 import os
 import ntpath
 import json
+import re
+from ceda_di.metadata.product import FileFormatError
+import ceda_di.file_handlers.generic_file as generic_file
+import ceda_di.file_handlers.netcdf_file as netcdf_file
 
 class  HandlerPicker(object):
     """
     Returns a handler for the supplied file..
     """
           
-    def __init__(self, level, handler_map):      
+    def __init__(self, handler_map):      
         self.handler_map = handler_map
-        self.level = level
         self.handlers = {}
              
            
@@ -27,35 +30,32 @@ class  HandlerPicker(object):
         FBS project.
         """
             
-        if self.level is "1" :
-            handler = generic_file.GenericFile
-            return handle
-        elif self.level is "2" : 
-            
-            #Try configured handler:
-            handler = get_configured_handler_class(filename)
+        #Try configured handler:
+        #handler = self.get_configured_handler_class(filename)
+        
+        handler = None
          
-            if handler is not None :
-                return handler 
+        if handler is not None :
+            return handler 
         
             #try to find a handler based on filename.
-            else :
-                extension = os.path.splitext(self.filename)[1]
+        else :
+            extension = os.path.splitext(filename)[1]
             
-                if extension == ".nc" :
-                    handler = netcdf_file.NetCDFFile 
-                    #return handle.get_properties_netcdf()
-                    return handler
-                else :
-                    handler = generic_file.GenericFile
-                    return handler
+            if extension == ".nc" :
+                handler = netcdf_file.NetCDFFile 
+                #return handle.get_properties_netcdf()
+                return handler
+            else :
+                handler = generic_file.GenericFile
+                return handler
             
         return None 
                  
     
     def get_configured_handlers(self):
         
-        for pattern, handler in handler_map.iteritems():
+        for pattern, handler in self.handler_map.iteritems():
             handler_class = handler['class']
             priority = handler['priority']
             

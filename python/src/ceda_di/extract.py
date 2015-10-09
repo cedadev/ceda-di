@@ -60,7 +60,7 @@ class HandlerFactory(object):
         Return instance of correct file handler class for 
         the specified level.
         """
-        if level is "1" :
+        if level == "1" :
             handler = self.handlers[".$"]
             handler_class = handler['class']
             return handler_class(file_path) 
@@ -303,7 +303,7 @@ class ExtractSeq(Extract):
                 self.handler_factory = HandlerFactory(self.conf("handlers"))
                 
                 ###########################################################
-                self.handler_factory = handler_picker.HandlerPicker(self.conf("level"), self.conf("handlers"))
+                self.handler_factory = handler_picker.HandlerPicker(self.conf("handlers"))
                 self.handler_factory.get_configured_handlers()
                 ###########################################################
                 
@@ -313,7 +313,12 @@ class ExtractSeq(Extract):
         elif self.status == util.Script_status.read_file_paths_and_store_metadata_to_db :
             try:            
                 self.logger = self.prepare_logging_seq()
-                self.handler_factory = HandlerFactory(self.conf("handlers"))
+                
+                ###########################################################
+                self.handler_factory = handler_picker.HandlerPicker(self.conf("handlers"))
+                self.handler_factory.get_configured_handlers()
+                ###########################################################
+                
                 self.file_list = self.build_list_from_file()
             
             except KeyError as k:
@@ -448,44 +453,27 @@ class ExtractSeq(Extract):
         
         return 1
     
-    def get_metadata(self, level, filename) :
-        
-        """
-        Returns metadata of a file depending on
-        file extension.
-        """
-            
-        handler = self.handler_factory.get_handler(filename)   
-                    
-        if level is "1" :
-            handle = generic_file.GenericFile(filename)
-            return handle.get_properties_level1()
-        elif level is "2" : 
-            if extension == ".nc" :
-                handle = netcdf_file.NetCDFFile(filename) 
-                #return handle.get_properties_netcdf()
-                return handle.get_properties_level2()
-            else :
-                handle = generic_file.GenericFile(filename)
-                return handle.get_properties_level2()
-            
-        return None
             
     def process_file_seq(self, filename, level):
         
         """
         Returns metadata from the given file.
         """
-                   
-        metadata = self.get_metadata(level, filename)  
+            
+        handler = self.handler_factory.get_handler(filename)        
+        handler_inst = handler(filename, level)        
+        metadata = handler_inst.get_properties()                   
           
         return metadata    
+    
         
     def store_filenames_to_file(self):
         """
         Stores filenames of files within a dataset to a file.
         """ 
-              
+            
+        self.prepare_run()
+               
         dataset_ids_file = self.conf("filename")
         dataset_id = self.conf("dataset")
         path_to_files = util.find_dataset(dataset_ids_file, dataset_id) 

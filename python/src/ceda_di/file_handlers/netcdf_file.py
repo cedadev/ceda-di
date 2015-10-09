@@ -15,8 +15,8 @@ class   NetCDFFile(GenericFile):
     of an NetCDF file.
     """
               
-    def __init__(self, file_path):             
-        GenericFile.__init__(self,file_path)
+    def __init__(self, file_path, level):             
+        GenericFile.__init__(self, file_path, level)
         
     def phenomena(self):
     
@@ -34,7 +34,7 @@ class   NetCDFFile(GenericFile):
         return phens  
     
     
-    def get_properties_level2(self):
+    def get_properties_netcdf_level2(self):
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index.            
@@ -75,7 +75,16 @@ class   NetCDFFile(GenericFile):
         #print summary_info
               
         return file_info      
-              
+    
+     
+    #Overwrides the base class method.   
+    def get_properties(self):
+        
+        if self.level == "1" :
+            return self.get_properties_level1()  
+        elif self.level  == "2" :
+            return self.get_properties_netcdf_level2()   
+       
                 
     def __enter__(self):
         return self

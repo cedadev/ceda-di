@@ -8,9 +8,9 @@ class  GenericFile(object):
     Simple class for returning basic information about a file.
     """
           
-    def __init__(self, file_path):      
+    def __init__(self, file_path, level):      
         self.file_path = file_path
-    
+        self.level = level
                 
     def get_properties_level1(self):
         """
@@ -92,7 +92,14 @@ class  GenericFile(object):
         file_info["phenomena"] = phenomena_list 
                              
         return file_info    
-            
+    
+    
+    def get_properties(self):
+        
+        if self.level =="1" :
+            return self.get_properties_level1()  
+        elif self.level  == "2" :
+            return self.get_properties_level2()
                    
     def __enter__(self):
         return self

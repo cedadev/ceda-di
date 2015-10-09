@@ -6,13 +6,13 @@
     "es-port": 9200,
 
     "_option": "es_index: Elasticsearch index to use",
-    "es-index": "archive_level_1",
+    "es-index": "archive_level_2",
 
     "_option": "es_mapping: Elasticsearch document type to index data as",
     "es-mapping": "file",
 
     "_option": "es_index_settings: Path to Elasticsearch index settings config",
-    "es-index-settings": "../../elasticsearch/mapping/level_1_settings.json",
+    "es-index-settings": "../../elasticsearch/mapping/level_2_settings.json",
 
     "_option": "max_results: max number of search results to request",
     "max-results": 100,
@@ -62,23 +62,22 @@
     },
 
     "_option": "handlers: python classes to handle data files",
-    "handlers": {
-        "_nav_post_processed.bil.hdr$": {
-            "class": "ceda_di.providers.arsf.envi.BIL",
-            "priority": 10
-        },
-        ".tif$": {
-            "class": "ceda_di.providers.arsf.exif.EXIF",
-            "priority": 10
-        },
-        ".nc$": {
-            "class": "ceda_di.providers.faam.faam.FAAMNetCDF",
-            "priority": 10
-        },
-        ".$": {
-            "class": "ceda_di.providers.file_handler.Generic",
-            "priority": 100
-        }
-        
+    "handlers": 
+    {
+      ".nc$": 
+      {
+        "class": "ceda_di.file_handlers.netcdf_file.NetCDFFile",
+        "priority": 10
+      },
+      "[^.nc]$": 
+      {
+        "class": "ceda_di.file_handlers.generic_file.GenericFile",
+        "priority": 10
+      }
     }
 }
+
+
+
+
+
