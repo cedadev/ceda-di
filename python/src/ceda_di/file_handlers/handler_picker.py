@@ -6,6 +6,8 @@ import re
 from ceda_di.metadata.product import FileFormatError
 import ceda_di.file_handlers.generic_file as generic_file
 import ceda_di.file_handlers.netcdf_file as netcdf_file
+import magic as magic_number_reader
+
 
 class  HandlerPicker(object):
     """
@@ -15,6 +17,7 @@ class  HandlerPicker(object):
     def __init__(self, handler_map):      
         self.handler_map = handler_map
         self.handlers = {}
+        self.handlers_and_dirs = {}
              
            
        
@@ -25,32 +28,61 @@ class  HandlerPicker(object):
         for the given file.
         """
         
+        handler = None
+        #Sanity check.
+        #check if file still exists.  
+        file_exists = os.path.isfile(filename) 
+        
+        file_dir = os.path.dirname(filename)
+        
+        if not file_exists :
+            return None      
+        
         """
         First use configured handlers then use handlers within 
         FBS project.
         """
             
-        #Try configured handler:
-        #handler = self.get_configured_handler_class(filename)
-        
-        handler = None
-         
+        #Try configured handler.
+        handler = self.get_configured_handler_class(filename)        
+                
         if handler is not None :
-            return handler 
+            self.handlers_and_dirs[file_dir] = handler
+            return handler        
         
-            #try to find a handler based on filename.
-        else :
-            extension = os.path.splitext(filename)[1]
+        #Try returning a handler based on file extension.
+        extension = os.path.splitext(filename)[1]
             
-            if extension == ".nc" :
-                handler = netcdf_file.NetCDFFile 
-                #return handle.get_properties_netcdf()
-                return handler
-            else :
-                handler = generic_file.GenericFile
-                return handler
+        if extension == ".nc" :
+            handler = netcdf_file.NetCDFFile
+             
             
-        return None 
+        if handler is not None :
+            self.handlers_and_dirs[file_dir] = handler
+            return handler
+                
+        #Try returning a handler based on file's magic number.        
+        res = magic_number_reader.from_file(filename)        
+        
+        if res  == "NetCDF Data Format data":        
+            handler = netcdf_file.NetCDFFile   
+            
+                
+        if handler is not None :
+            self.handlers_and_dirs[file_dir] = handler
+            return handler
+           
+        #Try to return last handler used in this directory.      
+        handler = self.handlers_and_dirs[file_dir] = handler
+        
+        if handler is not None :
+            return handler
+                
+        #Nothing worked, return the generic handler.      
+        handler = generic_file.GenericFile        
+        
+        
+        return handler            
                  
     
     def get_configured_handlers(self):

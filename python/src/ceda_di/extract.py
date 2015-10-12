@@ -340,7 +340,7 @@ class ExtractSeq(Extract):
         #kltsa 15/09/2015 changes for issue :23221.
         if self.status == util.Script_status.read_file_paths_and_store_metadata_to_db : 
             log_fname = "%s_%s_%s_%s_%s.log" \
-                        %(self.conf("es-index"), self.conf("filename"), self.conf("start"), self.conf("num-files"), socket.gethostname())
+                        %(self.conf("es-index"), self.conf("filename").replace("/", "-"), self.conf("start"), self.conf("num-files"), socket.gethostname())
         else :
             log_fname = "%s_%s_%s.log" \
                         %(self.conf("es-index"), self.conf("dataset"), socket.gethostname())
@@ -366,7 +366,7 @@ class ExtractSeq(Extract):
         log_format = self.conf("logging")["format"]
         level = LEVELS.get(conf_log_level, logging.NOTSET)
         logging.basicConfig( filename=fpath,
-                             filemode="a",   
+                             filemode="a+",   
                              format=log_format,
                              level=level
                            )
@@ -460,12 +460,15 @@ class ExtractSeq(Extract):
         Returns metadata from the given file.
         """
             
-        handler = self.handler_factory.get_handler(filename)        
-        handler_inst = handler(filename, level)        
-        metadata = handler_inst.get_properties()                   
-          
-        return metadata    
-    
+        handler = self.handler_factory.get_handler(filename) 
+        if handler is not None:       
+            handler_inst = handler(filename, level)        
+            metadata = handler_inst.get_properties()
+            self.logger.info(("%s was read using handler \"%s\"." %(filename, handler_inst.get_handler_id())))         
+            return metadata    
+        else :
+            self.logger.info(("%s could not be read by any handler." %(filename)))
+            return None
         
     def store_filenames_to_file(self):
         """

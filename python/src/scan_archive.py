@@ -182,12 +182,15 @@ def scan_filenames_from_file_in_lotus(config):
             print "created command : %s" %(command)
             commands.append(command)
             
-        #include remaning files
-        command = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s" \
-                  %(current_dir, filename, remainder, start, level)
+            
+        #include remaning files    
+        if remainder > 0:
+            
+            command = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s" \
+                      %(current_dir, filename, remainder, start, level)
         
-        print "created command : %s" %(command)
-        commands.append(command)
+            print "created command : %s" %(command)
+            commands.append(command)
     
         
     #Run each command in lotus.
@@ -241,27 +244,31 @@ def scan_filenames_from_file_in_localhost(config):
         start = 0
         for i in range(0, number_of_tasks):
             
-            command = " python %s/scan_dataset.py -f %s --num-files %s  --start $d  -l %s"\
+            command = " python %s/scan_dataset.py -f %s --num-files %s  --start %d  -l %s"\
                       %(current_dir, filename, num_files, start, level) 
                
             start += step
             
-            print "created command :" + command
+            #print "created command :" + command
             commands.append(command)
             
-        #include remaning files
-        command = "python %s/scan_dataset.py -f %s --num-files %d  --start %d -l %s" \
-                  %(current_dir, filename, remainder, start,  level) 
+            
+        #include remaning files    
+        if remainder > 0:
+        
+            command = "python %s/scan_dataset.py -f %s --num-files %d  --start %d -l %s" \
+                      %(current_dir, filename, remainder, start,  level) 
         
         
-        print "created command : %s" %(command)
-        commands.append(command)
+            #print "created command : %s" %(command)
+            commands.append(command)
     
         
     #Run each command in localhost.
     number_of_commands = len(commands)
-    for i in range(0, number_of_commands): 
-        subprocess.call(command[i], shell=True) 
+    for i in range(0, number_of_commands):
+        print "Executing command : %s" %(commands[i]) 
+        subprocess.call(commands[i], shell=True) 
     
     
 

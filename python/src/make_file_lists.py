@@ -120,6 +120,8 @@ def create_file_lists_in_localhost(status, config):
         command = "python %s/scan_dataset.py -f %s -d  %s --make-list %s/%s_dataset__files.txt" \
                   %(current_dir, filename, datasets_ids[i], directroy_to_save_files, datasets_ids[i])
         
+        print "executing : %s" %(command)          
+        
         subprocess.call(command, shell=True)         
         
   
