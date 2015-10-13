@@ -19,7 +19,7 @@ import ceda_di.util.util as util
 
 import ceda_di.file_handlers.generic_file as generic_file
 import ceda_di.file_handlers.netcdf_file as netcdf_file
-import ceda_di.file_handlers.handler_picker as handler_picker
+import ceda_di.util.handler_picker as handler_picker
 
 ########
 from elasticsearch.exceptions import TransportError
@@ -109,7 +109,7 @@ class Extract(object):
             self.configuration = conf
             self.make_dirs(conf)
             self.logger = self.prepare_logging()
-            self.handler_factory = HandlerFactory(self.conf("handlers"))
+            self.handler_factory_ints = HandlerFactory(self.conf("handlers"))
             
             if path is None:
                 self.file_list = self._build_file_list()
@@ -179,7 +179,7 @@ class Extract(object):
         """
         Instantiate a handler for a file and extract metadata.
         """
-        handler = self.handler_factory.get_handler(filename)
+        handler = self.handler_factory_ints.get_handler(filename)
         if handler is not None:
             with handler as hand:
                 if self.conf('send-to-index'):
@@ -283,7 +283,7 @@ class ExtractSeq(Extract):
         self.configuration = conf
         self.status = status 
         self.logger = None
-        self.handler_factory = None
+        self.handler_factory_ints = None
         self.file_list = None       
            
            
@@ -300,11 +300,11 @@ class ExtractSeq(Extract):
         elif self.status == util.Script_status.search_dir_and_store_metadata_to_db :
             try:            
                 self.logger = self.prepare_logging_seq()
-                self.handler_factory = HandlerFactory(self.conf("handlers"))
+                self.handler_factory_ints = HandlerFactory(self.conf("handlers"))
                 
                 ###########################################################
-                self.handler_factory = handler_picker.HandlerPicker(self.conf("handlers"))
-                self.handler_factory.get_configured_handlers()
+                self.handler_factory_ints = handler_picker.HandlerPicker(self.conf("handlers"))
+                self.handler_factory_ints.get_configured_handlers()
                 ###########################################################
                 
                 self.file_list = self.build_file_list_from_path()
@@ -315,8 +315,8 @@ class ExtractSeq(Extract):
                 self.logger = self.prepare_logging_seq()
                 
                 ###########################################################
-                self.handler_factory = handler_picker.HandlerPicker(self.conf("handlers"))
-                self.handler_factory.get_configured_handlers()
+                self.handler_factory_ints = handler_picker.HandlerPicker(self.conf("handlers"))
+                self.handler_factory_ints.get_configured_handlers()
                 ###########################################################
                 
                 self.file_list = self.build_list_from_file()
@@ -460,9 +460,9 @@ class ExtractSeq(Extract):
         Returns metadata from the given file.
         """
             
-        handler = self.handler_factory.get_handler(filename) 
+        handler = self.handler_factory_ints. pick_best_handler(filename) 
         if handler is not None:       
-            handler_inst = handler(filename, level)        
+            handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.       
             metadata = handler_inst.get_properties()
             self.logger.info(("%s was read using handler \"%s\"." %(filename, handler_inst.get_handler_id())))         
             return metadata    
