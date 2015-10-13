@@ -73,11 +73,11 @@ class  GenericFile(object):
          Wrapper for method get_properties().
         :returns: A dict containing information compatible with current es index.
         """ 
-        
-        self.handler_id = "Generic level 2."
-        
+               
         file_info = self.get_properties_generic_level1()          
-          
+       
+        self.handler_id = "Generic level 2."
+            
         if file_info is None :
             return None
          
