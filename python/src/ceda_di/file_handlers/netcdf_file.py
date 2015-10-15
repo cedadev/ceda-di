@@ -36,7 +36,7 @@ class   NetCDFFile(GenericFile):
                     phens.append(phen)
                      
                 return phens
-        except :
+        except Exception:
             return None  
     
     

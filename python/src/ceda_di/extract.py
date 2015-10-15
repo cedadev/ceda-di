@@ -448,7 +448,8 @@ class ExtractSeq(Extract):
                       doc_type=self.conf('es-mapping'),
                       body=body,
                       id=es_id) 
-        except :
+        except Exception as e:
+            self.logger.error(e.message)
             return -1 
         
         return 1
