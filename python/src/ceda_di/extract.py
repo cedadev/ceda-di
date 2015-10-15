@@ -544,5 +544,5 @@ class ExtractSeq(Extract):
                 else :
                     end = datetime.datetime.now()              
                     
-                    self.logger.info("%s|%s|0|%s ms" %(os.path.basename(filename), os.path.dirname(filename), str(end - start)))
+                    self.logger.error("%s|%s|0|%s ms" %(os.path.basename(filename), os.path.dirname(filename), str(end - start)))
                     continue
