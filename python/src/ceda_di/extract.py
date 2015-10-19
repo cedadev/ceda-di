@@ -300,7 +300,7 @@ class ExtractSeq(Extract):
         elif self.status == util.Script_status.search_dir_and_store_metadata_to_db :
             try:            
                 self.logger = self.prepare_logging_seq()
-                self.handler_factory_ints = HandlerFactory(self.conf("handlers"))
+                #self.handler_factory_ints = HandlerFactory(self.conf("handlers"))
                 
                 ###########################################################
                 self.handler_factory_ints = handler_picker.HandlerPicker(self.conf("handlers"))
@@ -332,7 +332,7 @@ class ExtractSeq(Extract):
         """
            
         #Check if logging directory exists and if necessary create it.
-        log_dir = self.conf("log-path")
+        log_dir = self.conf("core")["log-path"]
         
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)   
@@ -340,10 +340,11 @@ class ExtractSeq(Extract):
         #kltsa 15/09/2015 changes for issue :23221.
         if self.status == util.Script_status.read_file_paths_and_store_metadata_to_db : 
             log_fname = "%s_%s_%s_%s_%s.log" \
-                        %(self.conf("es-index"), self.conf("filename").replace("/", "-"), self.conf("start"), self.conf("num-files"), socket.gethostname())
+                        %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "-"),\
+                        self.conf("scanning")["start"], self.conf("scanning")["num-files"], socket.gethostname())
         else :
             log_fname = "%s_%s_%s.log" \
-                        %(self.conf("es-index"), self.conf("dataset"), socket.gethostname())
+                        %(self.conf("es-configuration")["es-index"], self.conf("dataset"), socket.gethostname())
          
          
         #create the path where to create the log files.               
@@ -360,10 +361,10 @@ class ExtractSeq(Extract):
                  }
 
         
-        conf_log_level = self.conf("log-level")
+        conf_log_level = self.conf("core")["log-level"]
         
         
-        log_format = self.conf("logging")["format"]
+        log_format = self.conf("core")["format"]
         level = LEVELS.get(conf_log_level, logging.NOTSET)
         logging.basicConfig( filename=fpath,
                              filemode="a+",   
@@ -444,8 +445,8 @@ class ExtractSeq(Extract):
         """
         
         try:
-            self.es.index(index=self.conf('es-index'),
-                      doc_type=self.conf('es-mapping'),
+            self.es.index(index=self.conf("es-configuration")['es-index'],
+                      doc_type=self.conf("es-configuration")['es-mapping'],
                       body=body,
                       id=es_id) 
         except Exception as e:

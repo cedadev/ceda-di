@@ -10,6 +10,7 @@ import subprocess
 import simplejson as json
 import time
 from enum import Enum
+import ConfigParser
 
 
 #some globals.
@@ -59,19 +60,78 @@ def read_conf(conf_path):
         return {}
 
 
+def cfg_read(filename):
+    
+    """
+    Reads configuration file into a dictionary.
+
+    :param conf_path: Path to the INI configuration file.
+    :returns: Dict containing parsed ini conf.
+    """
+    
+    #Read the config file
+    config = ConfigParser.ConfigParser()
+    config.read(filename)
+    
+    #get sections
+    sections = config.sections()
+    
+    conf = {}
+    options_dict = {}
+    handlers_sections = []
+    
+    for section in sections:
+        
+        if section in handlers_sections:
+            continue
+            
+        options = config.options(section)
+
+        for option in options:
+           
+            try:                
+                value = config.get(section, option)
+                parsed_value = value.replace("\"", "")
+                if section == "handlers":
+                    handlers_sections.append(value)                
+                options_dict[option] = parsed_value
+                if options_dict[option] == -1:
+                    options_dict[option] = None
+            except:
+                options_dict[option] = None
+         
+        conf[section] = options_dict.copy()
+        options_dict.clear()
+    
+    
+    regx_details = {}
+    regxs = {}    
+    for handler in handlers_sections:
+        regx_pattern = config.get(handler, "regx")
+        regx_details["class"] = config.get(handler, "class")
+        regx_details["priority"] = config.get(handler, "priority")
+        regxs[regx_pattern] = regx_details.copy()
+        regx_details.clear()  
+        
+    conf["handlers"] = regxs.copy()    
+    
+    return  conf 
+
+
 def get_settings(conf_path, args):
     # Default configuration options
     # These are overridden by the config file and command-line arguments
-    defaults = {
-        "json-path": "json/",
-        "log-path": "log/",
-        "log-file": "log/",
-        "logging": {
-            "format": "[%(levelname)s] (%(name)s) %(message)s"
-        }
-    }
+    defaults = {       
+        "core" : { "log-path": "log/",
+                      "log-file": "log/",
+                      "format": "[%(levelname)s] (%(name)s) %(message)s"
+                    }
+        }    
 
-    conf_file = read_conf(conf_path)
+    #conf_file = read_conf(conf_path)
+    conf_file = cfg_read(conf_path)
+    
+    #print conf_file
 
     # Apply updates to CONFIG dictionary in priority order
     # Configuration priority: CONFIG < CONF_FILE < ARGS

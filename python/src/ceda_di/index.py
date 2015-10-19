@@ -11,8 +11,8 @@ def _get_host_string(config):
     a string of format 'host:port'.
     :param dict config: Application configuration dictionary, including ES config.
     """
-    host = config["es-host"]
-    port = config["es-port"]
+    host = config["es-configuration"]["es-host"]
+    port = config["es-configuration"]["es-port"]
     return "%s:%d" % (host, port)
 
 
@@ -22,8 +22,8 @@ def create_index(config, elasticsearch):
     :param dict config: Application configuration dictionary, including ES config.
     :param str index_settings_path: Path to index settings JSON document.
     """
-    index_settings_path = config["es-index-settings"]
-    index_name = config["es-index"]
+    index_settings_path = config["es-configuration"]["es-index-settings"]
+    index_name = config["es-configuration"]["es-index"]
 
     import simplejson as json  # Import here as unused in rest of module
     with open(index_settings_path, 'r') as settings:
