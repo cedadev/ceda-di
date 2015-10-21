@@ -6,13 +6,13 @@
     "es-port": 9200,
 
     "_option": "es_index: Elasticsearch index to use",
-    "es-index": "archive_level_2",
+    "es-index": "archive_level_1",
 
     "_option": "es_mapping: Elasticsearch document type to index data as",
     "es-mapping": "file",
 
     "_option": "es_index_settings: Path to Elasticsearch index settings config",
-    "es-index-settings": "../../elasticsearch/mapping/level_2_settings.json",
+    "es-index-settings": "../../elasticsearch/mapping/level_1_settings.json",
 
     "_option": "log-path: log dir path, relative to 'outputpath'",
     "log-path": "/home/kleanthis/Dev/python_dev/ceda-di/log/",

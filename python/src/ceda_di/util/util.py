@@ -77,14 +77,14 @@ def cfg_read(filename):
     sections = config.sections()
     
     conf = {}
-    options_dict = {}
+    section_options = {}
     handlers_sections = []
     
     for section in sections:
         
         if section in handlers_sections:
             continue
-            
+                
         options = config.options(section)
 
         for option in options:
@@ -94,14 +94,15 @@ def cfg_read(filename):
                 parsed_value = value.replace("\"", "")
                 if section == "handlers":
                     handlers_sections.append(value)                
-                options_dict[option] = parsed_value
-                if options_dict[option] == -1:
-                    options_dict[option] = None
+                section_options[option] = parsed_value
+                if section_options[option] == -1:
+                    section_options[option] = None
             except:
-                options_dict[option] = None
+                section_options[option] = None
          
-        conf[section] = options_dict.copy()
-        options_dict.clear()
+       
+        conf[section] = section_options.copy()
+        section_options.clear()
     
     
     regx_details = {}
@@ -123,9 +124,9 @@ def get_settings(conf_path, args):
     # These are overridden by the config file and command-line arguments
     defaults = {       
         "core" : { "log-path": "log/",
-                      "log-file": "log/",
-                      "format": "[%(levelname)s] (%(name)s) %(message)s"
-                    }
+                   "log-file": "log/",
+                   "format": "[%(levelname)s] (%(name)s) %(message)s"
+                 }
         }    
 
     #conf_file = read_conf(conf_path)
