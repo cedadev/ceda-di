@@ -51,7 +51,7 @@ def set_program_op_status_and_defaults(com_args):
     # Searches for the configuration file.
     if 'config' not in com_args or not com_args["config"]:
         direc = os.path.dirname(__file__)
-        conf_path = os.path.join(direc, "../config/ceda_di.ini")
+        conf_path = os.path.join(direc, "../config/ceda_fbs.ini")
         com_args["config"] = conf_path
 
     #Creates a dictionary with default settings some of them where loaded from th edefaults file.
