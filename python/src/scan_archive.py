@@ -49,13 +49,23 @@ def set_program_op_status_and_defaults(com_args):
     status_and_defaults = []   
     
     # Searches for the configuration file.
-    if 'config' not in com_args or not conf_args["config"]:
+    if "config" not in com_args or not com_args["config"]:
         direc = os.path.dirname(__file__)
         conf_path = os.path.join(direc, "../config/ceda_di.ini")
         com_args["config"] = conf_path
-
+    
+    
     #Creates a dictionary with default settings.
     config = util.get_settings(com_args["config"], com_args)
+
+    #Set defaults if not supplied by user.
+    if "start" not in config or not config["config"]:
+        config["start"] = config["scanning"]["start"]        
+    if "num-files" not in config or not config["num-files"]:
+        config["num-files"] = config["scanning"]["num-files"]    
+    if "num-processes" not in config or not config["num-processes"]:
+        config["num-processes"] = config["scanning"]["num-processes"]
+ 
 
     status_and_defaults.append(config)
        

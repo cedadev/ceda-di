@@ -122,12 +122,7 @@ def cfg_read(filename):
 def get_settings(conf_path, args):
     # Default configuration options
     # These are overridden by the config file and command-line arguments
-    defaults = {       
-        "core" : { "log-path": "log/",
-                   "log-file": "log/",
-                   "format": "[%(levelname)s] (%(name)s) %(message)s"
-                 }
-        }    
+    defaults = {}    
 
     #conf_file = read_conf(conf_path)
     conf_file = cfg_read(conf_path)

@@ -107,7 +107,14 @@ def set_program_op_status_and_defaults(com_args):
 
     #Creates a dictionary with default settings some of them where loaded from th edefaults file.
     config = util.get_settings(com_args["config"], com_args)
-
+    
+    
+    #Set defaults if not supplied by user.
+    if "start" not in config or not config["start"]:
+        config["start"] = config["scanning"]["start"]        
+    if "num-files" not in config or not config["num-files"]:
+        config["num-files"] = config["scanning"]["num-files"]    
+ 
     status_and_defaults.append(config)
        
     if ("make-list" in config) and ("dataset" in config) and  ("filename" in config) :
