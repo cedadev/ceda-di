@@ -166,6 +166,12 @@ def write_list_to_file(file_list, filename):
     
     f.close()
     
+def get_file_header(filename):
+    with open(filename, 'r') as f:
+        first_line = f.readline()    
+    
+    return first_line
+
     
 def find_dataset(filename, dataset_id):
     """

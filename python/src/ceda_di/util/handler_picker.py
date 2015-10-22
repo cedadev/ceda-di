@@ -4,9 +4,14 @@ import ntpath
 import json
 import re
 from ceda_di.metadata.product import FileFormatError
+
 import ceda_di.file_handlers.generic_file as generic_file
 import ceda_di.file_handlers.netcdf_file as netcdf_file
+import ceda_di.file_handlers.nasaames_file as nasaames_file
+
 import magic as magic_number_reader
+
+import util as util
 
 
 class  HandlerPicker(object):
@@ -18,7 +23,8 @@ class  HandlerPicker(object):
         self.handler_map = handler_map
         self.handlers = {}
         self.handlers_and_dirs = {}
-             
+        NETCDF_PYTHON_MAGIC_NUM_RES = "NetCDF Data Format data"
+        ASCII_PYTHON_MAGIC_NUM_RES = "ASCII text"      
            
        
     def pick_best_handler(self, filename):
@@ -52,9 +58,10 @@ class  HandlerPicker(object):
         #Try returning a handler based on file extension.
         extension = os.path.splitext(filename)[1]
             
-        if extension == ".nc" :
+        if extension == ".nc":
             handler = netcdf_file.NetCDFFile
-             
+        elif extension == ".na":     
+            handler = nasaames_file.NASAAmes 
             
         if handler is not None :
             self.handlers_and_dirs[file_dir] = handler
@@ -63,9 +70,14 @@ class  HandlerPicker(object):
         #Try returning a handler based on file's magic number.        
         res = magic_number_reader.from_file(filename)        
         
-        if res  == "NetCDF Data Format data":        
-            handler = netcdf_file.NetCDFFile   
-            
+        if res  == NETCDF_PYTHON_MAGIC_NUM_RES:        
+            handler = netcdf_file.NetCDFFile 
+        elif res == ASCII_PYTHON_MAGIC_NUM_RES:
+            #ok lets see if it is a na file.
+            first_line = util.get_file_header()
+            tokens = first_line.split(" ")  
+            if tokens[0].isdigit() and tokens[1].isdigit():
+                handler = nasaames_file.NASAAmes            
                 
         if handler is not None :
             self.handlers_and_dirs[file_dir] = handler

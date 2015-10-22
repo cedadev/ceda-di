@@ -376,6 +376,11 @@ class ExtractSeq(Extract):
         #Enable only logging from within this module.      
         es_log = logging.getLogger("elasticsearch")
         es_log.setLevel(logging.CRITICAL)
+                
+        nappy_log = logging.getLogger("nappy")
+        nappy_log.setLevel(logging.CRITICAL)
+        
+        
         #es_log.addHandler(logging.FileHandler(fpath_es))
         
         urllib3_log = logging.getLogger("urllib3")
