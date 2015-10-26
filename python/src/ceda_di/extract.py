@@ -29,6 +29,9 @@ from ceda_di import index
 from ceda_di.metadata.product import FileFormatError
 from mhlib import PATH
 
+from twisted.python import log as twisted_log
+from logging.config import dictConfig
+
 
 class HandlerFactory(object):
     """
@@ -366,23 +369,37 @@ class ExtractSeq(Extract):
         
         log_format = self.conf("core")["format"]
         level = LEVELS.get(conf_log_level, logging.NOTSET)
-        logging.basicConfig( filename=fpath,
+        
+        extract_logger = logging.getLogger(__name__)
+        
+        if extract_logger is None:
+            logging.basicConfig( filename=fpath,
                              filemode="a+",   
                              format=log_format,
                              level=level
                            )
         
-                  
-        #Enable only logging from within this module.      
+        else:
+             file_handler = logging.FileHandler(fpath)
+             log_format = logging.Formatter(log_format)
+             file_handler.setFormatter(log_format)       
+             
+             
+             extract_logger.addHandler(file_handler)
+             extract_logger.setLevel(level)   
+             extract_logger.propagate = 0
+        
+        
         es_log = logging.getLogger("elasticsearch")
-        es_log.setLevel(logging.CRITICAL)
+        es_log.setLevel(logging.CRITICAL)                
+       
                 
-        nappy_log = logging.getLogger("nappy")
-        nappy_log.setLevel(logging.CRITICAL)
+        #nappy_log = logging.getLogger("nappy")
+        #nappy_log.setLevel(logging.CRITICAL)
+        #nappy_log.propagate = False
         
-        
-        #es_log.addHandler(logging.FileHandler(fpath_es))
-        
+        #es_log.addHandler(logging.FileHandler(fpath_es))        
+                 
         urllib3_log = logging.getLogger("urllib3")
         urllib3_log.setLevel(logging.CRITICAL)
         #urllib3_log.addHandler(logging.FileHandler(fpath_es))

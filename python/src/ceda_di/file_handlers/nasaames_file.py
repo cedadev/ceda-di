@@ -1,12 +1,13 @@
-import nappy
 from generic_file import GenericFile 
 from ceda_di.metadata import product
+import nappy
 
 
 class NASAAmes(GenericFile):
  
     def __init__(self, file_path, level):             
-        GenericFile.__init__(self, file_path, level)
+        GenericFile.__init__(self, file_path, level) 
+       
         
     def get_handler_id(self):
         return self.handler_id  
