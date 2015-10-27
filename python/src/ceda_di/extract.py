@@ -29,9 +29,6 @@ from ceda_di import index
 from ceda_di.metadata.product import FileFormatError
 from mhlib import PATH
 
-from twisted.python import log as twisted_log
-from logging.config import dictConfig
-
 
 class HandlerFactory(object):
     """
