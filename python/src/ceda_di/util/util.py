@@ -170,7 +170,7 @@ def get_file_header(filename):
     with open(filename, 'r') as f:
         first_line = f.readline()    
     
-    return first_line
+    return first_line.replace("\n", "")
 
     
 def find_dataset(filename, dataset_id):

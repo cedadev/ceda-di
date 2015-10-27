@@ -22,8 +22,8 @@ class  HandlerPicker(object):
         self.handler_map = handler_map
         self.handlers = {}
         self.handlers_and_dirs = {}
-        NETCDF_PYTHON_MAGIC_NUM_RES = "NetCDF Data Format data"
-        ASCII_PYTHON_MAGIC_NUM_RES = "ASCII text"      
+        self.NETCDF_PYTHON_MAGIC_NUM_RES = "NetCDF Data Format data"
+        self.ASCII_PYTHON_MAGIC_NUM_RES = "ASCII text"      
            
        
     def pick_best_handler(self, filename):
@@ -44,8 +44,8 @@ class  HandlerPicker(object):
         file_dir = os.path.dirname(filename)
         
         if not file_exists :
-            return None      
-                
+            return None                
+            
             
         #Try configured handler.
         handler = self.get_configured_handler_class(filename)        
@@ -69,14 +69,16 @@ class  HandlerPicker(object):
         #Try returning a handler based on file's magic number.        
         res = magic_number_reader.from_file(filename)        
         
-        if res  == NETCDF_PYTHON_MAGIC_NUM_RES:        
+        if res  == self.NETCDF_PYTHON_MAGIC_NUM_RES:        
             handler = netcdf_file.NetCDFFile 
-        elif res == ASCII_PYTHON_MAGIC_NUM_RES:
+        elif res == self.ASCII_PYTHON_MAGIC_NUM_RES:
             #ok lets see if it is a na file.
-            first_line = util.get_file_header()
+            first_line = util.get_file_header(filename)
             tokens = first_line.split(" ")  
             if tokens[0].isdigit() and tokens[1].isdigit():
-                handler = nasaames_file.NASAAmes            
+                handler = nasaames_file.NASAAmes  
+            else:
+                handler = generic_file.GenericFile                              
                 
         if handler is not None :
             self.handlers_and_dirs[file_dir] = handler

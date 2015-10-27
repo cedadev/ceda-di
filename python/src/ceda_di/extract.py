@@ -370,31 +370,32 @@ class ExtractSeq(Extract):
         log_format = self.conf("core")["format"]
         level = LEVELS.get(conf_log_level, logging.NOTSET)
         
-        logging.root.handlers = []
+        """
+        ok, since this is the main module lets remove previously configured handlers 
+        and add the one used in this script.
+        """ 
+        logging.root.handlers = []           
         
-        extract_logger = logging.getLogger(__name__)
-        
-        if extract_logger is None:
-            
-            
-            
-            logging.basicConfig( filename=fpath,
+        """        
+        logging.basicConfig( filename=fpath,
                              filemode="a+",   
                              format=log_format,
                              level=level
                            )
+        """
         
-        else:
-            file_handler = logging.FileHandler(fpath)
-            log_format = logging.Formatter(log_format)
-            file_handler.setFormatter(log_format)       
+        extract_logger = logging.getLogger(__name__)
+        
+        file_handler = logging.FileHandler(fpath)
+        log_format = logging.Formatter(log_format)
+        file_handler.setFormatter(log_format)       
              
              
-            extract_logger.addHandler(file_handler)
-            extract_logger.setLevel(level)   
-            extract_logger.propagate = 0
-        
-        
+        extract_logger.addHandler(file_handler)
+        extract_logger.setLevel(level)   
+        extract_logger.propagate = 0
+           
+       
         es_log = logging.getLogger("elasticsearch")
         es_log.setLevel(logging.CRITICAL)                
        

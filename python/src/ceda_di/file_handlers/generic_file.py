@@ -93,10 +93,7 @@ class  GenericFile(object):
         phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters 
         phenomena_list = [] 
         phenomena_list.append(phenomenon_parameters_dict.copy())
-                
-        #summary_info = {}        
-        #summary_info["info"] = file_info["info"]
-        #summary_info["phenomena"] = phenomena_list
+           
          
         file_info["phenomena"] = phenomena_list 
                              

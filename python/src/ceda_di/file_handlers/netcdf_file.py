@@ -74,16 +74,10 @@ class   NetCDFFile(GenericFile):
         
                 var_id_dict.clear()
                 phenomenon_parameters_dict.clear()
-         
-            #summary_info = {}        
-            #summary_info["info"] = file_info        
-            #summary_info["phenomena"] = phenomena_list    
+                     
          
             file_info["phenomena"] = phenomena_list
-              
-            #doc = json.dumps(summary_info) 
-            #print summary_info
-              
+                      
               
             return file_info
         
