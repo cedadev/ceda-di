@@ -3,7 +3,7 @@ from ceda_di.metadata import product
 import nappy
 
 
-class NASAAmes(GenericFile):
+class NASAAmesFile(GenericFile):
  
     def __init__(self, file_path, level):             
         GenericFile.__init__(self, file_path, level) 

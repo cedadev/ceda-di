@@ -60,7 +60,7 @@ class  HandlerPicker(object):
         if extension == ".nc":
             handler = netcdf_file.NetCDFFile
         elif extension == ".na":     
-            handler = nasaames_file.NASAAmes 
+            handler = nasaames_file.NASAAmesFile 
             
         if handler is not None :
             self.handlers_and_dirs[file_dir] = handler
@@ -76,7 +76,7 @@ class  HandlerPicker(object):
             first_line = util.get_file_header(filename)
             tokens = first_line.split(" ")  
             if tokens[0].isdigit() and tokens[1].isdigit():
-                handler = nasaames_file.NASAAmes  
+                handler = nasaames_file.NASAAmesFile  
             else:
                 handler = generic_file.GenericFile                              
                 
