@@ -75,8 +75,9 @@ class  HandlerPicker(object):
             #ok lets see if it is a na file.
             first_line = util.get_file_header(filename)
             tokens = first_line.split(" ")  
-            if tokens[0].isdigit() and tokens[1].isdigit():
-                handler = nasaames_file.NASAAmesFile  
+            if len(tokens) >= 2: 
+                if tokens[0].isdigit() and tokens[1].isdigit():
+                    handler = nasaames_file.NASAAmesFile  
             else:
                 handler = generic_file.GenericFile                              
                 
