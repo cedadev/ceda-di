@@ -32,6 +32,7 @@ class  HandlerPicker(object):
         :returns handler: Returns an appropriate handler 
         for the given file.
         """
+        print filename
         
         handler = None
         """
