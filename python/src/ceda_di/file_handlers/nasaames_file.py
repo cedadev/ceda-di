@@ -14,19 +14,23 @@ class NASAAmesFile(GenericFile):
         
     def get_parameters(self):
     
-        na = nappy.openNAFile(self.file_path)         
+    
+        try:
+            na = nappy.openNAFile(self.file_path)         
       
-        variables = {}
-        for v in na.getVariables():
-            variables.update({
-                v[0]: {
-                    "name": v[0],
-                    "units": v[1]
-                }
-            })
+            variables = {}
+            for v in na.getVariables():
+                variables.update({
+                    v[0]: {
+                        "name": v[0],
+                        "units": v[1]
+                    }
+                })
 
-        variables = [product.Parameter(k, other_params=v) for (k, v) in variables.iteritems()]
-        return variables
+            variables = [product.Parameter(k, other_params=v) for (k, v) in variables.iteritems()]
+            return variables
+        except Exception:
+            return None  
   
     def get_properties_nanaames_level2(self):
         
