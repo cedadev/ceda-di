@@ -31,8 +31,7 @@ class  HandlerPicker(object):
         :param filename : the filename to be scanned.
         :returns handler: Returns an appropriate handler 
         for the given file.
-        """
-        print filename
+        """        
         
         handler = None
         """
