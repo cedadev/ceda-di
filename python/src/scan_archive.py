@@ -88,8 +88,7 @@ def set_program_op_status_and_defaults(com_args):
     else :
         status_and_defaults.append(util.Script_status.stay_idle)
        
-    return status_and_defaults     
-
+    return status_and_defaults
 
 def scan_all_datasets_in_lotus(config):
     
@@ -115,8 +114,7 @@ def scan_all_datasets_in_lotus(config):
         commands.append(command)
     
     lotus_max_processes = config["num-processes"] 
-    util.run_tasks_in_lotus(commands, int(lotus_max_processes), user_wait_time=30)        
-    
+    util.run_tasks_in_lotus(commands, int(lotus_max_processes), user_wait_time=30)    
             
 def scan_specific_datasets_in_lotus(config):
     #Get basic options.
@@ -140,8 +138,7 @@ def scan_specific_datasets_in_lotus(config):
         
                    
         print "executng : %s" %(command)
-        subprocess.call(command, shell=True)
-        
+        subprocess.call(command, shell=True)        
 
 def scan_filenames_from_file_in_lotus(config):
     
@@ -205,8 +202,7 @@ def scan_filenames_from_file_in_lotus(config):
         
     #Run each command in lotus.
     lotus_max_processes = config["num-processes"] 
-    util.run_tasks_in_lotus(commands, int(lotus_max_processes), user_wait_time=30)
-        
+    util.run_tasks_in_lotus(commands, int(lotus_max_processes), user_wait_time=30)        
           
 def scan_files_in_lotus(config, scan_status):
     
@@ -222,8 +218,7 @@ def scan_files_in_lotus(config, scan_status):
         scan_all_datasets_in_lotus(config)
                                 
     elif scan_status == util.Script_status.scan_filenames_from_file :
-        scan_filenames_from_file_in_lotus(config)   
-                 
+        scan_filenames_from_file_in_lotus(config)                 
 
 def scan_filenames_from_file_in_localhost(config):
             
@@ -278,9 +273,7 @@ def scan_filenames_from_file_in_localhost(config):
     number_of_commands = len(commands)
     for i in range(0, number_of_commands):
         print "Executing command : %s" %(commands[i]) 
-        subprocess.call(commands[i], shell=True) 
-    
-    
+        subprocess.call(commands[i], shell=True)   
 
 def scan_files_in_localhost(config, scan_status):
     
@@ -324,8 +317,7 @@ def scan_files_in_localhost(config, scan_status):
             print "executng : %s" %(command)
             subprocess.call(command, shell=True)   
     elif scan_status == util.Script_status.scan_filenames_from_file :
-        scan_filenames_from_file_in_localhost(config) 
-        
+        scan_filenames_from_file_in_localhost(config)        
  
 def main():
         

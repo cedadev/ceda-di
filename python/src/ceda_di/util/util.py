@@ -12,7 +12,6 @@ import time
 from enum import Enum
 import ConfigParser
 
-
 #some globals.
 Script_status = Enum( "Script_status",
                       "search_dir_and_store_names_to_file \
@@ -42,7 +41,6 @@ def sanitise_args(config):
 
     return sane_conf
 
-
 def read_conf(conf_path):
     """
     Reads configuration file into a dictionary.
@@ -58,7 +56,6 @@ def read_conf(conf_path):
         sys.stderr.write(  # Continued on next line
             "Can't read configuration file\n%s\n\n" % err_path)
         return {}
-
 
 def cfg_read(filename):
     
@@ -116,8 +113,7 @@ def cfg_read(filename):
         
     conf["handlers"] = regxs.copy()    
     
-    return  conf 
-
+    return  conf
 
 def get_settings(conf_path, args):
     # Default configuration options
@@ -136,7 +132,6 @@ def get_settings(conf_path, args):
     defaults.update(args)
 
     return defaults
-
 
 def build_file_list(path):
     """
@@ -171,7 +166,6 @@ def get_file_header(filename):
         first_line = f.readline()    
     
     return first_line.replace("\n", "")
-
     
 def find_dataset(filename, dataset_id):
     """
@@ -190,7 +184,6 @@ def find_dataset(filename, dataset_id):
     else :
         return var_dict[dataset_id]
 
-
 def find_num_lines_in_file(filename):
     
     """
@@ -202,10 +195,9 @@ def find_num_lines_in_file(filename):
     with open(filename) as infp:
         for line in infp:
             num_lines += 1
-    return num_lines        
+    return num_lines
 
-
-def get_number_of_submitted_lotus_tasks() :
+def get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit) :
     
     """
     :returns: Number of tasks submitted in lotus.
@@ -214,20 +206,16 @@ def get_number_of_submitted_lotus_tasks() :
     empty_task_queue_string = "No unfinished job found\n"
     non_empty_task_queue_string = "JOBID     USER    STAT  QUEUE      FROM_HOST   EXEC_HOST   JOB_NAME   SUBMIT_TIME"    
         
-    try:                
-        command_output  = subprocess.check_output('bjobs', stderr=subprocess.STDOUT, shell=True)
-    except CalledProcessError:
-        return -1
-    else:       
-        if command_output == empty_task_queue_string:
-            num_of_running_tasks = 0   
-        elif command_output.startswith(non_empty_task_queue_string): 
-            num_of_running_tasks = command_output.count("\n") -1 
-        else:    
-            num_of_running_tasks = -1
-                    
-        return num_of_running_tasks
+    command_output  = subprocess.check_output('bjobs', stderr=subprocess.STDOUT, shell=True)
     
+    if command_output == empty_task_queue_string:
+        num_of_running_tasks = 0   
+    elif command_output.startswith(non_empty_task_queue_string): 
+        num_of_running_tasks = command_output.count("\n") -1 
+    else:    
+        num_of_running_tasks = max_number_of_tasks_to_submit
+                    
+    return num_of_running_tasks    
     
 def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=None, logger=None):
     
@@ -267,9 +255,9 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
     while len(task_list) > 0 :            
         
         #Find out if other jobs can be submitted.
-        num_of_running_tasks = get_number_of_submitted_lotus_tasks() 
-        
-        if num_of_running_tasks == -1:
+        try: 
+            num_of_running_tasks = get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit) 
+        except CalledProcessError:
             continue
         
         #num_of_running_tasks = 0

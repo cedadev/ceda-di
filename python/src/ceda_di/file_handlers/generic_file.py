@@ -99,7 +99,6 @@ class  GenericFile(object):
                              
         return file_info    
     
-    
     def get_properties(self):
         
         if self.level =="1" :

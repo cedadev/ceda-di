@@ -37,8 +37,7 @@ class   NetCDFFile(GenericFile):
                      
                 return phens
         except Exception:
-            return None  
-    
+            return None    
     
     def get_properties_netcdf_level2(self):
         """
@@ -89,8 +88,7 @@ class   NetCDFFile(GenericFile):
         if self.level == "1" :
             return self.get_properties_generic_level1()  
         elif self.level  == "2" :
-            return self.get_properties_netcdf_level2()   
-       
+            return self.get_properties_netcdf_level2()       
                 
     def __enter__(self):
         return self

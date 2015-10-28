@@ -66,7 +66,6 @@ def set_program_op_status_and_defaults(com_args):
     
     return status_and_defaults
 
-
 def create_file_lists_in_lotus(status, config):
     
     """
@@ -95,8 +94,7 @@ def create_file_lists_in_lotus(status, config):
     lotus_max_processes = config["num-processes"] 
     
     #Run each command in lotus.
-    util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes), user_wait_time=3)
-    
+    util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes), user_wait_time=3)    
 
 def create_file_lists_in_localhost(status, config):
     
@@ -122,8 +120,7 @@ def create_file_lists_in_localhost(status, config):
         
         print "executing : %s" %(command)          
         
-        subprocess.call(command, shell=True)         
-        
+        subprocess.call(command, shell=True)        
   
 def main():
         

@@ -65,9 +65,7 @@ def cfg_read(filename):
         
     conf["handlers"] = regxs.copy()    
     
-    return  conf   
- 
- 
+    return  conf
  
 def main():
     

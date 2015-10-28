@@ -53,25 +53,8 @@ class HandlerFactory(object):
         """
         handler_class = self.get_handler_class(filename)
         if handler_class is not None:
-            return handler_class(filename)
-        
-    def get_handler_by_level(self, level, file_path = None):
-        """
-        Return instance of correct file handler class for 
-        the specified level.
-        """
-        if level == "1" :
-            handler = self.handlers[".$"]
-            handler_class = handler['class']
-            return handler_class(file_path) 
-        else :
-            return None                
-        
-        """
-        handler_class = self.get_handler_class(filename)
-        if handler_class is not None:
-            return handler_class(filename)
-        """
+            return handler_class(filename)        
+       
     def get_handler_class(self, filename):
         """
         Return the class of the correct file handler (un-instantiated).
@@ -274,7 +257,7 @@ class ExtractSeq(Extract):
     """
     File crawler and metadata extractor class.
     Part of core functionality of FBS.
-    Files are scanned sequentially.
+    Files are scanned sequentially (one thread).
     """
     def __init__(self, conf, status):
         
@@ -300,8 +283,7 @@ class ExtractSeq(Extract):
         elif self.status == util.Script_status.search_dir_and_store_metadata_to_db :
             try:            
                 self.logger = self.prepare_logging_seq()
-                #self.handler_factory_ints = HandlerFactory(self.conf("handlers"))
-                
+                                
                 ###########################################################
                 self.handler_factory_ints = handler_picker.HandlerPicker(self.conf("handlers"))
                 self.handler_factory_ints.get_configured_handlers()
@@ -322,8 +304,7 @@ class ExtractSeq(Extract):
                 self.file_list = self.build_list_from_file()
             
             except KeyError as k:
-                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
-         
+                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))         
                             
     def prepare_logging_seq(self):
         
@@ -394,23 +375,21 @@ class ExtractSeq(Extract):
            
        
         es_log = logging.getLogger("elasticsearch")
-        es_log.setLevel(logging.CRITICAL)                
+        es_log.setLevel(logging.ERROR)
+        #es_log.addHandler(logging.FileHandler(fpath_es))         
        
                 
-        #nappy_log = logging.getLogger("nappy")
-        #nappy_log.setLevel(logging.CRITICAL)
-        #nappy_log.propagate = False
+        nappy_log = logging.getLogger("nappy")
+        nappy_log.setLevel(logging.ERROR)        
         
-        #es_log.addHandler(logging.FileHandler(fpath_es))        
-                 
+                        
         urllib3_log = logging.getLogger("urllib3")
-        urllib3_log.setLevel(logging.CRITICAL)
+        urllib3_log.setLevel(logging.ERROR)
         #urllib3_log.addHandler(logging.FileHandler(fpath_es))
                 
         log = logging.getLogger(__name__)             
               
-        return log 
-   
+        return log   
     
     def  build_file_list_from_path(self):
         
@@ -423,8 +402,7 @@ class ExtractSeq(Extract):
         #derectory where the files to be searched are.
         path_to_files = util.find_dataset(dataset_ids_file, dataset_id) 
          
-        return util.build_file_list(path_to_files)
-                        
+        return util.build_file_list(path_to_files)                        
         
     def build_list_from_file(self):
         
@@ -460,15 +438,14 @@ class ExtractSeq(Extract):
         for p in file_list:
             new_file_list.append(p.rstrip()) 
              
-        return new_file_list       
-   
+        return new_file_list   
             
     def index_properties_seq(self, body, es_id):
         
         """
         Indexes metadata in Elasticsearch.
         """
-        
+                
         try:
             self.es.index(index=self.conf("es-configuration")['es-index'],
                       doc_type=self.conf("es-configuration")['es-mapping'],
@@ -478,8 +455,7 @@ class ExtractSeq(Extract):
             self.logger.error(e.message)
             return -1 
         
-        return 1
-    
+        return 1    
             
     def process_file_seq(self, filename, level):
         
@@ -493,7 +469,7 @@ class ExtractSeq(Extract):
             metadata = handler_inst.get_properties()
             self.logger.info(("%s was read using handler \"%s\"." %(filename, handler_inst.get_handler_id())))         
             return metadata    
-        else :
+        else:
             self.logger.info(("%s could not be read by any handler." %(filename)))
             return None
         

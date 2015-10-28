@@ -58,8 +58,7 @@ def ckeck_com_args_validity(config, status):
     level = int(config.get("level")) 
         
     if level < 1  or level > 3:
-        raise ValueError("Level value is out of range, please use value between 1-3.")   
-           
+        raise ValueError("Level value is out of range, please use value between 1-3.")           
     
 def scan_dir_and_store_metadata_to_db(conf, status):
     
@@ -69,7 +68,6 @@ def scan_dir_and_store_metadata_to_db(conf, status):
     """     
     extract = ExtractSeq(conf, status)
     extract.run_seq();      
-      
               
 def scan_dir_and_store_filenames_to_file(conf, status):
     
@@ -78,8 +76,7 @@ def scan_dir_and_store_filenames_to_file(conf, status):
     and stores their filenames and path to a file.
     """ 
     extract = ExtractSeq(conf, status)
-    extract.store_filenames_to_file();                
-   
+    extract.store_filenames_to_file();   
         
 def read_file_paths_and_store_metadata_to_db(conf, status) :
     
@@ -89,8 +86,7 @@ def read_file_paths_and_store_metadata_to_db(conf, status) :
     """
                           
     extract = ExtractSeq(conf, status)
-    extract.run_seq();      
-    
+    extract.run_seq();    
         
 def set_program_op_status_and_defaults(com_args):
     
@@ -126,8 +122,7 @@ def set_program_op_status_and_defaults(com_args):
         status_and_defaults.append(util.Script_status.read_file_paths_and_store_metadata_to_db)        
     
     
-    return status_and_defaults     
-    
+    return status_and_defaults   
     
 def main():
         

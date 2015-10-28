@@ -6,8 +6,7 @@ import nappy
 class NASAAmesFile(GenericFile):
  
     def __init__(self, file_path, level):             
-        GenericFile.__init__(self, file_path, level) 
-       
+        GenericFile.__init__(self, file_path, level)       
         
     def get_handler_id(self):
         return self.handler_id  
@@ -71,9 +70,7 @@ class NASAAmesFile(GenericFile):
             return file_info
         
         else :            
-            return self.get_properties_generic_level2()     
-            
-             
+            return self.get_properties_generic_level2()                    
                 
     def get_properties(self):
         

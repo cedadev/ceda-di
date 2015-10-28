@@ -95,8 +95,7 @@ class  HandlerPicker(object):
         handler = generic_file.GenericFile        
         
         
-        return handler            
-                 
+        return handler              
     
     def get_configured_handlers(self):
         
@@ -135,9 +134,7 @@ class  HandlerPicker(object):
                 pass
             except AttributeError:
                 return handler_class
-        return None          
-            
-                   
+        return None                  
                    
     def __enter__(self):
         return self
