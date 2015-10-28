@@ -11,8 +11,7 @@ class NASAAmesFile(GenericFile):
     def get_handler_id(self):
         return self.handler_id  
         
-    def get_parameters(self):
-    
+    def get_parameters(self):    
     
         try:
             na = nappy.openNAFile(self.file_path)         
