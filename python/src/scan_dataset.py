@@ -33,17 +33,10 @@ from docopt import docopt
 import ceda_di.util.util as util
 from ceda_di import __version__  # Grab version from package __init__.py
 from ceda_di.extract import ExtractSeq
-from ceda_di.index import BulkIndexer
-from ceda_di.search import Searcher
-from operator import or_
-
-import glob
-import logging
-import logging.handlers
 import datetime
-from enum import Enum
-import sys
-from Cython.Shadow import NULL
+
+
+
 
 
 def ckeck_com_args_validity(config, status):
@@ -52,7 +45,7 @@ def ckeck_com_args_validity(config, status):
     checks the validity of command line arguments
     """
 
-    if status == util.Script_status.search_dir_and_store_names_to_file :
+    if status == util.Script_status.search_dir_and_store_names_to_file:
         return
 
     level = int(config.get("level"))
@@ -67,7 +60,7 @@ def scan_dir_and_store_metadata_to_db(conf, status):
     and outputs metadata to elastic search database.
     """
     extract = ExtractSeq(conf, status)
-    extract.run_seq();
+    extract.run_seq()
 
 def scan_dir_and_store_filenames_to_file(conf, status):
 
@@ -76,9 +69,9 @@ def scan_dir_and_store_filenames_to_file(conf, status):
     and stores their filenames and path to a file.
     """
     extract = ExtractSeq(conf, status)
-    extract.store_filenames_to_file();
+    extract.store_filenames_to_file()
 
-def read_file_paths_and_store_metadata_to_db(conf, status) :
+def read_file_paths_and_store_metadata_to_db(conf, status):
 
     """
     Reads file paths form a given file, extracts metadata
@@ -86,7 +79,7 @@ def read_file_paths_and_store_metadata_to_db(conf, status) :
     """
 
     extract = ExtractSeq(conf, status)
-    extract.run_seq();
+    extract.run_seq()
 
 def set_program_op_status_and_defaults(com_args):
 
@@ -101,7 +94,8 @@ def set_program_op_status_and_defaults(com_args):
         conf_path = os.path.join(direc, "../config/ceda_fbs.ini")
         com_args["config"] = conf_path
 
-    #Creates a dictionary with default settings some of them where loaded from th edefaults file.
+    #Creates a dictionary with default settings some of them
+    #where loaded from th edefaults file.
     config = util.get_settings(com_args["config"], com_args)
 
 
@@ -113,12 +107,12 @@ def set_program_op_status_and_defaults(com_args):
 
     status_and_defaults.append(config)
 
-    if ("make-list" in config) and ("dataset" in config) and  ("filename" in config) :
+    if ("make-list" in config) and ("dataset" in config) and  ("filename" in config):
         status_and_defaults.append(util.Script_status.search_dir_and_store_names_to_file)
-    elif  ("dataset" in config) and  ("filename" in config) and ("level" in config) :
+    elif  ("dataset" in config) and  ("filename" in config) and ("level" in config):
         status_and_defaults.append(util.Script_status.search_dir_and_store_metadata_to_db)
     elif  ("filename" in config) and ("start" in config) and \
-          ("num-files" in config) and ("level" in config)  :
+          ("num-files" in config) and ("level" in config):
         status_and_defaults.append(util.Script_status.read_file_paths_and_store_metadata_to_db)
 
 
@@ -152,11 +146,11 @@ def main():
 
 
     #Manage the options given.
-    if status == util.Script_status.search_dir_and_store_names_to_file :
+    if status == util.Script_status.search_dir_and_store_names_to_file:
         scan_dir_and_store_filenames_to_file(config, status)
-    elif status == util.Script_status.search_dir_and_store_metadata_to_db :
+    elif status == util.Script_status.search_dir_and_store_metadata_to_db:
         scan_dir_and_store_metadata_to_db(config, status)
-    elif status == util.Script_status.read_file_paths_and_store_metadata_to_db :
+    elif status == util.Script_status.read_file_paths_and_store_metadata_to_db:
         read_file_paths_and_store_metadata_to_db(config, status)
 
     end = datetime.datetime.now()

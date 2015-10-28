@@ -74,18 +74,18 @@ def set_program_op_status_and_defaults(com_args):
         status_and_defaults.append(util.Script_status.run_script_in_lotus)
     elif ("host" in config) and config["host"] == "localhost":
         status_and_defaults.append(util.Script_status.run_script_in_localhost)
-    else :
+    else:
         status_and_defaults.append(util.Script_status.stay_idle)
 
     #Determines if script will read paths from file or if it will search for
     #files using a dataset id.
-    if ("level" in config) and not ("dataset" in config):
+    if ("level" in config) and (not ("dataset" in config)):
         status_and_defaults.append(util.Script_status.scan_filenames_from_file)
-    elif ("dataset" in config) and  config["dataset"] == "all" :
+    elif ("dataset" in config) and  config["dataset"] == "all":
         status_and_defaults.append(util.Script_status.scan_all_dataset_ids)
-    elif ("dataset" in config) and  config["dataset"] != "all" :
+    elif ("dataset" in config) and  config["dataset"] != "all":
         status_and_defaults.append(util.Script_status.scan_specific_dataset_id)
-    else :
+    else:
         status_and_defaults.append(util.Script_status.stay_idle)
 
     return status_and_defaults
@@ -100,13 +100,13 @@ def scan_all_datasets_in_lotus(config):
 
     dataset_ids = util.find_dataset(filename, "all")
     keys = dataset_ids.keys()
-    number_of_datasets= len(keys)
-    commands  = []
+    number_of_datasets = len(keys)
+    commands = []
 
 
     for i in range(0, number_of_datasets):
 
-        command =  "python %s/scan_dataset.py -f  %s -d  %s  -l  %s" \
+        command = "python %s/scan_dataset.py -f  %s -d  %s  -l  %s" \
                    %(current_dir, filename, keys[i], level)
 
 
@@ -123,7 +123,7 @@ def scan_specific_datasets_in_lotus(config):
     level = config["level"]
     current_dir = os.getcwd()
 
-    if ',' in dataset_id :
+    if ',' in dataset_id:
         dataset_ids_list = dataset_id.split(",")
         for dataset_id_item in dataset_ids_list:
 
@@ -167,11 +167,11 @@ def scan_filenames_from_file_in_lotus(config):
     commands = []
     step = int(num_files)
 
-    for filename in list_of_cache_files :
+    for filename in list_of_cache_files:
 
         num_of_lines = util.find_num_lines_in_file(filename)
 
-        if num_of_lines == 0 :
+        if num_of_lines == 0:
             continue
 
         #calculate number of jobs.
@@ -211,13 +211,13 @@ def scan_files_in_lotus(config, scan_status):
     """
 
     #Scan given dataset ids  or file.
-    if scan_status == util.Script_status.scan_specific_dataset_id :
+    if scan_status == util.Script_status.scan_specific_dataset_id:
         scan_specific_datasets_in_lotus(config)
 
-    elif scan_status == util.Script_status.scan_all_dataset_ids :
+    elif scan_status == util.Script_status.scan_all_dataset_ids:
         scan_all_datasets_in_lotus(config)
 
-    elif scan_status == util.Script_status.scan_filenames_from_file :
+    elif scan_status == util.Script_status.scan_filenames_from_file:
         scan_filenames_from_file_in_lotus(config)
 
 def scan_filenames_from_file_in_localhost(config):
@@ -235,11 +235,11 @@ def scan_filenames_from_file_in_localhost(config):
     commands = []
     step = int(num_files)
 
-    for filename in list_of_cache_files :
+    for filename in list_of_cache_files:
 
         num_of_lines = util.find_num_lines_in_file(filename)
 
-        if num_of_lines == 0 :
+        if num_of_lines == 0:
             continue
 
         #calculate number of jobs.
@@ -262,7 +262,7 @@ def scan_filenames_from_file_in_localhost(config):
         if remainder > 0:
 
             command = "python %s/scan_dataset.py -f %s --num-files %d  --start %d -l %s" \
-                      %(current_dir, filename, remainder, start,  level)
+                      %(current_dir, filename, remainder, start, level)
 
 
             #print "created command : %s" %(command)
@@ -287,9 +287,9 @@ def scan_files_in_localhost(config, scan_status):
     current_dir = os.getcwd()
 
     #Manage the options given.
-    if scan_status == util.Script_status.scan_specific_dataset_id :
+    if scan_status == util.Script_status.scan_specific_dataset_id:
         dataset_id = config["dataset"]
-        if ',' in dataset_id :
+        if ',' in dataset_id:
             dataset_ids_list = dataset_id.split(",")
             for dataset_id_item in dataset_ids_list:
                 command = "python %s/scan_dataset.py -f %s -d %s -l %s"\
@@ -299,7 +299,7 @@ def scan_files_in_localhost(config, scan_status):
                 print "executng : %s" %(command)
                 subprocess.call(command, shell=True)
                 #os.system(command)
-        else :
+        else:
             command = "python %s/scan_dataset.py -f %s -d %s -l %s" \
                       %(current_dir, filename, dataset_id,  level)
 
@@ -307,7 +307,7 @@ def scan_files_in_localhost(config, scan_status):
             print "executng : %s"  %(command)
             subprocess.call(command, shell=True)
 
-    elif scan_status == util.Script_status.scan_all_dataset_ids :
+    elif scan_status == util.Script_status.scan_all_dataset_ids:
         dataset_ids = util.find_dataset(filename, "all")
 
         for key, value in dataset_ids.iteritems():
@@ -316,7 +316,7 @@ def scan_files_in_localhost(config, scan_status):
 
             print "executng : %s" %(command)
             subprocess.call(command, shell=True)
-    elif scan_status == util.Script_status.scan_filenames_from_file :
+    elif scan_status == util.Script_status.scan_filenames_from_file:
         scan_filenames_from_file_in_localhost(config)
 
 def main():
@@ -337,15 +337,15 @@ def main():
     status_and_defaults = set_program_op_status_and_defaults(com_args)
 
     config_file = status_and_defaults[0]
-    run_status =  status_and_defaults[1]
+    run_status = status_and_defaults[1]
     scan_status = status_and_defaults[2]
 
     #Calls appropriate functions.
-    if run_status == util.Script_status.run_script_in_lotus :
+    if run_status == util.Script_status.run_script_in_lotus:
         scan_files_in_lotus(config_file, scan_status)
-    elif run_status == util.Script_status.run_script_in_localhost :
+    elif run_status == util.Script_status.run_script_in_localhost:
         scan_files_in_localhost(config_file, scan_status)
-    else :
+    else:
         print "Some options could not be recognized.\n"
 
 

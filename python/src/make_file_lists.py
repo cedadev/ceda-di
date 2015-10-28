@@ -35,9 +35,9 @@ import sys
 import subprocess
 
 
-Script_status = Enum( "Script_status",
-                      "create_lists_in_lotus\
-                      create_lists_in_localhost"
+Script_status = Enum("Script_status",
+                     "create_lists_in_lotus\
+                     create_lists_in_localhost"
                     )
 
 
@@ -60,7 +60,7 @@ def set_program_op_status_and_defaults(com_args):
 
     if ("host" in config) and config["host"] == "localhost":
         status_and_defaults.append(Script_status.create_lists_in_localhost)
-    else :
+    else:
         status_and_defaults.append(Script_status.create_lists_in_lotus)
 
 
@@ -75,7 +75,7 @@ def create_file_lists_in_lotus(status, config):
     #Get file.
     filename = config["filename"]
     #Extract datasets ids and paths.
-    datasets =  util.find_dataset(filename, "all")
+    datasets = util.find_dataset(filename, "all")
     datasets_ids = datasets.keys()
     num_datasets = len(datasets_ids)
     scan_commands = []
@@ -105,7 +105,7 @@ def create_file_lists_in_localhost(status, config):
     #Get file.
     filename = config["filename"]
     #Extract datasets ids and paths.
-    datasets =  util.find_dataset(filename, "all")
+    datasets = util.find_dataset(filename, "all")
     datasets_ids = datasets.keys()
     num_datasets = len(datasets_ids)
     scan_commands = []
@@ -143,9 +143,9 @@ def main():
     config = status_and_defaults[0]
 
 
-    if status == Script_status.create_lists_in_localhost :
+    if status == Script_status.create_lists_in_localhost:
         create_file_lists_in_localhost(status, config)
-    else :
+    else:
         create_file_lists_in_lotus(status, config)
 
 
