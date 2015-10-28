@@ -115,7 +115,7 @@ def scan_all_datasets_in_lotus(config):
         commands.append(command)
     
     lotus_max_processes = config["num-processes"] 
-    util.run_tasks_in_lotus(commands, int(lotus_max_processes), user_wait_time=5)        
+    util.run_tasks_in_lotus(commands, int(lotus_max_processes), user_wait_time=30)        
     
             
 def scan_specific_datasets_in_lotus(config):
@@ -205,7 +205,7 @@ def scan_filenames_from_file_in_lotus(config):
         
     #Run each command in lotus.
     lotus_max_processes = config["num-processes"] 
-    util.run_tasks_in_lotus(commands, int(lotus_max_processes), user_wait_time=5)
+    util.run_tasks_in_lotus(commands, int(lotus_max_processes), user_wait_time=30)
         
           
 def scan_files_in_lotus(config, scan_status):
