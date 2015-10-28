@@ -53,8 +53,8 @@ class HandlerFactory(object):
         """
         handler_class = self.get_handler_class(filename)
         if handler_class is not None:
-            return handler_class(filename)        
-       
+            return handler_class(filename)
+
     def get_handler_class(self, filename):
         """
         Return the class of the correct file handler (un-instantiated).
@@ -87,13 +87,13 @@ class Extract(object):
     def __init__(self, conf, path=None):
         if conf is None:
             return
-        
-        try: 
+
+        try:
             self.configuration = conf
             self.make_dirs(conf)
             self.logger = self.prepare_logging()
             self.handler_factory_ints = HandlerFactory(self.conf("handlers"))
-            
+
             if path is None:
                 self.file_list = self._build_file_list()
             else:
@@ -105,10 +105,10 @@ class Extract(object):
         """
         Return file list
         :return: A list of file paths
-        """            
+        """
         path_l = self.conf("input-path")
         return util.build_file_list(path_l)
-          
+
     def conf(self, conf_opt):
         """
         Return configuration option or raise exception if it doesn't exist.
@@ -155,9 +155,9 @@ class Extract(object):
                             format=self.conf("logging")["format"],
                             level=logging.INFO)
 
-        log = logging.getLogger(__name__)        
+        log = logging.getLogger(__name__)
         return log
-           
+
     def process_file(self, filename):
         """
         Instantiate a handler for a file and extract metadata.
@@ -194,7 +194,7 @@ class Extract(object):
         if props is not None:
             with open(out_fname, 'w') as j:
                 j.write(str(props))
-                
+
     def run(self):
         """
         Run main metadata extraction suite.
@@ -227,10 +227,10 @@ class Extract(object):
                 # loaded from JSON end up in unicode
                 path = f
                 if "raw" not in path:
-                    #lets do that sequentially 
-                    
+                    #lets do that sequentially
+
                     self.process_file(path)
-                    
+
                     #p = multiprocessing.Process(target=self.process_file,
                     #                            args=(path,))
                     #pool.append(p)
@@ -249,91 +249,91 @@ class Extract(object):
         self.logger.info("Metadata extraction completed at: %s",
                          end.isoformat())
         self.logger.info("Start: %s, End: %s, Total: %s",
-                         start.isoformat(), end.isoformat(), end - start)             
-  
-#kltsa 14/08/2015 issue #23203.    
-class ExtractSeq(Extract): 
-        
+                         start.isoformat(), end.isoformat(), end - start)
+
+#kltsa 14/08/2015 issue #23203.
+class ExtractSeq(Extract):
+
     """
     File crawler and metadata extractor class.
     Part of core functionality of FBS.
     Files are scanned sequentially (one thread).
     """
     def __init__(self, conf, status):
-        
-        Extract.__init__(self, None)        
-        
+
+        Extract.__init__(self, None)
+
         self.configuration = conf
-        self.status = status 
+        self.status = status
         self.logger = None
         self.handler_factory_ints = None
-        self.file_list = None       
-           
-           
+        self.file_list = None
+
+
     def prepare_run(self):
-        
+
         """
          Prepares login and file list to be scanned.
         """
         if self.status == util.Script_status.search_dir_and_store_names_to_file :
-            try:            
-                self.logger = self.prepare_logging_seq()                         
+            try:
+                self.logger = self.prepare_logging_seq()
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
         elif self.status == util.Script_status.search_dir_and_store_metadata_to_db :
-            try:            
+            try:
                 self.logger = self.prepare_logging_seq()
-                                
+
                 ###########################################################
                 self.handler_factory_ints = handler_picker.HandlerPicker(self.conf("handlers"))
                 self.handler_factory_ints.get_configured_handlers()
                 ###########################################################
-                
+
                 self.file_list = self.build_file_list_from_path()
             except KeyError as k:
-                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))        
+                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
         elif self.status == util.Script_status.read_file_paths_and_store_metadata_to_db :
-            try:            
+            try:
                 self.logger = self.prepare_logging_seq()
-                
+
                 ###########################################################
                 self.handler_factory_ints = handler_picker.HandlerPicker(self.conf("handlers"))
                 self.handler_factory_ints.get_configured_handlers()
                 ###########################################################
-                
+
                 self.file_list = self.build_list_from_file()
-            
+
             except KeyError as k:
-                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))         
-                            
+                sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
+
     def prepare_logging_seq(self):
-        
+
         """
         initializes  logging.
         """
-           
+
         #Check if logging directory exists and if necessary create it.
         log_dir = self.conf("core")["log-path"]
-        
+
         if not os.path.exists(log_dir):
-            os.makedirs(log_dir)   
-                   
+            os.makedirs(log_dir)
+
         #kltsa 15/09/2015 changes for issue :23221.
-        if self.status == util.Script_status.read_file_paths_and_store_metadata_to_db : 
+        if self.status == util.Script_status.read_file_paths_and_store_metadata_to_db :
             log_fname = "%s_%s_%s_%s_%s.log" \
                         %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "-"),\
                         self.conf("scanning")["start"], self.conf("scanning")["num-files"], socket.gethostname())
         else :
             log_fname = "%s_%s_%s.log" \
                         %(self.conf("es-configuration")["es-index"], self.conf("dataset"), socket.gethostname())
-         
-         
-        #create the path where to create the log files.               
+
+
+        #create the path where to create the log files.
         fpath = os.path.join(log_dir,
                              log_fname
                             )
-             
-        
+
+
         LEVELS = { 'debug'   : logging.DEBUG,
                    'info'    : logging.INFO,
                    'warning' : logging.WARNING,
@@ -341,210 +341,210 @@ class ExtractSeq(Extract):
                    'critical': logging.CRITICAL
                  }
 
-        
+
         conf_log_level = self.conf("core")["log-level"]
-        
-        
+
+
         log_format = self.conf("core")["format"]
         level = LEVELS.get(conf_log_level, logging.NOTSET)
-        
+
         """
-        ok, since this is the main module lets remove previously configured handlers 
+        ok, since this is the main module lets remove previously configured handlers
         and add the one used in this script.
-        """ 
-        logging.root.handlers = []           
-        
-        """        
+        """
+        logging.root.handlers = []
+
+        """
         logging.basicConfig( filename=fpath,
-                             filemode="a+",   
+                             filemode="a+",
                              format=log_format,
                              level=level
                            )
         """
-        
+
         extract_logger = logging.getLogger(__name__)
-        
+
         file_handler = logging.FileHandler(fpath)
         log_format = logging.Formatter(log_format)
-        file_handler.setFormatter(log_format)       
-             
-             
+        file_handler.setFormatter(log_format)
+
+
         extract_logger.addHandler(file_handler)
-        extract_logger.setLevel(level)   
+        extract_logger.setLevel(level)
         extract_logger.propagate = 0
-           
-       
+
+
         es_log = logging.getLogger("elasticsearch")
         es_log.setLevel(logging.ERROR)
-        #es_log.addHandler(logging.FileHandler(fpath_es))         
-       
-                
+        #es_log.addHandler(logging.FileHandler(fpath_es))
+
+
         nappy_log = logging.getLogger("nappy")
-        nappy_log.setLevel(logging.ERROR)        
-        
-                        
+        nappy_log.setLevel(logging.ERROR)
+
+
         urllib3_log = logging.getLogger("urllib3")
         urllib3_log.setLevel(logging.ERROR)
         #urllib3_log.addHandler(logging.FileHandler(fpath_es))
-                
-        log = logging.getLogger(__name__)             
-              
-        return log   
-    
+
+        log = logging.getLogger(__name__)
+
+        return log
+
     def  build_file_list_from_path(self):
-        
+
         """
         Returns the files contained within a dataset.
-        """    
-       
+        """
+
         dataset_ids_file = self.conf("filename")
         dataset_id = self.conf("dataset")
         #derectory where the files to be searched are.
-        path_to_files = util.find_dataset(dataset_ids_file, dataset_id) 
-         
-        return util.build_file_list(path_to_files)                        
-        
+        path_to_files = util.find_dataset(dataset_ids_file, dataset_id)
+
+        return util.build_file_list(path_to_files)
+
     def build_list_from_file(self):
-        
+
         """
-        Reads file paths form a given file and returns a subset of them 
-        in a list.  
+        Reads file paths form a given file and returns a subset of them
+        in a list.
         """
-            
+
         file_containing_paths = self.conf("filename")
         start_file = self.conf("start")
         num_of_files = self.conf("num-files")
-       
-        #TODO: Make this a library function and make it more efficient.  
+
+        #TODO: Make this a library function and make it more efficient.
         with open(file_containing_paths) as f:
             content = f.readlines()
-                    
-        self.logger.info(("%s lines read from file \"%s\"."  %(str(len(content)), file_containing_paths)))   
-       
+
+        self.logger.info(("%s lines read from file \"%s\"."  %(str(len(content)), file_containing_paths)))
+
         list_len = len(content)
         if int(start_file) < 0 or int(start_file) > list_len :
             self.logger.info("please correct start parameter value.")
             return
-            
+
         end_file = int(start_file) + int(num_of_files)
-    
+
         if end_file > list_len :
             self.logger.info("please correct num-files parameter value.")
             return
-   
-        file_list = content[int(start_file):end_file] 
-    
+
+        file_list = content[int(start_file):end_file]
+
         new_file_list = []
         for p in file_list:
-            new_file_list.append(p.rstrip()) 
-             
-        return new_file_list   
-            
+            new_file_list.append(p.rstrip())
+
+        return new_file_list
+
     def index_properties_seq(self, body, es_id):
-        
+
         """
         Indexes metadata in Elasticsearch.
         """
-                
+
         try:
             self.es.index(index=self.conf("es-configuration")['es-index'],
                       doc_type=self.conf("es-configuration")['es-mapping'],
                       body=body,
-                      id=es_id) 
+                      id=es_id)
         except Exception as e:
             self.logger.error(e.message)
-            return -1 
-        
-        return 1    
-            
+            return -1
+
+        return 1
+
     def process_file_seq(self, filename, level):
-        
+
         """
         Returns metadata from the given file.
         """
-            
-        handler = self.handler_factory_ints. pick_best_handler(filename) 
-        if handler is not None:       
-            handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.       
+
+        handler = self.handler_factory_ints. pick_best_handler(filename)
+        if handler is not None:
+            handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
             metadata = handler_inst.get_properties()
-            self.logger.info(("%s was read using handler \"%s\"." %(filename, handler_inst.get_handler_id())))         
-            return metadata    
+            self.logger.info(("%s was read using handler \"%s\"." %(filename, handler_inst.get_handler_id())))
+            return metadata
         else:
             self.logger.info(("%s could not be read by any handler." %(filename)))
             return None
-        
+
     def store_filenames_to_file(self):
         """
         Stores filenames of files within a dataset to a file.
-        """ 
-            
+        """
+
         self.prepare_run()
-               
+
         dataset_ids_file = self.conf("filename")
         dataset_id = self.conf("dataset")
-        path_to_files = util.find_dataset(dataset_ids_file, dataset_id) 
+        path_to_files = util.find_dataset(dataset_ids_file, dataset_id)
         file_to_store_paths = self.conf("make-list")
-                
+
         self.logger.info(("Creating file \%s\ with paths to files belonging to \"%s\" dataset." %(file_to_store_paths, dataset_id ) ) )
         file_list = util.build_file_list(path_to_files)
-        
+
         util.write_list_to_file(file_list, file_to_store_paths)
-        
-                
-        self.logger.info(("file \"%s\" containing paths to files in given dataset has been created." %(file_to_store_paths)))         
-                                          
-    def run_seq(self):      
-        
+
+
+        self.logger.info(("file \"%s\" containing paths to files in given dataset has been created." %(file_to_store_paths)))
+
+    def run_seq(self):
+
         """
          Extracts metadata information from files and posts them in elastic search.
         """
-                    
+
         #Create all data structures needed.
-        self.prepare_run()    
-                    
-        #Sanity check.    
+        self.prepare_run()
+
+        #Sanity check.
         if self.file_list is None:
-            self.logger.info( "File list is empty.") 
+            self.logger.info( "File list is empty.")
             return
-              
+
         # Create index if necessary
         es_factory = ElasticsearchClientFactory()
         self.es = es_factory.get_client(self.configuration)
-       
+
         try:
             index.create_index(self.configuration, self.es)
         except TransportError as te:
             if te[0] == 400:
                 pass
             else:
-                raise TransportError(te)         
-        
-        doc = {}       
+                raise TransportError(te)
+
+        doc = {}
         level = self.conf("level")
-        
+
         if len(self.file_list) > 0:
-            
+
             for filename in self.file_list:
                 #file_path = f
-                
+
                 #self.logger.info("Metadata extraction started for file %s", file_path)
                 start = datetime.datetime.now()
-                
-                doc = self.process_file_seq(filename, level)    
-                
+
+                doc = self.process_file_seq(filename, level)
+
                 if doc is not None :
-                                                               
+
                     #es_query = json.dumps(doc)
-                    es_id = hashlib.sha1(filename).hexdigest()      
-                
+                    es_id = hashlib.sha1(filename).hexdigest()
+
                     ret = self.index_properties_seq(doc, es_id)
-                    
+
                     end = datetime.datetime.now()
-                                        
+
                     self.logger.info(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), str(ret), str(end - start))))
-                       
+
                 else :
-                    end = datetime.datetime.now()              
-                    
+                    end = datetime.datetime.now()
+
                     self.logger.error("%s|%s|0|%s ms" %(os.path.basename(filename), os.path.dirname(filename), str(end - start)))
                     continue

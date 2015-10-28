@@ -17,101 +17,101 @@ class  HandlerPicker(object):
     """
     Returns a handler for the supplied file..
     """
-          
-    def __init__(self, handler_map):      
+
+    def __init__(self, handler_map):
         self.handler_map = handler_map
         self.handlers = {}
         self.handlers_and_dirs = {}
         self.NETCDF_PYTHON_MAGIC_NUM_RES = "NetCDF Data Format data"
-        self.ASCII_PYTHON_MAGIC_NUM_RES = "ASCII text"      
-           
-       
+        self.ASCII_PYTHON_MAGIC_NUM_RES = "ASCII text"
+
+
     def pick_best_handler(self, filename):
         """
         :param filename : the filename to be scanned.
-        :returns handler: Returns an appropriate handler 
+        :returns handler: Returns an appropriate handler
         for the given file.
-        """        
-        
+        """
+
         handler = None
         """
         Sanity check.
-        check if file still exists.  
+        check if file still exists.
         """
-        
-        file_exists = os.path.isfile(filename) 
-        
+
+        file_exists = os.path.isfile(filename)
+
         file_dir = os.path.dirname(filename)
-        
+
         if not file_exists :
-            return None                
-            
-            
+            return None
+
+
         #Try configured handler.
-        handler = self.get_configured_handler_class(filename)        
-                
-        if handler is not None :
-            self.handlers_and_dirs[file_dir] = handler
-            return handler        
-        
-        #Try returning a handler based on file extension.
-        extension = os.path.splitext(filename)[1]
-            
-        if extension == ".nc":
-            handler = netcdf_file.NetCDFFile
-        elif extension == ".na":     
-            handler = nasaames_file.NASAAmesFile 
-            
+        handler = self.get_configured_handler_class(filename)
+
         if handler is not None :
             self.handlers_and_dirs[file_dir] = handler
             return handler
-                
-        #Try returning a handler based on file's magic number.        
-        res = magic_number_reader.from_file(filename)        
-        
-        if res  == self.NETCDF_PYTHON_MAGIC_NUM_RES:        
-            handler = netcdf_file.NetCDFFile 
+
+        #Try returning a handler based on file extension.
+        extension = os.path.splitext(filename)[1]
+
+        if extension == ".nc":
+            handler = netcdf_file.NetCDFFile
+        elif extension == ".na":
+            handler = nasaames_file.NASAAmesFile
+
+        if handler is not None :
+            self.handlers_and_dirs[file_dir] = handler
+            return handler
+
+        #Try returning a handler based on file's magic number.
+        res = magic_number_reader.from_file(filename)
+
+        if res  == self.NETCDF_PYTHON_MAGIC_NUM_RES:
+            handler = netcdf_file.NetCDFFile
         elif res == self.ASCII_PYTHON_MAGIC_NUM_RES:
             #ok lets see if it is a na file.
             first_line = util.get_file_header(filename)
-            tokens = first_line.split(" ")  
-            if len(tokens) >= 2: 
+            tokens = first_line.split(" ")
+            if len(tokens) >= 2:
                 if tokens[0].isdigit() and tokens[1].isdigit():
-                    handler = nasaames_file.NASAAmesFile  
+                    handler = nasaames_file.NASAAmesFile
             else:
-                handler = generic_file.GenericFile                              
-                
+                handler = generic_file.GenericFile
+
         if handler is not None :
             self.handlers_and_dirs[file_dir] = handler
             return handler
-           
-        #Try to return last handler used in this directory.      
+
+        #Try to return last handler used in this directory.
         handler = self.handlers_and_dirs[file_dir] = handler
-        
+
         if handler is not None :
             return handler
-                
-        #Nothing worked, return the generic handler.      
-        handler = generic_file.GenericFile        
-        
-        
-        return handler              
-    
+
+        #Nothing worked, return the generic handler.
+        handler = generic_file.GenericFile
+
+
+        return handler
+
     def get_configured_handlers(self):
-        
+
         for pattern, handler in self.handler_map.iteritems():
             handler_class = handler['class']
             priority = handler['priority']
-            
+
             (module, _class) = handler_class.rsplit(".", 1)
             mod = __import__(module, fromlist=[_class])
-            
+
             self.handlers[pattern] =\
             {
               "class": getattr(mod, _class),
               "priority": priority
-            }  
-            
+            }
+
     def get_configured_handler_class(self, filename):
         """
         Return the class of the correct file handler (un-instantiated).
@@ -134,10 +134,10 @@ class  HandlerPicker(object):
                 pass
             except AttributeError:
                 return handler_class
-        return None                  
-                   
+        return None
+
     def __enter__(self):
         return self
-        
+
     def __exit__(self, *args):
         pass

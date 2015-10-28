@@ -5,13 +5,13 @@ Usage:
   make_file_lists.py -h | --help
   make_file_lists.py --version
   make_file_lists.py (-f <filename> | --filename <filename>) (-m <location> | --make-list <location>)
-                     [-p <number_of_processes> | --num-processes <number_of_processes>]  
+                     [-p <number_of_processes> | --num-processes <number_of_processes>]
                      (--host <hostname>)
-                     
+
 Options:
   -h --help                                  Show this screen.
   --version                                  Show version.
-  -f --filename=<filename>                   File from where the dataset will be read [default: datasets.ini]. 
+  -f --filename=<filename>                   File from where the dataset will be read [default: datasets.ini].
   -m --make-list=<location>                  Stores the list of filenames to a file.
   -p --num-processes=<number_of_processes>   Number of processes to use.
   --host=<hostname>                       The name of the host where the script will run.
@@ -28,7 +28,7 @@ from operator import or_
 import glob
 import logging
 import logging.handlers
-import datetime   
+import datetime
 from enum import Enum
 import sys
 
@@ -38,16 +38,16 @@ import subprocess
 Script_status = Enum( "Script_status",
                       "create_lists_in_lotus\
                       create_lists_in_localhost"
-                    )    
-    
+                    )
+
 
 def set_program_op_status_and_defaults(com_args):
-    
+
     """
-    Set global variables that determine the operations to be performed. 
+    Set global variables that determine the operations to be performed.
     """
-     
-    status_and_defaults = []   
+
+    status_and_defaults = []
     # Searches for the configuration file.
     if 'config' not in com_args or not com_args["config"]:
         direc = os.path.dirname(__file__)
@@ -57,21 +57,21 @@ def set_program_op_status_and_defaults(com_args):
     #Creates a dictionary with default settings some of them where loaded from th edefaults file.
     config = util.get_settings(com_args["config"], com_args)
     status_and_defaults.append(config)
-    
-    if ("host" in config) and config["host"] == "localhost": 
-        status_and_defaults.append(Script_status.create_lists_in_localhost)       
+
+    if ("host" in config) and config["host"] == "localhost":
+        status_and_defaults.append(Script_status.create_lists_in_localhost)
     else :
         status_and_defaults.append(Script_status.create_lists_in_lotus)
-    
-    
+
+
     return status_and_defaults
 
 def create_file_lists_in_lotus(status, config):
-    
+
     """
-    Finds and stores all files belonging to each dataset. 
+    Finds and stores all files belonging to each dataset.
     """
-    
+
     #Get file.
     filename = config["filename"]
     #Extract datasets ids and paths.
@@ -79,29 +79,29 @@ def create_file_lists_in_lotus(status, config):
     datasets_ids = datasets.keys()
     num_datasets = len(datasets_ids)
     scan_commands = []
-    current_dir = os.getcwd() 
+    current_dir = os.getcwd()
     directroy_to_save_files = config["make-list"]
-    
-    #Create the commands that will create the files containing the paths to data files. 
+
+    #Create the commands that will create the files containing the paths to data files.
     for i in range(0, num_datasets):
-            
+
         command = "python %s/scan_dataset.py -f %s -d  %s --make-list %s/%s_dataset__files.txt" \
                   %(current_dir, filename, datasets_ids[i], directroy_to_save_files, datasets_ids[i])
-        
-        scan_commands.append(command)          
-  
-    
-    lotus_max_processes = config["num-processes"] 
-    
+
+        scan_commands.append(command)
+
+
+    lotus_max_processes = config["num-processes"]
+
     #Run each command in lotus.
-    util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes), user_wait_time=3)    
+    util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes), user_wait_time=3)
 
 def create_file_lists_in_localhost(status, config):
-    
+
     """
-    Finds and stores all files belonging to each dataset. 
+    Finds and stores all files belonging to each dataset.
     """
-    
+
     #Get file.
     filename = config["filename"]
     #Extract datasets ids and paths.
@@ -109,49 +109,49 @@ def create_file_lists_in_localhost(status, config):
     datasets_ids = datasets.keys()
     num_datasets = len(datasets_ids)
     scan_commands = []
-    current_dir = os.getcwd() 
+    current_dir = os.getcwd()
     directroy_to_save_files = config["make-list"]
-    
-    #Create the commands that will create the files containing the paths to data files. 
+
+    #Create the commands that will create the files containing the paths to data files.
     for i in range(0, num_datasets):
-            
+
         command = "python %s/scan_dataset.py -f %s -d  %s --make-list %s/%s_dataset__files.txt" \
                   %(current_dir, filename, datasets_ids[i], directroy_to_save_files, datasets_ids[i])
-        
-        print "executing : %s" %(command)          
-        
-        subprocess.call(command, shell=True)        
-  
+
+        print "executing : %s" %(command)
+
+        subprocess.call(command, shell=True)
+
 def main():
-        
+
     """
     Relevant ticket : http://team.ceda.ac.uk/trac/ceda/ticket/23217
-    """   
-      
-    #Get command line arguments. 
-    com_args = util.sanitise_args(docopt(__doc__, version=__version__))        
-       
+    """
+
+    #Get command line arguments.
+    com_args = util.sanitise_args(docopt(__doc__, version=__version__))
+
     #Insert defaults
-    status_and_defaults = set_program_op_status_and_defaults(com_args)      
-     
-   
-   
-    start = datetime.datetime.now()              
-    print "Script started at: %s" %(str(start)) 
-       
+    status_and_defaults = set_program_op_status_and_defaults(com_args)
+
+
+
+    start = datetime.datetime.now()
+    print "Script started at: %s" %(str(start))
+
     status = status_and_defaults[1]
-    config = status_and_defaults[0]   
-     
-     
+    config = status_and_defaults[0]
+
+
     if status == Script_status.create_lists_in_localhost :
-        create_file_lists_in_localhost(status, config)   
-    else :    
-        create_file_lists_in_lotus(status, config) 
-    
-     
-    end = datetime.datetime.now()    
-    print "Script ended at : %s it ran for : %s" %(str(end), str(end - start)) 
-        
-        
+        create_file_lists_in_localhost(status, config)
+    else :
+        create_file_lists_in_lotus(status, config)
+
+
+    end = datetime.datetime.now()
+    print "Script ended at : %s it ran for : %s" %(str(end), str(end - start))
+
+
 if __name__ == '__main__':
     main()
