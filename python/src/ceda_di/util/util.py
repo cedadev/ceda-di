@@ -14,15 +14,14 @@ import ConfigParser
 
 #some globals.
 Script_status = Enum("Script_status",
-                     "search_dir_and_store_names_to_file \
-                      search_dir_and_store_metadata_to_db \
-                      read_file_paths_and_store_metadata_to_db\
-                      run_script_in_lotus \
-                      run_script_in_localhost \
-                      scan_specific_dataset_id \
-                      scan_all_dataset_ids \
-                      scan_filenames_from_file \
-                      stay_idle"
+                     "SEARCH_AND_STORE_INFO_TO_FILE \
+                      SEARCH_AND_STORE_INFO_TO_DB \
+                      READ_PATHS_AND_STORE_INFO_TO_DB\
+                      RUN_SCRIPT_IN_LOTUS \
+                      RUN_SCRIPT_IN_LOCALHOST \
+                      SCAN_SPECIFIC_DATASET_ID \
+                      SCAN_ALL_DATASETS \
+                      STAY_IDLE"
                     )
 
 

@@ -275,12 +275,12 @@ class ExtractSeq(Extract):
         """
          Prepares login and file list to be scanned.
         """
-        if self.status == util.Script_status.search_dir_and_store_names_to_file :
+        if self.status == util.Script_status.SEARCH_AND_STORE_INFO_TO_FILE:
             try:
                 self.logger = self.prepare_logging_seq()
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
-        elif self.status == util.Script_status.search_dir_and_store_metadata_to_db :
+        elif self.status == util.Script_status.SEARCH_AND_STORE_INFO_TO_DB:
             try:
                 self.logger = self.prepare_logging_seq()
 
@@ -292,7 +292,7 @@ class ExtractSeq(Extract):
                 self.file_list = self.build_file_list_from_path()
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
-        elif self.status == util.Script_status.read_file_paths_and_store_metadata_to_db :
+        elif self.status == util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB:
             try:
                 self.logger = self.prepare_logging_seq()
 
@@ -319,7 +319,7 @@ class ExtractSeq(Extract):
             os.makedirs(log_dir)
 
         #kltsa 15/09/2015 changes for issue :23221.
-        if self.status == util.Script_status.read_file_paths_and_store_metadata_to_db :
+        if self.status == util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB:
             log_fname = "%s_%s_%s_%s_%s.log" \
                         %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "-"),\
                         self.conf("scanning")["start"], self.conf("scanning")["num-files"], socket.gethostname())

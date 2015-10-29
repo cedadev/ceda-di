@@ -36,8 +36,8 @@ import subprocess
 
 
 Script_status = Enum("Script_status",
-                     "create_lists_in_lotus\
-                     create_lists_in_localhost"
+                     "RUN_SCRIPT_IN_LOTUS\
+                      RUN_SCRIPT_IN_LOCALHOST"
                     )
 
 
@@ -59,9 +59,9 @@ def set_program_op_status_and_defaults(com_args):
     status_and_defaults.append(config)
 
     if ("host" in config) and config["host"] == "localhost":
-        status_and_defaults.append(Script_status.create_lists_in_localhost)
+        status_and_defaults.append(Script_status.RUN_SCRIPT_IN_LOCALHOST)
     else:
-        status_and_defaults.append(Script_status.create_lists_in_lotus)
+        status_and_defaults.append(Script_status.RUN_SCRIPT_IN_LOTUS)
 
 
     return status_and_defaults
@@ -143,7 +143,7 @@ def main():
     config = status_and_defaults[0]
 
 
-    if status == Script_status.create_lists_in_localhost:
+    if status == Script_status.RUN_SCRIPT_IN_LOCALHOST:
         create_file_lists_in_localhost(status, config)
     else:
         create_file_lists_in_lotus(status, config)
