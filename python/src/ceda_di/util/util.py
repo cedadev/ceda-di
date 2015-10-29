@@ -201,8 +201,7 @@ def get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit):
     """
 
     empty_task_queue_string = "No unfinished job found\n"
-    non_empty_task_queue_string = "JOBID     USER    STAT  QUEUE\
-                                   FROM_HOST   EXEC_HOST   JOB_NAME   SUBMIT_TIME"
+    non_empty_task_queue_string = "JOBID     USER    STAT  QUEUE      FROM_HOST   EXEC_HOST   JOB_NAME   SUBMIT_TIME"
 
     command_output = subprocess.check_output('bjobs', stderr=subprocess.STDOUT, shell=True)
 
