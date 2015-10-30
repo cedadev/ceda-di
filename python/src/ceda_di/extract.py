@@ -268,8 +268,11 @@ class ExtractSeq(Extract):
         self.logger = None
         self.handler_factory_ints = None
         self.file_list = None
-
-
+        #some constants
+        self.FILE_PROPERTIES_ERROR = "0"
+        self.FILE_INDEX_ERROR = "-1"  
+        self.FILE_INDEXED = "1"
+       
     def prepare_run(self):
 
         """
@@ -446,17 +449,11 @@ class ExtractSeq(Extract):
         Indexes metadata in Elasticsearch.
         """
 
-        try:
-            self.es.index(index=self.conf("es-configuration")['es-index'],
-                      doc_type=self.conf("es-configuration")['es-mapping'],
-                      body=body,
-                      id=es_id)
-        except Exception as e:
-            self.logger.error(e.message)
-            return -1
-
-        return 1
-
+        self.es.index(index=self.conf("es-configuration")["es-index"],
+            doc_type=self.conf("es-configuration")["es-mapping"],
+            body=body,
+            id=es_id)
+        
     def process_file_seq(self, filename, level):
 
         """
@@ -536,15 +533,19 @@ class ExtractSeq(Extract):
 
                     #es_query = json.dumps(doc)
                     es_id = hashlib.sha1(filename).hexdigest()
-
-                    ret = self.index_properties_seq(doc, es_id)
-
-                    end = datetime.datetime.now()
-
-                    self.logger.info(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), str(ret), str(end - start))))
+                  
+                    try:
+                        self.index_properties_seq(doc, es_id)
+                    except Exception as e:
+                        end = datetime.datetime.now()
+                        self.logger.error(e.message)
+                        self.logger.error(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), self.FILE_INDEX_ERROR, str(end - start))))
+                    else:  
+                        end = datetime.datetime.now()
+                        self.logger.info(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), self.FILE_INDEXED, str(end - start))))
 
                 else :
                     end = datetime.datetime.now()
 
-                    self.logger.error("%s|%s|0|%s ms" %(os.path.basename(filename), os.path.dirname(filename), str(end - start)))
+                    self.logger.error("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), self.FILE_PROPERTIES_ERROR, str(end - start)))
                     continue
