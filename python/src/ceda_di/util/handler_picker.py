@@ -8,6 +8,8 @@ import ceda_di.file_handlers.generic_file as generic_file
 import ceda_di.file_handlers.netcdf_file as netcdf_file
 import ceda_di.file_handlers.nasaames_file as nasaames_file
 
+import ceda_di.file_handlers.pp_file as pp_file
+
 import magic as magic_number_reader
 
 import util as util
@@ -61,6 +63,8 @@ class  HandlerPicker(object):
             handler = netcdf_file.NetCDFFile
         elif extension == ".na":
             handler = nasaames_file.NASAAmesFile
+        elif extension == ".pp":
+            handler = pp_file.PPFile    
 
         if handler is not None :
             self.handlers_and_dirs[file_dir] = handler
