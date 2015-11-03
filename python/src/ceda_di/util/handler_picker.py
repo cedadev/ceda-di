@@ -64,7 +64,7 @@ class  HandlerPicker(object):
         elif extension == ".na":
             handler = nasaames_file.NASAAmesFile
         elif extension == ".pp":
-            handler = pp_file.PPFile    
+            handler = pp_file.PPFile
 
         if handler is not None :
             self.handlers_and_dirs[file_dir] = handler

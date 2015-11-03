@@ -533,7 +533,7 @@ class ExtractSeq(Extract):
 
                     #es_query = json.dumps(doc)
                     es_id = hashlib.sha1(filename).hexdigest()
-                  
+
                     try:
                         self.index_properties_seq(doc, es_id)
                     except Exception as e:

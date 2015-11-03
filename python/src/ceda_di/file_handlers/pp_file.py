@@ -1,5 +1,6 @@
 import os
 import cf
+import inspect
 
 
 from generic_file import GenericFile
@@ -22,7 +23,7 @@ class PPFile(GenericFile):
         Construct list of Phenomena based on variables in NetCDF file.
         :returns : List of metadata.product.Parameter objects.
         """
-        phenomenon_attr = {}        
+        phenomenon_attr = {}
         phenomena_list = []
         phenomenon_parameters_dict = {}
         try:
@@ -31,34 +32,38 @@ class PPFile(GenericFile):
             #For all phenomena.
             for i in range(0, number_of_phenomena):
                 phen = phenomena[i]
-                list_of_phenomenon_parameters = []                
+                list_of_phenomenon_parameters = []
+
                 #For every phenomenon.
-                for key in ('standard_name', 'title', 'name', 'long_name', 'units'):
-                    if hasattr(phen, key):
-                        #name value dict.
+                dict_of_phenomenon_prop = phen.properties
+                keys = dict_of_phenomenon_prop.keys()
+                for key in keys:
                         phenomenon_attr["name"] = key
-                        phenomenon_attr["value"] = str(getattr(phen, key))                
-                        
-                        list_of_phenomenon_parameters.append(phenomenon_attr.copy())                        
+                        phenomenon_attr["value"] = str(dict_of_phenomenon_prop[key])
+
+                        list_of_phenomenon_parameters.append(phenomenon_attr.copy())
                         phenomenon_attr.clear()
-            
+
                 #Also add var_id
                 phenomenon_attr["name"] = "var_id"
-                phenomenon_attr["value"] = str(getattr(phen, "name"))
-                
+                if "name" in keys:
+                    phenomenon_attr["value"] = str(dict_of_phenomenon_prop["name"])
+                else:
+                    phenomenon_attr["value"] = "None"
+
                 #Attributes of phenomenon.
-                list_of_phenomenon_parameters.append(phenomenon_attr.copy())                        
+                list_of_phenomenon_parameters.append(phenomenon_attr.copy())
                 phenomenon_attr.clear()
-            
+
                 #Dict of phenomenon attributes.
                 phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
-            
-                #list of phenomenon. 
+
+                #list of phenomenon.
                 phenomena_list.append(phenomenon_parameters_dict.copy())
-                phenomenon_parameters_dict.clear()                        
-                 
+                phenomenon_parameters_dict.clear()
+
             return phenomena_list
-        except Exception:
+        except Exception as e:
             return None
 
     def get_properties_netcdf_level2(self):
@@ -76,17 +81,17 @@ class PPFile(GenericFile):
 
             self.handler_id = "pp handler level 2."
             file_info["phenomena"] = pp_phenomena
-           
+
             return file_info
 
-        else :
+        else:
             return self.get_properties_generic_level2()
 
     def get_properties(self):
 
-        if self.level == "1" :
+        if self.level == "1":
             return self.get_properties_generic_level1()
-        elif self.level  == "2" :
+        elif self.level  == "2":
             return self.get_properties_netcdf_level2()
 
     def __enter__(self):
