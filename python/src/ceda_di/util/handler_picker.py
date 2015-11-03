@@ -60,11 +60,11 @@ class  HandlerPicker(object):
         extension = os.path.splitext(filename)[1]
 
         if extension == ".nc":
-            handler = netcdf_file.NetCDFFile
+            handler = netcdf_file.NetCdfFile
         elif extension == ".na":
-            handler = nasaames_file.NASAAmesFile
+            handler = nasaames_file.NasaAmesFile
         elif extension == ".pp":
-            handler = pp_file.PPFile
+            handler = pp_file.PpFile
 
         if handler is not None :
             self.handlers_and_dirs[file_dir] = handler
@@ -74,14 +74,14 @@ class  HandlerPicker(object):
         res = magic_number_reader.from_file(filename)
 
         if res  == self.NETCDF_PYTHON_MAGIC_NUM_RES:
-            handler = netcdf_file.NetCDFFile
+            handler = netcdf_file.NetCdfFile
         elif res == self.ASCII_PYTHON_MAGIC_NUM_RES:
             #ok lets see if it is a na file.
             first_line = util.get_file_header(filename)
             tokens = first_line.split(" ")
             if len(tokens) >= 2:
                 if tokens[0].isdigit() and tokens[1].isdigit():
-                    handler = nasaames_file.NASAAmesFile
+                    handler = nasaames_file.NasaAmesFile
             else:
                 handler = generic_file.GenericFile
 

@@ -9,7 +9,7 @@ import netCDF4
 from generic_file import GenericFile
 from ceda_di.metadata import product
 
-class   NetCDFFile(GenericFile):
+class   NetCdfFile(GenericFile):
     """
     Simple class for returning basic information about the content
     of an NetCDF file.

@@ -5,7 +5,7 @@ import inspect
 
 from generic_file import GenericFile
 
-class PPFile(GenericFile):
+class PpFile(GenericFile):
     """
     Simple class for returning basic information about the content
     of an NetCDF file.
@@ -21,7 +21,7 @@ class PPFile(GenericFile):
 
         """
         Construct list of Phenomena based on variables in NetCDF file.
-        :returns : List of metadata.product.Parameter objects.
+        :returns : List of phenomena.
         """
         phenomenon_attr = {}
         phenomena_list = []
