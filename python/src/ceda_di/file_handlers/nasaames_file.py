@@ -11,7 +11,7 @@ class NasaAmesFile(GenericFile):
     def get_handler_id(self):
         return self.handler_id
 
-    def get_parameters(self):
+    def phenomena(self):
 
         try:
             na = nappy.openNAFile(self.file_path)
@@ -32,7 +32,7 @@ class NasaAmesFile(GenericFile):
 
     def get_properties_nanaames_level2(self):
 
-        nasaames_phenomena = self.get_parameters()
+        nasaames_phenomena = self.phenomena()
 
         if nasaames_phenomena is not None:
 

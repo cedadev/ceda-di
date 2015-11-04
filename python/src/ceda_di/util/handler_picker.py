@@ -65,6 +65,8 @@ class  HandlerPicker(object):
             handler = nasaames_file.NasaAmesFile
         elif extension == ".pp":
             handler = pp_file.PpFile
+        elif extension in (".grb", ".grib", ".GRB", ".GRIB"):
+            handler = grib_file.GribFile
 
         if handler is not None :
             self.handlers_and_dirs[file_dir] = handler

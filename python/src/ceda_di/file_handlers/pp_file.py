@@ -66,7 +66,7 @@ class PpFile(GenericFile):
         except Exception as e:
             return None
 
-    def get_properties_netcdf_level2(self):
+    def get_properties_pp_level2(self):
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index.
@@ -92,7 +92,7 @@ class PpFile(GenericFile):
         if self.level == "1":
             return self.get_properties_generic_level1()
         elif self.level  == "2":
-            return self.get_properties_netcdf_level2()
+            return self.get_properties_pp_level2()
 
     def __enter__(self):
         return self
