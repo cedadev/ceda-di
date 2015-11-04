@@ -11,6 +11,7 @@ import simplejson as json
 import time
 from enum import Enum
 import ConfigParser
+import struct
 
 #some globals.
 Script_status = Enum("Script_status",
@@ -163,6 +164,16 @@ def get_file_header(filename):
         first_line = f.readline()
 
     return first_line.replace("\n", "")
+
+def get_bytes_from_file(filename, num_bytes):
+
+    # open file in binary mode
+    with open(filename, 'rb') as in_file:
+        fmt = ">%ss" %(str(num_bytes))
+        bytes = struct.unpack(fmt,  in_file.read(num_bytes))[0]
+
+    return bytes
+
 
 def find_dataset(filename, dataset_id):
     """

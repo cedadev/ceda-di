@@ -10,6 +10,8 @@ import ceda_di.file_handlers.nasaames_file as nasaames_file
 
 import ceda_di.file_handlers.pp_file as pp_file
 
+import ceda_di.file_handlers.grib_file as grib_file
+
 import magic as magic_number_reader
 
 import util as util
@@ -26,6 +28,7 @@ class  HandlerPicker(object):
         self.handlers_and_dirs = {}
         self.NETCDF_PYTHON_MAGIC_NUM_RES = "NetCDF Data Format data"
         self.ASCII_PYTHON_MAGIC_NUM_RES = "ASCII text"
+        self.DATA_PYTHON_MAGIC_NUM_RES = "data"
 
 
     def pick_best_handler(self, filename):
@@ -84,6 +87,13 @@ class  HandlerPicker(object):
             if len(tokens) >= 2:
                 if tokens[0].isdigit() and tokens[1].isdigit():
                     handler = nasaames_file.NasaAmesFile
+            else:
+                handler = generic_file.GenericFile
+        #This can be a grb file.
+        elif res == self.DATA_PYTHON_MAGIC_NUM_RES:
+            res = util.get_bytes_from_file(filename, 4)
+            if res == "GRIB":
+                handler = grib_file.GribFile
             else:
                 handler = generic_file.GenericFile
 
