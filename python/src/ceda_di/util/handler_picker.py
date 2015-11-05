@@ -16,7 +16,7 @@ import util as util
 
 class  HandlerPicker(object):
     """
-    Returns a handler for the supplied file..
+    Returns a file handler for the supplied file.
     """
 
     def __init__(self, handler_map):
@@ -30,17 +30,17 @@ class  HandlerPicker(object):
 
     def pick_best_handler(self, filename):
         """
-        :param filename : the filename to be scanned.
+        :param filename : the file to be scanned.
         :returns handler: Returns an appropriate handler
         for the given file.
         """
 
         handler = None
+
         """
         Sanity check.
         check if file still exists.
         """
-
         file_exists = os.path.isfile(filename)
 
         file_dir = os.path.dirname(filename)

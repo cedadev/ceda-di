@@ -8,7 +8,7 @@ from generic_file import GenericFile
 class PpFile(GenericFile):
     """
     Simple class for returning basic information about the content
-    of an NetCDF file.
+    of an PP file.
     """
 
     def __init__(self, file_path, level):
@@ -20,7 +20,7 @@ class PpFile(GenericFile):
     def phenomena(self):
 
         """
-        Construct list of Phenomena based on variables in NetCDF file.
+        Construct list of Phenomena based on variables in pp file.
         :returns : List of phenomena.
         """
         phenomenon_attr = {}
@@ -80,7 +80,7 @@ class PpFile(GenericFile):
     def get_properties_pp_level2(self):
         """
         Wrapper for method phenomena().
-        :returns:  A dict containing information compatible with current es index.
+        :returns:  A dict containing information compatible with current es index level 2.
         """
 
         pp_phenomena = self.phenomena()
@@ -91,6 +91,10 @@ class PpFile(GenericFile):
             file_info = self.get_properties_generic_level1()
 
             self.handler_id = "pp handler level 2."
+
+            if file_info is None:
+                return None
+
             file_info["phenomena"] = pp_phenomena
 
             return file_info

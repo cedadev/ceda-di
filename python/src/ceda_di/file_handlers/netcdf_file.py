@@ -42,7 +42,7 @@ class   NetCdfFile(GenericFile):
     def get_properties_netcdf_level2(self):
         """
         Wrapper for method phenomena().
-        :returns:  A dict containing information compatible with current es index.
+        :returns:  A dict containing information compatible with current es index level 2.
         """
 
         netcdf_phenomena = self.phenomena()
@@ -53,6 +53,9 @@ class   NetCdfFile(GenericFile):
             file_info = self.get_properties_generic_level1()
 
             self.handler_id = "Netcdf handler level 2."
+
+            if file_info is None:
+                return None
 
             phenomena_list = []
             var_id_dict = {}

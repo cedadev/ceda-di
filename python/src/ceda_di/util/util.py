@@ -42,6 +42,7 @@ def sanitise_args(config):
     return sane_conf
 
 def read_conf(conf_path):
+
     """
     Reads configuration file into a dictionary.
 
@@ -58,10 +59,11 @@ def read_conf(conf_path):
         return {}
 
 def cfg_read(filename):
+
     """
     Reads configuration file into a dictionary.
 
-    :param conf_path: Path to the INI configuration file.
+    :param filename: Path to the INI configuration file.
     :returns: Dict containing parsed ini conf.
     """
     #Read the config file
@@ -132,9 +134,10 @@ def get_settings(conf_path, args):
     return defaults
 
 def build_file_list(path):
+
     """
     :param path : A file path
-    :return: List of files contained withint he specified directory..
+    :return: List of files contained withint he specified directory.
     """
     file_list = []
     for root, _, files in os.walk(path, followlinks=True):
@@ -148,7 +151,6 @@ def write_list_to_file(file_list, filename):
     """
     :param file_list : A list of files.
     :param filename : Where the list of files is going to be saved.
-    Saves content of a list to a file.
     """
 
     infile = open(filename, 'w')
@@ -160,12 +162,23 @@ def write_list_to_file(file_list, filename):
     infile.close()
 
 def get_file_header(filename):
+
+    """
+    :param filename : The file to be read.
+    :returns: First line of the file.
+    """
     with open(filename, 'r') as f:
         first_line = f.readline()
 
     return first_line.replace("\n", "")
 
 def get_bytes_from_file(filename, num_bytes):
+
+    """
+    :param filename : The file to be read.
+    :param num_bytes : number of bytes to read.
+    :returns: The first num_bytes from the file.
+    """
 
     try :
         fd = open(filename, 'r')
@@ -177,6 +190,7 @@ def get_bytes_from_file(filename, num_bytes):
     return bytes
 
 def find_dataset(filename, dataset_id):
+
     """
     :param filename : file containing dataset information.
     :param dataset_id : dataset to be searched.

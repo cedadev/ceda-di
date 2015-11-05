@@ -92,7 +92,7 @@ class Extract(object):
             self.configuration = conf
             self.make_dirs(conf)
             self.logger = self.prepare_logging()
-            self.handler_factory_ints = HandlerFactory(self.conf("handlers"))
+            self.handler_factory_inst = HandlerFactory(self.conf("handlers"))
 
             if path is None:
                 self.file_list = self._build_file_list()
@@ -162,7 +162,7 @@ class Extract(object):
         """
         Instantiate a handler for a file and extract metadata.
         """
-        handler = self.handler_factory_ints.get_handler(filename)
+        handler = self.handler_factory_inst.get_handler(filename)
         if handler is not None:
             with handler as hand:
                 if self.conf('send-to-index'):
@@ -266,13 +266,13 @@ class ExtractSeq(Extract):
         self.configuration = conf
         self.status = status
         self.logger = None
-        self.handler_factory_ints = None
+        self.handler_factory_inst = None
         self.file_list = None
         #some constants
         self.FILE_PROPERTIES_ERROR = "0"
         self.FILE_INDEX_ERROR = "-1"  
         self.FILE_INDEXED = "1"
-       
+
     def prepare_run(self):
 
         """
@@ -288,8 +288,8 @@ class ExtractSeq(Extract):
                 self.logger = self.prepare_logging_seq()
 
                 ###########################################################
-                self.handler_factory_ints = handler_picker.HandlerPicker(self.conf("handlers"))
-                self.handler_factory_ints.get_configured_handlers()
+                self.handler_factory_inst = handler_picker.HandlerPicker(self.conf("handlers"))
+                self.handler_factory_inst.get_configured_handlers()
                 ###########################################################
 
                 self.file_list = self.build_file_list_from_path()
@@ -300,8 +300,8 @@ class ExtractSeq(Extract):
                 self.logger = self.prepare_logging_seq()
 
                 ###########################################################
-                self.handler_factory_ints = handler_picker.HandlerPicker(self.conf("handlers"))
-                self.handler_factory_ints.get_configured_handlers()
+                self.handler_factory_inst = handler_picker.HandlerPicker(self.conf("handlers"))
+                self.handler_factory_inst.get_configured_handlers()
                 ###########################################################
 
                 self.file_list = self.build_list_from_file()
@@ -453,14 +453,14 @@ class ExtractSeq(Extract):
             doc_type=self.conf("es-configuration")["es-mapping"],
             body=body,
             id=es_id)
-        
+
     def process_file_seq(self, filename, level):
 
         """
         Returns metadata from the given file.
         """
 
-        handler = self.handler_factory_ints. pick_best_handler(filename)
+        handler = self.handler_factory_inst.pick_best_handler(filename)
         if handler is not None:
             handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
             metadata = handler_inst.get_properties()
@@ -540,7 +540,7 @@ class ExtractSeq(Extract):
                         end = datetime.datetime.now()
                         self.logger.error(e.message)
                         self.logger.error(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), self.FILE_INDEX_ERROR, str(end - start))))
-                    else:  
+                    else:
                         end = datetime.datetime.now()
                         self.logger.info(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), self.FILE_INDEXED, str(end - start))))
 

@@ -4,6 +4,10 @@ import nappy
 
 
 class NasaAmesFile(GenericFile):
+    """
+    Class for returning basic information about the content
+    of an nasaames file.
+    """
 
     def __init__(self, file_path, level):
         GenericFile.__init__(self, file_path, level)
@@ -40,6 +44,9 @@ class NasaAmesFile(GenericFile):
             file_info = self.get_properties_generic_level1()
 
             self.handler_id = "Nasaames handler level 2."
+
+            if file_info is None:
+                return None
 
             #List of phenomena
             phenomena_list = []

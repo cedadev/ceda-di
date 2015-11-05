@@ -5,7 +5,7 @@ import json
 
 class  GenericFile(object):
     """
-    Simple class for returning basic information about a file.
+    Class for returning basic information about a file.
     """
 
     def __init__(self, file_path, level):

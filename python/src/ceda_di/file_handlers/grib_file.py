@@ -6,8 +6,8 @@ from generic_file import GenericFile
 
 class GribFile(GenericFile):
     """
-    Simple class for returning basic information about the content
-    of an NetCDF file.
+    Class for returning basic information about the content
+    of an Grib file.
     """
 
     def __init__(self, file_path, level):
@@ -28,13 +28,13 @@ class GribFile(GenericFile):
         phenomenon_attr_found = {}
 
         try:
-            f = open(self.file_path)
+            fd = open(self.file_path)
 
             phen_keys = "paramId cfNameECMF cfName cfVarName units nameECMF name".split()
             found = set()
 
             while 1:
-                gid = gapi.grib_new_from_file(f)
+                gid = gapi.grib_new_from_file(fd)
                 if gid is None: break
 
                 list_of_phenomenon_parameters = []
@@ -75,7 +75,7 @@ class GribFile(GenericFile):
 
                 gapi.grib_release(gid)
 
-            f.close()
+            fd.close()
             """ 
             phenomena_list_unique = []
             for item in phenomena_list:
@@ -90,7 +90,7 @@ class GribFile(GenericFile):
     def get_properties_grib_level2(self):
         """
         Wrapper for method phenomena().
-        :returns:  A dict containing information compatible with current es index.
+        :returns:  A dict containing information compatible with current es index level 2.
         """
 
         pp_phenomena = self.phenomena()
@@ -101,6 +101,10 @@ class GribFile(GenericFile):
             file_info = self.get_properties_generic_level1()
 
             self.handler_id = "grib handler level 2."
+
+            if file_info is None:
+                return None
+
             file_info["phenomena"] = pp_phenomena
 
             return file_info
