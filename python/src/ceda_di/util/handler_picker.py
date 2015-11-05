@@ -2,18 +2,15 @@ import os
 import ntpath
 import json
 import re
-from ceda_di.metadata.product import FileFormatError
 
+from ceda_di.metadata.product import FileFormatError
 import ceda_di.file_handlers.generic_file as generic_file
 import ceda_di.file_handlers.netcdf_file as netcdf_file
 import ceda_di.file_handlers.nasaames_file as nasaames_file
-
 import ceda_di.file_handlers.pp_file as pp_file
-
 import ceda_di.file_handlers.grib_file as grib_file
 
 import magic as magic_number_reader
-
 import util as util
 
 
@@ -74,6 +71,7 @@ class  HandlerPicker(object):
         if handler is not None :
             self.handlers_and_dirs[file_dir] = handler
             return handler
+
 
         #Try returning a handler based on file's magic number.
         res = magic_number_reader.from_file(filename)

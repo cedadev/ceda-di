@@ -84,8 +84,7 @@ class GribFile(GenericFile):
             """
             return phenomena_list
 
-        except Exception as e:
-            print e
+        except Exception:
             return None
 
     def get_properties_grib_level2(self):

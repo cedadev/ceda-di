@@ -167,13 +167,14 @@ def get_file_header(filename):
 
 def get_bytes_from_file(filename, num_bytes):
 
-    # open file in binary mode
-    with open(filename, 'rb') as in_file:
-        fmt = ">%ss" %(str(num_bytes))
-        bytes = struct.unpack(fmt,  in_file.read(num_bytes))[0]
+    try :
+        fd = open(filename, 'r')
+        bytes = fd.read(num_bytes)
+        fd.close()
+    except IOError:
+        return None
 
     return bytes
-
 
 def find_dataset(filename, dataset_id):
     """

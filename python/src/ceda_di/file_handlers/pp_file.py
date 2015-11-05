@@ -29,20 +29,25 @@ class PpFile(GenericFile):
         try:
             phenomena = cf.read(self.file_path)
             number_of_phenomena = len(phenomena)
+            found = set()
             #For all phenomena.
             for i in range(0, number_of_phenomena):
                 phen = phenomena[i]
                 list_of_phenomenon_parameters = []
+                list_of_phenomenon_parameters_t = []
 
                 #For every phenomenon.
                 dict_of_phenomenon_prop = phen.properties
                 keys = dict_of_phenomenon_prop.keys()
                 for key in keys:
-                        phenomenon_attr["name"] = key
-                        phenomenon_attr["value"] = str(dict_of_phenomenon_prop[key])
+                        value = str(dict_of_phenomenon_prop[key])
 
+                        phenomenon_attr["name"] = key
+                        phenomenon_attr["value"] = value
                         list_of_phenomenon_parameters.append(phenomenon_attr.copy())
                         phenomenon_attr.clear()
+
+                        list_of_phenomenon_parameters_t.append((key, value))
 
                 #Also add var_id
                 phenomenon_attr["name"] = "var_id"
@@ -57,10 +62,16 @@ class PpFile(GenericFile):
 
                 #Dict of phenomenon attributes.
                 phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
+                list_of_phenomenon_parameters_tt = tuple(list_of_phenomenon_parameters_t)
 
-                #list of phenomenon.
-                phenomena_list.append(phenomenon_parameters_dict.copy())
-                phenomenon_parameters_dict.clear()
+
+                if list_of_phenomenon_parameters_tt not in found:
+                    found.add(list_of_phenomenon_parameters_tt)
+                    #list of phenomenon.
+                    phenomena_list.append(phenomenon_parameters_dict.copy())
+                    phenomenon_parameters_dict.clear()
+                else:
+                     phenomenon_parameters_dict.clear()
 
             return phenomena_list
         except Exception as e:
