@@ -83,16 +83,16 @@ class PpFile(GenericFile):
         :returns:  A dict containing information compatible with current es index level 2.
         """
 
-        pp_phenomena = self.phenomena()
+        #Get basic file info.
+        file_info = self.get_properties_generic_level1()
 
-        if pp_phenomena is not None:
-
-            #Get basic file info.
-            file_info = self.get_properties_generic_level1()
+        if file_info is not None:
 
             self.handler_id = "pp handler level 2."
 
-            if file_info is None:
+            pp_phenomena = self.phenomena()
+
+            if pp_phenomena is None:
                 return None
 
             file_info["phenomena"] = pp_phenomena

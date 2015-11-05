@@ -36,16 +36,16 @@ class NasaAmesFile(GenericFile):
 
     def get_properties_nanaames_level2(self):
 
-        nasaames_phenomena = self.phenomena()
+        #Get basic file info.
+        file_info = self.get_properties_generic_level1()
 
-        if nasaames_phenomena is not None:
-
-            #Get basic file info.
-            file_info = self.get_properties_generic_level1()
+        if file_info is not None:
 
             self.handler_id = "Nasaames handler level 2."
 
-            if file_info is None:
+            nasaames_phenomena = self.phenomena()
+
+            if nasaames_phenomena is None:
                 return None
 
             #List of phenomena

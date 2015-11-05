@@ -45,16 +45,16 @@ class   NetCdfFile(GenericFile):
         :returns:  A dict containing information compatible with current es index level 2.
         """
 
-        netcdf_phenomena = self.phenomena()
+        #Get basic file info.
+        file_info = self.get_properties_generic_level1()
 
-        if netcdf_phenomena is not None:
-
-            #Get basic file info.
-            file_info = self.get_properties_generic_level1()
+        if file_info is not None:
 
             self.handler_id = "Netcdf handler level 2."
 
-            if file_info is None:
+            netcdf_phenomena = self.phenomena()
+
+            if netcdf_phenomena is None:
                 return None
 
             phenomena_list = []

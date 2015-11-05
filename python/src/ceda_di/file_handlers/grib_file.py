@@ -93,19 +93,19 @@ class GribFile(GenericFile):
         :returns:  A dict containing information compatible with current es index level 2.
         """
 
-        pp_phenomena = self.phenomena()
+        file_info = self.get_properties_generic_level1() 
 
-        if pp_phenomena is not None:
+        if file_info is not None:
 
             #Get basic file info.
-            file_info = self.get_properties_generic_level1()
+            grib_phenomena = self.phenomena()
 
             self.handler_id = "grib handler level 2."
 
-            if file_info is None:
+            if grib_phenomena is None:
                 return None
 
-            file_info["phenomena"] = pp_phenomena
+            file_info["phenomena"] = grib_phenomena
 
             return file_info
 
