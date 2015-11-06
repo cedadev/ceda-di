@@ -11,7 +11,7 @@ import ceda_di.file_handlers.pp_file as pp_file
 import ceda_di.file_handlers.grib_file as grib_file
 
 import magic as magic_number_reader
-import util as util
+import ceda_di.util.util as util
 
 
 class  HandlerPicker(object):
@@ -43,16 +43,16 @@ class  HandlerPicker(object):
         """
         file_exists = os.path.isfile(filename)
 
-        file_dir = os.path.dirname(filename)
-
-        if not file_exists :
+        if not file_exists:
             return None
 
+
+        file_dir = os.path.dirname(filename)
 
         #Try configured handler.
         handler = self.get_configured_handler_class(filename)
 
-        if handler is not None :
+        if handler is not None:
             self.handlers_and_dirs[file_dir] = handler
             return handler
 
@@ -68,7 +68,7 @@ class  HandlerPicker(object):
         elif extension in (".grb", ".grib", ".GRB", ".GRIB"):
             handler = grib_file.GribFile
 
-        if handler is not None :
+        if handler is not None:
             self.handlers_and_dirs[file_dir] = handler
             return handler
 
@@ -76,7 +76,7 @@ class  HandlerPicker(object):
         #Try returning a handler based on file's magic number.
         res = magic_number_reader.from_file(filename)
 
-        if res  == self.NETCDF_PYTHON_MAGIC_NUM_RES:
+        if res == self.NETCDF_PYTHON_MAGIC_NUM_RES:
             handler = netcdf_file.NetCdfFile
         elif res == self.ASCII_PYTHON_MAGIC_NUM_RES:
             #ok lets see if it is a na file.
@@ -95,14 +95,14 @@ class  HandlerPicker(object):
             else:
                 handler = generic_file.GenericFile
 
-        if handler is not None :
+        if handler is not None:
             self.handlers_and_dirs[file_dir] = handler
             return handler
 
         #Try to return last handler used in this directory.
         handler = self.handlers_and_dirs[file_dir] = handler
 
-        if handler is not None :
+        if handler is not None:
             return handler
 
         #Nothing worked, return the generic handler.
@@ -122,8 +122,8 @@ class  HandlerPicker(object):
 
             self.handlers[pattern] =\
             {
-              "class": getattr(mod, _class),
-              "priority": priority
+             "class": getattr(mod, _class),
+             "priority": priority
             }
 
     def get_configured_handler_class(self, filename):
@@ -143,8 +143,8 @@ class  HandlerPicker(object):
             try:
                 handler_class.get_file_format(filename)
                 return handler_class
-            except FileFormatError as ex:
-                self.logger.info("Not using handler {} because {}".format(handler_class, ex.message))
+            except FileFormatError: #as ex
+                #self.logger.info("Not using handler {} because {}".format(handler_class, ex.message))
                 pass
             except AttributeError:
                 return handler_class

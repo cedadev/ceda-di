@@ -4,14 +4,12 @@ Module containing useful functions for the command-line interfaces.
 
 import os
 import sys
-import csv
 import subprocess
 
 import simplejson as json
 import time
 from enum import Enum
 import ConfigParser
-import struct
 
 #some globals.
 Script_status = Enum("Script_status",
@@ -167,8 +165,8 @@ def get_file_header(filename):
     :param filename : The file to be read.
     :returns: First line of the file.
     """
-    with open(filename, 'r') as f:
-        first_line = f.readline()
+    with open(filename, 'r') as fd:
+        first_line = fd.readline()
 
     return first_line.replace("\n", "")
 
@@ -180,14 +178,14 @@ def get_bytes_from_file(filename, num_bytes):
     :returns: The first num_bytes from the file.
     """
 
-    try :
+    try:
         fd = open(filename, 'r')
-        bytes = fd.read(num_bytes)
+        bytes_read = fd.read(num_bytes)
         fd.close()
     except IOError:
         return None
 
-    return bytes
+    return bytes_read
 
 def find_dataset(filename, dataset_id):
 
@@ -254,7 +252,7 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
 
     if user_wait_time is None:
         init_wait_time = 30
-    else :
+    else:
         init_wait_time = user_wait_time
 
     wait_time = init_wait_time
@@ -275,7 +273,7 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
     print "==============================="
 
 
-    while len(task_list) > 0 :
+    while len(task_list) > 0:
 
         #Find out if other jobs can be submitted.
         try:
@@ -346,7 +344,7 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
         #If nothing can be submitted wait again.
         if num_of_tasks_to_submit == 0:
             wait_time = wait_time - dec
-            if (wait_time == 0):
+            if wait_time == 0:
                 wait_time = init_wait_time
 
 

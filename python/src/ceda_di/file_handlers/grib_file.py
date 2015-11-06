@@ -1,8 +1,6 @@
-import traceback
-import sys
 import gribapi as gapi
 
-from generic_file import GenericFile
+from ceda_di.file_handlers.generic_file import GenericFile
 
 class GribFile(GenericFile):
     """
@@ -25,7 +23,6 @@ class GribFile(GenericFile):
         phenomenon_attr = {}
         phenomena_list = []
         phenomenon_parameters_dict = {}
-        phenomenon_attr_found = {}
 
         try:
             fd = open(self.file_path)
@@ -76,7 +73,7 @@ class GribFile(GenericFile):
                 gapi.grib_release(gid)
 
             fd.close()
-            """ 
+            """
             phenomena_list_unique = []
             for item in phenomena_list:
                 if item not in phenomena_list_unique:
@@ -93,7 +90,7 @@ class GribFile(GenericFile):
         :returns:  A dict containing information compatible with current es index level 2.
         """
 
-        file_info = self.get_properties_generic_level1() 
+        file_info = self.get_properties_generic_level1()
 
         if file_info is not None:
 
@@ -116,7 +113,7 @@ class GribFile(GenericFile):
 
         if self.level == "1":
             return self.get_properties_generic_level1()
-        elif self.level  == "2":
+        elif self.level == "2":
             return self.get_properties_grib_level2()
 
     def __enter__(self):

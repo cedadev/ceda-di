@@ -19,7 +19,8 @@ class  GenericFile(object):
 
     def get_properties_generic_level1(self):
         """
-         Scans the given file and returns information about the file not the content.
+        Scans the given file and returns information about 
+        the file not the content.
         :returns: A dict containing a summary information.
         """
 
@@ -31,13 +32,13 @@ class  GenericFile(object):
         #check if file still exists.
         file_exists = os.path.isfile(self.file_path)
 
-        if not file_exists :
+        if not file_exists:
             return None
 
         is_symlink = os.path.islink(self.file_path)
 
         #kltsa 16/09/2015 change for issue 23214 : symbolic link files will be ignored.
-        if is_symlink :
+        if is_symlink:
             return None
 
         file_info = {}
@@ -78,7 +79,7 @@ class  GenericFile(object):
 
         self.handler_id = "Generic level 2."
 
-        if file_info is None :
+        if file_info is None:
             return None
 
         #creates the nested json structure.
@@ -101,9 +102,9 @@ class  GenericFile(object):
 
     def get_properties(self):
 
-        if self.level =="1" :
+        if self.level == "1":
             return self.get_properties_generic_level1()
-        elif self.level  == "2" :
+        elif self.level == "2":
             return self.get_properties_generic_level2()
 
     def __enter__(self):

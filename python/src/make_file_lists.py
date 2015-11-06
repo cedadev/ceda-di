@@ -4,33 +4,32 @@
 Usage:
   make_file_lists.py -h | --help
   make_file_lists.py --version
-  make_file_lists.py (-f <filename> | --filename <filename>) (-m <location> | --make-list <location>)
+  make_file_lists.py (-f <filename> | --filename <filename>)
+                     (-m <location> | --make-list <location>)
                      [-p <number_of_processes> | --num-processes <number_of_processes>]
                      (--host <hostname>)
 
 Options:
   -h --help                                  Show this screen.
   --version                                  Show version.
-  -f --filename=<filename>                   File from where the dataset will be read [default: datasets.ini].
-  -m --make-list=<location>                  Stores the list of filenames to a file.
+  -f --filename=<filename>                   File from where the dataset
+                                             will be read
+                                             [default: datasets.ini].
+  -m --make-list=<location>                  Stores the list of filenames
+                                             to a file.
   -p --num-processes=<number_of_processes>   Number of processes to use.
-  --host=<hostname>                       The name of the host where the script will run.
+  --host=<hostname>                          The name of the host where
+                                             the script will run.
  """
 
 import os
 
 from docopt import docopt
-
 import ceda_di.util.util as util
 from ceda_di import __version__  # Grab version from package __init__.py
-from operator import or_
-
-import glob
-import logging
-import logging.handlers
 import datetime
 from enum import Enum
-import sys
+
 
 import subprocess
 
@@ -41,7 +40,7 @@ Script_status = Enum("Script_status",
                     )
 
 
-def set_program_op_status_and_defaults(com_args):
+def set_prog_status_and_defs(com_args):
 
     """
     Set global variables that determine the operations to be performed.
@@ -54,7 +53,8 @@ def set_program_op_status_and_defaults(com_args):
         conf_path = os.path.join(direc, "../config/ceda_fbs.ini")
         com_args["config"] = conf_path
 
-    #Creates a dictionary with default settings some of them where loaded from th edefaults file.
+    #Creates a dictionary with default settings some of
+    #them where loaded from th edefaults file.
     config = util.get_settings(com_args["config"], com_args)
     status_and_defaults.append(config)
 
@@ -82,11 +82,14 @@ def create_file_lists_in_lotus(status, config):
     current_dir = os.getcwd()
     directroy_to_save_files = config["make-list"]
 
-    #Create the commands that will create the files containing the paths to data files.
+    #Create the commands that will create the
+    #files containing the paths to data files.
     for i in range(0, num_datasets):
 
-        command = "python %s/scan_dataset.py -f %s -d  %s --make-list %s/%s_dataset__files.txt" \
-                  %(current_dir, filename, datasets_ids[i], directroy_to_save_files, datasets_ids[i])
+        command = "python %s/scan_dataset.py -f %s -d  %s\
+                    --make-list %s/%s_dataset__files.txt" \
+                  %(current_dir, filename, datasets_ids[i],\
+                    directroy_to_save_files, datasets_ids[i])
 
         scan_commands.append(command)
 
@@ -94,7 +97,8 @@ def create_file_lists_in_lotus(status, config):
     lotus_max_processes = config["num-processes"]
 
     #Run each command in lotus.
-    util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes), user_wait_time=3)
+    util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes),\
+                             user_wait_time=3)
 
 def create_file_lists_in_localhost(status, config):
 
@@ -112,11 +116,14 @@ def create_file_lists_in_localhost(status, config):
     current_dir = os.getcwd()
     directroy_to_save_files = config["make-list"]
 
-    #Create the commands that will create the files containing the paths to data files.
+    #Create the commands that will create the
+    #files containing the paths to data files.
     for i in range(0, num_datasets):
 
-        command = "python %s/scan_dataset.py -f %s -d  %s --make-list %s/%s_dataset__files.txt" \
-                  %(current_dir, filename, datasets_ids[i], directroy_to_save_files, datasets_ids[i])
+        command = "python %s/scan_dataset.py -f %s -d\
+                    %s --make-list %s/%s_dataset__files.txt" \
+                  %(current_dir, filename, datasets_ids[i],\
+                     directroy_to_save_files, datasets_ids[i])
 
         print "executing : %s" %(command)
 
@@ -132,7 +139,7 @@ def main():
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))
 
     #Insert defaults
-    status_and_defaults = set_program_op_status_and_defaults(com_args)
+    status_and_defaults = set_prog_status_and_defs(com_args)
 
 
 

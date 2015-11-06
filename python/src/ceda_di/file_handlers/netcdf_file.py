@@ -1,12 +1,7 @@
-import logging
-import os
-import ntpath
-import json
-
 import netCDF4
 
 
-from generic_file import GenericFile
+from ceda_di.file_handlers.generic_file import GenericFile
 from ceda_di.metadata import product
 
 class   NetCdfFile(GenericFile):
@@ -61,7 +56,7 @@ class   NetCdfFile(GenericFile):
             var_id_dict = {}
             phenomenon_parameters_dict = {}
 
-            for item in netcdf_phenomena :           #get all parameter objects.
+            for item in netcdf_phenomena:           #get all parameter objects.
 
                 name = item.get_name()               #get phenomena name.
 
@@ -83,14 +78,14 @@ class   NetCdfFile(GenericFile):
 
             return file_info
 
-        else :
+        else:
             return self.get_properties_generic_level2()
 
     def get_properties(self):
 
         if self.level == "1":
             return self.get_properties_generic_level1()
-        elif self.level  == "2":
+        elif self.level == "2":
             return self.get_properties_netcdf_level2()
 
     def __enter__(self):

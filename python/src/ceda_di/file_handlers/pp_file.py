@@ -1,9 +1,7 @@
-import os
 import cf
-import inspect
 
 
-from generic_file import GenericFile
+from ceda_di.file_handlers.generic_file import GenericFile
 
 class PpFile(GenericFile):
     """
@@ -40,14 +38,14 @@ class PpFile(GenericFile):
                 dict_of_phenomenon_prop = phen.properties
                 keys = dict_of_phenomenon_prop.keys()
                 for key in keys:
-                        value = str(dict_of_phenomenon_prop[key])
+                    value = str(dict_of_phenomenon_prop[key])
 
-                        phenomenon_attr["name"] = key
-                        phenomenon_attr["value"] = value
-                        list_of_phenomenon_parameters.append(phenomenon_attr.copy())
-                        phenomenon_attr.clear()
+                    phenomenon_attr["name"] = key
+                    phenomenon_attr["value"] = value
+                    list_of_phenomenon_parameters.append(phenomenon_attr.copy())
+                    phenomenon_attr.clear()
 
-                        list_of_phenomenon_parameters_t.append((key, value))
+                    list_of_phenomenon_parameters_t.append((key, value))
 
                 #Also add var_id
                 phenomenon_attr["name"] = "var_id"
@@ -71,10 +69,10 @@ class PpFile(GenericFile):
                     phenomena_list.append(phenomenon_parameters_dict.copy())
                     phenomenon_parameters_dict.clear()
                 else:
-                     phenomenon_parameters_dict.clear()
+                    phenomenon_parameters_dict.clear()
 
             return phenomena_list
-        except Exception as e:
+        except Exception:
             return None
 
     def get_properties_pp_level2(self):
@@ -106,7 +104,7 @@ class PpFile(GenericFile):
 
         if self.level == "1":
             return self.get_properties_generic_level1()
-        elif self.level  == "2":
+        elif self.level == "2":
             return self.get_properties_pp_level2()
 
     def __enter__(self):

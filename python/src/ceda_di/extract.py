@@ -5,29 +5,22 @@
 import datetime
 import logging
 import logging.config
-import multiprocessing
 import os
 import sys
 import re
 
-#kltsa
-import requests
-import json
 import hashlib
 import socket
 import ceda_di.util.util as util
 
-import ceda_di.file_handlers.generic_file as generic_file
-import ceda_di.file_handlers.netcdf_file as netcdf_file
 import ceda_di.util.handler_picker as handler_picker
 
-########
 from elasticsearch.exceptions import TransportError
 
 from ceda_di.search import ElasticsearchClientFactory
 from ceda_di import index
 from ceda_di.metadata.product import FileFormatError
-from mhlib import PATH
+
 
 
 class HandlerFactory(object):
@@ -74,7 +67,7 @@ class HandlerFactory(object):
                 return handler_class
             except FileFormatError as ex:
                 self.logger.info("Not using handler {} because {}".format(handler_class, ex.message))
-                pass
+                #pass
             except AttributeError:
                 return handler_class
         return None
@@ -268,10 +261,12 @@ class ExtractSeq(Extract):
         self.logger = None
         self.handler_factory_inst = None
         self.file_list = None
+        self.es = None
         #some constants
         self.FILE_PROPERTIES_ERROR = "0"
-        self.FILE_INDEX_ERROR = "-1"  
+        self.FILE_INDEX_ERROR = "-1"
         self.FILE_INDEXED = "1"
+
 
     def prepare_run(self):
 
@@ -326,7 +321,7 @@ class ExtractSeq(Extract):
             log_fname = "%s_%s_%s_%s_%s.log" \
                         %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "-"),\
                         self.conf("scanning")["start"], self.conf("scanning")["num-files"], socket.gethostname())
-        else :
+        else:
             log_fname = "%s_%s_%s.log" \
                         %(self.conf("es-configuration")["es-index"], self.conf("dataset"), socket.gethostname())
 
@@ -337,11 +332,11 @@ class ExtractSeq(Extract):
                             )
 
 
-        LEVELS = { 'debug'   : logging.DEBUG,
-                   'info'    : logging.INFO,
-                   'warning' : logging.WARNING,
-                   'error'   : logging.ERROR,
-                   'critical': logging.CRITICAL
+        levels = {'debug'   : logging.DEBUG,
+                  'info'    : logging.INFO,
+                  'warning' : logging.WARNING,
+                  'error'   : logging.ERROR,
+                  'critical': logging.CRITICAL
                  }
 
 
@@ -349,7 +344,7 @@ class ExtractSeq(Extract):
 
 
         log_format = self.conf("core")["format"]
-        level = LEVELS.get(conf_log_level, logging.NOTSET)
+        level = levels.get(conf_log_level, logging.NOTSET)
 
         """
         ok, since this is the main module lets remove previously configured handlers
@@ -419,27 +414,27 @@ class ExtractSeq(Extract):
         num_of_files = self.conf("num-files")
 
         #TODO: Make this a library function and make it more efficient.
-        with open(file_containing_paths) as f:
-            content = f.readlines()
+        with open(file_containing_paths) as fd:
+            content = fd.readlines()
 
         self.logger.info(("%s lines read from file \"%s\"."  %(str(len(content)), file_containing_paths)))
 
         list_len = len(content)
-        if int(start_file) < 0 or int(start_file) > list_len :
+        if int(start_file) < 0 or int(start_file) > list_len:
             self.logger.info("please correct start parameter value.")
             return
 
         end_file = int(start_file) + int(num_of_files)
 
-        if end_file > list_len :
+        if end_file > list_len:
             self.logger.info("please correct num-files parameter value.")
             return
 
         file_list = content[int(start_file):end_file]
 
         new_file_list = []
-        for p in file_list:
-            new_file_list.append(p.rstrip())
+        for path in file_list:
+            new_file_list.append(path.rstrip())
 
         return new_file_list
 
@@ -449,10 +444,10 @@ class ExtractSeq(Extract):
         Indexes metadata in Elasticsearch.
         """
 
-        self.es.index(index=self.conf("es-configuration")["es-index"],
-            doc_type=self.conf("es-configuration")["es-mapping"],
-            body=body,
-            id=es_id)
+        self.es.index(index=self.conf("es-configuration")["es-index"],\
+                      doc_type=self.conf("es-configuration")["es-mapping"],\
+                      body=body,\
+                      id=es_id)
 
     def process_file_seq(self, filename, level):
 
@@ -482,7 +477,7 @@ class ExtractSeq(Extract):
         path_to_files = util.find_dataset(dataset_ids_file, dataset_id)
         file_to_store_paths = self.conf("make-list")
 
-        self.logger.info(("Creating file \%s\ with paths to files belonging to \"%s\" dataset." %(file_to_store_paths, dataset_id ) ) )
+        self.logger.info(("Creating file \"%s\" with paths to files belonging to \"%s\" dataset." %(file_to_store_paths, dataset_id)))
         file_list = util.build_file_list(path_to_files)
 
         util.write_list_to_file(file_list, file_to_store_paths)
@@ -501,7 +496,7 @@ class ExtractSeq(Extract):
 
         #Sanity check.
         if self.file_list is None:
-            self.logger.info( "File list is empty.")
+            self.logger.info("File list is empty.")
             return
 
         # Create index if necessary
@@ -529,22 +524,22 @@ class ExtractSeq(Extract):
 
                 doc = self.process_file_seq(filename, level)
 
-                if doc is not None :
+                if doc is not None:
 
                     #es_query = json.dumps(doc)
                     es_id = hashlib.sha1(filename).hexdigest()
 
                     try:
                         self.index_properties_seq(doc, es_id)
-                    except Exception as e:
+                    except Exception as ex:
                         end = datetime.datetime.now()
-                        self.logger.error(e.message)
+                        self.logger.error(ex.message)
                         self.logger.error(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), self.FILE_INDEX_ERROR, str(end - start))))
                     else:
                         end = datetime.datetime.now()
                         self.logger.info(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), self.FILE_INDEXED, str(end - start))))
 
-                else :
+                else:
                     end = datetime.datetime.now()
 
                     self.logger.error("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), self.FILE_PROPERTIES_ERROR, str(end - start)))

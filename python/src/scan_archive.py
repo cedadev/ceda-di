@@ -4,25 +4,37 @@
 Usage:
   scan_archive.py --help
   scan_archive.py --version
-  scan_archive.py (-f <filename> | --filename <filename>) (-d <dataset_id> | --dataset <dataset_id> )
-                  (-l <level> | --level <level>)  (-h <hostname> | --host <hostname>) [-p <number_of_processes> | --num-processes <number_of_processes>]
+  scan_archive.py (-f <filename> | --filename <filename>)
+                  (-d <dataset_id> | --dataset <dataset_id> )
+                  (-l <level> | --level <level>)
+                  (-h <hostname> | --host <hostname>)
+                  [-p <number_of_processes> | --num-processes <number_of_processes>]
                   [-c <path_to_config_dir> | --config <path_to_config_dir>]
- scan_archive.py  (-f <filename> | --filename <filename>) (-l <level> | --level <level>)  (-h <hostname> | --host <hostname>)
-                  [-p <number_of_processes> | --num-processes <number_of_processes>] [-n <n_files> | --num-files <n_files>]
+ scan_archive.py  (-f <filename> | --filename <filename>)
+                  (-l <level> | --level <level>)
+                  (-h <hostname> | --host <hostname>)
+                  [-p <number_of_processes> | --num-processes <number_of_processes>]
+                  [-n <n_files> | --num-files <n_files>]
                   [-c <path_to_config_dir> | --config <path_to_config_dir>]
 
 Options:
   --help                                     Show this screen.
   --version                                  Show version.
   -d --dataset=<dataset_id>                  Dataset id.
-  -f --filename=<filename>                   File from where the dataset will be read [default: datasets.ini].
+  -f --filename=<filename>                   File from where the dataset
+                                             will be read
+                                             [default: datasets.ini].
   -l --level=<level>                         Level of search:
                                              Level 1: File names and sizes
-                                             Level 2: File names, sizes and phenomena (e.g. "air temperature")
-                                             Level 3: File names, sizes, phenomena and geospatial metadata.
-  -c --config=<path_to_config_dir>           Specify the main configuration directory.
+                                             Level 2: File names, sizes
+                                             and phenomena (e.g. "air temperature")
+                                             Level 3: File names, sizes,
+                                             phenomena and geospatial metadata.
+  -c --config=<path_to_config_dir>           Specify the main
+                                             configuration directory.
   -n --num-files=<n_files>                   Number of files to scan.
-  -h --host=<hostname>                       The name of the host where the script will run.
+  -h --host=<hostname>                       The name of the host where
+                                             the script will run.
   -p --num-processes=<number_of_processes>   Number of processes to use.
  """
 
@@ -34,13 +46,11 @@ import ceda_di.util.util as util
 from ceda_di import __version__  # Grab version from package __init__.py
 
 import datetime
-from enum import Enum
-
 import subprocess
-import time
 
 
-def set_program_op_status_and_defaults(com_args):
+
+def set_prog_status_and_defs(com_args):
 
     """
     Determines the operations to be performed by the script.
@@ -79,14 +89,20 @@ def set_program_op_status_and_defaults(com_args):
 
     #Determines if script will read paths from file or if it will search for
     #files using a dataset id.
-    if ("level" in config) and (not ("dataset" in config)):
-        status_and_defaults.append(util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB)
+    if ("level" in config) and (not "dataset" in config):
+
+        status_and_defaults.append(\
+            util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB)
+
     elif ("dataset" in config) and  config["dataset"] == "all":
-        status_and_defaults.append(util.Script_status.SCAN_ALL_DATASETS)
+        status_and_defaults.append(\
+            util.Script_status.SCAN_ALL_DATASETS)
     elif ("dataset" in config) and  config["dataset"] != "all":
-        status_and_defaults.append(util.Script_status.SCAN_SPECIFIC_DATASET_ID)
+        status_and_defaults.append(\
+            util.Script_status.SCAN_SPECIFIC_DATASET_ID)
     else:
-        status_and_defaults.append(util.Script_status.stay_idle)
+        status_and_defaults.append(\
+            util.Script_status.STAY_IDLE)
 
     return status_and_defaults
 
@@ -114,7 +130,8 @@ def scan_all_datasets_in_lotus(config):
         commands.append(command)
 
     lotus_max_processes = config["num-processes"]
-    util.run_tasks_in_lotus(commands, int(lotus_max_processes), user_wait_time=30)
+    util.run_tasks_in_lotus(commands, int(lotus_max_processes),\
+                            user_wait_time=30)
 
 def scan_specific_datasets_in_lotus(config):
     #Get basic options.
@@ -140,7 +157,7 @@ def scan_specific_datasets_in_lotus(config):
         print "executng : %s" %(command)
         subprocess.call(command, shell=True)
 
-def scan_filenames_from_file_in_lotus(config):
+def scan_paths_from_file_in_lotus(config):
 
     """
     basic algorithm:
@@ -181,7 +198,8 @@ def scan_filenames_from_file_in_lotus(config):
         start = 0
         for i in range(0, number_of_jobs):
 
-            command = " python %s/scan_dataset.py -f %s --num-files %s --start %d  -l %s" \
+            command = " python %s/scan_dataset.py -f %s --num-files %s\
+                        --start %d  -l %s"\
                         %(current_dir, filename, num_files, start, level)
 
             start += step
@@ -193,7 +211,8 @@ def scan_filenames_from_file_in_lotus(config):
         #include remaning files
         if remainder > 0:
 
-            command = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s" \
+            command = " python %s/scan_dataset.py -f %s\
+                        --num-files %d --start %d -l %s" \
                       %(current_dir, filename, remainder, start, level)
 
             print "created command : %s" %(command)
@@ -202,7 +221,8 @@ def scan_filenames_from_file_in_lotus(config):
 
     #Run each command in lotus.
     lotus_max_processes = config["num-processes"]
-    util.run_tasks_in_lotus(commands, int(lotus_max_processes), user_wait_time=30)
+    util.run_tasks_in_lotus(commands, int(lotus_max_processes),\
+                            user_wait_time=30)
 
 def scan_files_in_lotus(config, scan_status):
 
@@ -218,9 +238,9 @@ def scan_files_in_lotus(config, scan_status):
         scan_all_datasets_in_lotus(config)
 
     elif scan_status == util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB:
-        scan_filenames_from_file_in_lotus(config)
+        scan_paths_from_file_in_lotus(config)
 
-def scan_filenames_from_file_in_localhost(config):
+def scan_paths_from_file_in_localhost(config):
 
     #Get basic options.
     filename_path = config["filename"]
@@ -249,8 +269,9 @@ def scan_filenames_from_file_in_localhost(config):
         start = 0
         for i in range(0, number_of_tasks):
 
-            command = " python %s/scan_dataset.py -f %s --num-files %s  --start %d  -l %s"\
-                      %(current_dir, filename, num_files, start, level)
+            command = " python %s/scan_dataset.py -f %s\
+                       --num-files %s  --start %d  -l %s"\
+                       %(current_dir, filename, num_files, start, level)
 
             start += step
 
@@ -261,7 +282,8 @@ def scan_filenames_from_file_in_localhost(config):
         #include remaning files
         if remainder > 0:
 
-            command = "python %s/scan_dataset.py -f %s --num-files %d  --start %d -l %s" \
+            command = "python %s/scan_dataset.py -f %s\
+                      --num-files %d  --start %d -l %s" \
                       %(current_dir, filename, remainder, start, level)
 
 
@@ -301,7 +323,7 @@ def scan_files_in_localhost(config, scan_status):
                 #os.system(command)
         else:
             command = "python %s/scan_dataset.py -f %s -d %s -l %s" \
-                      %(current_dir, filename, dataset_id,  level)
+                      %(current_dir, filename, dataset_id, level)
 
 
             print "executng : %s"  %(command)
@@ -312,12 +334,13 @@ def scan_files_in_localhost(config, scan_status):
 
         for key, value in dataset_ids.iteritems():
             dataset_id = key
-            command = "python  %s/scan_dataset.py -f %s -d  %s -l %s" %(current_dir, filename, dataset_id, level)
+            command = "python  %s/scan_dataset.py -f %s -d  %s -l %s"\
+                        %(current_dir, filename, dataset_id, level)
 
             print "executng : %s" %(command)
             subprocess.call(command, shell=True)
     elif scan_status == util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB:
-        scan_filenames_from_file_in_localhost(config)
+        scan_paths_from_file_in_localhost(config)
 
 def main():
 
@@ -334,7 +357,7 @@ def main():
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))
 
     #Sets default values and determione what operations the script will perform.
-    status_and_defaults = set_program_op_status_and_defaults(com_args)
+    status_and_defaults = set_prog_status_and_defs(com_args)
 
     config_file = status_and_defaults[0]
     run_status = status_and_defaults[1]

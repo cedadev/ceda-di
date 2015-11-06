@@ -1,4 +1,4 @@
-from generic_file import GenericFile
+from ceda_di.file_handlers.generic_file import GenericFile
 from ceda_di.metadata import product
 import nappy
 
@@ -18,18 +18,18 @@ class NasaAmesFile(GenericFile):
     def phenomena(self):
 
         try:
-            na = nappy.openNAFile(self.file_path)
+            na_fhandle = nappy.openNAFile(self.file_path)
 
             variables = {}
-            for v in na.getVariables():
+            for var in na_fhandle.getVariables():
                 variables.update({
-                    v[0]: {
-                        "name": v[0],
-                        "units": v[1]
+                    var[0]: {
+                        "name": var[0],
+                        "units": var[1]
                     }
                 })
 
-            variables = [product.Parameter(k, other_params=v) for (k, v) in variables.iteritems()]
+            variables = [product.Parameter(k, other_params=var) for (k, var) in variables.iteritems()]
             return variables
         except Exception:
             return None
@@ -75,14 +75,14 @@ class NasaAmesFile(GenericFile):
 
             return file_info
 
-        else :
+        else:
             return self.get_properties_generic_level2()
 
     def get_properties(self):
 
         if self.level == "1":
             return self.get_properties_generic_level1()
-        elif self.level  == "2":
+        elif self.level == "2":
             return self.get_properties_nanaames_level2()
 
     def __enter__(self):
