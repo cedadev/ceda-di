@@ -74,26 +74,30 @@ class  HandlerPicker(object):
 
 
         #Try returning a handler based on file's magic number.
-        res = magic_number_reader.from_file(filename)
+        try:
+            res = magic_number_reader.from_file(filename)
 
-        if res == self.NETCDF_PYTHON_MAGIC_NUM_RES:
-            handler = netcdf_file.NetCdfFile
-        elif res == self.ASCII_PYTHON_MAGIC_NUM_RES:
-            #ok lets see if it is a na file.
-            first_line = util.get_file_header(filename)
-            tokens = first_line.split(" ")
-            if len(tokens) >= 2:
-                if tokens[0].isdigit() and tokens[1].isdigit():
-                    handler = nasaames_file.NasaAmesFile
-            else:
-                handler = generic_file.GenericFile
-        #This can be a grb file.
-        elif res == self.DATA_PYTHON_MAGIC_NUM_RES:
-            res = util.get_bytes_from_file(filename, 4)
-            if res == "GRIB":
-                handler = grib_file.GribFile
-            else:
-                handler = generic_file.GenericFile
+            if res == self.NETCDF_PYTHON_MAGIC_NUM_RES:
+                handler = netcdf_file.NetCdfFile
+            elif res == self.ASCII_PYTHON_MAGIC_NUM_RES:
+                #ok lets see if it is a na file.
+                first_line = util.get_file_header(filename)
+                tokens = first_line.split(" ")
+                if len(tokens) >= 2:
+                    if tokens[0].isdigit() and tokens[1].isdigit():
+                        handler = nasaames_file.NasaAmesFile
+                else:
+                    handler = generic_file.GenericFile
+            #This can be a grb file.
+            elif res == self.DATA_PYTHON_MAGIC_NUM_RES:
+                res = util.get_bytes_from_file(filename, 4)
+                if res == "GRIB":
+                    handler = grib_file.GribFile
+                else:
+                    handler = generic_file.GenericFile
+        except: #catch everything... we do not want ifthere is an error just return the generic handler.
+            handler = generic_file.GenericFile
+
 
         if handler is not None:
             self.handlers_and_dirs[file_dir] = handler
