@@ -86,10 +86,10 @@ def create_file_lists_in_lotus(status, config):
     #files containing the paths to data files.
     for i in range(0, num_datasets):
 
-        command = "python %s/scan_dataset.py -f %s -d  %s  \
-                    --make-list %s/%s_dataset__files.txt"  \
-                  %(current_dir, filename, datasets_ids[i],\
-                    directroy_to_save_files, datasets_ids[i])
+        command = "%s/python %s/scan_dataset.py -f %s -d  %s\
+                  --make-list %s/%s_dataset__files.txt"\
+                   %(current_dir, current_dir, filename, datasets_ids[i],\
+                   directroy_to_save_files, datasets_ids[i])
 
         scan_commands.append(command)
 
@@ -98,7 +98,7 @@ def create_file_lists_in_lotus(status, config):
 
     #Run each command in lotus.
     util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes),\
-                             user_wait_time=3)
+                             user_wait_time=30)
 
 def create_file_lists_in_localhost(status, config):
 
@@ -120,10 +120,10 @@ def create_file_lists_in_localhost(status, config):
     #files containing the paths to data files.
     for i in range(0, num_datasets):
 
-        command = "python %s/scan_dataset.py -f %s -d        \
-                    %s --make-list %s/%s_dataset__files.txt" \
-                  %(current_dir, filename, datasets_ids[i],  \
-                     directroy_to_save_files, datasets_ids[i])
+        command = "python %s/scan_dataset.py -f %s -d\
+        %s --make-list %s/%s_dataset__files.txt" \
+    %(current_dir, filename, datasets_ids[i],  \
+    directroy_to_save_files, datasets_ids[i])
 
         print "executing : %s" %(command)
 

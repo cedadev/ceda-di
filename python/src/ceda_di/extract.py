@@ -480,6 +480,8 @@ class ExtractSeq(Extract):
         self.logger.info(("Creating file \"%s\" with paths to files belonging to \"%s\" dataset." %(file_to_store_paths, dataset_id)))
         file_list = util.build_file_list(path_to_files)
 
+        self.logger.info(("this dataset contains %s." %(str(len(file_list)))))
+
         util.write_list_to_file(file_list, file_to_store_paths)
 
 
@@ -534,13 +536,16 @@ class ExtractSeq(Extract):
                     except Exception as ex:
                         end = datetime.datetime.now()
                         self.logger.error(ex.message)
-                        self.logger.error(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), self.FILE_INDEX_ERROR, str(end - start))))
+                        self.logger.error(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
+                                                              self.FILE_INDEX_ERROR, str(end - start))))
                     else:
                         end = datetime.datetime.now()
-                        self.logger.info(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), self.FILE_INDEXED, str(end - start))))
+                        self.logger.info(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
+                                                             self.FILE_INDEXED, str(end - start))))
 
                 else:
                     end = datetime.datetime.now()
 
-                    self.logger.error("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), self.FILE_PROPERTIES_ERROR, str(end - start)))
+                    self.logger.error("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
+                                                         self.FILE_PROPERTIES_ERROR, str(end - start)))
                     continue
