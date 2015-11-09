@@ -317,7 +317,8 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
             task = task_list[0]
             task_list.remove(task)
 
-            command = "bsub -R select[type==any] %s" %(task)
+            #-R select[type==any]
+            command = "bsub %s" %(task)
 
 
             info_msg = "%s. Executng : %s" %(str(i +1), command)
