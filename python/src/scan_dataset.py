@@ -119,13 +119,13 @@ def set_prog_status_and_defs(com_args):
 
     status_and_defaults.append(config)
 
-    if ("make-list" in config) and ("dataset" in config)\
+    if ("make-list" in config) and ("dataset" in config) \
        and  ("filename" in config):
 
         status_and_defaults.append(\
         util.Script_status.SEARCH_AND_STORE_INFO_TO_FILE)
 
-    elif ("dataset" in config) and  ("filename" in config)\
+    elif ("dataset" in config) and  ("filename" in config) \
           and ("level" in config):
 
         status_and_defaults.append(\

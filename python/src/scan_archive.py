@@ -211,7 +211,7 @@ def scan_paths_from_file_in_lotus(config):
         #include remaning files
         if remainder > 0:
 
-            command = " python %s/scan_dataset.py -f %s\
+            command = " python %s/scan_dataset.py -f %s  \
                         --num-files %d --start %d -l %s" \
                       %(current_dir, filename, remainder, start, level)
 
@@ -282,7 +282,7 @@ def scan_paths_from_file_in_localhost(config):
         #include remaning files
         if remainder > 0:
 
-            command = "python %s/scan_dataset.py -f %s\
+            command = "python %s/scan_dataset.py -f %s  \
                       --num-files %d  --start %d -l %s" \
                       %(current_dir, filename, remainder, start, level)
 
