@@ -86,10 +86,10 @@ def create_file_lists_in_lotus(status, config):
     #files containing the paths to data files.
     for i in range(0, num_datasets):
 
-        command = "%s/python %s/scan_dataset.py -f %s -d  %s\
+        command = "python %s/scan_dataset.py -f %s -d  %s\
                   --make-list %s/%s_dataset__files.txt"\
-                   %(current_dir, current_dir, filename, datasets_ids[i],\
-                   directroy_to_save_files, datasets_ids[i])
+                  %(current_dir, filename, datasets_ids[i],\
+                  directroy_to_save_files, datasets_ids[i])
 
         scan_commands.append(command)
 
@@ -121,9 +121,9 @@ def create_file_lists_in_localhost(status, config):
     for i in range(0, num_datasets):
 
         command = "python %s/scan_dataset.py -f %s -d\
-        %s --make-list %s/%s_dataset__files.txt" \
-    %(current_dir, filename, datasets_ids[i],  \
-    directroy_to_save_files, datasets_ids[i])
+                  %s --make-list %s/%s_dataset__files.txt" \
+                  %(current_dir, filename, datasets_ids[i],  \
+                  directroy_to_save_files, datasets_ids[i])
 
         print "executing : %s" %(command)
 
