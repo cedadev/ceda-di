@@ -276,6 +276,8 @@ class ExtractSeq(Extract):
         if self.status == util.Script_status.SEARCH_AND_STORE_INFO_TO_FILE:
             try:
                 self.logger = self.prepare_logging_seq()
+
+                self.file_list = self.build_file_list_from_path()
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
         elif self.status == util.Script_status.SEARCH_AND_STORE_INFO_TO_DB:
@@ -320,7 +322,7 @@ class ExtractSeq(Extract):
         if self.status == util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB:
             log_fname = "%s_%s_%s_%s_%s.log" \
                         %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "-"),\
-                        self.conf("scanning")["start"], self.conf("scanning")["num-files"], socket.gethostname())
+                        self.conf("start"), self.conf("num-files"), socket.gethostname())
         else:
             log_fname = "%s_%s_%s.log" \
                         %(self.conf("es-configuration")["es-index"], self.conf("dataset"), socket.gethostname())
@@ -472,16 +474,8 @@ class ExtractSeq(Extract):
 
         self.prepare_run()
         try :
-
-            dataset_ids_file = self.conf("filename")
-            dataset_id = self.conf("dataset")
-            path_to_files = util.find_dataset(dataset_ids_file, dataset_id)
             file_to_store_paths = self.conf("make-list")
-
-            self.logger.info(("Creating file \"%s\" with paths to files belonging to \"%s\" dataset." %(file_to_store_paths, dataset_id)))
-            file_list = util.build_file_list(path_to_files)
-            self.logger.info(("This dataset contains %s files." %(str(len(file_list)))))
-            files_written = util.write_list_to_file(file_list, file_to_store_paths)
+            files_written = util.write_list_to_file(self.file_list, file_to_store_paths)
             self.logger.info(("Paths written in file: %s." %(str(files_written))))
             self.logger.info(("file \"%s\" containing paths to files in given dataset has been created." %(file_to_store_paths)))
         except Exception:
