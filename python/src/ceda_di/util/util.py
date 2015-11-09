@@ -152,12 +152,15 @@ def write_list_to_file(file_list, filename):
     """
 
     infile = open(filename, 'w')
+    items_written = 0
 
     for item in file_list:
-        infile.writelines(item)
-        infile.write("\n")
+        infile.writelines("%s\n" %item)
+        items_written += 1
+
 
     infile.close()
+    return items_written
 
 def get_file_header(filename):
 
