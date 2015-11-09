@@ -114,6 +114,7 @@ def set_prog_status_and_defs(com_args):
     #Set defaults if not supplied by user.
     if "start" not in config or not config["start"]:
         config["start"] = config["scanning"]["start"]
+
     if "num-files" not in config or not config["num-files"]:
         config["num-files"] = config["scanning"]["num-files"]
 
