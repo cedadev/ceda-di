@@ -478,8 +478,8 @@ class ExtractSeq(Extract):
             files_written = util.write_list_to_file(self.file_list, file_to_store_paths)
             self.logger.info(("Paths written in file: %s." %(str(files_written))))
             self.logger.info(("file \"%s\" containing paths to files in given dataset has been created." %(file_to_store_paths)))
-        except Exception:
-            self.logger.error("Could not save the python list of files to file...")
+        except Exception, ex:
+            self.logger.error(("Could not save the python list of files to file...%s" %ex))
 
 
     def run_seq(self):
