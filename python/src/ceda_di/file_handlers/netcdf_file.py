@@ -178,6 +178,9 @@ class   NetCdfFile(GenericFile):
         if level_2_info == None:
             return None
 
+
+        self.handler_id = "Netcdf handler level 3."
+
          #ok, lets try get more info..
         try:
             geo_info = self.get_geospatial()
@@ -190,11 +193,7 @@ class   NetCdfFile(GenericFile):
             #loc_dict[location] = geo_info
             spatial = []
 
-            if "type" not in spatial:
-                gj = GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
-            else:
-                gj = GeoJSONGenerator(spatial["lat"], spatial["lon"],
-                                      spatial["type"])
+            gj = GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
             spatial = gj.get_elasticsearch_geojson()
 
             loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
