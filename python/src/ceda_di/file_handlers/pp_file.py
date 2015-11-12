@@ -100,12 +100,17 @@ class PpFile(GenericFile):
         else:
             return self.get_properties_generic_level2()
 
+    def get_properties_pp_level3(self):
+        return self.get_properties_pp_level2()
+
     def get_properties(self):
 
         if self.level == "1":
             return self.get_properties_generic_level1()
         elif self.level == "2":
             return self.get_properties_pp_level2()
+        elif self.level == "3":
+            return self.get_properties_pp_level3()
 
     def __enter__(self):
         return self

@@ -56,7 +56,7 @@ def ckeck_com_args_validity(config, status):
     checks the validity of command line arguments
     """
 
-    if status == util.Script_status.SEARCH_AND_STORE_INFO_TO_FILE:
+    if status == util.Script_status.SCAN_AND_STORE_TO_FILE:
         return
 
     level = int(config.get("level"))
@@ -93,7 +93,7 @@ def read_paths_and_store_meta_to_db(conf, status):
     extract = ExtractSeq(conf, status)
     extract.run_seq()
 
-def set_prog_status_and_defs(com_args):
+def get_stat_and_defs(com_args):
 
     """
     Set global variables that determine the operations to be performed.
@@ -124,19 +124,19 @@ def set_prog_status_and_defs(com_args):
        and  ("filename" in config):
 
         status_and_defaults.append(\
-        util.Script_status.SEARCH_AND_STORE_INFO_TO_FILE)
+        util.Script_status.SCAN_AND_STORE_TO_FILE)
 
     elif ("dataset" in config) and  ("filename" in config) \
           and ("level" in config):
 
         status_and_defaults.append(\
-        util.Script_status.SEARCH_AND_STORE_INFO_TO_DB)
+        util.Script_status.SCAN_AND_STORE_TO_DB)
 
     elif ("filename" in config) and ("start" in config) and \
           ("num-files" in config) and ("level" in config):
 
         status_and_defaults.append\
-        (util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB)
+        (util.Script_status.READ_PATHS_AND_STORE_TO_DB)
 
 
     return status_and_defaults
@@ -151,7 +151,7 @@ def main():
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))
 
     #Insert defaults
-    status_and_defaults = set_prog_status_and_defs(com_args)
+    status_and_defaults = get_stat_and_defs(com_args)
 
     config = status_and_defaults[0]
     status = status_and_defaults[1]
@@ -169,11 +169,11 @@ def main():
 
 
     #Manage the options given.
-    if status == util.Script_status.SEARCH_AND_STORE_INFO_TO_FILE:
+    if status == util.Script_status.SCAN_AND_STORE_TO_FILE:
         scan_and_store_paths_to_file(config, status)
-    elif status == util.Script_status.SEARCH_AND_STORE_INFO_TO_DB:
+    elif status == util.Script_status.SCAN_AND_STORE_TO_DB:
         scan_and_store_meta_to_db(config, status)
-    elif status == util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB:
+    elif status == util.Script_status.READ_PATHS_AND_STORE_TO_DB:
         read_paths_and_store_meta_to_db(config, status)
 
     end = datetime.datetime.now()

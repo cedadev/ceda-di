@@ -29,18 +29,11 @@ import ceda_di.util.util as util
 from ceda_di import __version__  # Grab version from package __init__.py
 import datetime
 from enum import Enum
-
-
 import subprocess
+import ceda_di.util.util as util
 
 
-Script_status = Enum("Script_status",
-                     "RUN_SCRIPT_IN_LOTUS\
-                      RUN_SCRIPT_IN_LOCALHOST"
-                    )
-
-
-def set_prog_status_and_defs(com_args):
+def get_stat_and_defs(com_args):
 
     """
     Set global variables that determine the operations to be performed.
@@ -59,9 +52,9 @@ def set_prog_status_and_defs(com_args):
     status_and_defaults.append(config)
 
     if ("host" in config) and config["host"] == "localhost":
-        status_and_defaults.append(Script_status.RUN_SCRIPT_IN_LOCALHOST)
+        status_and_defaults.append(util.Script_status.RUN_SCRIPT_IN_LOCALHOST)
     else:
-        status_and_defaults.append(Script_status.RUN_SCRIPT_IN_LOTUS)
+        status_and_defaults.append(util.Script_status.RUN_SCRIPT_IN_LOTUS)
 
 
     return status_and_defaults
@@ -137,7 +130,7 @@ def main():
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))
 
     #Insert defaults
-    status_and_defaults = set_prog_status_and_defs(com_args)
+    status_and_defaults = get_stat_and_defs(com_args)
 
 
 
@@ -148,7 +141,7 @@ def main():
     config = status_and_defaults[0]
 
 
-    if status == Script_status.RUN_SCRIPT_IN_LOCALHOST:
+    if status == util.Script_status.RUN_SCRIPT_IN_LOCALHOST:
         create_file_lists_in_localhost(status, config)
     else:
         create_file_lists_in_lotus(status, config)

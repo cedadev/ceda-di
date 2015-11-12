@@ -50,7 +50,7 @@ import subprocess
 
 
 
-def set_prog_status_and_defs(com_args):
+def get_stat_and_defs(com_args):
 
     """
     Determines the operations to be performed by the script.
@@ -92,7 +92,7 @@ def set_prog_status_and_defs(com_args):
     if ("level" in config) and (not "dataset" in config):
 
         status_and_defaults.append(\
-            util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB)
+            util.Script_status.READ_PATHS_AND_STORE_TO_DB)
 
     elif ("dataset" in config) and  config["dataset"] == "all":
         status_and_defaults.append(\
@@ -339,7 +339,7 @@ def scan_files_in_localhost(config, scan_status):
 
             print "executng : %s" %(command)
             subprocess.call(command, shell=True)
-    elif scan_status == util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB:
+    elif scan_status == util.Script_status.READ_PATHS_AND_STORE_TO_DB:
         scan_paths_from_file_in_localhost(config)
 
 def main():
@@ -357,7 +357,7 @@ def main():
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))
 
     #Sets default values and determione what operations the script will perform.
-    status_and_defaults = set_prog_status_and_defs(com_args)
+    status_and_defaults = get_stat_and_defs(com_args)
 
     config_file = status_and_defaults[0]
     run_status = status_and_defaults[1]

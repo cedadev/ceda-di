@@ -1,0 +1,58 @@
+﻿{
+  "mappings": 
+  {
+    "file" : 
+    {
+      "properties" : 
+      {
+        "info" : 
+        {
+          "properties" : 
+          {
+            "directory" : { "type" : "string", "index" : "not_analyzed" },
+            "format" : { "type" : "string" },
+            "md5" : { "type" : "string" },
+            "name" : { "type" : "string", "index" : "not_analyzed" },
+            "name_auto" : { "type": "completion", "search_analyzer": "simple", "index_analyzer": "simple", "payloads": false },
+            "size" : { "type" : "double" },
+            "type" : { "type" : "string" }
+          }
+        },
+        "phenomena": 
+        {        
+          "include_in_parent": true,
+          "type": "nested",        
+          "properties": 
+          {
+            "phenomenon_parameters":
+            {
+              "include_in_parent": true,
+              "type": "nested",        
+              "properties": 
+              {
+                "name":  { "type": "string" },
+                "value": { "type": "string" }
+              }
+            } 
+          }
+        },
+        "spatial": 
+        {
+          "properties": 
+          {
+            "coordinates": { "type": "geo_shape" }
+          }
+        },
+        "temporal": 
+        {
+          "properties": 
+          {
+            "end_time"  : { "type": "date"},
+            "start_time": { "type": "date"}
+          }
+        } 
+        
+      }
+    }   
+  }
+}

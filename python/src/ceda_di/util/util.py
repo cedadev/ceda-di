@@ -13,9 +13,9 @@ import ConfigParser
 
 #some globals.
 Script_status = Enum("Script_status",
-                     "SEARCH_AND_STORE_INFO_TO_FILE \
-                      SEARCH_AND_STORE_INFO_TO_DB \
-                      READ_PATHS_AND_STORE_INFO_TO_DB\
+                     "SCAN_AND_STORE_TO_FILE \
+                      SCAN_AND_STORE_TO_DB \
+                      READ_PATHS_AND_STORE_TO_DB\
                       RUN_SCRIPT_IN_LOTUS \
                       RUN_SCRIPT_IN_LOCALHOST \
                       SCAN_SPECIFIC_DATASET_ID \

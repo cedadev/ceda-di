@@ -3,6 +3,7 @@ import netCDF4
 
 from ceda_di.file_handlers.generic_file import GenericFile
 from ceda_di.metadata import product
+from ceda_di.metadata.product import GeoJSONGenerator
 
 class   NetCdfFile(GenericFile):
     """
@@ -126,11 +127,6 @@ class   NetCdfFile(GenericFile):
         :returns:  A dict containing information compatible with current es index level 2.
         """
 
-        #ok, lets try something new.
-        some_objects = self.get_geospatial()
-
-        some_other_ob = self.get_temporal()
-
         #Get basic file info.
         file_info = self.get_properties_generic_level1()
 
@@ -172,12 +168,55 @@ class   NetCdfFile(GenericFile):
         else:
             return self.get_properties_generic_level2()
 
+    def get_properties_netcdf_level3(self):
+        """
+        Wrapper for method phenomena().
+        :returns:  A dict containing information compatible with current es index level 2.
+        """
+        level_2_info = self.get_properties_netcdf_level2()
+
+        if level_2_info == None:
+            return None
+
+         #ok, lets try get more info..
+        try:
+            geo_info = self.get_geospatial()
+            temp_info = self.get_temporal()
+        except AttributeError:
+            return level_2_info
+        else:
+            loc_dict= {}
+            temp_dict ={}
+            #loc_dict[location] = geo_info
+            spatial = []
+
+            if "type" not in spatial:
+                gj = GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
+            else:
+                gj = GeoJSONGenerator(spatial["lat"], spatial["lon"],
+                                      spatial["type"])
+            spatial = gj.get_elasticsearch_geojson()
+
+            loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
+            level_2_info["spatial"] = loc_dict
+
+
+            level_2_info["temporal"] = temp_info
+
+            print level_2_info
+
+        return level_2_info
+
+
     def get_properties(self):
 
         if self.level == "1":
             return self.get_properties_generic_level1()
         elif self.level == "2":
             return self.get_properties_netcdf_level2()
+        elif self.level == "3":
+            return self.get_properties_netcdf_level3()
+
 
     def __enter__(self):
         return self

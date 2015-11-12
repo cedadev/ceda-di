@@ -273,14 +273,14 @@ class ExtractSeq(Extract):
         """
          Prepares login and file list to be scanned.
         """
-        if self.status == util.Script_status.SEARCH_AND_STORE_INFO_TO_FILE:
+        if self.status == util.Script_status.SCAN_AND_STORE_TO_FILE:
             try:
                 self.logger = self.prepare_logging_seq()
 
                 self.file_list = self.build_file_list_from_path()
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
-        elif self.status == util.Script_status.SEARCH_AND_STORE_INFO_TO_DB:
+        elif self.status == util.Script_status.SCAN_AND_STORE_TO_DB:
             try:
                 self.logger = self.prepare_logging_seq()
 
@@ -292,7 +292,7 @@ class ExtractSeq(Extract):
                 self.file_list = self.build_file_list_from_path()
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
-        elif self.status == util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB:
+        elif self.status == util.Script_status.READ_PATHS_AND_STORE_TO_DB:
             try:
                 self.logger = self.prepare_logging_seq()
 
@@ -319,7 +319,7 @@ class ExtractSeq(Extract):
             os.makedirs(log_dir)
 
         #kltsa 15/09/2015 changes for issue :23221.
-        if self.status == util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB:
+        if self.status == util.Script_status.READ_PATHS_AND_STORE_TO_DB:
             log_fname = "%s_%s_%s_%s_%s.log" \
                         %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "-"),\
                         self.conf("start"), self.conf("num-files"), socket.gethostname())
@@ -423,13 +423,13 @@ class ExtractSeq(Extract):
 
         list_len = len(content)
         if int(start_file) < 0 or int(start_file) > list_len:
-            self.logger.info("please correct start parameter value.")
+            self.logger.error("Please correct start parameter value.")
             return
 
         end_file = int(start_file) + int(num_of_files)
 
         if end_file > list_len:
-            self.logger.info("please correct num-files parameter value.")
+            self.logger.error("Please correct num-files parameter value.")
             return
 
         file_list = content[int(start_file):end_file]
