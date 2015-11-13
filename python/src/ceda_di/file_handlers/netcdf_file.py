@@ -184,7 +184,6 @@ class   NetCdfFile(GenericFile):
         #ok, lets try get more info..
         try:
             geo_info = self.get_geospatial()
-            temp_info = self.get_temporal()
         except AttributeError:
             return level_2_info
         else:
@@ -196,9 +195,14 @@ class   NetCdfFile(GenericFile):
             loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
             level_2_info["spatial"] = loc_dict
 
-            level_2_info["temporal"] = temp_info
+            try:
+                temp_info = self.get_temporal()
+                level_2_info["temporal"] = temp_info
+            except AttributeError:
+                pass
 
-            print level_2_info
+            return level_2_info
+
 
         return level_2_info
 
