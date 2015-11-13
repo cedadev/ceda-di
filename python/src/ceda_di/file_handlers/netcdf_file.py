@@ -178,7 +178,6 @@ class   NetCdfFile(GenericFile):
         if level_2_info == None:
             return None
 
-
         self.handler_id = "Netcdf handler level 3."
 
         #ok, lets try get more info..
