@@ -237,7 +237,7 @@ def scan_files_in_lotus(config, scan_status):
     elif scan_status == util.Script_status.SCAN_ALL_DATASETS:
         scan_all_datasets_in_lotus(config)
 
-    elif scan_status == util.Script_status.READ_PATHS_AND_STORE_INFO_TO_DB:
+    elif scan_status == util.Script_status.READ_PATHS_AND_STORE_TO_DB:
         scan_paths_from_file_in_lotus(config)
 
 def scan_paths_from_file_in_localhost(config):
