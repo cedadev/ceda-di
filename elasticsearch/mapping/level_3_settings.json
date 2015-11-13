@@ -40,15 +40,15 @@
         {
           "properties": 
           {
-            "coordinates": { "type": "geo_shape" }
+            "coordinates": { "type": "geo_shape", "tree": "quadtree", "precision": "50m", "store": "yes" }
           }
         },
         "temporal": 
         {
           "properties": 
           {
-            "end_time"  : { "type": "date"},
-            "start_time": { "type": "date"}
+            "end_time"  : { "type": "date", "format": "dateOptionalTime", "store": "yes"},
+            "start_time": { "type": "date", "format": "dateOptionalTime", "store": "yes"}
           }
         } 
         
