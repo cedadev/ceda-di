@@ -170,15 +170,15 @@ class   NetCdfFile(GenericFile):
         """
 
         try:
-            with netCDF4.Dataset(self.file_path) as netcdf_object:
+            with netCDF4.Dataset(self.file_path) as netcdf:
 
-                level2_meta = self.get_properties_netcdf_file_level2(netcdf_object)
+                level2_meta = self.get_properties_netcdf_file_level2(netcdf)
 
                 self.handler_id = "Netcdf handler level 3."
 
                 #try to add level 3 info. 
                 try:
-                    geo_info = self.get_geospatial(netcdf_object)
+                    geo_info = self.get_geospatial(netcdf)
 
                     loc_dict= {}
 
@@ -191,7 +191,7 @@ class   NetCdfFile(GenericFile):
                     pass
 
                 try:
-                    temp_info = self.get_temporal(netcdf_object)
+                    temp_info = self.get_temporal(netcdf)
                     level2_meta["temporal"] = temp_info
                 except AttributeError:
                     pass
