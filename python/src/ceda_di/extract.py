@@ -354,25 +354,25 @@ class ExtractSeq(Extract):
         """
         logging.root.handlers = []
 
-        """
+
         logging.basicConfig( filename=fpath,
                              filemode="a+",
                              format=log_format,
                              level=level
                            )
-        """
 
+
+        """
         extract_logger = logging.getLogger(__name__)
 
         file_handler = logging.FileHandler(fpath)
         log_format = logging.Formatter(log_format)
         file_handler.setFormatter(log_format)
 
-
         extract_logger.addHandler(file_handler)
         extract_logger.setLevel(level)
         extract_logger.propagate = 0
-
+        """
 
         es_log = logging.getLogger("elasticsearch")
         es_log.setLevel(logging.ERROR)

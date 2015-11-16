@@ -72,16 +72,15 @@ class   NetCdfFile(GenericFile):
                      (standard_name, fpath))
 
     #ok lets try something new.
-    def get_geospatial(self):
-        with netCDF4.Dataset(self.file_path) as ncdf:
-            lat_name = self.find_var_by_standard_name(ncdf, self.file_path, "latitude")
-            lon_name = self.find_var_by_standard_name(ncdf, self.file_path, "longitude")
+    def get_geospatial(self, ncdf):
+        lat_name = self.find_var_by_standard_name(ncdf, self.file_path, "latitude")
+        lon_name = self.find_var_by_standard_name(ncdf, self.file_path, "longitude")
 
-            if lat_name and lon_name:
-                return self.geospatial(ncdf, lat_name, lon_name)
-            else:
-                self.logger.error("Could not find lat/lon variables: %s" %
-                                  self.file_path)
+        if lat_name and lon_name:
+            return self.geospatial(ncdf, lat_name, lon_name)
+        else:
+            self.logger.error("Could not find lat/lon variables: %s" %
+                                self.file_path)
 
     def temporal(self, ncdf, time_name):
         """
@@ -98,30 +97,26 @@ class   NetCdfFile(GenericFile):
         }
 
 
-    def get_temporal(self):
-        with netCDF4.Dataset(self.file_path) as ncdf:
-            time_name = self.find_var_by_standard_name(ncdf, self.file_path, "time")
-            return self.temporal(ncdf, time_name)
+    def get_temporal(self, ncdf):
+        time_name = self.find_var_by_standard_name(ncdf, self.file_path, "time")
+        return self.temporal(ncdf, time_name)
  
 
-    def phenomena(self):
+    def phenomena(self, netcdf):
 
         """
         Construct list of Phenomena based on variables in NetCDF file.
         :returns : List of metadata.product.Parameter objects.
         """
-        try:
-            with netCDF4.Dataset(self.file_path) as netcdf_object:
-                phens = []
-                for v_name, v_data in netcdf_object.variables.iteritems():
-                    phen = product.Parameter(v_name, v_data.__dict__)
-                    phens.append(phen)
 
-                return phens
-        except Exception:
-            return None
+        phens = []
+        for v_name, v_data in netcdf.variables.iteritems():
+            phen = product.Parameter(v_name, v_data.__dict__)
+            phens.append(phen)
 
-    def get_properties_netcdf_level2(self):
+        return phens
+
+    def get_properties_netcdf_file_level2(self, netcdf):
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
@@ -134,10 +129,7 @@ class   NetCdfFile(GenericFile):
 
             self.handler_id = "Netcdf handler level 2."
 
-            netcdf_phenomena = self.phenomena()
-
-            if netcdf_phenomena is None:
-                return None
+            netcdf_phenomena = self.phenomena(netcdf)
 
             phenomena_list = []
             var_id_dict = {}
@@ -168,40 +160,52 @@ class   NetCdfFile(GenericFile):
         else:
             return self.get_properties_generic_level2()
 
+    def get_properties_netcdf_level2(self):
+
+        try:
+            with netCDF4.Dataset(self.file_path) as netcdf_object:
+                level2_meta = self.get_properties_netcdf_file_level2(netcdf_object)
+                return level2_meta
+        except Exception:
+            return None
+
     def get_properties_netcdf_level3(self):
+
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
         """
-        level_2_info = self.get_properties_netcdf_level2()
 
-        if level_2_info == None:
+        try:
+            with netCDF4.Dataset(self.file_path) as netcdf_object:
+
+                level2_meta = self.get_properties_netcdf_file_level2(netcdf_object)
+
+                self.handler_id = "Netcdf handler level 3."
+
+                #try to add level 3 info. 
+                try:
+                    geo_info = self.get_geospatial(netcdf_object)
+
+                    loc_dict= {}
+
+                    gj = GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
+                    spatial = gj.get_elasticsearch_geojson()
+
+                    loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
+                    level2_meta["spatial"] = loc_dict
+                except AttributeError:
+                    pass
+
+                try:
+                    temp_info = self.get_temporal(netcdf_object)
+                    level2_meta["temporal"] = temp_info
+                except AttributeError:
+                    pass
+
+            return level2_meta
+        except Exception as ex:
             return None
-
-        self.handler_id = "Netcdf handler level 3."
-
-        #ok, lets try get more info..
-        try:
-            geo_info = self.get_geospatial()
-        except AttributeError:
-            pass
-        else:
-            loc_dict= {}
-
-            gj = GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
-            spatial = gj.get_elasticsearch_geojson()
-
-            loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
-            level_2_info["spatial"] = loc_dict
-
-        try:
-            temp_info = self.get_temporal()
-        except AttributeError:
-            pass
-        else:
-            level_2_info["temporal"] = temp_info
-
-        return level_2_info
 
     def get_properties(self):
 
