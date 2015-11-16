@@ -204,7 +204,7 @@ class   NetCdfFile(GenericFile):
                     pass
 
             return level2_meta
-        except Exception as ex:
+        except Exception:
             return None
 
     def get_properties(self):
