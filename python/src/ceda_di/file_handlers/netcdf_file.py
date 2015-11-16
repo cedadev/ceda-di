@@ -67,9 +67,7 @@ class   NetCdfFile(GenericFile):
             except AttributeError:
                 continue
 
-        logger = logging.getLogger(__name__)
-        logger.error("Could not find standard name variable \"%s\": %s" %
-                     (standard_name, fpath))
+        return None
 
     #ok lets try something new.
     def get_geospatial(self, ncdf):
@@ -79,8 +77,7 @@ class   NetCdfFile(GenericFile):
         if lat_name and lon_name:
             return self.geospatial(ncdf, lat_name, lon_name)
         else:
-            self.logger.error("Could not find lat/lon variables: %s" %
-                                self.file_path)
+            return None
 
     def temporal(self, ncdf, time_name):
         """
@@ -96,19 +93,15 @@ class   NetCdfFile(GenericFile):
             "end_time": times[-1].isoformat()
         }
 
-
     def get_temporal(self, ncdf):
         time_name = self.find_var_by_standard_name(ncdf, self.file_path, "time")
-        return self.temporal(ncdf, time_name)
- 
+        return self.temporal(ncdf, time_name) 
 
     def phenomena(self, netcdf):
-
         """
         Construct list of Phenomena based on variables in NetCDF file.
         :returns : List of metadata.product.Parameter objects.
         """
-
         phens = []
         for v_name, v_data in netcdf.variables.iteritems():
             phen = product.Parameter(v_name, v_data.__dict__)
@@ -121,7 +114,6 @@ class   NetCdfFile(GenericFile):
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
         """
-
         #Get basic file info.
         file_info = self.get_properties_generic_level1()
 
@@ -166,6 +158,7 @@ class   NetCdfFile(GenericFile):
             with netCDF4.Dataset(self.file_path) as netcdf_object:
                 level2_meta = self.get_properties_netcdf_file_level2(netcdf_object)
                 return level2_meta
+        #Catch all possible errors that can be related to this file and and record the error later.   
         except Exception:
             return None
 
