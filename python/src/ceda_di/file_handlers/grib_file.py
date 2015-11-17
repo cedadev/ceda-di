@@ -120,7 +120,7 @@ class GribFile(GenericFile):
             return self.get_properties_generic_level1()
         elif self.level == "2":
             return self.get_properties_grib_level2()
-        elif self.level == "2":
+        elif self.level == "3":
             return self.get_properties_grib_level3()
 
 
