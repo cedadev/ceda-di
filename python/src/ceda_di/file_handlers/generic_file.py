@@ -83,6 +83,7 @@ class  GenericFile(object):
             return None
 
         #creates the nested json structure.
+        """
         phenomenon_parameters_dict = {}
         var_id_dict = {}
         var_id_dict["name"] = "var_id"
@@ -97,11 +98,14 @@ class  GenericFile(object):
 
 
         file_info["phenomena"] = phenomena_list
+        """
 
         return file_info
 
     def get_properties_generic_level3(self):
-        return self.get_properties_generic_level2()
+        res = self.get_properties_generic_level2()
+        self.handler_id = "Generic level 3."
+        return res
 
     def get_properties(self):
 
@@ -109,7 +113,7 @@ class  GenericFile(object):
             return self.get_properties_generic_level1()
         elif self.level == "2":
             return self.get_properties_generic_level2()
-        elif self.level == "2":
+        elif self.level == "3":
             return self.get_properties_generic_level3()
 
     def __enter__(self):

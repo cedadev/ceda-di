@@ -98,10 +98,12 @@ class PpFile(GenericFile):
             return file_info
 
         else:
-            return self.get_properties_generic_level2()
+            return None
 
     def get_properties_pp_level3(self):
-        return self.get_properties_pp_level2()
+        res = self.get_properties_pp_level2()
+        self.handler_id = "pp handler level 3."
+        return res
 
     def get_properties(self):
 

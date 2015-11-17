@@ -150,7 +150,7 @@ class   NetCdfFile(GenericFile):
             return file_info
 
         else:
-            return self.get_properties_generic_level2()
+            return None
 
     def get_properties_netcdf_level2(self):
 
@@ -160,7 +160,7 @@ class   NetCdfFile(GenericFile):
                 return level2_meta
         #Catch all possible errors that can be related to this file and and record the error later.   
         except Exception:
-            return None
+            return self.get_properties_generic_level2()
 
     def get_properties_netcdf_level3(self):
 
@@ -173,6 +173,10 @@ class   NetCdfFile(GenericFile):
             with netCDF4.Dataset(self.file_path) as netcdf:
 
                 level2_meta = self.get_properties_netcdf_file_level2(netcdf)
+
+                #just in case.
+                if level2_meta == None:
+                    return None
 
                 self.handler_id = "Netcdf handler level 3."
 
