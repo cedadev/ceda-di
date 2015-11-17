@@ -122,6 +122,9 @@ class   NetCdfFile(GenericFile):
             self.handler_id = "Netcdf handler level 2."
 
             netcdf_phenomena = self.phenomena(netcdf)
+            
+            if netcdf_phenomena is None:
+                return file_info
 
             phenomena_list = []
             var_id_dict = {}

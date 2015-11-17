@@ -46,7 +46,7 @@ class NasaAmesFile(GenericFile):
             nasaames_phenomena = self.phenomena()
 
             if nasaames_phenomena is None:
-                return None
+                return file_info
 
             #List of phenomena
             phenomena_list = []

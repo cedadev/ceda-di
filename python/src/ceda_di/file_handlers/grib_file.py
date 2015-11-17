@@ -100,7 +100,7 @@ class GribFile(GenericFile):
             self.handler_id = "grib handler level 2."
 
             if grib_phenomena is None:
-                return None
+                return file_info
 
             file_info["phenomena"] = grib_phenomena
 

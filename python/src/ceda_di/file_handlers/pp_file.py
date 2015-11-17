@@ -91,7 +91,7 @@ class PpFile(GenericFile):
             pp_phenomena = self.phenomena()
 
             if pp_phenomena is None:
-                return None
+                return file_info
 
             file_info["phenomena"] = pp_phenomena
 
