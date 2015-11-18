@@ -537,7 +537,7 @@ class ExtractSeq(Extract):
                         self.index_properties_seq(doc, es_id)
                     except Exception as ex:
                         end = datetime.datetime.now()
-                        self.logger.error(ex.message)
+                        self.logger.error(("Database error: %s" %ex.message))
                         self.logger.error(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
                                                               self.FILE_INDEX_ERROR, str(end - start))))
                         self.database_errors = self.database_errors + 1
