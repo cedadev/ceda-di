@@ -37,7 +37,8 @@ class  GenericFile(object):
 
         is_symlink = os.path.islink(self.file_path)
 
-        #kltsa 16/09/2015 change for issue 23214 : symbolic link files will be ignored.
+        #kltsa 16/09/2015 change for issue 23214 : 
+        #symbolic link files will be ignored.
         if is_symlink:
             return None
 

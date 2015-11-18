@@ -267,7 +267,8 @@ class ExtractSeq(Extract):
         self.FILE_INDEX_ERROR = "-1"
         self.FILE_INDEXED = "1"
         #Varialbes for storing statistical information.
-        self.files_not_indexed = 0
+        self.database_errors = 0
+        self.files_properties_errors = 0
         self.files_indexed = 0
         self.total_number_of_files = 0
 
@@ -307,6 +308,7 @@ class ExtractSeq(Extract):
                 ###########################################################
 
                 self.file_list = self.build_list_from_file()
+                self.total_number_of_files = len(self.file_list)
 
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
@@ -538,14 +540,25 @@ class ExtractSeq(Extract):
                         self.logger.error(ex.message)
                         self.logger.error(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
                                                               self.FILE_INDEX_ERROR, str(end - start))))
+                        self.database_errors = self.database_errors + 1
                     else:
                         end = datetime.datetime.now()
                         self.logger.info(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
                                                              self.FILE_INDEXED, str(end - start))))
+                        self.files_indexed =  self.files_indexed + 1
 
                 else:
                     end = datetime.datetime.now()
 
                     self.logger.error("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
                                                          self.FILE_PROPERTIES_ERROR, str(end - start)))
+                    self.files_properties_errors = self.files_properties_errors + 1
                     continue
+
+            #At the end print some statistical info.
+            if self.database_errors > 0 or self.files_properties_errors > 0:
+                self.logger.error("Summary information files indexed: %s, files not indexed: %s (database errors),"
+                                  "%s (properties errors), total files: %s "
+                                  % (str(self.files_indexed), str(self.database_errors),
+                                  str(self.files_properties_errors), str(self.total_number_of_files))
+                                 )
