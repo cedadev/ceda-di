@@ -109,58 +109,59 @@ class   NetCdfFile(GenericFile):
 
         return phens
 
-    def get_properties_netcdf_file_level2(self, netcdf):
+    def get_properties_netcdf_file_level2(self, netcdf, index):
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
         """
         #Get basic file info.
-        file_info = self.get_properties_generic_level1()
 
-        if file_info is not None:
+        self.handler_id = "Netcdf handler level 2."
 
-            self.handler_id = "Netcdf handler level 2."
+        netcdf_phenomena = self.phenomena(netcdf)
 
-            netcdf_phenomena = self.phenomena(netcdf)
+        phenomena_list = []
+        var_id_dict = {}
+        phenomenon_parameters_dict = {}
 
-            phenomena_list = []
-            var_id_dict = {}
-            phenomenon_parameters_dict = {}
+        for item in netcdf_phenomena:
 
-            for item in netcdf_phenomena:           #get all parameter objects.
+            name = item.get_name()
 
-                name = item.get_name()               #get phenomena name.
+            var_id_dict["name"] = "var_id"
+            var_id_dict["value"] = name
 
-                var_id_dict["name"] = "var_id"
-                var_id_dict["value"] = name
+            list_of_phenomenon_parameters = item.get()
+            list_of_phenomenon_parameters.append(var_id_dict.copy())
+            phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
 
-                list_of_phenomenon_parameters = item.get()
-                list_of_phenomenon_parameters.append(var_id_dict.copy())
-                phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
+            phenomena_list.append(phenomenon_parameters_dict.copy())
 
-                phenomena_list.append(phenomenon_parameters_dict.copy())
-
-                var_id_dict.clear()
-                phenomenon_parameters_dict.clear()
+            var_id_dict.clear()
+            phenomenon_parameters_dict.clear()
 
 
-            file_info["phenomena"] = phenomena_list
+        index["phenomena"] = phenomena_list
 
 
-            return file_info
-
-        else:
-            return None
+        return index
 
     def get_properties_netcdf_level2(self):
 
-        try:
-            with netCDF4.Dataset(self.file_path) as netcdf_object:
-                level2_meta = self.get_properties_netcdf_file_level2(netcdf_object)
-                return level2_meta
-        #Catch all possible errors that can be related to this file and and record the error later.   
-        except Exception:
-            return self.get_properties_generic_level2()
+        #level 1.
+        file_info = self.get_properties_generic_level1()
+
+        if file_info is not None:
+            #ok basic info exist, lets add level 2 info.
+            try:
+                with netCDF4.Dataset(self.file_path) as netcdf_object:
+                    level2_meta = self.get_properties_netcdf_file_level2(netcdf_object, file_info)
+                    return level2_meta
+            #Catch all possible errors that can be related to this file and and record the error later.   
+            except Exception:
+                return file_info
+        else:
+            return None
 
     def get_properties_netcdf_level3(self):
 
@@ -168,41 +169,44 @@ class   NetCdfFile(GenericFile):
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
         """
+        #level 1
+        file_info = self.get_properties_generic_level1()
 
-        try:
-            with netCDF4.Dataset(self.file_path) as netcdf:
+        if file_info is not None:
 
-                level2_meta = self.get_properties_netcdf_file_level2(netcdf)
+            try:
+                with netCDF4.Dataset(self.file_path) as netcdf:
 
-                #just in case.
-                if level2_meta == None:
-                    return None
+                    #level 2
+                    level2_meta = self.get_properties_netcdf_file_level2(netcdf, file_info)
 
-                self.handler_id = "Netcdf handler level 3."
+                    self.handler_id = "Netcdf handler level 3."
 
-                #try to add level 3 info. 
-                try:
-                    geo_info = self.get_geospatial(netcdf)
+                    #try to add level 3 info. 
+                    try:
+                        geo_info = self.get_geospatial(netcdf)
 
-                    loc_dict= {}
+                        loc_dict= {}
 
-                    gj = GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
-                    spatial = gj.get_elasticsearch_geojson()
+                        gj = GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
+                        spatial = gj.get_elasticsearch_geojson()
 
-                    loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
-                    level2_meta["spatial"] = loc_dict
-                except AttributeError:
-                    pass
+                        loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
+                        level2_meta["spatial"] = loc_dict
+                    except AttributeError:
+                       pass
 
-                try:
-                    temp_info = self.get_temporal(netcdf)
-                    level2_meta["temporal"] = temp_info
-                except AttributeError:
-                    pass
+                    try:
+                        temp_info = self.get_temporal(netcdf)
+                        level2_meta["temporal"] = temp_info
+                    except AttributeError:
+                        pass
 
-            return level2_meta
-        except Exception:
-            return self.get_properties_generic_level2()
+                    return level2_meta
+            except Exception:
+                return file_info
+        else:
+            return None
 
     def get_properties(self):
 

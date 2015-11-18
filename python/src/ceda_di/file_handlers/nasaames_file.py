@@ -43,6 +43,7 @@ class NasaAmesFile(GenericFile):
 
             self.handler_id = "Nasaames handler level 2."
 
+            #level 2
             nasaames_phenomena = self.phenomena()
 
             if nasaames_phenomena is None:

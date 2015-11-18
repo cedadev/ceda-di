@@ -266,6 +266,11 @@ class ExtractSeq(Extract):
         self.FILE_PROPERTIES_ERROR = "0"
         self.FILE_INDEX_ERROR = "-1"
         self.FILE_INDEXED = "1"
+        #Varialbes for storing statistical information.
+        self.files_not_indexed = 0
+        self.files_indexed = 0
+        self.total_number_of_files = 0
+
 
 
     def prepare_run(self):
