@@ -122,7 +122,7 @@ class   NetCdfFile(GenericFile):
             self.handler_id = "Netcdf handler level 2."
 
             netcdf_phenomena = self.phenomena(netcdf)
-                        
+
             phenomena_list = []
             var_id_dict = {}
             phenomenon_parameters_dict = {}
@@ -202,7 +202,7 @@ class   NetCdfFile(GenericFile):
 
             return level2_meta
         except Exception:
-            return None
+            return self.get_properties_generic_level2()
 
     def get_properties(self):
 
