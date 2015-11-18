@@ -194,7 +194,7 @@ class   NetCdfFile(GenericFile):
                         loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
                         level2_meta["spatial"] = loc_dict
                     except AttributeError:
-                       pass
+                        pass
 
                     try:
                         temp_info = self.get_temporal(netcdf)
