@@ -557,8 +557,8 @@ class ExtractSeq(Extract):
 
             #At the end print some statistical info.
             if self.database_errors > 0 or self.files_properties_errors > 0:
-                self.logger.error("Summary information files indexed: %s, files not indexed: %s (database errors),"
+                self.logger.error("Summary information (%s), files indexed: %s, files not indexed: %s (database errors),"
                                   "%s (properties errors), total files: %s "
-                                  % (str(self.files_indexed), str(self.database_errors),
+                                  % ( self.conf("filename"), str(self.files_indexed), str(self.database_errors),
                                   str(self.files_properties_errors), str(self.total_number_of_files))
                                  )
