@@ -122,8 +122,8 @@ def scan_all_datasets_in_lotus(config):
 
     for i in range(0, number_of_datasets):
 
-        command = "python %s/scan_dataset.py -f  %s -d  %s  -l  %s" \
-                   %(current_dir, filename, keys[i], level)
+        command = ("python %s/scan_dataset.py -f  %s -d  %s  -l  %s" 
+                   %(current_dir, filename, keys[i], level))
 
 
         print "created command :" + command
@@ -198,9 +198,10 @@ def scan_paths_from_file_in_lotus(config):
         start = 0
         for i in range(0, number_of_jobs):
 
-            command = " python %s/scan_dataset.py -f %s --num-files %s\
-                        --start %d  -l %s"\
+            command = (" python %s/scan_dataset.py -f %s --num-files %s"
+                        "--start %d  -l %s"
                         %(current_dir, filename, num_files, start, level)
+                      )
 
             start += step
 
@@ -269,9 +270,10 @@ def scan_paths_from_file_in_localhost(config):
         start = 0
         for i in range(0, number_of_tasks):
 
-            command = " python %s/scan_dataset.py -f %s\
-                       --num-files %s  --start %d  -l %s"\
-                       %(current_dir, filename, num_files, start, level)
+            command = ( " python %s/scan_dataset.py -f %s"
+                        " --num-files %s  --start %d  -l %s"
+                        %(current_dir, filename, num_files, start, level)
+                      )
 
             start += step
 
