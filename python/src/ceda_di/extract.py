@@ -471,7 +471,7 @@ class ExtractSeq(Extract):
             self.logger.info(("%s was read using handler \"%s\"." %(filename, handler_inst.get_handler_id())))
             return metadata
         else:
-            self.logger.info(("%s could not be read by any handler." %(filename)))
+            self.logger.error(("%s could not be read by any handler." %(filename)))
             return None
 
     def store_filenames_to_file(self):

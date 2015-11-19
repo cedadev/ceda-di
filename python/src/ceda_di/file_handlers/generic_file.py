@@ -21,49 +21,32 @@ class  GenericFile(object):
         """
         Scans the given file and returns information about 
         the file not the content.
-        :returns: A dict containing a summary information.
+        :returns: A dict containing summary information.
         """
 
         self.handler_id = "Generic level 1."
 
-        if self.file_path is None:
-            return None
-
-        #check if file still exists.
-        file_exists = os.path.isfile(self.file_path)
-
-        if not file_exists:
-            return None
-
-        is_symlink = os.path.islink(self.file_path)
-
-        #kltsa 16/09/2015 change for issue 23214 : 
-        #symbolic link files will be ignored.
-        if is_symlink:
+        #Do the basic checking, if file exists 
+        #and that it is not a symbolic link.
+        if ( self.file_path is None
+             or not os.path.isfile(self.file_path)
+             or os.path.islink(self.file_path)
+           ):
             return None
 
         file_info = {}
         info = {}
 
-        #This is a regular file.
+        #Basic information. 
+        info["name"] = os.path.basename(self.file_path) #ntpath.basename(file_path)
+        info["name_auto"] = info["name"]
         info["directory"] = os.path.dirname(self.file_path)
+
+        info["size"] = round(os.path.getsize(self.file_path) / (1024*1024.0), 3)
+
+        info["type"] = "file"
         info["format"] = "data file"
         info["md5"] = ""
-
-        filename = os.path.basename(self.file_path) #ntpath.basename(file_path)
-        info["name"] = filename
-
-        #self.subdoc[input] = filename
-
-        #subval = json.dumps(self.subdoc)
-
-        info["name_auto"] = filename
-
-
-        size = os.path.getsize(self.file_path)
-        size_h = size/(1024*1024.0)
-        info["size"] = size_h
-        info["type"] = "file"
 
         file_info["info"] = info
 
@@ -72,7 +55,7 @@ class  GenericFile(object):
     def get_properties_generic_level2(self):
 
         """
-         Wrapper for method get_properties().
+         Wrapper for method get_properties_generic_level1().
         :returns: A dict containing information compatible with current es index.
         """
 
@@ -83,8 +66,8 @@ class  GenericFile(object):
         if file_info is None:
             return None
 
-        #creates the nested json structure.
         """
+        #creates the nested json structure.
         phenomenon_parameters_dict = {}
         var_id_dict = {}
         var_id_dict["name"] = "var_id"
@@ -96,7 +79,6 @@ class  GenericFile(object):
         phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
         phenomena_list = []
         phenomena_list.append(phenomenon_parameters_dict.copy())
-
 
         file_info["phenomena"] = phenomena_list
         """

@@ -43,11 +43,12 @@ class PpFile(GenericFile):
                     phenomenon_attr["name"] = key
                     phenomenon_attr["value"] = value
                     list_of_phenomenon_parameters.append(phenomenon_attr.copy())
-                    phenomenon_attr.clear()
+                    #phenomenon_attr.clear()
 
                     list_of_phenomenon_parameters_t.append((key, value))
 
                 #Also add var_id
+                """
                 phenomenon_attr["name"] = "var_id"
                 if "name" in keys:
                     phenomenon_attr["value"] = str(dict_of_phenomenon_prop["name"])
@@ -57,6 +58,7 @@ class PpFile(GenericFile):
                 #Attributes of phenomenon.
                 list_of_phenomenon_parameters.append(phenomenon_attr.copy())
                 phenomenon_attr.clear()
+                """
 
                 #Dict of phenomenon attributes.
                 phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters

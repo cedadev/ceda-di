@@ -49,14 +49,13 @@ class GribFile(GenericFile):
                     list_of_phenomenon_parameters.append(phenomenon_attr.copy())
                     list_of_phenomenon_parameters_t.append((key, value))
 
-
-                #Also add var_id
+                """
                 phenomenon_attr["name"] = "var_id"
                 phenomenon_attr["value"] = "None"
                 list_of_phenomenon_parameters.append(phenomenon_attr.copy())
                 phenomenon_attr.clear()
-
                 list_of_phenomenon_parameters_t.append(("name", "None"))
+                """
                 list_of_phenomenon_parameters_tt = tuple(list_of_phenomenon_parameters_t)
 
                 if list_of_phenomenon_parameters_tt not in found:

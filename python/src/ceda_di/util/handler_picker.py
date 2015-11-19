@@ -41,11 +41,8 @@ class  HandlerPicker(object):
         Sanity check.
         check if file still exists.
         """
-        file_exists = os.path.isfile(filename)
-
-        if not file_exists:
+        if not os.path.isfile(filename):
             return None
-
 
         file_dir = os.path.dirname(filename)
 

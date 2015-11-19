@@ -56,7 +56,7 @@ class NasaAmesFile(GenericFile):
 
             for item in nasaames_phenomena:           #get all parameter objects.
 
-                name = item.get_name()               #get phenomena name.
+                name = item.get_name()                #get phenomena name.
 
                 var_id_dict["name"] = "var_id"
                 var_id_dict["value"] = name
