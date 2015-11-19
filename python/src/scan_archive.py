@@ -199,7 +199,7 @@ def scan_paths_from_file_in_lotus(config):
         for i in range(0, number_of_jobs):
 
             command = (" python %s/scan_dataset.py -f %s --num-files %s"
-                        "--start %d  -l %s"
+                        " --start %d  -l %s"
                         %(current_dir, filename, num_files, start, level)
                       )
 
