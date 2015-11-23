@@ -162,6 +162,21 @@ def write_list_to_file(file_list, filename):
     infile.close()
     return items_written
 
+def read_file_into_list(filename):
+
+    with open(filename) as fd:
+        content = fd.readlines()
+
+    return content
+
+def find_in_list(list_str, str_item):
+
+    for str in list_str:
+        if str_item in str:
+            return str
+
+    return None
+
 def get_file_header(filename):
 
     """

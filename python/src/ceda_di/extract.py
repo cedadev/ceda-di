@@ -328,7 +328,7 @@ class ExtractSeq(Extract):
         #kltsa 15/09/2015 changes for issue :23221.
         if self.status == util.Script_status.READ_PATHS_AND_STORE_TO_DB:
             log_fname = "%s_%s_%s_%s_%s.log" \
-                        %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "-"),\
+                        %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "|"),\
                         self.conf("start"), self.conf("num-files"), socket.gethostname())
         else:
             log_fname = "%s_%s_%s.log" \
@@ -545,7 +545,7 @@ class ExtractSeq(Extract):
                         end = datetime.datetime.now()
                         self.logger.info(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
                                                              self.FILE_INDEXED, str(end - start))))
-                        self.files_indexed =  self.files_indexed + 1
+                        self.files_indexed = self.files_indexed + 1
 
                 else:
                     end = datetime.datetime.now()
@@ -556,8 +556,8 @@ class ExtractSeq(Extract):
                     continue
 
             #At the end print some statistical info.
-            if self.database_errors > 0 or self.files_properties_errors > 0:
-                self.logger.error("Summary information (%s), files indexed: %s, files not indexed: %s (database errors),"
+            logging.getLogger().setLevel(logging.INFO)
+            self.logger.info("Summary information (%s), files indexed: %s, files not indexed: %s (database errors),"
                                   "%s (properties errors), total files: %s "
                                   % ( self.conf("filename"), str(self.files_indexed), str(self.database_errors),
                                   str(self.files_properties_errors), str(self.total_number_of_files))

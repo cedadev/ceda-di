@@ -112,7 +112,7 @@ def create_file_lists_in_localhost(status, config):
     #files containing the paths to data files.
     for i in range(0, num_datasets):
 
-        command = "python %s/scan_dataset.py -f %s -d  %s --make-list %s/%s_dataset__files.txt" \
+        command = "python %s/scan_dataset.py -f %s -d  %s --make-list %s/%s_dataset-files.txt" \
                   %(current_dir, filename, datasets_ids[i],  \
                   directroy_to_save_files, datasets_ids[i])
 
