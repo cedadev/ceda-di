@@ -262,6 +262,8 @@ class ExtractSeq(Extract):
         self.handler_factory_inst = None
         self.file_list = None
         self.es = None
+        self.dataset_id = None
+        self.dataset_dir = None
         #some constants
         self.FILE_PROPERTIES_ERROR = "0"
         self.FILE_INDEX_ERROR = "-1"
@@ -271,7 +273,6 @@ class ExtractSeq(Extract):
         self.files_properties_errors = 0
         self.files_indexed = 0
         self.total_number_of_files = 0
-
 
 
     def prepare_run(self):
@@ -367,8 +368,6 @@ class ExtractSeq(Extract):
                              format=log_format,
                              level=level
                            )
-
-
         """
         extract_logger = logging.getLogger(__name__)
 
@@ -405,11 +404,11 @@ class ExtractSeq(Extract):
         """
 
         dataset_ids_file = self.conf("filename")
-        dataset_id = self.conf("dataset")
+        self.dataset_id = self.conf("dataset")
         #derectory where the files to be searched are.
-        path_to_files = util.find_dataset(dataset_ids_file, dataset_id)
+        self.dataset_dir = util.find_dataset(dataset_ids_file, dataset_id)
 
-        return util.build_file_list(path_to_files)
+        return util.build_file_list(self.dataset_dir)
 
     def build_list_from_file(self):
 
@@ -421,6 +420,8 @@ class ExtractSeq(Extract):
         file_containing_paths = self.conf("filename")
         start_file = self.conf("start")
         num_of_files = self.conf("num-files")
+        filename = os.path.basename(file_containing_paths)
+        self.dataset_id = os.path.splitext(filename)[0]
 
         #TODO: Make this a library function and make it more efficient.
         with open(file_containing_paths) as fd:
@@ -558,7 +559,7 @@ class ExtractSeq(Extract):
             #At the end print some statistical info.
             logging.getLogger().setLevel(logging.INFO)
             self.logger.info("Summary information (%s), files indexed: %s, files not indexed: %s (database errors),"
-                                  "%s (properties errors), total files: %s "
-                                  % ( self.conf("filename"), str(self.files_indexed), str(self.database_errors),
-                                  str(self.files_properties_errors), str(self.total_number_of_files))
-                                 )
+                             "%s (properties errors), total files: %s "
+                             % ( self.dataset_id, str(self.files_indexed), str(self.database_errors),
+                             str(self.files_properties_errors), str(self.total_number_of_files))
+                            )
