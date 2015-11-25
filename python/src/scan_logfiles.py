@@ -70,7 +70,7 @@ def parse_logs(com_args):
                 dataset_info["indexed"] = dataset_info["indexed"] + indexed
                 dataset_info["database_errors"] = dataset_info["database_errors"] + database_errors
                 dataset_info["properties_errors"] = dataset_info["properties_errors"] + properties_errors
-                dataset_info["total_files"] = dataset_info["total_files"] + total_files
+                #dataset_info["total_files"] = dataset_info["total_files"] + total_files
                 dataset_info = None
         #At the end print all information.
 

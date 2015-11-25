@@ -309,7 +309,6 @@ class ExtractSeq(Extract):
                 ###########################################################
 
                 self.file_list = self.build_list_from_file()
-                self.total_number_of_files = len(self.file_list)
 
             except KeyError as k:
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
@@ -426,6 +425,8 @@ class ExtractSeq(Extract):
         #TODO: Make this a library function and make it more efficient.
         with open(file_containing_paths) as fd:
             content = fd.readlines()
+
+        self.total_number_of_files = len(content)
 
         self.logger.info(("%s lines read from file \"%s\"."  %(str(len(content)), file_containing_paths)))
 
