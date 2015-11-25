@@ -43,7 +43,6 @@ def parse_logs(com_args):
             words_list = record.split(",")
             #dataset
             dataset = (words_list[1].split()[4].replace("(", "")).replace(")", "")
-            dataset_dir = util.find_dataset(datasets_file, dataset)
             #indexed
             indexed = int(words_list[2].split()[2])
             #database errors
@@ -60,7 +59,7 @@ def parse_logs(com_args):
                 dataset_info["database_errors"] = database_errors
                 dataset_info["properties_errors"] = properties_errors
                 dataset_info["total_files"] = total_files
-                dataset_info["dataset_dir"] = dataset_dir
+                dataset_info["dataset_dir"] = util.find_dataset(datasets_file, dataset)
 
                 summary_info[dataset] = dataset_info.copy()
                 dataset_info = None

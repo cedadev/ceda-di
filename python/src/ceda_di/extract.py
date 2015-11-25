@@ -405,7 +405,7 @@ class ExtractSeq(Extract):
         dataset_ids_file = self.conf("filename")
         self.dataset_id = self.conf("dataset")
         #derectory where the files to be searched are.
-        self.dataset_dir = util.find_dataset(dataset_ids_file, dataset_id)
+        self.dataset_dir = util.find_dataset(dataset_ids_file, self.dataset_id)
 
         return util.build_file_list(self.dataset_dir)
 
