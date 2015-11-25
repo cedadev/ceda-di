@@ -80,8 +80,8 @@ def validate_results(dict_data):
     for item in dict_data:
         dataset_info = {}
         dataset_info = dict_data[item]
-        sum = dataset_info["indexed"] + dataset_info["database_errors"] + dataset_info["properties_errors"] 
-        if dataset_info["total_files"] == sum:
+        indexed_and_errors = dataset_info["indexed"] + dataset_info["database_errors"] + dataset_info["properties_errors"] 
+        if dataset_info["total_files"] == indexed_and_errors:
             dataset_info["status"] = "ok"
         else:
             dataset_info["status"] = "errors"
