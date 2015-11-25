@@ -76,14 +76,26 @@ def parse_logs(com_args):
 
     return summary_info
 
+def validate_results(dict_data):
+
+    for item in dict_data:
+        dataset_info = {}
+        dataset_info = dict_data[item]
+        sum = dataset_info["indexed"] + dataset_info["database_errors"] + dataset_info["properties_errors"] 
+        if dataset_info["total_files"] == sum:
+            dataset_info["status"] = "ok"
+        else:
+            dataset_info["status"] = "errors"
+
 def print_dict(dict_data):
-    print "{a:<20} {b:<20} {c:<20} {d:<20} {e:<20} {f:<20}".format(a="Dataset",\
-           b="Indexed", c="Total_files", d="Properties_errors", e="Database_errors",\
-           f="Dataset dir")
+    print "{a:<20} {b:<20} {c:<20} {d:<20} {e:<20} {g:<10} {f:<20}".format(a="Dataset",\
+           b="Indexed", c="Total files", d="Properties errors", e="Database errors",\
+           f="Dataset dir", g="Status")
+    print "-------------------------------------------------------------------------------------------------------------------------------"
 
     for item in dict_data:
         print ("{a:<20} {p[indexed]:<20} {p[total_files]:<20} {p[properties_errors]:<20}" 
-              " {p[database_errors]:<20} {p[dataset_dir]:<20}").format(a=item, p=dict_data[item])
+              " {p[database_errors]:<20} {p[status]:<10} {p[dataset_dir]:<20}").format(a=item, p=dict_data[item])
 
 def main():
 
@@ -95,7 +107,9 @@ def main():
     start = datetime.datetime.now()
     print "Script started at: {}".format(str(start))
 
-    print_dict(parse_logs(com_args))
+    res = parse_logs(com_args)
+    validate_results(res)
+    print_dict(res)
 
     #Get command line arguments.
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))
