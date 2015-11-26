@@ -394,6 +394,8 @@ class ExtractSeq(Extract):
 
         log = logging.getLogger(__name__)
 
+        log.debug("==============Script started.==============.")
+
         return log
 
     def  build_file_list_from_path(self):
@@ -406,6 +408,7 @@ class ExtractSeq(Extract):
         self.dataset_id = self.conf("dataset")
         #derectory where the files to be searched are.
         self.dataset_dir = util.find_dataset(dataset_ids_file, self.dataset_id)
+        self.logger.debug("Scannning files in directory {}.".format(self.dataset_dir))
 
         return util.build_file_list(self.dataset_dir)
 
@@ -419,8 +422,13 @@ class ExtractSeq(Extract):
         file_containing_paths = self.conf("filename")
         start_file = self.conf("start")
         num_of_files = self.conf("num-files")
+
+        self.logger.debug("Copying paths from file {} start is {} and number of lines is {}.".\
+                          format(file_containing_paths, start_file, num_of_files))
+
         filename = os.path.basename(file_containing_paths)
         self.dataset_id = os.path.splitext(filename)[0]
+        self.logger.debug("Dataset id is  {}.".format(self.dataset_id))
 
         #TODO: Make this a library function and make it more efficient.
         with open(file_containing_paths) as fd:
@@ -428,7 +436,7 @@ class ExtractSeq(Extract):
 
         self.total_number_of_files = len(content)
 
-        self.logger.info(("%s lines read from file \"%s\"."  %(str(len(content)), file_containing_paths)))
+        self.logger.debug("{} lines read from file {}.".format((len(content)), file_containing_paths))
 
         list_len = len(content)
         if int(start_file) < 0 or int(start_file) > list_len:
@@ -438,10 +446,12 @@ class ExtractSeq(Extract):
         end_file = int(start_file) + int(num_of_files)
 
         if end_file > list_len:
-            self.logger.error("Please correct num-files parameter value.")
+            self.logger.error("Please correct num-files parameter value because it is out of range.")
             return
 
         file_list = content[int(start_file):end_file]
+
+        self.logger.debug("{} files copied in local file list.".format(len(file_list)))
 
         new_file_list = []
         for path in file_list:
@@ -465,15 +475,18 @@ class ExtractSeq(Extract):
         """
         Returns metadata from the given file.
         """
-
-        handler = self.handler_factory_inst.pick_best_handler(filename)
-        if handler is not None:
-            handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
-            metadata = handler_inst.get_properties()
-            self.logger.info(("%s was read using handler \"%s\"." %(filename, handler_inst.get_handler_id())))
-            return metadata
-        else:
-            self.logger.error(("%s could not be read by any handler." %(filename)))
+        try:
+            handler = self.handler_factory_inst.pick_best_handler(filename)
+            if handler is not None:
+                handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
+                metadata = handler_inst.get_properties()
+                self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
+                return metadata
+            else:
+                self.logger.error("{} could not be read by any handler.".format(filename))
+                return None
+        except Exception as ex:
+            self.logger.error("Could not process file: {}".format(ex))
             return None
 
     def store_filenames_to_file(self):
@@ -485,10 +498,10 @@ class ExtractSeq(Extract):
         try :
             file_to_store_paths = self.conf("make-list")
             files_written = util.write_list_to_file(self.file_list, file_to_store_paths)
-            self.logger.info(("Paths written in file: %s." %(str(files_written))))
-            self.logger.info(("file \"%s\" containing paths to files in given dataset has been created." %(file_to_store_paths)))
-        except Exception, ex:
-            self.logger.error(("Could not save the python list of files to file...%s" %ex))
+            self.logger.debug("Paths written in file: {}.".format(files_written))
+            self.logger.debug("file {} containing paths to files in given dataset has been created.".format(file_to_store_paths))
+        except Exception as ex:
+            self.logger.error("Could not save the python list of files to file...{}".format(ex))
 
 
     def run_seq(self):
@@ -506,6 +519,7 @@ class ExtractSeq(Extract):
             return
 
         # Create index if necessary
+        self.logger.debug("Setting elastic search index.")
         es_factory = ElasticsearchClientFactory()
         self.es = es_factory.get_client(self.configuration)
 
@@ -520,6 +534,7 @@ class ExtractSeq(Extract):
         doc = {}
         level = self.conf("level")
 
+        self.logger.debug("File list contains {} files.".format(len(self.file_list)))
         if len(self.file_list) > 0:
 
             for filename in self.file_list:
@@ -528,12 +543,15 @@ class ExtractSeq(Extract):
                 #self.logger.info("Metadata extraction started for file %s", file_path)
                 start = datetime.datetime.now()
 
+                self.logger.debug("Scanning file {} at level {}.".format(filename, level))
                 doc = self.process_file_seq(filename, level)
+
 
                 if doc is not None:
 
                     #es_query = json.dumps(doc)
                     es_id = hashlib.sha1(filename).hexdigest()
+                    self.logger.debug("Json for file {}: {} has is .".format(filename, doc, es_id))
 
                     try:
                         self.index_properties_seq(doc, es_id)
@@ -545,7 +563,7 @@ class ExtractSeq(Extract):
                         self.database_errors = self.database_errors + 1
                     else:
                         end = datetime.datetime.now()
-                        self.logger.info(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
+                        self.logger.debug(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
                                                              self.FILE_INDEXED, str(end - start))))
                         self.files_indexed = self.files_indexed + 1
 

@@ -77,6 +77,10 @@ def parse_logs(com_args):
 
 def validate_results(dict_data):
 
+    files_indexed_in_datasets = 0
+    errors_in_datasets = 0
+    total_files_in_datasets = 0
+
     for item in dict_data:
         dataset_info = {}
         dataset_info = dict_data[item]
@@ -86,15 +90,38 @@ def validate_results(dict_data):
         else:
             dataset_info["status"] = "errors"
 
+        #Info for all datasets.
+        files_indexed_in_datasets += dataset_info["indexed"]
+        errors_in_datasets += dataset_info["database_errors"] + dataset_info["properties_errors"]
+        total_files_in_datasets += dataset_info["total_files"]
+
+    datasets_info = {}
+    datasets_info["files_indexed_in_datasets"] = files_indexed_in_datasets
+    datasets_info["errors_in_datasets"] = errors_in_datasets
+    datasets_info["total_files_in_datasets"] = total_files_in_datasets
+
+    dict_data["Totals"] = datasets_info.copy()
+
 def print_dict(dict_data):
     print "{a:<20} {b:<20} {c:<20} {d:<20} {e:<20} {g:<10} {f:<20}".format(a="Dataset",\
            b="Indexed", c="Total files", d="Properties errors", e="Database errors",\
            f="Dataset dir", g="Status")
-    print "-------------------------------------------------------------------------------------------------------------------------------"
+
+    print ("---------------------------------------------------------------"
+           "----------------------------------------------------------------")
 
     for item in dict_data:
-        print ("{a:<20} {p[indexed]:<20} {p[total_files]:<20} {p[properties_errors]:<20}" 
-              " {p[database_errors]:<20} {p[status]:<10} {p[dataset_dir]:<20}").format(a=item, p=dict_data[item])
+        if item != "Totals":
+            print ("{a:<20} {p[indexed]:<20} {p[total_files]:<20} {p[properties_errors]:<20}" 
+                " {p[database_errors]:<20} {p[status]:<10} {p[dataset_dir]:<20}").format(a=item, p=dict_data[item])
+
+    print ("---------------------------------------------------------------"
+           "----------------------------------------------------------------")
+
+    #At the end print the totals:
+    print ("{a:<20} {p[files_indexed_in_datasets]:<20} {p[total_files_in_datasets]:<20}"
+           " {p[errors_in_datasets]:<20}").format(a="Totals:", p=dict_data["Totals"])
+
 
 def main():
 
