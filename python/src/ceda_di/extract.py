@@ -408,9 +408,11 @@ class ExtractSeq(Extract):
         self.dataset_id = self.conf("dataset")
         #derectory where the files to be searched are.
         self.dataset_dir = util.find_dataset(dataset_ids_file, self.dataset_id)
-        self.logger.debug("Scannning files in directory {}.".format(self.dataset_dir))
-
-        return util.build_file_list(self.dataset_dir)
+        if self.dataset_dir is not None:
+            self.logger.debug("Scannning files in directory {}.".format(self.dataset_dir))
+            return util.build_file_list(self.dataset_dir)
+        else:
+            return None
 
     def build_list_from_file(self):
 
@@ -497,9 +499,10 @@ class ExtractSeq(Extract):
         self.prepare_run()
         try :
             file_to_store_paths = self.conf("make-list")
-            files_written = util.write_list_to_file(self.file_list, file_to_store_paths)
-            self.logger.debug("Paths written in file: {}.".format(files_written))
-            self.logger.debug("file {} containing paths to files in given dataset has been created.".format(file_to_store_paths))
+            if self.file_list is not None:
+                files_written = util.write_list_to_file(self.file_list, file_to_store_paths)
+                self.logger.debug("Paths written in file: {}.".format(files_written))
+                self.logger.debug("file {} containing paths to files in given dataset has been created.".format(file_to_store_paths))
         except Exception as ex:
             self.logger.error("Could not save the python list of files to file...{}".format(ex))
 

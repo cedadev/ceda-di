@@ -218,10 +218,14 @@ def find_dataset(filename, dataset_id):
             if not line.startswith("#"):
                 name, var = line.partition("=")[::2]
                 var_dict[name.strip()] = var.strip()
+
     if dataset_id == "all":
         return var_dict
     else:
-        return var_dict[dataset_id]
+        try:
+            return var_dict[dataset_id]
+        except KeyError as ex:
+            return None
 
 def find_num_lines_in_file(filename):
 
@@ -333,8 +337,8 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
             task_list.remove(task)
 
             #-R select[type==any]
-            #default task max duration -W 48:00 --> two days.
-            command = "bsub -W 48:00 %s" %(task)
+            #default max duration for every job.
+            command = "bsub -W 168:00 %s" %(task)
 
 
             info_msg = "%s. Executng : %s" %(str(i +1), command)
