@@ -333,7 +333,8 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
             task_list.remove(task)
 
             #-R select[type==any]
-            command = "bsub %s" %(task)
+            #default task max duration -W 48:00 --> two days.
+            command = "bsub -W 48:00 %s" %(task)
 
 
             info_msg = "%s. Executng : %s" %(str(i +1), command)
