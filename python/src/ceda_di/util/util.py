@@ -10,6 +10,8 @@ import simplejson as json
 import time
 from enum import Enum
 import ConfigParser
+import logging
+
 
 #some globals.
 Script_status = Enum("Script_status",
@@ -22,6 +24,13 @@ Script_status = Enum("Script_status",
                       SCAN_ALL_DATASETS \
                       STAY_IDLE"
                     )
+
+log_levels = {"debug"   : logging.DEBUG,
+              "info"    : logging.INFO,
+              "warning" : logging.WARNING,
+              "error"   : logging.ERROR,
+              "critical": logging.CRITICAL
+             }
 
 
 def sanitise_args(config):
@@ -155,9 +164,8 @@ def write_list_to_file(file_list, filename):
     items_written = 0
 
     for item in file_list:
-        infile.writelines("%s\n" %item)
+        infile.write("%s\n" %item)
         items_written += 1
-
 
     infile.close()
     return items_written

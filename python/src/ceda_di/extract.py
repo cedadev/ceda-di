@@ -4,7 +4,6 @@
 
 import datetime
 import logging
-import logging.config
 import os
 import sys
 import re
@@ -425,20 +424,10 @@ class ExtractSeq(Extract):
                              log_fname
                             )
 
-
-        levels = {'debug'   : logging.DEBUG,
-                  'info'    : logging.INFO,
-                  'warning' : logging.WARNING,
-                  'error'   : logging.ERROR,
-                  'critical': logging.CRITICAL
-                 }
-
-
         conf_log_level = self.conf("core")["log-level"]
 
-
         log_format = self.conf("core")["format"]
-        level = levels.get(conf_log_level, logging.NOTSET)
+        level = util.log_levels.get(conf_log_level, logging.NOTSET)
 
         """
         ok, since this is the main module lets remove previously configured handlers
@@ -510,20 +499,11 @@ class ExtractSeq(Extract):
                              log_fname
                             )
 
-
-        levels = {'debug'   : logging.DEBUG,
-                  'info'    : logging.INFO,
-                  'warning' : logging.WARNING,
-                  'error'   : logging.ERROR,
-                  'critical': logging.CRITICAL
-                 }
-
-
         conf_log_level = self.conf("core")["log-level"]
 
 
         log_format = self.conf("core")["format"]
-        level = levels.get(conf_log_level, logging.NOTSET)
+        level = util.log_levels.get(conf_log_level, logging.NOTSET)
 
         logging.root.handlers = []
 
@@ -620,20 +600,11 @@ class ExtractSeq(Extract):
                              log_fname
                             )
 
-
-        levels = {'debug'   : logging.DEBUG,
-                  'info'    : logging.INFO,
-                  'warning' : logging.WARNING,
-                  'error'   : logging.ERROR,
-                  'critical': logging.CRITICAL
-                 }
-
-
         conf_log_level = self.conf("core")["log-level"]
 
 
         log_format = self.conf("core")["format"]
-        level = levels.get(conf_log_level, logging.NOTSET)
+        level = util.log_levels.get(conf_log_level, logging.NOTSET)
 
         """
         ok, since this is the main module lets remove previously configured handlers
