@@ -37,20 +37,20 @@ def parse_logs(com_args):
 
         filename = list_of_files[i]
         content_list = util.read_file_into_list(filename)
-        record = util.find_in_list(content_list, "Summary")
+        summary = util.find_in_list(content_list, "Summary")
 
-        if record is not None:
-            words_list = record.split(",")
+        if summary is not None:
+            words_list = summary.split("Summary", 1)[1].split(",")
             #dataset
-            dataset = (words_list[1].split()[4].replace("(", "")).replace(")", "")
+            dataset = (words_list[0].split())[5]
             #indexed
-            indexed = int(words_list[2].split()[2])
+            indexed = int(words_list[1].split()[3])
             #database errors
-            database_errors = int(words_list[3].split()[3])
+            database_errors = int(words_list[2].split()[3])
             #properties errors
-            properties_errors = int(words_list[4].split()[0])
+            properties_errors = int(words_list[3].split()[3])
             #total files
-            total_files = int(words_list[5].split()[2])
+            total_files = int(words_list[4].split()[3])
 
             if dataset not in  summary_info:
                 dataset_info = {}
@@ -136,10 +136,6 @@ def main():
     res = parse_logs(com_args)
     validate_results(res)
     print_dict(res)
-
-    #Get command line arguments.
-    com_args = util.sanitise_args(docopt(__doc__, version=__version__))
-
 
     end = datetime.datetime.now()
     print "\nScript ended at : {} it ran for : {}".format(str(end), str(end - start))
