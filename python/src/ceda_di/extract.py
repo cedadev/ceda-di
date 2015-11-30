@@ -389,8 +389,8 @@ class ExtractSeq(Extract):
 
             #At the end print some statistical info.
             logging.getLogger().setLevel(logging.INFO)
-            self.logger.info("Summary information (%s), files indexed: %s, files not indexed: %s (database errors),"
-                             "%s (properties errors), total files: %s "
+            self.logger.info("Summary information for Dataset id : %s, files indexed : %s, database errors : %s,"
+                             " properties errors : %s, total files : %s "
                              % ( self.dataset_id, str(self.files_indexed), str(self.database_errors),
                              str(self.files_properties_errors), str(self.total_number_of_files))
                             )
