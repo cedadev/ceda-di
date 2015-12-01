@@ -110,15 +110,12 @@ class   NetCdfFile(GenericFile):
             phens.append(phen)
 
         return phens
-
-    def check_phenomenon_validity(self, list_of_params):
-        valid_items = []
-        for item in list_of_params:
-            if len(item["value"]) < self.NETCDF_MAX_PHEN_LENGTH\
-               and len(item["name"]) < self.NETCDF_MAX_PHEN_LENGTH:
-                valid_items.append(item)
-
-        return valid_items
+    #TODO : Use a filter ?
+    def check_phenomenon_validity(self, item):
+        if len(item["value"]) < self.NETCDF_MAX_PHEN_LENGTH\
+           and len(item["name"]) < self.NETCDF_MAX_PHEN_LENGTH:
+            return True
+        return False
 
     def get_properties_netcdf_file_level2(self, netcdf, index):
         """
@@ -144,7 +141,8 @@ class   NetCdfFile(GenericFile):
 
             list_of_phenomenon_parameters = item.get()
             list_of_phenomenon_parameters.append(var_id_dict.copy())
-            list_of_phenomenon_parameters = self.check_phenomenon_validity(list_of_phenomenon_parameters)
+            #list_of_phenomenon_parameters = 
+            list_of_phenomenon_parameters = filter(self.check_phenomenon_validity, list_of_phenomenon_parameters)
             phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
 
             phenomena_list.append(phenomenon_parameters_dict.copy())
@@ -215,7 +213,8 @@ class   NetCdfFile(GenericFile):
                         pass
 
                     return level2_meta
-            except Exception:
+            except Exception as ex:
+                print ex
                 return file_info
         else:
             return None
