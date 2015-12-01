@@ -320,7 +320,7 @@ class ExtractSeq(Extract):
             self.logger.error("Could not process file: {}".format(ex))
             return None
 
-    def run_seq(self):
+    def scan_dataset(self):
 
         """
          Extracts metadata information from files and posts them in elastic search.
@@ -574,7 +574,7 @@ class ExtractSeq(Extract):
             self.file_list.append(path.rstrip())
 
         #at the end extract metadata.
-        self.run_seq()
+        self.scan_dataset()
 
     #***Functionality for traversing dataset and then immediately extract metadata.***
     def prepare_logging_seq_rs(self):
@@ -655,4 +655,4 @@ class ExtractSeq(Extract):
         self.file_list = self.read_dataset()
         self.total_number_of_files = len(self.file_list)
         #at the end extract metadata.
-        self.run_seq()
+        self.scan_dataset()
