@@ -653,5 +653,6 @@ class ExtractSeq(Extract):
         self.handler_factory_inst.get_configured_handlers()
 
         self.file_list = self.read_dataset()
+        self.total_number_of_files = len(self.file_list)
         #at the end extract metadata.
         self.run_seq()
