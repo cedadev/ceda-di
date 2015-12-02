@@ -42,8 +42,8 @@ import os
 
 from docopt import docopt
 
-import ceda_di.util.util as util
-from ceda_di import __version__  # Grab version from package __init__.py
+import ceda_fbs.util.util as util
+from ceda_fbs import __version__  # Grab version from package __init__.py
 
 import datetime
 import subprocess

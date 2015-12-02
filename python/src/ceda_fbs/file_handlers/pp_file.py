@@ -1,7 +1,7 @@
 import cf
 
 
-from ceda_di.file_handlers.generic_file import GenericFile
+from ceda_fbs.file_handlers.generic_file import GenericFile
 
 class PpFile(GenericFile):
     """

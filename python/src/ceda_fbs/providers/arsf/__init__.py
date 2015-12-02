@@ -1,6 +1,6 @@
 import re
 
-from ceda_di._dataset import _geospatial
+from ceda_fbs._dataset import _geospatial
 
 
 class Hyperspectral(_geospatial):

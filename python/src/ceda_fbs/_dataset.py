@@ -52,10 +52,10 @@ class _geospatial(object):
 
     def get_properties(self):
         """
-        Return a ceda_di.metadata.product.Properties object populated with the
+        Return a ceda_fbs.metadata.product.Properties object populated with the
         file's metadata.
 
-        :returns: A ceda_di.metadata.product.Properties object
+        :returns: A ceda_fbs.metadata.product.Properties object
         """
         self.unimpl_base_class()
 

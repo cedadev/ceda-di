@@ -8,13 +8,13 @@ from jasmin_cis.test.test_files.data import TestFileTestData
 import os
 
 # A dictionary of test file tuples indexed by characteristic name
-ceda_di_test_files = {}
+ceda_fbs_test_files = {}
 
 
 def make_pathname(filename):
     return os.path.join(os.path.dirname(__file__), filename)
 
-ceda_di_test_files["cloudsat_PRECIP_2007"] = TestFileTestData(
+ceda_fbs_test_files["cloudsat_PRECIP_2007"] = TestFileTestData(
     master_filename=make_pathname('2007189224156_06358_CS_2C-PRECIP-COLUMN_GRANULE_P_R04_E02.hdf'),
     file_format="HDF4/CloudSat",
     product_name="CloudSat",

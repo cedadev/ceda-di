@@ -10,15 +10,15 @@ import re
 
 import hashlib
 import socket
-import ceda_di.util.util as util
+import ceda_fbs.util.util as util
 
-import ceda_di.util.handler_picker as handler_picker
+import ceda_fbs.util.handler_picker as handler_picker
 
 from elasticsearch.exceptions import TransportError
 
-from ceda_di.search import ElasticsearchClientFactory
-from ceda_di import index
-from ceda_di.metadata.product import FileFormatError
+from ceda_fbs.search import ElasticsearchClientFactory
+from ceda_fbs import index
+from ceda_fbs.metadata.product import FileFormatError
 
 
 
@@ -74,7 +74,7 @@ class HandlerFactory(object):
 class Extract(object):
     """
     File crawler and metadata extractor class.
-    Part of core functionality of ceda_di.
+    Part of core functionality of ceda_fbs.
     """
     def __init__(self, conf, path=None):
         if conf is None:

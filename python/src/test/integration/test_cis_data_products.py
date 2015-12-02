@@ -4,12 +4,12 @@ import datetime as dt
 
 from hamcrest import *
 
-from ceda_di.extract import Extract
+from ceda_fbs.extract import Extract
 from di import read_conf
 from jasmin_cis.test.test_files.data import *
 from test.utils_for_testing.within_delta import within_delta
 from test.utils_for_testing.corner_same_as_bounds import corner_in_bounds_by_delta
-from test.integration.test_files.data import ceda_di_test_files
+from test.integration.test_files.data import ceda_fbs_test_files
 
 
 class CISProductTests(object):
@@ -17,7 +17,7 @@ class CISProductTests(object):
     Abstract class for testing products
     """
 
-    CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../../../config/ceda_di.json')
+    CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../../../config/ceda_fbs.json')
     TEST_DIR = os.path.join(os.path.dirname(__file__), 'test_files')
 
     @classmethod
@@ -114,7 +114,7 @@ class TestCloudSat(CISProductTests, TestCase):
 
     @classmethod
     def setUpClass(cls):
-        for key, value in ceda_di_test_files.iteritems():
+        for key, value in ceda_fbs_test_files.iteritems():
             cis_test_files[key] = value
         cls.setUpForTest("cloudsat_PRECIP_2007")
 

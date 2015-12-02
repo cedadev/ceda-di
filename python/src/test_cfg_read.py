@@ -7,7 +7,7 @@ import os
 
 import ConfigParser
 
-from ceda_di.file_handlers.netcdf_file import NetCDFFile  
+from ceda_fbs.file_handlers.netcdf_file import NetCDFFile  
 from elasticsearch import Elasticsearch
  
 def cfg_read(filename):
@@ -73,7 +73,7 @@ def main():
     print "script started."
 
 
-    conf_path2 =  "/home/kleanthis/Dev/python_dev/ceda-di/python/config/ceda_di.ini"
+    conf_path2 =  "/home/kleanthis/Dev/python_dev/ceda-di/python/config/ceda_fbs.ini"
     conf = cfg_read(conf_path2)
 
     print conf

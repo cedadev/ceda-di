@@ -25,9 +25,9 @@ import os
 
 from docopt import docopt
 
-from ceda_di import __version__  # Grab version from package __init__.py
-from ceda_di.extract import Extract
-import ceda_di.util.cmd as cmd
+from ceda_fbs import __version__  # Grab version from package __init__.py
+from ceda_fbs.extract import Extract
+import ceda_fbs.util.cmd as cmd
 
 
 def dump_to_json(output_directory, seq, file_list):
@@ -100,7 +100,7 @@ def main():
     args = cmd.sanitise_args(docopt(__doc__, version=__version__))
     if 'config' not in args or not args["config"]:
         direc = os.path.dirname(__file__)
-        conf_path = os.path.join(direc, "../config/ceda_di.json")
+        conf_path = os.path.join(direc, "../config/ceda_fbs.json")
         args["config"] = conf_path
 
     config = cmd.get_settings(args["config"], args)

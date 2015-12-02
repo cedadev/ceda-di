@@ -1,7 +1,7 @@
 import iris
 
-from ceda_di._dataset import _geospatial
-from ceda_di.metadata import product
+from ceda_fbs._dataset import _geospatial
+from ceda_fbs.metadata import product
 
 class GRIB_PP(_geospatial):
     def __init__(self, fname):

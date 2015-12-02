@@ -1,5 +1,5 @@
-from ceda_di.file_handlers.generic_file import GenericFile
-from ceda_di.metadata import product
+from ceda_fbs.file_handlers.generic_file import GenericFile
+from ceda_fbs.metadata import product
 import nappy
 
 

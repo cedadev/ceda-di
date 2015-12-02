@@ -1,6 +1,6 @@
 """
 Interface for ENVI BIL and BSQ files (reading packed binary data)
-Used by envi_geo in ceda_di module
+Used by envi_geo in ceda_fbs module
 
 Taken and adapted from:
 arsf-dan.nerc.ac.uk/trac/attachment/ticket/287/data_handler.py

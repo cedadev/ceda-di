@@ -1,12 +1,12 @@
 """
-Test module for ceda_di.metadata.product
+Test module for ceda_fbs.metadata.product
 """
 
 import unittest
 from hamcrest import *
 import numpy.ma as ma
 
-from ceda_di.metadata.product import Properties, Parameter, GeoJSONGenerator
+from ceda_fbs.metadata.product import Properties, Parameter, GeoJSONGenerator
 
 
 class TestProperties(unittest.TestCase):
