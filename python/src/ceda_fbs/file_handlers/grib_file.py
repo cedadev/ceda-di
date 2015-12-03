@@ -1,6 +1,7 @@
 import gribapi as gapi
+import ceda_fbs.util.util as util
 
-from ceda_di.file_handlers.generic_file import GenericFile
+from ceda_fbs.file_handlers.generic_file import GenericFile
 
 class GribFile(GenericFile):
     """
@@ -10,6 +11,7 @@ class GribFile(GenericFile):
 
     def __init__(self, file_path, level):
         GenericFile.__init__(self, file_path, level)
+        self.FILE_FORMAT = "GRIB"
 
     def get_handler_id(self):
         return self.handler_id
@@ -43,11 +45,14 @@ class GribFile(GenericFile):
                         break
 
                     value = str(gapi.grib_get(gid, key))
-                    phenomenon_attr["name"] = key
-                    phenomenon_attr["value"] = value
+                    if len(key) < util.NETCDF_MAX_PHEN_LENGTH \
+                       and len(value) < util.NETCDF_MAX_PHEN_LENGTH:
 
-                    list_of_phenomenon_parameters.append(phenomenon_attr.copy())
-                    list_of_phenomenon_parameters_t.append((key, value))
+                        phenomenon_attr["name"] = key
+                        phenomenon_attr["value"] = value
+
+                        list_of_phenomenon_parameters.append(phenomenon_attr.copy())
+                        list_of_phenomenon_parameters_t.append((key, value))
 
                 """
                 phenomenon_attr["name"] = "var_id"
@@ -93,6 +98,7 @@ class GribFile(GenericFile):
 
         if file_info is not None:
 
+            file_info["info"]["format"] = self.FILE_FORMAT 
             #level 2.
             grib_phenomena = self.phenomena()
 

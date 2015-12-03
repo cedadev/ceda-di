@@ -11,8 +11,8 @@ import exifread
 import xmltodict
 from xml.parsers.expat import ExpatError
 
-from ceda_di._dataset import _geospatial
-from ceda_di.metadata import product
+from ceda_fbs._dataset import _geospatial
+from ceda_fbs.metadata import product
 
 
 class EXIF(_geospatial):
@@ -108,10 +108,10 @@ class EXIF(_geospatial):
 
     def get_properties(self):
         """
-        Return a ceda_di.metadata.product.Properties object populated with the
+        Return a ceda_fbs.metadata.product.Properties object populated with the
         file's metadata.
 
-        :returns: A ceda_di.metadata.product.Properties object
+        :returns: A ceda_fbs.metadata.product.Properties object
         """
         filesystem = super(EXIF, self).get_filesystem(self.fname)
         data_format = {

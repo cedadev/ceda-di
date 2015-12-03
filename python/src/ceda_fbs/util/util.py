@@ -32,6 +32,7 @@ log_levels = {"debug"   : logging.DEBUG,
               "critical": logging.CRITICAL
              }
 
+NETCDF_MAX_PHEN_LENGTH = 256
 
 def sanitise_args(config):
     """
@@ -247,6 +248,13 @@ def find_num_lines_in_file(filename):
         for line in infp:
             num_lines += 1
     return num_lines
+
+
+def check_attributes_length(item):
+    if len(item["value"]) < NETCDF_MAX_PHEN_LENGTH\
+        and len(item["name"]) < NETCDF_MAX_PHEN_LENGTH:
+        return True
+    return False
 
 def get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit):
 

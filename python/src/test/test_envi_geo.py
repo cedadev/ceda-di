@@ -1,13 +1,13 @@
 """
-Test module for ceda_di.envi_geo
+Test module for ceda_fbs.envi_geo
 """
 
 import unittest
 
-from ceda_di.providers.arsf.envi import BIL
-from ceda_di.providers.arsf.envi import BSQ
-from ceda_di.providers.arsf.envi import ENVI
-from ceda_di.metadata.product import Parameter
+from ceda_fbs.providers.arsf.envi import BIL
+from ceda_fbs.providers.arsf.envi import BSQ
+from ceda_fbs.providers.arsf.envi import ENVI
+from ceda_fbs.metadata.product import Parameter
 
 
 class ENVIStub(object):
@@ -25,7 +25,7 @@ class ENVIStub(object):
 
 
 class TestENVI(unittest.TestCase):
-    """Test class for ceda_di.exif_geo.EXIF"""
+    """Test class for ceda_fbs.exif_geo.EXIF"""
     def setUp(self):
         self.path = "/path/to/some/file"
         self.envi_stub = ENVIStub(velocity="unladen_swallow",

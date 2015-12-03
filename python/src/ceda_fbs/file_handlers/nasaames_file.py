@@ -1,6 +1,7 @@
-from ceda_di.file_handlers.generic_file import GenericFile
-from ceda_di.metadata import product
+from ceda_fbs.file_handlers.generic_file import GenericFile
+from ceda_fbs.metadata import product
 import nappy
+import ceda_fbs.util.util as util
 
 
 class NasaAmesFile(GenericFile):
@@ -11,6 +12,7 @@ class NasaAmesFile(GenericFile):
 
     def __init__(self, file_path, level):
         GenericFile.__init__(self, file_path, level)
+        self.FILE_FORMAT = "NASA Ames"
 
     def get_handler_id(self):
         return self.handler_id
@@ -42,6 +44,7 @@ class NasaAmesFile(GenericFile):
         if file_info is not None:
 
             self.handler_id = "Nasaames handler level 2."
+            file_info["info"]["format"] = self.FILE_FORMAT
 
             #level 2
             nasaames_phenomena = self.phenomena()
@@ -63,6 +66,7 @@ class NasaAmesFile(GenericFile):
 
                 list_of_phenomenon_parameters = item.get()
                 list_of_phenomenon_parameters.append(var_id_dict.copy())
+                list_of_phenomenon_parameters = filter(util.check_attributes_length, list_of_phenomenon_parameters)
                 phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
 
                 phenomena_list.append(phenomenon_parameters_dict.copy())

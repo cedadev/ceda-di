@@ -1,7 +1,8 @@
 import cf
+import ceda_fbs.util.util as util
 
 
-from ceda_di.file_handlers.generic_file import GenericFile
+from ceda_fbs.file_handlers.generic_file import GenericFile
 
 class PpFile(GenericFile):
     """
@@ -11,6 +12,7 @@ class PpFile(GenericFile):
 
     def __init__(self, file_path, level):
         GenericFile.__init__(self, file_path, level)
+        self.FILE_FORMAT = "PP"
 
     def get_handler_id(self):
         return self.handler_id
@@ -40,12 +42,15 @@ class PpFile(GenericFile):
                 for key in keys:
                     value = str(dict_of_phenomenon_prop[key])
 
-                    phenomenon_attr["name"] = key
-                    phenomenon_attr["value"] = value
-                    list_of_phenomenon_parameters.append(phenomenon_attr.copy())
-                    #phenomenon_attr.clear()
+                    if len(key) < util.NETCDF_MAX_PHEN_LENGTH \
+                       and len(value) < util.NETCDF_MAX_PHEN_LENGTH:
+                        phenomenon_attr["name"] = key
+                        phenomenon_attr["value"] = value
 
-                    list_of_phenomenon_parameters_t.append((key, value))
+                        list_of_phenomenon_parameters.append(phenomenon_attr.copy())
+                        #phenomenon_attr.clear()
+
+                        list_of_phenomenon_parameters_t.append((key, value))
 
                 #Also add var_id
                 """
@@ -89,6 +94,7 @@ class PpFile(GenericFile):
         if file_info is not None:
 
             self.handler_id = "pp handler level 2."
+            file_info["info"]["format"] = self.FILE_FORMAT
             #level 2
             pp_phenomena = self.phenomena()
 

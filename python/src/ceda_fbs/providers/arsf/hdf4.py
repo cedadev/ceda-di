@@ -9,9 +9,9 @@ from pyhdf.VS import VS
 from pyhdf.V import V
 from pyhdf.error import HDF4Error
 
-from ceda_di._dataset import _geospatial
-from ceda_di.metadata import product
-from ceda_di.providers import arsf
+from ceda_fbs._dataset import _geospatial
+from ceda_fbs.metadata import product
+from ceda_fbs.providers import arsf
 
 
 class HDF4(_geospatial):
@@ -194,7 +194,7 @@ class HDF4(_geospatial):
 
     def get_properties(self):
         """
-        Returns ceda_di.metadata.properties.Properties object
+        Returns ceda_fbs.metadata.properties.Properties object
         containing geospatial and temporal metadata from file.
 
         :returns: Metadata.product.Properties object

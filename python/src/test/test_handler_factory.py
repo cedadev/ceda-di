@@ -1,7 +1,7 @@
 from unittest import TestCase
-from ceda_di.extract import HandlerFactory
+from ceda_fbs.extract import HandlerFactory
 from hamcrest import *
-from ceda_di.metadata.product import FileFormatError
+from ceda_fbs.metadata.product import FileFormatError
 
 
 class TestHandlerFactory(TestCase):
@@ -13,23 +13,23 @@ class TestHandlerFactory(TestCase):
     def setUp(self):
         handler_map = {
             "_nav_post_processed.bil.hdr$": {
-                "class": "ceda_di.providers.arsf.envi.BIL",
+                "class": "ceda_fbs.providers.arsf.envi.BIL",
                 "priority": 10
             },
             ".hdf$": {
-                "class": "ceda_di.providers.arsf.hdf4.HDF4",
+                "class": "ceda_fbs.providers.arsf.hdf4.HDF4",
                 "priority": 10
             },
             ".tif$": {
-                "class": "ceda_di.providers.arsf.exif.EXIF",
+                "class": "ceda_fbs.providers.arsf.exif.EXIF",
                 "priority": 10
             },
             ".nc$": {
-                "class": "ceda_di.jascis.JasCisDataProduct",
+                "class": "ceda_fbs.jascis.JasCisDataProduct",
                 "priority": 1
             },
             ".*_CS_.*GRANULE.*\\.hdf$": {
-                "class": "ceda_di.jascis.JasCisDataProduct",
+                "class": "ceda_fbs.jascis.JasCisDataProduct",
                 "priority": 1
             },
             ".*\.never$": {

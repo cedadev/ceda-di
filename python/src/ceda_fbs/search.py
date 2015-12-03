@@ -4,7 +4,7 @@ import sys
 import simplejson as json
 
 from elasticsearch import Elasticsearch, ConnectionError
-from ceda_di.metadata.product import GeoJSONGenerator
+from ceda_fbs.metadata.product import GeoJSONGenerator
 
 
 class JsonQueryBuilder(object):
@@ -323,7 +323,7 @@ class Searcher(object):
         :param elastic_search_client_factory: Creates appropriately configured Elasticsearch client instances
         :returns: A new Searcher instance
         """
-        from ceda_di.extract import HandlerFactory
+        from ceda_fbs.extract import HandlerFactory
 
         self._elastic_search_client_factory = elastic_search_client_factory
 

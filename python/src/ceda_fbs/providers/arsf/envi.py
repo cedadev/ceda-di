@@ -6,10 +6,10 @@ Also contains methods for extracting metadata (geospatial/temporal).
 import logging
 import os
 
-from ceda_di.filetypes.file_io import envi_io
-from ceda_di.providers import arsf
-from ceda_di.metadata import product
-from ceda_di._dataset import _geospatial
+from ceda_fbs.filetypes.file_io import envi_io
+from ceda_fbs.providers import arsf
+from ceda_fbs.metadata import product
+from ceda_fbs._dataset import _geospatial
 
 
 class ENVI(_geospatial):

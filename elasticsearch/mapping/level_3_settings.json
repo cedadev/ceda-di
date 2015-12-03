@@ -40,15 +40,15 @@
         {
           "properties": 
           {
-            "coordinates": { "type": "geo_shape", "tree": "quadtree", "precision": "50m", "store": "yes" }
+            "coordinates": { "type": "geo_shape", "tree": "quadtree", "precision": "500m", "store": "no" }
           }
         },
         "temporal": 
         {
           "properties": 
           {
-            "end_time"  : { "type": "date", "format": "dateOptionalTime", "store": "yes"},
-            "start_time": { "type": "date", "format": "dateOptionalTime", "store": "yes"}
+            "end_time"  : { "type": "date", "format": "dateOptionalTime", "store": "no" },
+            "start_time": { "type": "date", "format": "dateOptionalTime", "store": "no" }
           }
         } 
         

@@ -16,8 +16,8 @@ Options:
 import os
 
 from docopt import docopt
-import ceda_di.util.util as util
-from ceda_di import __version__
+import ceda_fbs.util.util as util
+from ceda_fbs import __version__
 
 import datetime
 

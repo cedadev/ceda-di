@@ -320,7 +320,7 @@ class Properties(object):
                  temporal=None, data_format=None, parameters=None,
                  index_entry_creation=None, **kwargs):
         """
-        Construct 'ceda_di.metadata.Properties' ready to export.
+        Construct 'ceda_fbs.metadata.Properties' ready to export.
         (for structure, see "doc/schema.json")
 
         :param dict filesystem: Filesystem information about file

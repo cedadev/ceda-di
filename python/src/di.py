@@ -11,7 +11,7 @@ Usage:
 Options:
     --help                     Show this screen.
     --version                  Show version.
-    --config=<path>            Config file. [default: ../config/ceda_di.json]
+    --config=<path>            Config file. [default: ../config/ceda_fbs.json]
     --host=<host>              Specify ElasticSearch host.
     --port=<port>              Specify ElasticSearch port.
     --index=<name>             Specify ElasticSearch index name.
@@ -39,18 +39,18 @@ import os
 
 from docopt import docopt
 
-import ceda_di.util.cmd as cmd
-from ceda_di import __version__  # Grab version from package __init__.py
-from ceda_di.extract import Extract
-from ceda_di.index import BulkIndexer
-from ceda_di.search import Searcher
+import ceda_fbs.util.cmd as cmd
+from ceda_fbs import __version__  # Grab version from package __init__.py
+from ceda_fbs.extract import Extract
+from ceda_fbs.index import BulkIndexer
+from ceda_fbs.search import Searcher
 
 
 def main():
     conf_args = cmd.sanitise_args(docopt(__doc__, version=__version__))
     if 'config' not in conf_args or not conf_args["config"]:
         direc = os.path.dirname(__file__)
-        conf_path = os.path.join(direc, "../config/ceda_di.json")
+        conf_path = os.path.join(direc, "../config/ceda_fbs.json")
         conf_args["config"] = conf_path
 
     config = cmd.get_settings(conf_args["config"], conf_args)

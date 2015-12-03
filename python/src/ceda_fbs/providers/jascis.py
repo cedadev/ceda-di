@@ -9,9 +9,9 @@ from jasmin_cis.data_io.products.AProduct import get_coordinates, get_variables,
     get_product_full_name, ProductPluginException
 from jasmin_cis.time_util import convert_std_time_to_datetime
 
-from ceda_di._dataset import _geospatial
-from ceda_di.metadata import product
-from ceda_di.metadata.product import Parameter, FileFormatError
+from ceda_fbs._dataset import _geospatial
+from ceda_fbs.metadata import product
+from ceda_fbs.metadata.product import Parameter, FileFormatError
 import numpy as np
 import numpy.ma as ma
 

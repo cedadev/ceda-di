@@ -6,15 +6,15 @@ import unittest
 from elasticsearch import ConnectionError
 from mock import MagicMock
 import sys
-from ceda_di._dataset import _geospatial
-from ceda_di.extract import HandlerFactory
-from ceda_di.search import Searcher, JsonQueryBuilder
+from ceda_fbs._dataset import _geospatial
+from ceda_fbs.extract import HandlerFactory
+from ceda_fbs.search import Searcher, JsonQueryBuilder
 from di import read_conf
 
 
 class TestJsonQueryBuilder(unittest.TestCase):
     """
-    Test the ceda_di.search.JsonQueryBuilder class
+    Test the ceda_fbs.search.JsonQueryBuilder class
     """
 
     def run_query_builder_return_must(self, query_string, file_handle_factory=None):
@@ -387,10 +387,10 @@ class TestJsonQueryBuilder(unittest.TestCase):
 
 class TestSearcher(unittest.TestCase):
     """
-    Test the ceda_di.search.Searcher class
+    Test the ceda_fbs.search.Searcher class
     """
 
-    CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../../config/ceda_di.json')
+    CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../../config/ceda_fbs.json')
 
     def setUp(self):
         sys.stdout = MagicMock()  # Mock stdout so we can capture printed output

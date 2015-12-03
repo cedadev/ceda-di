@@ -1,10 +1,10 @@
 """
-Test module for ceda_di.netcdf_geo
+Test module for ceda_fbs.netcdf_geo
 """
 
 import unittest
 
-from ceda_di.filetypes.netcdf import NetCDF_Base
+from ceda_fbs.filetypes.netcdf import NetCDF_Base
 
 
 class NetCDFStub(object):

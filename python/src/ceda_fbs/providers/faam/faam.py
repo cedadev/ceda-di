@@ -1,6 +1,6 @@
 import os
 
-import ceda_di.filetypes.netcdf
+import ceda_fbs.filetypes.netcdf
 
 
 class FAAMNetCDF(object):
@@ -9,7 +9,7 @@ class FAAMNetCDF(object):
     """
     def __init__(self, fpath):
         self.fpath = fpath
-        self.nc_from_fac = ceda_di.filetypes.netcdf.NetCDFFactory(fpath)
+        self.nc_from_fac = ceda_fbs.filetypes.netcdf.NetCDFFactory(fpath)
         self.readme = self.get_readme(fpath)
 
     def __enter__(self):
