@@ -1,4 +1,5 @@
 import gribapi as gapi
+import ceda_fbs.util.util as util
 
 from ceda_fbs.file_handlers.generic_file import GenericFile
 
@@ -43,11 +44,14 @@ class GribFile(GenericFile):
                         break
 
                     value = str(gapi.grib_get(gid, key))
-                    phenomenon_attr["name"] = key
-                    phenomenon_attr["value"] = value
+                    if len(key) < util.NETCDF_MAX_PHEN_LENGTH \
+                       and len(value) < util.NETCDF_MAX_PHEN_LENGTH:
 
-                    list_of_phenomenon_parameters.append(phenomenon_attr.copy())
-                    list_of_phenomenon_parameters_t.append((key, value))
+                        phenomenon_attr["name"] = key
+                        phenomenon_attr["value"] = value
+
+                        list_of_phenomenon_parameters.append(phenomenon_attr.copy())
+                        list_of_phenomenon_parameters_t.append((key, value))
 
                 """
                 phenomenon_attr["name"] = "var_id"

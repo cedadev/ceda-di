@@ -4,16 +4,15 @@ import netCDF4
 from ceda_fbs.file_handlers.generic_file import GenericFile
 from ceda_fbs.metadata import product
 from ceda_fbs.metadata.product import GeoJSONGenerator
-import copy
+import ceda_fbs.util.util as util
 
 class   NetCdfFile(GenericFile):
     """
     Simple class for returning basic information about the content
     of an NetCDF file.
     """
-    
+
     def __init__(self, file_path, level):
-        self.NETCDF_MAX_PHEN_LENGTH = 256
         GenericFile.__init__(self, file_path, level)
 
     def get_handler_id(self):
@@ -110,12 +109,6 @@ class   NetCdfFile(GenericFile):
             phens.append(phen)
 
         return phens
-    #TODO : Use a filter ?
-    def check_phenomenon_validity(self, item):
-        if len(item["value"]) < self.NETCDF_MAX_PHEN_LENGTH\
-           and len(item["name"]) < self.NETCDF_MAX_PHEN_LENGTH:
-            return True
-        return False
 
     def get_properties_netcdf_file_level2(self, netcdf, index):
         """
@@ -142,7 +135,7 @@ class   NetCdfFile(GenericFile):
             list_of_phenomenon_parameters = item.get()
             list_of_phenomenon_parameters.append(var_id_dict.copy())
             #list_of_phenomenon_parameters = 
-            list_of_phenomenon_parameters = filter(self.check_phenomenon_validity, list_of_phenomenon_parameters)
+            list_of_phenomenon_parameters = filter(util.check_attributes_length, list_of_phenomenon_parameters)
             phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
 
             phenomena_list.append(phenomenon_parameters_dict.copy())
