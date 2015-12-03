@@ -14,6 +14,7 @@ class   NetCdfFile(GenericFile):
 
     def __init__(self, file_path, level):
         GenericFile.__init__(self, file_path, level)
+        self.FILE_FORMAT = "NetCDF"
 
     def get_handler_id(self):
         return self.handler_id
@@ -155,6 +156,8 @@ class   NetCdfFile(GenericFile):
         file_info = self.get_properties_generic_level1()
 
         if file_info is not None:
+
+            file_info["info"]["format"] = self.FILE_FORMAT
             #ok basic info exist, lets add level 2 info.
             try:
                 with netCDF4.Dataset(self.file_path) as netcdf_object:
@@ -176,6 +179,8 @@ class   NetCdfFile(GenericFile):
         file_info = self.get_properties_generic_level1()
 
         if file_info is not None:
+
+            file_info["info"]["format"] = self.FILE_FORMAT
 
             try:
                 with netCDF4.Dataset(self.file_path) as netcdf:
@@ -206,8 +211,7 @@ class   NetCdfFile(GenericFile):
                         pass
 
                     return level2_meta
-            except Exception as ex:
-                print ex
+            except Exception:
                 return file_info
         else:
             return None

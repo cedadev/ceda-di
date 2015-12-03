@@ -12,6 +12,7 @@ class NasaAmesFile(GenericFile):
 
     def __init__(self, file_path, level):
         GenericFile.__init__(self, file_path, level)
+        self.FILE_FORMAT = "NASA Ames"
 
     def get_handler_id(self):
         return self.handler_id
@@ -43,6 +44,7 @@ class NasaAmesFile(GenericFile):
         if file_info is not None:
 
             self.handler_id = "Nasaames handler level 2."
+            file_info["info"]["format"] = self.FILE_FORMAT
 
             #level 2
             nasaames_phenomena = self.phenomena()

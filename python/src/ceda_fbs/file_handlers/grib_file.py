@@ -11,6 +11,7 @@ class GribFile(GenericFile):
 
     def __init__(self, file_path, level):
         GenericFile.__init__(self, file_path, level)
+        self.FILE_FORMAT = "GRIB"
 
     def get_handler_id(self):
         return self.handler_id
@@ -97,6 +98,7 @@ class GribFile(GenericFile):
 
         if file_info is not None:
 
+            file_info["info"]["format"] = self.FILE_FORMAT 
             #level 2.
             grib_phenomena = self.phenomena()
 
