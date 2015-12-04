@@ -94,7 +94,6 @@ class PpFile(GenericFile):
         if file_info is not None:
 
             self.handler_id = "pp handler level 2."
-            file_info["info"]["format"] = self.FILE_FORMAT
             #level 2
             pp_phenomena = self.phenomena()
 
@@ -116,11 +115,15 @@ class PpFile(GenericFile):
     def get_properties(self):
 
         if self.level == "1":
-            return self.get_properties_generic_level1()
+            res = self.get_properties_generic_level1()
         elif self.level == "2":
-            return self.get_properties_pp_level2()
+            res = self.get_properties_pp_level2()
         elif self.level == "3":
-            return self.get_properties_pp_level3()
+            res = self.get_properties_pp_level3()
+
+        res["info"]["format"] = self.FILE_FORMAT
+
+        return res
 
     def __enter__(self):
         return self

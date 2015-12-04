@@ -157,7 +157,6 @@ class   NetCdfFile(GenericFile):
 
         if file_info is not None:
 
-            file_info["info"]["format"] = self.FILE_FORMAT
             #ok basic info exist, lets add level 2 info.
             try:
                 with netCDF4.Dataset(self.file_path) as netcdf_object:
@@ -179,8 +178,6 @@ class   NetCdfFile(GenericFile):
         file_info = self.get_properties_generic_level1()
 
         if file_info is not None:
-
-            file_info["info"]["format"] = self.FILE_FORMAT
 
             try:
                 with netCDF4.Dataset(self.file_path) as netcdf:
@@ -219,12 +216,15 @@ class   NetCdfFile(GenericFile):
     def get_properties(self):
 
         if self.level == "1":
-            return self.get_properties_generic_level1()
+            res = self.get_properties_generic_level1()
         elif self.level == "2":
-            return self.get_properties_netcdf_level2()
+            res = self.get_properties_netcdf_level2()
         elif self.level == "3":
-            return self.get_properties_netcdf_level3()
+            res = self.get_properties_netcdf_level3()
 
+        res["info"]["format"] = self.FILE_FORMAT
+
+        return res
 
     def __enter__(self):
         return self
