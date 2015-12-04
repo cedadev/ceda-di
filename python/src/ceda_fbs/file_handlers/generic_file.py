@@ -46,26 +46,6 @@ class  GenericFile(object):
 
         info["type"] = "file"
 
-        #Layer 2 will set this field in a different method.
-        if self.level == "1": 
-            ext = os.path.splitext(self.file_path)[1]
-            if ext  == "":
-                type = "Unknown"
-            else:
-                type = ext.replace(".", "")
-
-                if type == "na":
-                    type = "NASA Ames" 
-                elif type == "grb" or type == "grib":
-                    type = "GRIB1"
-                elif type == "nc":
-                    type = "NetCDF"
-                elif type == "pp":
-                    type = "PP"
-
-            info["format"] = type
-
-
         info["md5"] = ""
 
         file_info["info"] = info
