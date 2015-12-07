@@ -65,7 +65,7 @@ def ckeck_com_args_validity(config, status):
         raise ValueError("Level value is out of range, please \
                           use value between 1-3.")
 
-def scan_dataset_and_store_to_db(conf, status):
+def read_and_scan_dataset(conf, status):
 
     """
     Reads files from a specific directory in filesystem
@@ -74,7 +74,7 @@ def scan_dataset_and_store_to_db(conf, status):
     extract = ExtractSeq(conf)
     extract.read_and_scan_dataset()
 
-def scan_dataset_and_store_to_file(conf, status):
+def store_dataset_to_file(conf, status):
 
     """
     Reads files from a specific directory in filesystem
@@ -83,7 +83,7 @@ def scan_dataset_and_store_to_file(conf, status):
     extract = ExtractSeq(conf)
     extract.store_dataset_to_file()
 
-def read_dataset_from_file_store_to_db(conf, status):
+def read_dataset_from_file_and_scan(conf, status):
 
     """
     Reads file paths form a given file, extracts metadata
@@ -170,11 +170,11 @@ def main():
 
     #Manage the options given.
     if status == util.Script_status.SCAN_AND_STORE_TO_FILE:
-        scan_dataset_and_store_to_file(config, status)
+        store_dataset_to_file(config, status)
     elif status == util.Script_status.SCAN_AND_STORE_TO_DB:
-        scan_dataset_and_store_to_db(config, status)
+        read_and_scan_dataset(config, status)
     elif status == util.Script_status.READ_PATHS_AND_STORE_TO_DB:
-        read_dataset_from_file_store_to_db(config, status)
+        read_dataset_from_file_and_scan(config, status)
 
     end = datetime.datetime.now()
     print "Script ended at : %s it ran for : %s" %(str(end), str(end - start))
