@@ -26,10 +26,24 @@ class GribFile(GenericFile):
         phenomena_list = []
         phenomenon_parameters_dict = {}
 
+        phen_keys = [
+                      "paramId",
+                      "cfNameECMF",
+                      "cfName",
+                      "cfVarName",
+                      "units",
+                      "nameECMF",
+                      "name",
+                      "Ni",
+                      "Nj",
+                      "latitudeOfFirstGridPointInDegrees",
+                      "longitudeOfFirstGridPointInDegrees",
+                      "latitudeOfLastGridPointInDegrees",
+                      "longitudeOfLastGridPointInDegrees"
+                    ]
         try:
             fd = open(self.file_path)
 
-            phen_keys = "paramId cfNameECMF cfName cfVarName units nameECMF name".split()
             found = set()
 
             while 1:
