@@ -40,7 +40,7 @@
         {
           "properties": 
           {
-            "coordinates": { "type": "geo_shape", "tree": "quadtree", "precision": "500m", "store": "no" }
+            "coordinates": { "type": "geo_shape", "tree": "quadtree", "precision": "50m", "store": "no" }
           }
         },
         "temporal": 
