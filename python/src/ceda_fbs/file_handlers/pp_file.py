@@ -42,8 +42,8 @@ class PpFile(GenericFile):
                 for key in keys:
                     value = str(dict_of_phenomenon_prop[key])
 
-                    if len(key) < util.NETCDF_MAX_PHEN_LENGTH \
-                       and len(value) < util.NETCDF_MAX_PHEN_LENGTH:
+                    if len(key) < util.NETCDF_MAX_PAR_LENGTH \
+                       and len(value) < util.NETCDF_MAX_PAR_LENGTH:
                         phenomenon_attr["name"] = key
                         phenomenon_attr["value"] = value
 
