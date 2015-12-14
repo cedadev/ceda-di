@@ -32,7 +32,7 @@ log_levels = {"debug"   : logging.DEBUG,
               "critical": logging.CRITICAL
              }
 
-NETCDF_MAX_PHEN_LENGTH = 256
+NETCDF_MAX_PAR_LENGTH = 256
 
 def sanitise_args(config):
     """
@@ -251,8 +251,8 @@ def find_num_lines_in_file(filename):
 
 
 def check_attributes_length(item):
-    if len(item["value"]) < NETCDF_MAX_PHEN_LENGTH\
-        and len(item["name"]) < NETCDF_MAX_PHEN_LENGTH:
+    if len(item["value"]) < NETCDF_MAX_PAR_LENGTH\
+        and len(item["name"]) < NETCDF_MAX_PAR_LENGTH:
         return True
     return False
 
