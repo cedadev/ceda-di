@@ -111,6 +111,19 @@ class   NetCdfFile(GenericFile):
 
         return phens
 
+    def get_parameters(self, item):
+        valid_attributes = [ "standard_name",
+                             "long_name",
+                             "title",
+                             "name",
+                             "units"
+                           ]
+        if item["name"] in valid_attributes \
+           and len(item["value"]) < util.NETCDF_MAX_PAR_LENGTH\
+           and len(item["name"]) < util.NETCDF_MAX_PAR_LENGTH:
+            return True
+        return False
+
     def get_properties_netcdf_file_level2(self, netcdf, index):
         """
         Wrapper for method phenomena().
@@ -136,13 +149,13 @@ class   NetCdfFile(GenericFile):
             list_of_phenomenon_parameters = item.get()
             list_of_phenomenon_parameters.append(var_id_dict.copy())
             #list_of_phenomenon_parameters = 
-            list_of_phenomenon_parameters = filter(util.check_attributes_length, list_of_phenomenon_parameters)
-            phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
+            list_of_phenomenon_parameters = filter(self.get_parameters, list_of_phenomenon_parameters)
 
-            phenomena_list.append(phenomenon_parameters_dict.copy())
-
-            var_id_dict.clear()
-            phenomenon_parameters_dict.clear()
+            if len(list_of_phenomenon_parameters) > 0:
+                phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
+                phenomena_list.append(phenomenon_parameters_dict.copy())
+                var_id_dict.clear()
+                phenomenon_parameters_dict.clear()
 
 
         index["phenomena"] = phenomena_list
