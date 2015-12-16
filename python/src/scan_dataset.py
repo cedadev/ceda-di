@@ -56,7 +56,7 @@ def ckeck_com_args_validity(config, status):
     checks the validity of command line arguments
     """
 
-    if status == util.Script_status.SCAN_AND_STORE_TO_FILE:
+    if status == util.Script_status.STORE_DATASET_TO_FILE:
         return
 
     level = int(config.get("level"))
@@ -124,19 +124,19 @@ def get_stat_and_defs(com_args):
        and  ("filename" in config):
 
         status_and_defaults.append(\
-        util.Script_status.SCAN_AND_STORE_TO_FILE)
+        util.Script_status.STORE_DATASET_TO_FILE)
 
     elif ("dataset" in config) and  ("filename" in config) \
           and ("level" in config):
 
         status_and_defaults.append(\
-        util.Script_status.SCAN_AND_STORE_TO_DB)
+        util.Script_status.READ_AND_SCAN_DATASET)
 
     elif ("filename" in config) and ("start" in config) and \
           ("num-files" in config) and ("level" in config):
 
         status_and_defaults.append\
-        (util.Script_status.READ_PATHS_AND_STORE_TO_DB)
+        (util.Script_status.READ_DATASET_FROM_FILE_AND_SCAN)
 
 
     return status_and_defaults
@@ -169,11 +169,11 @@ def main():
 
 
     #Manage the options given.
-    if status == util.Script_status.SCAN_AND_STORE_TO_FILE:
+    if status == util.Script_status.STORE_DATASET_TO_FILE:
         store_dataset_to_file(config, status)
-    elif status == util.Script_status.SCAN_AND_STORE_TO_DB:
+    elif status == util.Script_status.READ_AND_SCAN_DATASET:
         read_and_scan_dataset(config, status)
-    elif status == util.Script_status.READ_PATHS_AND_STORE_TO_DB:
+    elif status == util.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
         read_dataset_from_file_and_scan(config, status)
 
     end = datetime.datetime.now()
