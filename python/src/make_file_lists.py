@@ -49,6 +49,10 @@ def get_stat_and_defs(com_args):
     #Creates a dictionary with default settings some of
     #them where loaded from th edefaults file.
     config = util.get_settings(com_args["config"], com_args)
+
+    if "num-processes" not in config or not config["num-processes"]:
+        config["num-processes"] = config["scanning"]["num-processes"]
+
     status_and_defaults.append(config)
 
     if ("host" in config) and config["host"] == "localhost":
