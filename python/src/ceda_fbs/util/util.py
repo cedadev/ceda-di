@@ -15,13 +15,13 @@ import logging
 
 #some globals.
 Script_status = Enum("Script_status",
-                     "SCAN_AND_STORE_TO_FILE \
-                      SCAN_AND_STORE_TO_DB \
-                      READ_PATHS_AND_STORE_TO_DB\
+                     "STORE_DATASET_TO_FILE \
+                      READ_AND_SCAN_DATASET \
+                      READ_DATASET_FROM_FILE_AND_SCAN\
                       RUN_SCRIPT_IN_LOTUS \
                       RUN_SCRIPT_IN_LOCALHOST \
-                      SCAN_SPECIFIC_DATASET_ID \
-                      SCAN_ALL_DATASETS \
+                      READ_AND_SCAN_DATASETS_SUB \
+                      READ_AND_SCAN_DATASETS \
                       STAY_IDLE"
                     )
 
