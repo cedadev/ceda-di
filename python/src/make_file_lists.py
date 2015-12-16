@@ -59,7 +59,7 @@ def get_stat_and_defs(com_args):
 
     return status_and_defaults
 
-def create_file_lists_in_lotus(status, config):
+def store_datasets_to_files_in_lotus(status, config):
 
     """
     Finds and stores all files belonging to each dataset.
@@ -92,7 +92,7 @@ def create_file_lists_in_lotus(status, config):
     util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes),\
                              user_wait_time=30)
 
-def create_file_lists_in_localhost(status, config):
+def store_datasets_to_files_in_localhost(status, config):
 
     """
     Finds and stores all files belonging to each dataset.
@@ -142,9 +142,9 @@ def main():
 
 
     if status == util.Script_status.RUN_SCRIPT_IN_LOCALHOST:
-        create_file_lists_in_localhost(status, config)
+        store_datasets_to_files_in_localhost(status, config)
     else:
-        create_file_lists_in_lotus(status, config)
+        store_datasets_to_files_in_lotus(status, config)
 
 
     end = datetime.datetime.now()
