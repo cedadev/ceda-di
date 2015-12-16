@@ -193,7 +193,7 @@ class ExtractSeq(object):
             os.makedirs(log_dir)
 
         #kltsa 15/09/2015 changes for issue :23221.
-        #if self.status == util.Script_status.READ_PATHS_AND_STORE_TO_DB:
+        #if self.status == util.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
         #    log_fname = "%s_%s_%s_%s_%s.log" \
         #                %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "|"),\
         #                self.conf("start"), self.conf("num-files"), socket.gethostname())
@@ -273,7 +273,7 @@ class ExtractSeq(object):
             os.makedirs(log_dir)
 
         #kltsa 15/09/2015 changes for issue :23221.
-        #READ_PATHS_AND_STORE_TO_DB:
+        #READ_DATASET_FROM_FILE_AND_SCAN:
         log_fname = "%s_%s_%s_%s_%s.log" \
                     %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "|"),\
                     self.conf("start"), self.conf("num-files"), socket.gethostname())
