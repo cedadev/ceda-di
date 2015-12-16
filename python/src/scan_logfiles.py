@@ -28,12 +28,12 @@ def parse_logs(com_args):
 
     #find all files in log directroy.
     list_of_files = util.build_file_list(log_directory)
-    no_files = len(list_of_files)
+    num_files = len(list_of_files)
 
     summary_info = {}
 
     #open each file and exrtact info.
-    for i in range(0, no_files):
+    for i in range(0, num_files):
 
         filename = list_of_files[i]
         content_list = util.read_file_into_list(filename)
