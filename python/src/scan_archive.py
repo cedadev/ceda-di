@@ -92,21 +92,21 @@ def get_stat_and_defs(com_args):
     if ("level" in config) and (not "dataset" in config):
 
         status_and_defaults.append(\
-            util.Script_status.READ_PATHS_AND_STORE_TO_DB)
+            util.Script_status.READ_DATASET_FROM_FILE_AND_SCAN)
 
     elif ("dataset" in config) and  config["dataset"] == "all":
         status_and_defaults.append(\
-            util.Script_status.SCAN_ALL_DATASETS)
+            util.Script_status.READ_AND_SCAN_DATASETS)
     elif ("dataset" in config) and  config["dataset"] != "all":
         status_and_defaults.append(\
-            util.Script_status.SCAN_SPECIFIC_DATASET_ID)
+            util.Script_status.READ_AND_SCAN_DATASETS_SUB)
     else:
         status_and_defaults.append(\
             util.Script_status.STAY_IDLE)
 
     return status_and_defaults
 
-def scan_all_datasets_in_lotus(config):
+def read_and_scan_datasets_in_lotus(config):
 
     filename = config["filename"]
     level = config["level"]
@@ -133,7 +133,7 @@ def scan_all_datasets_in_lotus(config):
     util.run_tasks_in_lotus(commands, int(lotus_max_processes),\
                             user_wait_time=30)
 
-def scan_specific_datasets_in_lotus(config):
+def read_and_scan_datasets_sub_in_lotus(config):
     #Get basic options.
     filename = config["filename"]
     dataset_id = config["dataset"]
@@ -157,7 +157,7 @@ def scan_specific_datasets_in_lotus(config):
         print "executng : %s" %(command)
         subprocess.call(command, shell=True)
 
-def scan_paths_from_file_in_lotus(config):
+def read_datasets_from_files_and_scan_in_lotus(config):
 
     """
     basic algorithm:
@@ -225,23 +225,23 @@ def scan_paths_from_file_in_lotus(config):
     util.run_tasks_in_lotus(commands, int(lotus_max_processes),\
                             user_wait_time=30)
 
-def scan_files_in_lotus(config, scan_status):
+def scan_datasets_in_lotus(config, scan_status):
 
     """
     Uses Lotus in order to scan files in the filesystem.
     """
 
     #Scan given dataset ids  or file.
-    if scan_status == util.Script_status.SCAN_SPECIFIC_DATASET_ID:
-        scan_specific_datasets_in_lotus(config)
+    if scan_status == util.Script_status.READ_AND_SCAN_DATASETS_SUB:
+        read_and_scan_datasets_sub_in_lotus(config)
 
-    elif scan_status == util.Script_status.SCAN_ALL_DATASETS:
-        scan_all_datasets_in_lotus(config)
+    elif scan_status == util.Script_status.READ_AND_SCAN_DATASETS:
+        read_and_scan_datasets_in_lotus(config)
 
-    elif scan_status == util.Script_status.READ_PATHS_AND_STORE_TO_DB:
-        scan_paths_from_file_in_lotus(config)
+    elif scan_status == util.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
+        read_datasets_from_files_and_scan_in_lotus(config)
 
-def scan_paths_from_file_in_localhost(config):
+def read_datasets_from_files_and_scan_in_localhost(config):
 
     #Get basic options.
     filename_path = config["filename"]
@@ -299,7 +299,7 @@ def scan_paths_from_file_in_localhost(config):
         print "Executing command : %s" %(commands[i])
         subprocess.call(commands[i], shell=True)
 
-def scan_files_in_localhost(config, scan_status):
+def scan_datasets_in_localhost(config, scan_status):
 
     """
     Uses localhost in order to scan files in the filesystem.
@@ -311,7 +311,7 @@ def scan_files_in_localhost(config, scan_status):
     current_dir = os.getcwd()
 
     #Manage the options given.
-    if scan_status == util.Script_status.SCAN_SPECIFIC_DATASET_ID:
+    if scan_status == util.Script_status.READ_AND_SCAN_DATASETS_SUB:
         dataset_id = config["dataset"]
         if ',' in dataset_id:
             dataset_ids_list = dataset_id.split(",")
@@ -331,7 +331,7 @@ def scan_files_in_localhost(config, scan_status):
             print "executng : %s"  %(command)
             subprocess.call(command, shell=True)
 
-    elif scan_status == util.Script_status.SCAN_ALL_DATASETS:
+    elif scan_status == util.Script_status.READ_AND_SCAN_DATASETS:
         dataset_ids = util.find_dataset(filename, "all")
 
         for key, value in dataset_ids.iteritems():
@@ -341,8 +341,8 @@ def scan_files_in_localhost(config, scan_status):
 
             print "executng : %s" %(command)
             subprocess.call(command, shell=True)
-    elif scan_status == util.Script_status.READ_PATHS_AND_STORE_TO_DB:
-        scan_paths_from_file_in_localhost(config)
+    elif scan_status == util.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
+        read_datasets_from_files_and_scan_in_localhost(config)
 
 def main():
 
@@ -367,9 +367,9 @@ def main():
 
     #Calls appropriate functions.
     if run_status == util.Script_status.RUN_SCRIPT_IN_LOTUS:
-        scan_files_in_lotus(config_file, scan_status)
+        scan_datasets_in_lotus(config_file, scan_status)
     elif run_status == util.Script_status.RUN_SCRIPT_IN_LOCALHOST:
-        scan_files_in_localhost(config_file, scan_status)
+        scan_datasets_in_localhost(config_file, scan_status)
     else:
         print "Some options could not be recognized.\n"
 
