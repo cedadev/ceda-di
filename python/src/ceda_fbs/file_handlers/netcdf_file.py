@@ -99,30 +99,45 @@ class   NetCdfFile(GenericFile):
         time_name = self.find_var_by_standard_name(ncdf, self.file_path, "time")
         return self.temporal(ncdf, time_name) 
 
-    def phenomena(self, netcdf):
-        """
-        Construct list of Phenomena based on variables in NetCDF file.
-        :returns : List of metadata.product.Parameter objects.
-        """
-        phens = []
-        for v_name, v_data in netcdf.variables.iteritems():
-            phen = product.Parameter(v_name, v_data.__dict__)
-            phens.append(phen)
-
-        return phens
-
     def get_parameters(self, item):
-        valid_attributes = [ "standard_name",
+        valid_parameters = [ "standard_name",
                              "long_name",
                              "title",
                              "name",
                              "units"
                            ]
-        if item["name"] in valid_attributes \
+        if item["name"] in valid_parameters \
            and len(item["value"]) < util.NETCDF_MAX_PAR_LENGTH\
            and len(item["name"]) < util.NETCDF_MAX_PAR_LENGTH:
             return True
         return False
+
+    def phenomena(self, netcdf):
+        """
+        Construct list of Phenomena based on variables in NetCDF file.
+        :returns : List of metadata.product.Parameter objects.
+        """
+        phens_list = []
+        #for all phenomena list.
+        for v_name, v_data in netcdf.variables.iteritems():
+            phen_par_list = []
+            #for all attributtes in phenomenon.
+            for key, value in v_data.__dict__.iteritems():
+                phen_par = { "name" : key.strip(),
+                             "value": unicode(value).strip()
+                           }
+
+                if self.get_parameters(phen_par):
+                    phen_par_list.append(phen_par.copy())
+
+            phen_par = { "name" : "var_id",
+                          "value" : v_name
+                       }
+            phen_par_list.append(phen_par.copy())
+
+            phens_list.append(phen_par_list)
+
+        return phens_list
 
     def get_properties_netcdf_file_level2(self, netcdf, index):
         """
@@ -136,26 +151,12 @@ class   NetCdfFile(GenericFile):
         netcdf_phenomena = self.phenomena(netcdf)
 
         phenomena_list = []
-        var_id_dict = {}
         phenomenon_parameters_dict = {}
 
-        for item in netcdf_phenomena:
-
-            name = item.get_name()
-
-            var_id_dict["name"] = "var_id"
-            var_id_dict["value"] = name
-
-            list_of_phenomenon_parameters = item.get()
-            list_of_phenomenon_parameters.append(var_id_dict.copy())
-            #list_of_phenomenon_parameters = 
-            list_of_phenomenon_parameters = filter(self.get_parameters, list_of_phenomenon_parameters)
-
-            if len(list_of_phenomenon_parameters) > 0:
-                phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
-                phenomena_list.append(phenomenon_parameters_dict.copy())
-                var_id_dict.clear()
-                phenomenon_parameters_dict.clear()
+        for phenomenon_par in netcdf_phenomena:
+            phenomenon_parameters_dict["phenomenon_parameters"] = phenomenon_par
+            phenomena_list.append(phenomenon_parameters_dict.copy())
+            phenomenon_parameters_dict.clear()
 
 
         index["phenomena"] = phenomena_list
@@ -221,7 +222,8 @@ class   NetCdfFile(GenericFile):
                         pass
 
                     return level2_meta
-            except Exception:
+            except Exception as ex:
+                print ex
                 return file_info
         else:
             return None
