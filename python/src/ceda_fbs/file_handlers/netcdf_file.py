@@ -99,7 +99,7 @@ class   NetCdfFile(GenericFile):
         time_name = self.find_var_by_standard_name(ncdf, self.file_path, "time")
         return self.temporal(ncdf, time_name) 
 
-    def get_parameters(self, item):
+    def is_valid_parameter(self, item):
         valid_parameters = [ "standard_name",
                              "long_name",
                              "title",
@@ -127,7 +127,7 @@ class   NetCdfFile(GenericFile):
                              "value": unicode(value).strip()
                            }
 
-                if self.get_parameters(phen_par):
+                if self.is_valid_parameter(phen_par):
                     phen_par_list.append(phen_par.copy())
 
             phen_par = { "name" : "var_id",
