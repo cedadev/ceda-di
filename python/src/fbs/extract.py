@@ -10,10 +10,10 @@ import re
 import hashlib
 import socket
 import fbs_lib.util as util
-import fbs_lib.handler_picker as handler_picker
+import file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
-from fbs.es.search import ElasticsearchClientFactory
-from fbs import index
+from es.search import ElasticsearchClientFactory
+from es import index
 
 #kltsa 14/08/2015 issue #23203.
 class ExtractSeq(object):
@@ -192,7 +192,7 @@ class ExtractSeq(object):
             os.makedirs(log_dir)
 
         #kltsa 15/09/2015 changes for issue :23221.
-        #if self.status == util.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
+        #if self.status == constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
         #    log_fname = "%s_%s_%s_%s_%s.log" \
         #                %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "|"),\
         #                self.conf("start"), self.conf("num-files"), socket.gethostname())

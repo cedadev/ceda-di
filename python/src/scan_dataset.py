@@ -45,9 +45,7 @@ import fbs_lib.util as util
 from fbs import __version__  # Grab version from package __init__.py
 from fbs.extract import ExtractSeq
 import datetime
-
-
-
+import fbs.constants.constants as constants
 
 
 def ckeck_com_args_validity(config, status):
@@ -56,7 +54,7 @@ def ckeck_com_args_validity(config, status):
     checks the validity of command line arguments
     """
 
-    if status == util.Script_status.STORE_DATASET_TO_FILE:
+    if status == constants.Script_status.STORE_DATASET_TO_FILE:
         return
 
     level = int(config.get("level"))
@@ -124,19 +122,19 @@ def get_stat_and_defs(com_args):
        and  ("filename" in config):
 
         status_and_defaults.append(\
-        util.Script_status.STORE_DATASET_TO_FILE)
+        constants.Script_status.STORE_DATASET_TO_FILE)
 
     elif ("dataset" in config) and  ("filename" in config) \
           and ("level" in config):
 
         status_and_defaults.append(\
-        util.Script_status.READ_AND_SCAN_DATASET)
+        constants.Script_status.READ_AND_SCAN_DATASET)
 
     elif ("filename" in config) and ("start" in config) and \
           ("num-files" in config) and ("level" in config):
 
         status_and_defaults.append\
-        (util.Script_status.READ_DATASET_FROM_FILE_AND_SCAN)
+        (constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN)
 
 
     return status_and_defaults
@@ -169,11 +167,11 @@ def main():
 
 
     #Manage the options given.
-    if status == util.Script_status.STORE_DATASET_TO_FILE:
+    if status == constants.Script_status.STORE_DATASET_TO_FILE:
         store_dataset_to_file(config, status)
-    elif status == util.Script_status.READ_AND_SCAN_DATASET:
+    elif status == constants.Script_status.READ_AND_SCAN_DATASET:
         read_and_scan_dataset(config, status)
-    elif status == util.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
+    elif status == constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
         read_dataset_from_file_and_scan(config, status)
 
     end = datetime.datetime.now()

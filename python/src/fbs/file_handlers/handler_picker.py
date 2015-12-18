@@ -4,11 +4,11 @@ import json
 import re
 
 from fbs_lib.util import FileFormatError
-import fbs.file_handlers.generic_file as generic_file
-import fbs.file_handlers.netcdf_file as netcdf_file
-import fbs.file_handlers.nasaames_file as nasaames_file
-import fbs.file_handlers.pp_file as pp_file
-import fbs.file_handlers.grib_file as grib_file
+import generic_file as generic_file
+import netcdf_file as netcdf_file
+import nasaames_file as nasaames_file
+import pp_file as pp_file
+import grib_file as grib_file
 
 import magic as magic_number_reader
 import fbs_lib.util as util

@@ -31,6 +31,7 @@ import datetime
 from enum import Enum
 import subprocess
 import fbs_lib.util as util
+import fbs.constants.constants as constants
 
 
 def get_stat_and_defs(com_args):
@@ -56,9 +57,9 @@ def get_stat_and_defs(com_args):
     status_and_defaults.append(config)
 
     if ("host" in config) and config["host"] == "localhost":
-        status_and_defaults.append(util.Script_status.RUN_SCRIPT_IN_LOCALHOST)
+        status_and_defaults.append(constants.Script_status.RUN_SCRIPT_IN_LOCALHOST)
     else:
-        status_and_defaults.append(util.Script_status.RUN_SCRIPT_IN_LOTUS)
+        status_and_defaults.append(constants.Script_status.RUN_SCRIPT_IN_LOTUS)
 
 
     return status_and_defaults
@@ -145,7 +146,7 @@ def main():
     config = status_and_defaults[0]
 
 
-    if status == util.Script_status.RUN_SCRIPT_IN_LOCALHOST:
+    if status == constants.Script_status.RUN_SCRIPT_IN_LOCALHOST:
         store_datasets_to_files_in_localhost(status, config)
     else:
         store_datasets_to_files_in_lotus(status, config)
