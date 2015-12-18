@@ -9,12 +9,11 @@ import sys
 import re
 import hashlib
 import socket
-import ceda_fbs.util.util as util
-import ceda_fbs.util.handler_picker as handler_picker
+import fbs_lib.util as util
+import fbs_lib.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
-from ceda_fbs.search import ElasticsearchClientFactory
-from ceda_fbs import index
-from ceda_fbs.metadata.product import FileFormatError
+from fbs.es.search import ElasticsearchClientFactory
+from fbs import index
 
 #kltsa 14/08/2015 issue #23203.
 class ExtractSeq(object):

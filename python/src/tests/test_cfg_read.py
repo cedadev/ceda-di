@@ -7,7 +7,7 @@ import os
 
 import ConfigParser
 
-from ceda_fbs.file_handlers.netcdf_file import NetCDFFile  
+from fbs.file_handlers.netcdf_file import NetCDFFile  
 from elasticsearch import Elasticsearch
  
 def cfg_read(filename):

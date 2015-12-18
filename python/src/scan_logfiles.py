@@ -16,7 +16,7 @@ Options:
 import os
 
 from docopt import docopt
-import ceda_fbs.util.util as util
+import fbs_lib.util as util
 from ceda_fbs import __version__
 
 import datetime

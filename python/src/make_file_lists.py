@@ -25,12 +25,12 @@ Options:
 import os
 
 from docopt import docopt
-import ceda_fbs.util.util as util
-from ceda_fbs import __version__  # Grab version from package __init__.py
+import fbs_lib.util as util
+from fbs import __version__  # Grab version from package __init__.py
 import datetime
 from enum import Enum
 import subprocess
-import ceda_fbs.util.util as util
+import fbs_lib.util as util
 
 
 def get_stat_and_defs(com_args):

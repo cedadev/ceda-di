@@ -1,10 +1,8 @@
 import netCDF4
 
 
-from ceda_fbs.file_handlers.generic_file import GenericFile
-from ceda_fbs.metadata import product
-from ceda_fbs.metadata.product import GeoJSONGenerator
-import ceda_fbs.util.util as util
+from fbs.file_handlers.generic_file import GenericFile
+import fbs_lib.util as util
 
 class   NetCdfFile(GenericFile):
     """
@@ -207,7 +205,7 @@ class   NetCdfFile(GenericFile):
 
                         loc_dict= {}
 
-                        gj = GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
+                        gj = util.GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
                         spatial = gj.get_elasticsearch_geojson()
 
                         loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]

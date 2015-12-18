@@ -3,15 +3,15 @@ import ntpath
 import json
 import re
 
-from ceda_fbs.metadata.product import FileFormatError
-import ceda_fbs.file_handlers.generic_file as generic_file
-import ceda_fbs.file_handlers.netcdf_file as netcdf_file
-import ceda_fbs.file_handlers.nasaames_file as nasaames_file
-import ceda_fbs.file_handlers.pp_file as pp_file
-import ceda_fbs.file_handlers.grib_file as grib_file
+from fbs_lib.util import FileFormatError
+import fbs.file_handlers.generic_file as generic_file
+import fbs.file_handlers.netcdf_file as netcdf_file
+import fbs.file_handlers.nasaames_file as nasaames_file
+import fbs.file_handlers.pp_file as pp_file
+import fbs.file_handlers.grib_file as grib_file
 
 import magic as magic_number_reader
-import ceda_fbs.util.util as util
+import fbs_lib.util as util
 
 
 class  HandlerPicker(object):
