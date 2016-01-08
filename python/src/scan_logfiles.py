@@ -103,7 +103,7 @@ def validate_results(dict_data):
     dict_data["Totals"] = datasets_info.copy()
 
 def print_dict(dict_data):
-    print "{a:<20} {b:<20} {c:<20} {d:<20} {e:<20} {g:<10} {f:<20}".format(a="Dataset",\
+    print "{a:<40} {b:<20} {c:<20} {d:<20} {e:<20} {g:<10} {f:<20}".format(a="Dataset",\
            b="Indexed", c="Total files", d="Properties errors", e="Database errors",\
            f="Dataset dir", g="Status")
 
@@ -112,14 +112,14 @@ def print_dict(dict_data):
 
     for item in dict_data:
         if item != "Totals":
-            print ("{a:<20} {p[indexed]:<20} {p[total_files]:<20} {p[properties_errors]:<20}" 
+            print ("{a:<40} {p[indexed]:<20} {p[total_files]:<20} {p[properties_errors]:<20}" 
                 " {p[database_errors]:<20} {p[status]:<10} {p[dataset_dir]:<20}").format(a=item, p=dict_data[item])
 
     print ("---------------------------------------------------------------"
            "----------------------------------------------------------------")
 
     #At the end print the totals:
-    print ("{a:<20} {p[files_indexed_in_datasets]:<20} {p[total_files_in_datasets]:<20}"
+    print ("{a:<40} {p[files_indexed_in_datasets]:<20} {p[total_files_in_datasets]:<20}"
            " {p[errors_in_datasets]:<20}").format(a="Totals:", p=dict_data["Totals"])
 
 
