@@ -107,16 +107,16 @@ def print_dict(dict_data):
            b="Indexed", c="Total files", d="Properties errors", e="Database errors",\
            f="Dataset dir", g="Status")
 
-    print ("---------------------------------------------------------------"
-           "----------------------------------------------------------------")
+    print ("-------------------------------------------------------------------"
+           "--------------------------------------------------------------------")
 
     for item in dict_data:
         if item != "Totals":
             print ("{a:<40} {p[indexed]:<20} {p[total_files]:<20} {p[properties_errors]:<20}" 
                 " {p[database_errors]:<20} {p[status]:<10} {p[dataset_dir]:<20}").format(a=item, p=dict_data[item])
 
-    print ("---------------------------------------------------------------"
-           "----------------------------------------------------------------")
+    print ("-------------------------------------------------------------------"
+           "--------------------------------------------------------------------")
 
     #At the end print the totals:
     print ("{a:<40} {p[files_indexed_in_datasets]:<20} {p[total_files_in_datasets]:<20}"
