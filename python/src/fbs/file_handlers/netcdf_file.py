@@ -1,10 +1,8 @@
 import netCDF4
 
 
-from ceda_fbs.file_handlers.generic_file import GenericFile
-from ceda_fbs.metadata import product
-from ceda_fbs.metadata.product import GeoJSONGenerator
-import ceda_fbs.util.util as util
+from fbs.file_handlers.generic_file import GenericFile
+import fbs_lib.util as util
 
 class   NetCdfFile(GenericFile):
     """
@@ -12,7 +10,7 @@ class   NetCdfFile(GenericFile):
     of an NetCDF file.
     """
 
-    def __init__(self, file_path, level):
+    def __init__(self, file_path, level, additional_param=None):
         GenericFile.__init__(self, file_path, level)
         self.FILE_FORMAT = "NetCDF"
 
@@ -99,17 +97,45 @@ class   NetCdfFile(GenericFile):
         time_name = self.find_var_by_standard_name(ncdf, self.file_path, "time")
         return self.temporal(ncdf, time_name) 
 
+    def is_valid_parameter(self, item):
+        valid_parameters = [ "standard_name",
+                             "long_name",
+                             "title",
+                             "name",
+                             "units"
+                           ]
+        if item["name"] in valid_parameters \
+           and len(item["value"]) < util.NETCDF_MAX_PAR_LENGTH\
+           and len(item["name"]) < util.NETCDF_MAX_PAR_LENGTH:
+            return True
+        return False
+
     def phenomena(self, netcdf):
         """
         Construct list of Phenomena based on variables in NetCDF file.
         :returns : List of metadata.product.Parameter objects.
         """
-        phens = []
+        phens_list = []
+        #for all phenomena list.
         for v_name, v_data in netcdf.variables.iteritems():
-            phen = product.Parameter(v_name, v_data.__dict__)
-            phens.append(phen)
+            phen_par_list = []
+            #for all attributtes in phenomenon.
+            for key, value in v_data.__dict__.iteritems():
+                phen_par = { "name" : key.strip(),
+                             "value": unicode(value).strip()
+                           }
 
-        return phens
+                if self.is_valid_parameter(phen_par):
+                    phen_par_list.append(phen_par.copy())
+
+            phen_par = { "name" : "var_id",
+                          "value" : v_name
+                       }
+            phen_par_list.append(phen_par.copy())
+
+            phens_list.append(phen_par_list)
+
+        return phens_list
 
     def get_properties_netcdf_file_level2(self, netcdf, index):
         """
@@ -123,25 +149,11 @@ class   NetCdfFile(GenericFile):
         netcdf_phenomena = self.phenomena(netcdf)
 
         phenomena_list = []
-        var_id_dict = {}
         phenomenon_parameters_dict = {}
 
-        for item in netcdf_phenomena:
-
-            name = item.get_name()
-
-            var_id_dict["name"] = "var_id"
-            var_id_dict["value"] = name
-
-            list_of_phenomenon_parameters = item.get()
-            list_of_phenomenon_parameters.append(var_id_dict.copy())
-            #list_of_phenomenon_parameters = 
-            list_of_phenomenon_parameters = filter(util.check_attributes_length, list_of_phenomenon_parameters)
-            phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
-
+        for phenomenon_par in netcdf_phenomena:
+            phenomenon_parameters_dict["phenomenon_parameters"] = phenomenon_par
             phenomena_list.append(phenomenon_parameters_dict.copy())
-
-            var_id_dict.clear()
             phenomenon_parameters_dict.clear()
 
 
@@ -193,7 +205,7 @@ class   NetCdfFile(GenericFile):
 
                         loc_dict= {}
 
-                        gj = GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
+                        gj = util.GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
                         spatial = gj.get_elasticsearch_geojson()
 
                         loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
@@ -208,7 +220,8 @@ class   NetCdfFile(GenericFile):
                         pass
 
                     return level2_meta
-            except Exception:
+            except Exception as ex:
+                print ex
                 return file_info
         else:
             return None

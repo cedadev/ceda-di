@@ -25,12 +25,13 @@ Options:
 import os
 
 from docopt import docopt
-import ceda_fbs.util.util as util
-from ceda_fbs import __version__  # Grab version from package __init__.py
+import fbs_lib.util as util
+from fbs import __version__  # Grab version from package __init__.py
 import datetime
 from enum import Enum
 import subprocess
-import ceda_fbs.util.util as util
+import fbs_lib.util as util
+import fbs.constants.constants as constants
 
 
 def get_stat_and_defs(com_args):
@@ -49,17 +50,21 @@ def get_stat_and_defs(com_args):
     #Creates a dictionary with default settings some of
     #them where loaded from th edefaults file.
     config = util.get_settings(com_args["config"], com_args)
+
+    if "num-processes" not in config or not config["num-processes"]:
+        config["num-processes"] = config["scanning"]["num-processes"]
+
     status_and_defaults.append(config)
 
     if ("host" in config) and config["host"] == "localhost":
-        status_and_defaults.append(util.Script_status.RUN_SCRIPT_IN_LOCALHOST)
+        status_and_defaults.append(constants.Script_status.RUN_SCRIPT_IN_LOCALHOST)
     else:
-        status_and_defaults.append(util.Script_status.RUN_SCRIPT_IN_LOTUS)
+        status_and_defaults.append(constants.Script_status.RUN_SCRIPT_IN_LOTUS)
 
 
     return status_and_defaults
 
-def create_file_lists_in_lotus(status, config):
+def store_datasets_to_files_in_lotus(status, config):
 
     """
     Finds and stores all files belonging to each dataset.
@@ -92,7 +97,7 @@ def create_file_lists_in_lotus(status, config):
     util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes),\
                              user_wait_time=30)
 
-def create_file_lists_in_localhost(status, config):
+def store_datasets_to_files_in_localhost(status, config):
 
     """
     Finds and stores all files belonging to each dataset.
@@ -141,10 +146,10 @@ def main():
     config = status_and_defaults[0]
 
 
-    if status == util.Script_status.RUN_SCRIPT_IN_LOCALHOST:
-        create_file_lists_in_localhost(status, config)
+    if status == constants.Script_status.RUN_SCRIPT_IN_LOCALHOST:
+        store_datasets_to_files_in_localhost(status, config)
     else:
-        create_file_lists_in_lotus(status, config)
+        store_datasets_to_files_in_lotus(status, config)
 
 
     end = datetime.datetime.now()

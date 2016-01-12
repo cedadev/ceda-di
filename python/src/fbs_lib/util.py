@@ -13,18 +13,6 @@ import ConfigParser
 import logging
 
 
-#some globals.
-Script_status = Enum("Script_status",
-                     "SCAN_AND_STORE_TO_FILE \
-                      SCAN_AND_STORE_TO_DB \
-                      READ_PATHS_AND_STORE_TO_DB\
-                      RUN_SCRIPT_IN_LOTUS \
-                      RUN_SCRIPT_IN_LOCALHOST \
-                      SCAN_SPECIFIC_DATASET_ID \
-                      SCAN_ALL_DATASETS \
-                      STAY_IDLE"
-                    )
-
 log_levels = {"debug"   : logging.DEBUG,
               "info"    : logging.INFO,
               "warning" : logging.WARNING,
@@ -32,7 +20,52 @@ log_levels = {"debug"   : logging.DEBUG,
               "critical": logging.CRITICAL
              }
 
-NETCDF_MAX_PHEN_LENGTH = 256
+NETCDF_MAX_PAR_LENGTH = 256
+
+class Parameter(object):
+    """
+    Placeholder/wrapper class for metadata parameters
+
+    :param str name: Name of variable/parameter
+    :param dict other_params: Optional - Dict containing other param metadata
+    """
+    def __init__(self, name, other_params=None):
+        self.items = []
+        self.name = name
+
+        # Other arbitrary arguments
+        if other_params:
+            for key, value in other_params.iteritems():
+                self.items.append(
+                    self.make_param_item(key.strip(), unicode(value).strip()))
+
+    @staticmethod
+    def make_param_item(name, value):
+        """
+        Convert a name/value pair to dictionary (for better indexing in ES)
+
+        :param str name: Name of the parameter item (e.g. "long_name_fr", etc)
+        :param str value: Value of the parameter item (e.g. "Radiance")
+        :return: Dict containing name:value information
+        """
+        return {"name": name,
+                "value": value}
+
+    def get(self):
+        """Return the list of parameter items"""
+        return self.items
+
+    #kltsa : 04/10/2015
+    def get_name(self):
+        """Return the name of the phenomenon."""
+        return self.name
+
+class FileFormatError(Exception):
+    """
+    Exception to raise if there is a error in the file format
+    """
+    pass
+
 
 def sanitise_args(config):
     """
@@ -251,8 +284,8 @@ def find_num_lines_in_file(filename):
 
 
 def check_attributes_length(item):
-    if len(item["value"]) < NETCDF_MAX_PHEN_LENGTH\
-        and len(item["name"]) < NETCDF_MAX_PHEN_LENGTH:
+    if len(item["value"]) < NETCDF_MAX_PAR_LENGTH\
+        and len(item["name"]) < NETCDF_MAX_PAR_LENGTH:
         return True
     return False
 

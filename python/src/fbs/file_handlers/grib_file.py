@@ -1,7 +1,7 @@
 import gribapi as gapi
-import ceda_fbs.util.util as util
+import fbs_lib.util as util
 
-from ceda_fbs.file_handlers.generic_file import GenericFile
+from fbs.file_handlers.generic_file import GenericFile
 
 class GribFile(GenericFile):
     """
@@ -9,7 +9,7 @@ class GribFile(GenericFile):
     of an Grib file.
     """
 
-    def __init__(self, file_path, level):
+    def __init__(self, file_path, level, additional_param=None):
         GenericFile.__init__(self, file_path, level)
         self.FILE_FORMAT = "GRIB"
 
@@ -53,8 +53,8 @@ class GribFile(GenericFile):
                         break
 
                     value = str(gapi.grib_get(gid, key))
-                    if len(key) < util.NETCDF_MAX_PHEN_LENGTH \
-                       and len(value) < util.NETCDF_MAX_PHEN_LENGTH:
+                    if len(key) < util.NETCDF_MAX_PAR_LENGTH \
+                       and len(value) < util.NETCDF_MAX_PAR_LENGTH:
 
                         phenomenon_attr["name"] = key
                         phenomenon_attr["value"] = value
@@ -199,8 +199,8 @@ class GribFile(GenericFile):
                     elif key == "dataTime" and date_t is None:
                         date_t = value
                     else:
-                        if len(key) < util.NETCDF_MAX_PHEN_LENGTH \
-                           and len(value) < util.NETCDF_MAX_PHEN_LENGTH:
+                        if len(key) < util.NETCDF_MAX_PAR_LENGTH \
+                           and len(value) < util.NETCDF_MAX_PAR_LENGTH:
 
                             phenomenon_attr["name"] = key
                             phenomenon_attr["value"] = value

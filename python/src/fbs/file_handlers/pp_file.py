@@ -1,8 +1,8 @@
 import cf
-import ceda_fbs.util.util as util
+import fbs_lib.util as util
 
 
-from ceda_fbs.file_handlers.generic_file import GenericFile
+from fbs.file_handlers.generic_file import GenericFile
 
 class PpFile(GenericFile):
     """
@@ -10,9 +10,10 @@ class PpFile(GenericFile):
     of an PP file.
     """
 
-    def __init__(self, file_path, level):
+    def __init__(self, file_path, level, additional_param=None):
         GenericFile.__init__(self, file_path, level)
         self.FILE_FORMAT = "PP"
+        self.additional_param = additional_param
 
     def get_handler_id(self):
         return self.handler_id
@@ -27,6 +28,7 @@ class PpFile(GenericFile):
         phenomena_list = []
         phenomenon_parameters_dict = {}
         try:
+            cf.TEMPDIR(self.additional_param)
             phenomena = cf.read(self.file_path)
             number_of_phenomena = len(phenomena)
             found = set()
@@ -42,8 +44,8 @@ class PpFile(GenericFile):
                 for key in keys:
                     value = str(dict_of_phenomenon_prop[key])
 
-                    if len(key) < util.NETCDF_MAX_PHEN_LENGTH \
-                       and len(value) < util.NETCDF_MAX_PHEN_LENGTH:
+                    if len(key) < util.NETCDF_MAX_PAR_LENGTH \
+                       and len(value) < util.NETCDF_MAX_PAR_LENGTH:
                         phenomenon_attr["name"] = key
                         phenomenon_attr["value"] = value
 

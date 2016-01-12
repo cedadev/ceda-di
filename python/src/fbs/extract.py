@@ -9,12 +9,11 @@ import sys
 import re
 import hashlib
 import socket
-import ceda_fbs.util.util as util
-import ceda_fbs.util.handler_picker as handler_picker
+import fbs_lib.util as util
+import file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
-from ceda_fbs.search import ElasticsearchClientFactory
-from ceda_fbs import index
-from ceda_fbs.metadata.product import FileFormatError
+from es.search import ElasticsearchClientFactory
+from es import index
 
 #kltsa 14/08/2015 issue #23203.
 class ExtractSeq(object):
@@ -45,6 +44,7 @@ class ExtractSeq(object):
         self.files_properties_errors = 0
         self.files_indexed = 0
         self.total_number_of_files = 0
+        self.cf_tempdir = None
 
     #***General purpose methods.***
     def conf(self, conf_opt):
@@ -93,7 +93,7 @@ class ExtractSeq(object):
         try:
             handler = self.handler_factory_inst.pick_best_handler(filename)
             if handler is not None:
-                handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
+                handler_inst = handler(filename, level, self.cf_tempdir) #Can this done within the HandlerPicker class.
                 metadata = handler_inst.get_properties()
                 self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
                 return metadata
@@ -193,7 +193,7 @@ class ExtractSeq(object):
             os.makedirs(log_dir)
 
         #kltsa 15/09/2015 changes for issue :23221.
-        #if self.status == util.Script_status.READ_PATHS_AND_STORE_TO_DB:
+        #if self.status == constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
         #    log_fname = "%s_%s_%s_%s_%s.log" \
         #                %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "|"),\
         #                self.conf("start"), self.conf("num-files"), socket.gethostname())
@@ -273,7 +273,7 @@ class ExtractSeq(object):
             os.makedirs(log_dir)
 
         #kltsa 15/09/2015 changes for issue :23221.
-        #READ_PATHS_AND_STORE_TO_DB:
+        #READ_DATASET_FROM_FILE_AND_SCAN:
         log_fname = "%s_%s_%s_%s_%s.log" \
                     %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "|"),\
                     self.conf("start"), self.conf("num-files"), socket.gethostname())
@@ -323,6 +323,7 @@ class ExtractSeq(object):
         self.logger.debug("***Scanning started.***")
         self.handler_factory_inst = handler_picker.HandlerPicker(self.conf("handlers"))
         self.handler_factory_inst.get_configured_handlers()
+        self.cf_tempdir = self.conf("cf_tempdir")
 
 
         file_containing_paths = self.conf("filename")
@@ -435,6 +436,7 @@ class ExtractSeq(object):
         self.logger.debug("***Scanning started.***.")
         self.handler_factory_inst = handler_picker.HandlerPicker(self.conf("handlers"))
         self.handler_factory_inst.get_configured_handlers()
+        self.cf_tempdir = self.conf("cf_tempdir")
 
         self.file_list = self.read_dataset()
         self.total_number_of_files = len(self.file_list)

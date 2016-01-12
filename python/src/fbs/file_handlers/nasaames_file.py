@@ -1,7 +1,6 @@
-from ceda_fbs.file_handlers.generic_file import GenericFile
-from ceda_fbs.metadata import product
+from fbs.file_handlers.generic_file import GenericFile
 import nappy
-import ceda_fbs.util.util as util
+import fbs_lib.util as util
 
 
 class NasaAmesFile(GenericFile):
@@ -10,7 +9,7 @@ class NasaAmesFile(GenericFile):
     of an nasaames file.
     """
 
-    def __init__(self, file_path, level):
+    def __init__(self, file_path, level, additional_param=None):
         GenericFile.__init__(self, file_path, level)
         self.FILE_FORMAT = "NASA Ames"
 
@@ -31,7 +30,7 @@ class NasaAmesFile(GenericFile):
                     }
                 })
 
-            variables = [product.Parameter(k, other_params=var) for (k, var) in variables.iteritems()]
+            variables = [util.Parameter(k, other_params=var) for (k, var) in variables.iteritems()]
             return variables
         except Exception:
             return None
