@@ -9,7 +9,7 @@ class NasaAmesFile(GenericFile):
     of an nasaames file.
     """
 
-    def __init__(self, file_path, level):
+    def __init__(self, file_path, level, additional_param=None):
         GenericFile.__init__(self, file_path, level)
         self.FILE_FORMAT = "NASA Ames"
 

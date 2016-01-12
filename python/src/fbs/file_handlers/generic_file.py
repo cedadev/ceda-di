@@ -8,7 +8,7 @@ class  GenericFile(object):
     Class for returning basic information about a file.
     """
 
-    def __init__(self, file_path, level):
+    def __init__(self, file_path, level, additional_param=None):
         self.file_path = file_path
         self.level = level
         self.handler_id = None

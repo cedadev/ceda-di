@@ -10,9 +10,10 @@ class PpFile(GenericFile):
     of an PP file.
     """
 
-    def __init__(self, file_path, level):
+    def __init__(self, file_path, level, additional_param=None):
         GenericFile.__init__(self, file_path, level)
         self.FILE_FORMAT = "PP"
+        self.additional_param = additional_param
 
     def get_handler_id(self):
         return self.handler_id
@@ -27,6 +28,7 @@ class PpFile(GenericFile):
         phenomena_list = []
         phenomenon_parameters_dict = {}
         try:
+            cf.TEMPDIR(self.additional_param)
             phenomena = cf.read(self.file_path)
             number_of_phenomena = len(phenomena)
             found = set()

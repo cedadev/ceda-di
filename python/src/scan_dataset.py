@@ -136,6 +136,7 @@ def get_stat_and_defs(com_args):
         status_and_defaults.append\
         (constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN)
 
+    config["cf_tempdir"] = config["scanning"]["cf_tempdir"]
 
     return status_and_defaults
 

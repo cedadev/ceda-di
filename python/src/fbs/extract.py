@@ -44,6 +44,7 @@ class ExtractSeq(object):
         self.files_properties_errors = 0
         self.files_indexed = 0
         self.total_number_of_files = 0
+        self.cf_tempdir = None
 
     #***General purpose methods.***
     def conf(self, conf_opt):
@@ -92,7 +93,7 @@ class ExtractSeq(object):
         try:
             handler = self.handler_factory_inst.pick_best_handler(filename)
             if handler is not None:
-                handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
+                handler_inst = handler(filename, level, self.cf_tempdir) #Can this done within the HandlerPicker class.
                 metadata = handler_inst.get_properties()
                 self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
                 return metadata
@@ -322,6 +323,7 @@ class ExtractSeq(object):
         self.logger.debug("***Scanning started.***")
         self.handler_factory_inst = handler_picker.HandlerPicker(self.conf("handlers"))
         self.handler_factory_inst.get_configured_handlers()
+        self.cf_tempdir = self.conf("cf_tempdir")
 
 
         file_containing_paths = self.conf("filename")
@@ -434,6 +436,7 @@ class ExtractSeq(object):
         self.logger.debug("***Scanning started.***.")
         self.handler_factory_inst = handler_picker.HandlerPicker(self.conf("handlers"))
         self.handler_factory_inst.get_configured_handlers()
+        self.cf_tempdir = self.conf("cf_tempdir")
 
         self.file_list = self.read_dataset()
         self.total_number_of_files = len(self.file_list)
