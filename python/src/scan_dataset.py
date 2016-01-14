@@ -75,7 +75,7 @@ def sigterm_handler(signum, frame):
 
     raise SystemExit(signum)
 
-# Associate the handler with SIGTERM events:
+# Associate the handler with signals:
 signal.signal(signal.SIGTERM, sigterm_handler)
 signal.signal(signal.SIGINT, sigterm_handler)
 signal.signal(signal.SIGHUP, sigterm_handler)
