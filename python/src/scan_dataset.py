@@ -63,7 +63,7 @@ def sigterm_handler(signum, frame):
     print "Signal {} received deleting tmp files:".format(signum)
     for filename in tmp_dir_files:
 
-       if not os.path.isfile(filename):
+       if not os.path.exists(filename):
            continue
        stat_info = os.stat(filename)
        uid = stat_info.st_uid
@@ -177,7 +177,6 @@ def main():
     """
     Relevant ticket : http://team.ceda.ac.uk/trac/ceda/ticket/23203
     """
-
     #Get command line arguments.
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))
 
