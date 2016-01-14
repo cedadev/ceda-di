@@ -52,7 +52,7 @@ import signal, os, getpass, grp, pwd
 def sigterm_handler(signum, frame):
 
     """
-    Catches TTERM, SIGINT, SIGHUP signals
+    Catches SIGTERM, SIGINT, SIGHUP signals
     cleans tmp directoy 
     and terminates the process.
     """
@@ -63,6 +63,8 @@ def sigterm_handler(signum, frame):
     print "Signal {} received deleting tmp files:".format(signum)
     for filename in tmp_dir_files:
 
+       if not os.path.isfile(filename):
+           continue
        stat_info = os.stat(filename)
        uid = stat_info.st_uid
        file_owner = pwd.getpwuid(uid)[0]
