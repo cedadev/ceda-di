@@ -46,7 +46,37 @@ from fbs import __version__  # Grab version from package __init__.py
 from fbs.extract import ExtractSeq
 import datetime
 import fbs.constants.constants as constants
+import signal, os, getpass, grp, pwd
 
+
+def sigterm_handler(signum, frame):
+
+    """
+    Catches TTERM, SIGINT, SIGHUP signals
+    cleans tmp directoy 
+    and terminates the process.
+    """
+
+    script_user = getpass.getuser()
+    tmp_dir_files = util.build_file_list("/tmp")
+
+    print "Signal {} received deleting tmp files:".format(signum)
+    for filename in tmp_dir_files:
+
+       stat_info = os.stat(filename)
+       uid = stat_info.st_uid
+       file_owner = pwd.getpwuid(uid)[0]
+
+       if script_user == file_owner:
+           print filename
+           os.remove(filename)
+
+    raise SystemExit(signum)
+
+# Associate the handler with SIGTERM events:
+signal.signal(signal.SIGTERM, sigterm_handler)
+signal.signal(signal.SIGINT, sigterm_handler)
+signal.signal(signal.SIGHUP, sigterm_handler)
 
 def ckeck_com_args_validity(config, status):
 
