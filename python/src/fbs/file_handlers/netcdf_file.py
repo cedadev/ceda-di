@@ -3,6 +3,7 @@ import netCDF4
 
 from fbs.file_handlers.generic_file import GenericFile
 import fbs_lib.util as util
+import fbs_lib.geojson as geojson
 
 class   NetCdfFile(GenericFile):
     """
@@ -205,7 +206,7 @@ class   NetCdfFile(GenericFile):
 
                         loc_dict= {}
 
-                        gj = util.GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
+                        gj = geojson.GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
                         spatial = gj.get_elasticsearch_geojson()
 
                         loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
