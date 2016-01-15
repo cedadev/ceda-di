@@ -46,7 +46,7 @@ from fbs import __version__  # Grab version from package __init__.py
 from fbs.extract import ExtractSeq
 import datetime
 import fbs.constants.constants as constants
-import signal, os, getpass, grp, pwd
+import signal, getpass, pwd
 
 
 def sigterm_handler(signum, frame):
@@ -63,15 +63,15 @@ def sigterm_handler(signum, frame):
     print "Signal {} received deleting tmp files:".format(signum)
     for filename in tmp_dir_files:
 
-       if not os.path.exists(filename):
-           continue
-       stat_info = os.stat(filename)
-       uid = stat_info.st_uid
-       file_owner = pwd.getpwuid(uid)[0]
+        if not os.path.exists(filename):
+            continue
+        stat_info = os.stat(filename)
+        uid = stat_info.st_uid
+        file_owner = pwd.getpwuid(uid)[0]
 
-       if script_user == file_owner:
-           print filename
-           os.remove(filename)
+        if script_user == file_owner:
+            print filename
+            os.remove(filename)
 
     raise SystemExit(signum)
 

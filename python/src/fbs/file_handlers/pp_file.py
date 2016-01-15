@@ -18,7 +18,7 @@ class PpFile(GenericFile):
     def get_handler_id(self):
         return self.handler_id
 
-    def phenomena(self):
+    def phenomena(self, phenomena):
 
         """
         Construct list of Phenomena based on variables in pp file.
@@ -28,8 +28,6 @@ class PpFile(GenericFile):
         phenomena_list = []
         phenomenon_parameters_dict = {}
         try:
-            cf.TEMPDIR(self.additional_param)
-            phenomena = cf.read(self.file_path)
             number_of_phenomena = len(phenomena)
             found = set()
             #For all phenomena.
@@ -97,7 +95,9 @@ class PpFile(GenericFile):
 
             self.handler_id = "pp handler level 2."
             #level 2
-            pp_phenomena = self.phenomena()
+            cf.TEMPDIR(self.additional_param)
+            phenomena = cf.read(self.file_path)
+            pp_phenomena = self.phenomena(phenomena)
 
             if pp_phenomena is None:
                 return file_info
@@ -109,8 +109,60 @@ class PpFile(GenericFile):
         else:
             return None
 
+    def normalize_coord(self, coord):
+        if coord > 180:
+            coord = coord - 360
+        return coord
+
     def get_properties_pp_level3(self):
+         #Get basic file info.
+        file_info = self.get_properties_generic_level1()
+
+        if file_info is not None:
+
+            self.handler_id = "pp handler level 2."
+            #level 2
+            cf.TEMPDIR(self.additional_param)
+            phenomena = cf.read(self.file_path)
+            pp_phenomena = self.phenomena(phenomena)
+
+            if pp_phenomena is None:
+                return file_info
+
+            file_info["phenomena"] = pp_phenomena
+
+            #geospatial data.
+            list_max_lat = []
+            list_min_lat = []
+            list_max_lon = []
+            list_min_lon = []
+            for item in phenomena:
+                dim_dict_lat = item.coords('lat')
+                dim_dict_lon = item.coords('lon')
+                for key in dim_dict_lat:
+                    list_max_lat.append(float(str(item.coords('lat')[key].max()).split()[0]))
+                    list_min_lat.append(float(str(item.coords('lat')[key].min()).split()[0]))
+
+                for key in dim_dict_lon:
+                    list_max_lon.append(float(str(item.coords('lon')[key].max()).split()[0]))
+                    list_min_lon.append(float(str(item.coords('lon')[key].min()).split()[0]))
+
+            max_lat = self.normalize_coord(max(list_max_lat))
+            min_lat = self.normalize_coord(min(list_min_lat))
+            max_lon = self.normalize_coord(max(list_max_lon))
+            min_lon = self.normalize_coord(min(list_min_lon))
+
+            file_info["spatial"] = {'coordinates': {'type': 'envelope', 'coordinates': [[max_lat, max_lon], [max_lon, min_lon]]}}
+
+
+            return file_info
+
+        else:
+            return None
+
+
         res = self.get_properties_pp_level2()
+        #ok lets add geospatial information.
         self.handler_id = "pp handler level 3."
         return res
 
