@@ -49,7 +49,7 @@ import fbs.constants.constants as constants
 import signal, getpass, pwd
 
 
-def sigterm_handler(signum, frame):
+def sig_handler(signum, frame):
 
     """
     Catches SIGTERM, SIGINT, SIGHUP signals
@@ -76,9 +76,9 @@ def sigterm_handler(signum, frame):
     raise SystemExit(signum)
 
 # Associate the handler with signals:
-signal.signal(signal.SIGTERM, sigterm_handler)
-signal.signal(signal.SIGINT, sigterm_handler)
-signal.signal(signal.SIGHUP, sigterm_handler)
+signal.signal(signal.SIGTERM, sig_handler)
+signal.signal(signal.SIGINT, sig_handler)
+signal.signal(signal.SIGHUP, sig_handler)
 
 def ckeck_com_args_validity(config, status):
 
