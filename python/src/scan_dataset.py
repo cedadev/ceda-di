@@ -63,16 +63,17 @@ def sig_handler(signum, frame):
     print "Signal {} received deleting tmp files:".format(signum)
     for filename in tmp_dir_files:
 
-        if not os.path.exists(filename):
+        try:
+            stat_info = os.stat(filename)
+            uid = stat_info.st_uid
+            file_owner = pwd.getpwuid(uid)[0]
+
+            if script_user == file_owner:
+                print filename
+                os.remove(filename)
+        except:
             continue
-        stat_info = os.stat(filename)
-        uid = stat_info.st_uid
-        file_owner = pwd.getpwuid(uid)[0]
-
-        if script_user == file_owner:
-            print filename
-            os.remove(filename)
-
+        
     raise SystemExit(signum)
 
 # Associate the handler with signals:
