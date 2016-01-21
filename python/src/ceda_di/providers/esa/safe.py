@@ -69,6 +69,14 @@ mappings = {
          "Phase Identifier": "{%(safe)s}orbitReference/{%(safe)s}phaseIdentifier" % ns,
          "Cycle Number": "{%(safe)s}orbitReference/{%(safe)s}cycleNumber" % ns,
        },     
+    },
+    "acquisition_period": {
+       "common_prefix":
+         "./metadataSection/metadataObject[@ID='acquisitionPeriod']/metadataWrap/xmlData/",
+       "properties": {
+         "Start Time": "{%(safe)s}acquisitionPeriod/{%(safe)s}startTime" % ns,
+         "Stop Time": "{%(safe)s}acquisitionPeriod/{%(safe)s}stopTime" % ns,
+       }
     }    
 }
 
@@ -120,7 +128,7 @@ class SAFESentinel(_geospatial):
                 except:
                     print "FAILED: %s  -->  %s" % (section_id, xml_path)
               
-    def _get_temporal(self, vs, fn):
+    def OLD_get_temporal(self, vs, fn):
         """
         Return start and end timestamps (if existing)
 
@@ -133,7 +141,7 @@ class SAFESentinel(_geospatial):
 
         return self._parse_timestamps(timestamps)
 
-    def _parse_timestamps(self, tm_dict):
+    def OLD_parse_timestamps(self, tm_dict):
         """
         Parse start and end timestamps from an HDF4 file.
 
@@ -168,10 +176,10 @@ class SAFESentinel(_geospatial):
 
         for ll_string in coord_pairs:
             lat, lon = ll_string.split(",")
-            lats.append(lat)
-            lons.append(lon)
+            lats.append(float(lat))
+            lons.append(float(lon))
 
-        return {"lat": lats, "lon": lons}
+        return {"lat": lats, "lon": lons, "type": "swath"}
 
     def get_geospatial(self):
         """
@@ -186,7 +194,9 @@ class SAFESentinel(_geospatial):
 
         :returns: List containing temporal metadata
         """
-        return None
+        ap = self.sections["acquisition_period"]
+        return {"start_time": ap["Start Time"],
+                "end_time": ap["Stop Time"]} 
 
     def get_properties(self):
         """
@@ -196,6 +206,7 @@ class SAFESentinel(_geospatial):
         :returns: Metadata.product.Properties object
         """
         geospatial = self.get_geospatial()
+        #raise Exception("geo: %s" % str(geospatial))
         temporal = self.get_temporal()
         filesystem = super(SAFESentinel, self).get_filesystem(self.fname)
         data_format = {
