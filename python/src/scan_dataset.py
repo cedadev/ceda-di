@@ -49,7 +49,7 @@ import fbs.constants.constants as constants
 import signal, getpass, pwd
 
 
-def sigterm_handler(signum, frame):
+def sig_handler(signum, frame):
 
     """
     Catches SIGTERM, SIGINT, SIGHUP signals
@@ -59,26 +59,26 @@ def sigterm_handler(signum, frame):
 
     script_user = getpass.getuser()
     tmp_dir_files = util.build_file_list("/tmp")
-
     print "Signal {} received deleting tmp files:".format(signum)
     for filename in tmp_dir_files:
 
-        if not os.path.exists(filename):
-            continue
-        stat_info = os.stat(filename)
-        uid = stat_info.st_uid
-        file_owner = pwd.getpwuid(uid)[0]
+        try:
+            stat_info = os.stat(filename)
+            uid = stat_info.st_uid
+            file_owner = pwd.getpwuid(uid)[0]
 
-        if script_user == file_owner:
-            print filename
-            os.remove(filename)
+            if script_user == file_owner:
+                print filename
+                os.remove(filename)
+        except:
+            pass
 
     raise SystemExit(signum)
 
 # Associate the handler with signals:
-signal.signal(signal.SIGTERM, sigterm_handler)
-signal.signal(signal.SIGINT, sigterm_handler)
-signal.signal(signal.SIGHUP, sigterm_handler)
+signal.signal(signal.SIGTERM, sig_handler)
+signal.signal(signal.SIGINT, sig_handler)
+signal.signal(signal.SIGHUP, sig_handler)
 
 def ckeck_com_args_validity(config, status):
 

@@ -254,7 +254,7 @@ class GribFile(GenericFile):
                 geospatial_dict["type"] = "envelope"
                 if float(lon_l) > 180:
                     lon_l = (float(lon_l) -180) - 180
-                geospatial_dict["coordinates"] = [[lon_f, lat_f], [lon_l, lat_l]]
+                geospatial_dict["coordinates"] = [[lat_f, lon_f], [lat_l, lon_l]]
 
                 temporal_dict["start_time"] = date_d
                 temporal_dict["end_time"] = date_t
