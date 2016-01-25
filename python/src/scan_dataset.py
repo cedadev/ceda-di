@@ -59,7 +59,6 @@ def sig_handler(signum, frame):
 
     script_user = getpass.getuser()
     tmp_dir_files = util.build_file_list("/tmp")
-
     print "Signal {} received deleting tmp files:".format(signum)
     for filename in tmp_dir_files:
 
@@ -72,8 +71,8 @@ def sig_handler(signum, frame):
                 print filename
                 os.remove(filename)
         except:
-            continue
-        
+            pass
+
     raise SystemExit(signum)
 
 # Associate the handler with signals:
