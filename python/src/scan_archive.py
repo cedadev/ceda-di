@@ -114,7 +114,6 @@ def read_and_scan_datasets_in_lotus(config):
 
     current_dir = os.getcwd()
 
-
     dataset_ids = util.find_dataset(filename, "all")
     keys = dataset_ids.keys()
     number_of_datasets = len(keys)
