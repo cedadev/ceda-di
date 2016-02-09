@@ -177,7 +177,7 @@ class JsonQueryBuilder(object):
         :param start: Start datetime string
         :param end: End datetime string
         """
-        from jasmin_cis.parse_datetime import parse_partial_datetime
+        from cis.parse_datetime import parse_partial_datetime
         try:
             start = parse_partial_datetime(start, True).isoformat()
             end = parse_partial_datetime(end, False).isoformat()

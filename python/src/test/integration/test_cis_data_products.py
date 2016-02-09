@@ -6,7 +6,7 @@ from hamcrest import *
 
 from ceda_di.extract import Extract
 from di import read_conf
-from jasmin_cis.test.test_files.data import *
+from cis.test.integration_test_data import *
 from test.utils_for_testing.within_delta import within_delta
 from test.utils_for_testing.corner_same_as_bounds import corner_in_bounds_by_delta
 from test.integration.test_files.data import ceda_di_test_files

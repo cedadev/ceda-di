@@ -48,7 +48,7 @@ if readthedocs:
             "iris.cube",
             "iris.fileformats",
             "iris.fileformats.dot",
-            "jasmin_cis.data_io.products.products",
+            "cis.data_io.products.products",
             "numpy.dtype",
             "numpy.ma",
             "pyhdf.error",

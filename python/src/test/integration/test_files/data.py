@@ -3,7 +3,7 @@ Module that contains information about the test data
 """
 
 from datetime import datetime
-from jasmin_cis.test.test_files.data import TestFileTestData
+from cis.test.integration_test_data import TestFileTestData
 
 import os
 

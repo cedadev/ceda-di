@@ -99,7 +99,7 @@ Command-line Tasks (Commands)
     of results.
 
     There are three simple modes of restricting your search, and the syntax is
-    based on the `JASMIN_CIS <http://jasmin-cis.readthedocs.org/en/latest/colocation_examples.html>`_
+    based on the `CIS <http://cistools.net>`_
     syntax.
 
     Latitude and longitude is restricted like so:

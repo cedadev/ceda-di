@@ -3,11 +3,11 @@ Contains class which use the JASMIN CIS tool to extract metadata from specific d
 """
 
 import coards
-from jasmin_cis.exceptions import ClassNotFoundError
-from jasmin_cis.exceptions import FileFormatError as jasmin_cis_FileFormatError
-from jasmin_cis.data_io.products.AProduct import get_coordinates, get_variables, get_data, get_file_format, \
+from cis.exceptions import ClassNotFoundError
+from cis.exceptions import FileFormatError as cis_FileFormatError
+from cis.data_io.products.AProduct import get_coordinates, get_variables, get_data, get_file_format, \
     get_product_full_name, ProductPluginException
-from jasmin_cis.time_util import convert_std_time_to_datetime
+from cis.time_util import convert_std_time_to_datetime
 
 from ceda_di._dataset import _geospatial
 from ceda_di.metadata import product
@@ -28,7 +28,7 @@ class JasCisDataProduct(_geospatial):
             get_file_format([filename])
         except ClassNotFoundError:
             raise FileFormatError("No reader from CIS could be found")
-        except jasmin_cis_FileFormatError as ex:
+        except cis_FileFormatError as ex:
             message = ".".join(ex.error_list)
             raise FileFormatError(message)
         except ProductPluginException as ex:
