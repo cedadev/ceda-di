@@ -9,7 +9,7 @@ from hamcrest import *
 from mock import MagicMock
 
 from ceda_di._dataset import _geospatial
-from ceda_di.di import read_conf
+from ceda_di.util.cmd import read_conf
 from ceda_di.extract import HandlerFactory
 from ceda_di.search import Searcher, JsonQueryBuilder
 
