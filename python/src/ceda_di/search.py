@@ -167,6 +167,25 @@ class JsonQueryBuilder(object):
         self._add_to_query_filter("must", start_constraint)
         self._add_to_query_filter("must", end_constraint)
 
+    def parse_partial_datetime(self, datetime_string, use_upper_limit=False):
+        """
+        Parse and complete a full or partial ISO datetime
+        :param datetime_string: Datetime string (full or partial) which matches ISO date format.
+        Examples:
+        '2010-01-01T00:00:00'
+        '2010-01-01'
+        '2010'
+        :param use_upper_limit: Use the upper limit when completing missing parts of the datetime.
+        If true, the date is completed to be as late as possible, e.g:
+        '2010' -> '2010-12-31T23:59:59'
+        If false (default), the date is completed to be as early as possible, e.g.:
+        '2010' -> '2010-01-01T00:00:00'
+        :return: A Python datetime object corresponding to the parsed string
+        """
+        from cis.parse_datetime import _parse_datetime, convert_datetime_components_to_datetime
+        date_parts = _parse_datetime(datetime_string)
+        return convert_datetime_components_to_datetime(date_parts, use_upper_limit)
+
     def process_datetime_extents(self, start, end):
         """
         Process a datetime extents search filter and add it to the query dictionary.
@@ -177,10 +196,9 @@ class JsonQueryBuilder(object):
         :param start: Start datetime string
         :param end: End datetime string
         """
-        from cis.parse_datetime import parse_partial_datetime
         try:
-            start = parse_partial_datetime(start, True).isoformat()
-            end = parse_partial_datetime(end, False).isoformat()
+            start = self.parse_partial_datetime(start, True).isoformat()
+            end = self.parse_partial_datetime(end, False).isoformat()
         except ValueError:
             raise ValueError("Couldn't parse datetimes '{start}' and '{end}': "
                              "use the ISO-8601 YYYY-MM-DDTHH:MM:SS format.".format(start=start, end=end))
