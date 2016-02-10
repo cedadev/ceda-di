@@ -45,7 +45,7 @@ setup(
     install_requires=requirements,
     entry_points={
         'console_scripts': [
-            'ceda-di = ceda_di.di:main',
+            'ceda-di = di:main',
         ],
     },
 )
