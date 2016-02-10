@@ -1,15 +1,17 @@
 import copy
 import os
-from datetime import datetime
-from hamcrest import *
-import unittest
-from elasticsearch import ConnectionError
-from mock import MagicMock
 import sys
+import unittest
+from datetime import datetime
+
+from elasticsearch import ConnectionError
+from hamcrest import *
+from mock import MagicMock
+
 from ceda_di._dataset import _geospatial
+from ceda_di.di import read_conf
 from ceda_di.extract import HandlerFactory
 from ceda_di.search import Searcher, JsonQueryBuilder
-from di import read_conf
 
 
 class TestJsonQueryBuilder(unittest.TestCase):
