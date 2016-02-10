@@ -5,7 +5,7 @@ from unittest import TestCase
 from cis.test.integration_test_data import *
 from hamcrest import *
 
-from ceda_di.di import read_conf
+from ceda_di.util.cmd import read_conf
 from ceda_di.extract import Extract
 from test.integration.test_files.data import ceda_di_test_files
 from test.utils_for_testing.corner_same_as_bounds import corner_in_bounds_by_delta
