@@ -343,7 +343,7 @@ class Searcher(object):
         """
         from ceda_di.extract import HandlerFactory
 
-	self.logger = prepare_logging()
+        self.logger = self.prepare_logging()
 
         self._elastic_search_client_factory = elastic_search_client_factory
 
@@ -357,12 +357,16 @@ class Searcher(object):
                 raise SystemExit("Missing configuration option: %s\n\n" % str(k))
             self._json_query_builder = JsonQueryBuilder(handler_factory)
 
-        self._config_args = config_args
+        self.configuration = config_args
 
+    # This really needs abstracting out now it's in both search and extract
     def prepare_logging(self):
         """
         Initial logging setup
         """
+        import datetime
+        import logging
+        import os
         log_fname = (self.conf("es-index") + "_" +
                      datetime.datetime.now().isoformat() +
                      ".log")
@@ -378,21 +382,32 @@ class Searcher(object):
 
         return log
 
+    def conf(self, conf_opt):
+        """
+        Return configuration option or raise exception if it doesn't exist.
+        :param str conf_opt: The name of the configuration option to find.
+        """
+        if conf_opt in self.configuration:
+            return self.configuration[conf_opt]
+        else:
+            raise AttributeError(
+                "Mandatory configuration option not found: %s" % conf_opt)
+
     def run(self):
         """
         Run the search and output the results matching the configuration belonging to this instance.
 
         :returns: Outputs matching filenames to sys.stdout
         """
-        extents = self._config_args.get('extents')
-        max_results = self._config_args.get('max-results')
+        extents = self.configuration.get('extents')
+        max_results = self.configuration.get('max-results')
         query = self._json_query_builder.build(extents, max_results=max_results)
-        es = self._elastic_search_client_factory.get_client(self._config_args)
+        es = self._elastic_search_client_factory.get_client(self.configuration)
 
         try:
             # XXX
-            index = self._config_args.get('es-index')
-            doc_type = self._config_args.get('es-mapping')
+            index = self.configuration.get('es-index')
+            doc_type = self.configuration.get('es-mapping')
             self.logger.debug("Query constructed: \n%s", query)        
             results = es.search(index=index, doc_type=doc_type, body=query)
         except ConnectionError as ex:
@@ -402,7 +417,7 @@ class Searcher(object):
             print(error_msg)
             sys.exit(1)
 
-        if self._config_args.get('file-paths'):
+        if self.configuration.get('file-paths'):
             self._print_file_paths(results)
         else:
             self._print_json_results(results)
