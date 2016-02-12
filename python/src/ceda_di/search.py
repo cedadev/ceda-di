@@ -343,6 +343,7 @@ class Searcher(object):
         """
         from ceda_di.extract import HandlerFactory
 
+        self.configuration = config_args
         self.logger = self.prepare_logging()
 
         self._elastic_search_client_factory = elastic_search_client_factory
@@ -356,8 +357,6 @@ class Searcher(object):
                 sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
                 raise SystemExit("Missing configuration option: %s\n\n" % str(k))
             self._json_query_builder = JsonQueryBuilder(handler_factory)
-
-        self.configuration = config_args
 
     # This really needs abstracting out now it's in both search and extract
     def prepare_logging(self):
