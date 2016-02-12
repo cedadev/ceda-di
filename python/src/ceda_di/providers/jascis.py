@@ -2,7 +2,6 @@
 Contains class which use the JASMIN CIS tool to extract metadata from specific data formats
 """
 
-import coards
 from cis.exceptions import ClassNotFoundError
 from cis.exceptions import FileFormatError as cis_FileFormatError
 from cis.data_io.products.AProduct import get_coordinates, get_variables, get_data, get_file_format, \
