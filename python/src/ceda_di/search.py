@@ -152,14 +152,14 @@ class JsonQueryBuilder(object):
     def _add_temporal_query_to_filter(self, start, end):
         start_constraint = {
             "range": {
-                "eufar.temporal.start_time": {
+                "temporal.start_time": {
                     "lte": end
                 }
             }
         }
         end_constraint = {
             "range": {
-                "eufar.temporal.end_time": {
+                "temporal.end_time": {
                     "gte": start
                 }
             }

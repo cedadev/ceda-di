@@ -129,7 +129,6 @@ class Extract(object):
             except OSError:
                 pass  # Directory already exists!
 
-
     def prepare_logging(self):
         """
         Initial logging setup
