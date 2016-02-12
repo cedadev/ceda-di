@@ -166,7 +166,7 @@ class Extract(object):
         """
         props = handler.get_properties()
         self.logger.debug("Properties extracted: \n%s", props)
-	if props is not None:
+        if props is not None:
             self.es.index(index=self.conf('es-index'),
                           doc_type=self.conf('es-mapping'),
                           body=str(props),
@@ -180,7 +180,7 @@ class Extract(object):
         fname = os.path.basename(fname)
         json_path = os.path.join(self.conf("output-path"), self.conf("json-path"))
         out_fname = "%s/%s.json" % (json_path, os.path.splitext(fname)[0])
-
+        self.logger.DEBUG('Writing json to: {}'.format(out_fname))
         props = _geospatial_obj.get_properties()
         if props is not None:
             with open(out_fname, 'w') as j:
