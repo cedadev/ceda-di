@@ -143,7 +143,7 @@ class Extract(object):
 
         logging.basicConfig(filename=fpath,
                             format=self.conf("logging")["format"],
-                            level=logging.WARNING)
+                            level=logging.DEBUG)
 
         log = logging.getLogger(__name__)
 
@@ -166,7 +166,8 @@ class Extract(object):
         Index the file in Elasticsearch
         """
         props = handler.get_properties()
-        if props is not None:
+        self.logger.debug("Properties extracted: \n%s", props)
+	if props is not None:
             self.es.index(index=self.conf('es-index'),
                           doc_type=self.conf('es-mapping'),
                           body=str(props),

@@ -343,6 +343,8 @@ class Searcher(object):
         """
         from ceda_di.extract import HandlerFactory
 
+	self.logger = prepare_logging()
+
         self._elastic_search_client_factory = elastic_search_client_factory
 
         if json_query_builder is not None:
@@ -356,6 +358,25 @@ class Searcher(object):
             self._json_query_builder = JsonQueryBuilder(handler_factory)
 
         self._config_args = config_args
+
+    def prepare_logging(self):
+        """
+        Initial logging setup
+        """
+        log_fname = (self.conf("es-index") + "_" +
+                     datetime.datetime.now().isoformat() +
+                     ".log")
+        fpath = os.path.join(self.conf("output-path"),
+                             self.conf("log-path"),
+                             log_fname)
+
+        logging.basicConfig(filename=fpath,
+                            format=self.conf("logging")["format"],
+                            level=logging.DEBUG)
+
+        log = logging.getLogger(__name__)
+
+        return log
 
     def run(self):
         """
@@ -372,6 +393,7 @@ class Searcher(object):
             # XXX
             index = self._config_args.get('es-index')
             doc_type = self._config_args.get('es-mapping')
+            self.logger.debug("Query constructed: \n%s", query)        
             results = es.search(index=index, doc_type=doc_type, body=query)
         except ConnectionError as ex:
             url = es.transport.seed_connections[0].host
