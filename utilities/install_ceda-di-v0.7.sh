@@ -28,11 +28,11 @@ install_ceda_di()
   virtualenv-2.7 --system-site-packages "$env_dir""/"
   . "$env_dir""/bin/activate"
   pip install -r  "$code_dir""/python/pip_requirements.txt"
-  pip install docopt
-  pip install simplejson
-  pip install elasticsearch
-  pip install exifread
-  pip install xmltodict
+  #pip install docopt
+  #pip install simplejson
+  #pip install elasticsearch
+  #pip install exifread
+  #pip install xmltodict
 
   echo  "********************"
   echo  "**Testing scripts.**"
