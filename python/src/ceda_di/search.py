@@ -95,7 +95,7 @@ class JsonQueryBuilder(object):
             raise ValueError("No bounding box generated when reading the file.")
         constraint = {
             "geo_shape": {
-                "eufar.spatial.geometries.bbox": {
+                "spatial.geometries.search": {
                     "shape": bbox
                 }
             }
