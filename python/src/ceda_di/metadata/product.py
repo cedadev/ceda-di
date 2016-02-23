@@ -363,6 +363,7 @@ class Properties(object):
             "parameters": self.parameters,
             "spatial": self.spatial,
             "temporal": self.temporal,
+            "index_entry_creation": self.index_entry_creation,
         }
 
     def __str__(self):
