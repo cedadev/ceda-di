@@ -180,7 +180,7 @@ class Extract(object):
         fname = os.path.basename(fname)
         json_path = os.path.join(self.conf("output-path"), self.conf("json-path"))
         out_fname = "%s/%s.json" % (json_path, os.path.splitext(fname)[0])
-        self.logger.DEBUG('Writing json to: {}'.format(out_fname))
+        self.logger.debug('Writing json to: {}'.format(out_fname))
         props = _geospatial_obj.get_properties()
         if props is not None:
             with open(out_fname, 'w') as j:
