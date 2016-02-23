@@ -17,7 +17,7 @@ class CISProductTests(object):
     Abstract class for testing products
     """
 
-    CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../../../config/ceda_di.json')
+    CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../../../config/ceda_di_cis_integration.json')
     TEST_DIR = os.path.join(os.path.dirname(__file__), 'test_files')
 
     @classmethod
@@ -60,7 +60,7 @@ class CISProductTests(object):
 
     def test_json_has_geo_bounds(self):
         json_body = self.get_output_json()
-        geo_bbox = json_body['spatial']['geometries']['bbox']
+        geo_bbox = json_body['spatial']['geometries']['search']
         coordinates = geo_bbox['coordinates']
         assert_that(coordinates, corner_in_bounds_by_delta(self.cis_test_file, 0.01))
 
