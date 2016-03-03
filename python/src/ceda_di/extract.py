@@ -92,10 +92,17 @@ class Extract(object):
         Return file list
         :return: A list of file paths
         """
-        file_list = []
-        for root, _, files in os.walk(self.conf("input-path"), followlinks=True):
-            for each_file in files:
-                file_list.append(os.path.join(root, each_file))
+        path = self.conf("input-path")
+        self.logger.debug("Input path to scan: {}".format(path))
+        if os.path.isfile(path):
+            file_list = [path]
+        elif os.path.isdir(path):
+            file_list = []
+            for root, _, files in os.walk(path, followlinks=True):
+                for each_file in files:
+                    file_list.append(os.path.join(root, each_file))
+        else:
+            raise IOError("Unable to find file or directory: {}".format(path))
 
         return file_list
 
