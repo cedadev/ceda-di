@@ -164,21 +164,24 @@ class Extract(object):
         if handler is not None:
             with handler as hand:
                 if self.conf('send-to-index'):
+                    self.logger.debug("Indexing file properties")
                     self.index_properties(filename, hand)
                 if not self.conf('no-create-files'):
+                    self.logger.debug("Creating json file of properties")
                     self.write_properties(filename, hand)
 
     def index_properties(self, filename, handler):
         """
         Index the file in Elasticsearch
         """
+        import hashlib
         props = handler.get_properties()
         self.logger.debug("Properties extracted: \n%s", props)
         if props is not None:
             self.es.index(index=self.conf('es-index'),
                           doc_type=self.conf('es-mapping'),
                           body=str(props),
-                          id=props.properties["_id"])
+                          id=hashlib.sha1(filename).hexdigest())
 
     def write_properties(self, fname, _geospatial_obj):
         """

@@ -3,7 +3,6 @@ Module for holding and exporting file metadata as JSON documents.
 """
 
 from __future__ import division
-import hashlib
 import simplejson as json
 import logging
 import math
@@ -356,7 +355,6 @@ class Properties(object):
 
         self.misc = kwargs
         self.properties = {
-            "_id": hashlib.sha1(self.filesystem["path"]).hexdigest(),
             "data_format": self.data_format,
             "file": self.filesystem,
             "misc": self.misc,
