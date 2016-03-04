@@ -83,7 +83,7 @@ class Extract(object):
                 self.file_list = self._build_file_list()
             else:
                 self.file_list = file_list
-            self.logger.debug("Files to be indexed: {}".format(file_list))
+            self.logger.debug("Files to be indexed: {}".format(self.file_list))
         except KeyError as k:
             sys.stderr.write("Missing configuration option: %s\n\n" % str(k))
 
