@@ -37,23 +37,18 @@
             "_all": {
                 "enabled": true
             },
-            "_id": {
-                "path": "_id"
-            },
             "properties": {
                 "data_format": {
                     "properties": {
                         "format": {
-                            "type": "string",
-                            "store": "yes"
+                            "type": "string"
                         }
                     }
                 },
                 "index_entry_creation": {
                     "properties": {
                         "indexer": {
-                            "type": "string",
-                            "store": "yes"
+                            "type": "string"
                         }
                     }
                 },
@@ -61,18 +56,15 @@
                     "properties": {
                         "filename": {
                             "type": "string",
-                            "analyzer": "simple",
-                            "store": "yes"
+                            "analyzer": "simple"
                         },
                         "path": {
                             "type": "string",
                             "analyzer": "path_analyzer",
-                            "store": "yes",
                             "fields": {
                                 "hierarchy": {
                                     "type": "string",
-                                    "analyzer": "path_hierarchy_analyzer",
-                                    "store": "yes"
+                                    "analyzer": "path_hierarchy_analyzer"
                                 }
                             }
                         },
@@ -101,7 +93,7 @@
                                 },
                                 "autocomplete": {
                                     "type": "completion",
-                                    "index_analyzer": "variable_name_analyzer",
+                                    "analyzer": "variable_name_analyzer",
                                     "search_analyzer": "simple"
                                 }
                             }
@@ -115,17 +107,14 @@
                                 "search": {
                                     "type": "geo_shape",
                                     "tree": "quadtree",
-                                    "precision": "50m",
-                                    "store": "yes"
+                                    "precision": "50m"
                                 },
                                 "display": {
                                     "properties": {
                                         "coordinates": {
                                             "type": "double",
-                                            "enabled": false,
                                             "include_in_all" : false,
-                                            "index": "no",
-                                            "store": "yes"
+                                            "index": "no"
                                         }
                                     }
                                 }
@@ -137,13 +126,11 @@
                     "properties": {
                         "end_time": {
                             "type": "date",
-                            "format": "dateOptionalTime",
-                            "store": "yes"
+                            "format": "dateOptionalTime"
                         },
                         "start_time": {
                             "type": "date",
-                            "format": "dateOptionalTime",
-                            "store": "yes"
+                            "format": "dateOptionalTime"
                         }
                     }
                 }
