@@ -356,7 +356,8 @@ class Properties(object):
 
         self.misc = kwargs
         self.properties = {
-            "_id": hashlib.sha1(self.filesystem["path"]).hexdigest(),
+            # kltsa 08/03/2016 : Changes for issue #23275.
+            #"_id": hashlib.sha1(self.filesystem["path"]).hexdigest(),
             "data_format": self.data_format,
             "file": self.filesystem,
             "misc": self.misc,
