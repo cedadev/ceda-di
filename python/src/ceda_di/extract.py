@@ -9,6 +9,7 @@ import multiprocessing
 import os
 import sys
 import re
+import hashlib
 
 from elasticsearch.exceptions import TransportError
 
@@ -170,7 +171,8 @@ class Extract(object):
             self.es.index(index=self.conf('es-index'),
                           doc_type=self.conf('es-mapping'),
                           body=str(props),
-                          id=props.properties["_id"])
+                          id=hashlib.sha1(filename).hexdigest()\
+                         )#kltsa 08/03/2016: Changes for issue #23275.
 
     def write_properties(self, fname, _geospatial_obj):
         """
