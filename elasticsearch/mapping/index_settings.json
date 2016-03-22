@@ -107,7 +107,7 @@
                                 "search": {
                                     "type": "geo_shape",
                                     "tree": "quadtree",
-                                    "precision": "50m"
+                                    "precision": "1km"
                                 },
                                 "display": {
                                     "properties": {
