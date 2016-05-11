@@ -128,40 +128,6 @@ class SAFESentinel(_geospatial):
                 except:
                     print "FAILED: %s  -->  %s" % (section_id, xml_path)
               
-    def OLD_get_temporal(self, vs, fn):
-        """
-        Return start and end timestamps (if existing)
-
-        :param HDF4.V.vs vs: VData object
-        :param str fn: Path to the data file
-        :returns: Dict containing temporal information.
-        """
-        dates = []
-        timestamps["date"] = ''.join(dates)
-
-        return self._parse_timestamps(timestamps)
-
-    def OLD_parse_timestamps(self, tm_dict):
-        """
-        Parse start and end timestamps from an HDF4 file.
-
-        :param dict tm_dict: The timestamp to be parsed
-        :returns: Dict containing start and end timestamps
-        """
-        st_base = ("%s %s" % (tm_dict["date"], tm_dict["start_time"][0]))
-        et_base = ("%s %s" % (tm_dict["date"], tm_dict["end_time"][0]))
-
-        for t_format in ["%d/%m/%y %H%M%S", "%d/%m/%Y %H%M%S"]:
-            try:
-                start_time = datetime.datetime.strptime(st_base, t_format)
-                end_time = datetime.datetime.strptime(et_base, t_format)
-            except ValueError:
-                # ValueError will be raised if strptime format doesn't match
-                # the actual timestamp - so just try the next strptime format
-                continue
-
-        return {"start_time": start_time.isoformat(),
-                "end_time": end_time.isoformat()}
 
     def _package_coordinates(self, coords_string):
         """
@@ -191,7 +157,8 @@ class SAFESentinel(_geospatial):
 
     def get_temporal(self):
         """
-
+        Returns temporal window.
+        
         :returns: List containing temporal metadata
         """
         ap = self.sections["acquisition_period"]
