@@ -2,9 +2,8 @@
 Interface to extract and generate JSON from ESA SAFE Sentinel metadata
 """
 
-import datetime, os
+import datetime, os, pprint
 import xml.etree.cElementTree as ET
-
 
 from ceda_di._dataset import _geospatial
 from ceda_di.metadata import product
@@ -41,6 +40,7 @@ def get_mappings(ns):
 
     if ns["safe"] == ns["safe_1_0"]:
         product_info = {
+          "multiples": ["Polarisation"],
           "common_prefix":
             "./metadataSection/metadataObject[@ID='generalProductInformation']/metadataWrap/xmlData/",
           "properties": {
@@ -48,6 +48,7 @@ def get_mappings(ns):
              "Product Class Description": "{%(s1sarl1)s}standAloneProductInformation/{%(s1sarl1)s}productClassDescription" % ns,
              "Timeliness Category": "{%(s1sarl1)s}standAloneProductInformation/{%(s1sarl1)s}productTimelinessCategory" % ns,
              "Product Composition": "{%(s1sarl1)s}standAloneProductInformation/{%(s1sarl1)s}productComposition" % ns,
+             "Product Type": "{%(s1sarl1)s}standAloneProductInformation/{%(s1sarl1)s}productType" % ns,
              "Polarisation": "{%(s1sarl1)s}standAloneProductInformation/{%(s1sarl1)s}transmitterReceiverPolarisation" % ns,
            }
         }
@@ -92,7 +93,7 @@ def get_mappings(ns):
     }
 
     if ns["safe"] == ns["safe_1_0"]:
-        mappings["platform"]["properties"]["Mode"] = "{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}extension/{%(s1sarl1)s}instrumentMode/{%(s1sarl1)s}mode" % ns
+        mappings["platform"]["properties"]["Instrument Mode"] = "{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}extension/{%(s1sarl1)s}instrumentMode/{%(s1sarl1)s}mode" % ns
 
         mappings["orbit_info"]["properties"]["Stop Relative Orbit Number"] = "{%(safe)s}orbitReference/{%(safe)s}relativeOrbitNumber[@type='stop']" % ns
         mappings["orbit_info"]["properties"]["Phase Identifier"] = "{%(safe)s}orbitReference/{%(safe)s}phaseIdentifier" % ns
@@ -104,7 +105,9 @@ def get_mappings(ns):
 
         mappings["spatial"]["properties"]["Coordinates"] = "{%(safe)s}frameSet/{%(safe)s}frame/{%(safe)s}footPrint/{%(gml)s}coordinates" % ns
         mappings["acquisition_period"]["properties"]["Stop Time"] = "{%(safe)s}acquisitionPeriod/{%(safe)s}stopTime" % ns
-    else:
+    else: # Sentinel 2
+        mappings["platform"]["properties"]["Instrument Mode"] = "{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}mode" % ns
+        mappings["platform"]["properties"]["Platform Number"] = "{%(safe)s}platform/{%(safe)s}number" % ns
         mappings["spatial"]["properties"]["Coordinates"] = "{%(safe)s}frameSet/{%(safe)s}footPrint/{%(gml)s}coordinates" % ns
 
     return mappings
@@ -147,21 +150,27 @@ class SAFESentinelBase(_geospatial):
 
             self.sections[section_id] = {}
             prefix = content_dict["common_prefix"]
+            multiple_element_props = content_dict.get("multiples", [])
 
             for item_name, xml_path_end in content_dict["properties"].items():
                 xml_path = prefix + xml_path_end
-                
+                    
                 try:
-                    value = self.root.find(xml_path).text.strip()
+                    # Handle multiple element case - concatenate them into a space-separated string
+                    if item_name in multiple_element_props:
+                        value = " ".join([elem.text.strip() for elem in self.root.findall(xml_path)])
+                    else: # single element only
+                        value = self.root.find(xml_path).text.strip()
+
                     if item_name in content_dict.get("transformers", {}):
                         transformer = getattr(self, content_dict["transformers"][item_name])
                         value = transformer(value)
                     
                     self.sections[section_id][item_name] = value
-#                    print "SUCCESS: %s --> %s" % (section_id, xml_path)
+                    #print "SUCCESS: %s --> %s" % (section_id, xml_path)
                 except:
-                    print "FAILED: %s  -->  %s" % (section_id, xml_path)
-              
+                    #print "FAILED: %s  -->  %s" % (section_id, xml_path)
+                    pass
 
     def _package_coordinates(self, coords_string):
         """
@@ -195,6 +204,48 @@ class SAFESentinelBase(_geospatial):
         return {"start_time": ap["Start Time"],
                 "end_time": ap.get("Stop Time", ap["Start Time"])} 
 
+    def _add_filename_metadata(self, extra_metadata):
+        """
+        Adds extra metadata extracted from the filename.
+        Dictionary `extra_metadata` is changed in place.
+        Returns nothing.
+        """
+        # Make sure product_info section exists
+        extra_metadata.setdefault('product_info', {})
+        
+        if self.__class__ == SAFESentinel1a:
+            component = self.fname.split("_")[2]
+            if len(component) < 4: 
+                resolution = 'N/A'
+            else:
+                resolution = component[-1]
+                
+            extra_metadata['product_info']['Resolution'] = resolution
+        
+        # Add mission name abbreviation        
+        extra_metadata['product_info']['Name'] = os.path.splitext(self.fname)[0]
+
+    def _derive_extra_metadata(self, extra_metadata):
+        """
+        Derives extra fields from the existing fields.
+        Dictionary `extra_metadata` is changed in place.
+        Returns nothing.
+        """
+        extra_metadata['platform']['Family'] = extra_metadata['platform']['Platform Family Name']
+
+        # Add number if derived from Sentinel2
+        if self.__class__ == SAFESentinel2a:
+            extra_metadata['platform']['Family'] += "-%s" % extra_metadata['platform']['Platform Number']
+        
+    def _update_extra_metadata(self, extra_metadata):
+        """
+        Set extra content from existing content and filename.
+        Dictionary `extra_metadata` is changed in place.
+        Returns nothing.       
+        """
+        self._add_filename_metadata(extra_metadata)
+        self._derive_extra_metadata(extra_metadata)
+
     def get_properties(self):
         """
         Returns ceda_di.metadata.properties.Properties object
@@ -203,12 +254,9 @@ class SAFESentinelBase(_geospatial):
         :returns: Metadata.product.Properties object
         """
         geospatial = self.get_geospatial()
-        #raise Exception("geo: %s" % str(geospatial))
         temporal = self.get_temporal()
         filesystem = super(SAFESentinelBase, self).get_filesystem(self.fname)
-        data_format = {
-            "format": "SAFE",
-        }
+        data_format = {"format": "SAFE"}
 
         # Gather up extra metadata
         extra_metadata = {}
@@ -216,6 +264,9 @@ class SAFESentinelBase(_geospatial):
             if self.sections.get(key):
                 extra_metadata[key] = self.sections[key]
 
+        # Set extra content from existing content and filename
+        self._update_extra_metadata(extra_metadata)
+        
         props = product.Properties(spatial=geospatial,
                                    temporal=temporal,
                                    filesystem=filesystem,
@@ -231,15 +282,64 @@ class SAFESentinel1a(SAFESentinelBase): pass
 class SAFESentinel2a(SAFESentinelBase): pass
 
 
-if __name__ == "__main__":
+def check_match(d1, d2):
+    "Raises an exception if any part of dictionary `d1` is not in `d2`."
+    for (key, value) in d1.items():
+        if key not in d2:
+            raise Exception("Cannot find key '%s' in response: %s" % (key, d1))
+            
+        if isinstance(value, dict):
+            check_match(value, d2[key])
+        else:
+            if value != d2[key]:
+                raise Exception("Value for key '%s' does not match expected value: '%s'" % (key, d2[key]))            
 
-    for (sat, filepath) in [("Sentinel1a", "/neodc/sentinel1a/data/EW/L1_GRD/m/IPF_v2/2016/01/01/S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF.zip"),
-                            ("Sentinel2a", "/neodc/sentinel2a/data/L1C_MSI/2016/07/03/S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305.zip")]:
+                
+def test_parser():
+    "Tests parsing of an S1 and S2 file and searches for content."
+
+    # Prescribe content to test that find it in the output
+    s1_content = {'misc': {'platform': {'Instrument Mode': 'EW', 'Platform Family Name': 'SENTINEL-1',
+                                        'Family': 'SENTINEL-1'},
+                          'product_info': {'Product Type': 'GRD', 'Resolution': 'M',
+                                           'Name': 'S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF',
+                                           'Polarisation': 'HH HV'}}}
+    s2_content = {'misc': {'platform': {'Platform Family Name': 'SENTINEL', 'Platform Number': '2A',
+                                        'Family': 'SENTINEL-2A'},
+                           'product_info': {'Name': 'S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305'}}}
+                          
+    test_files = [
+        ("Sentinel1a",
+         "/neodc/sentinel1a/data/EW/L1_GRD/m/IPF_v2/2016/01/01/S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF.zip",
+         s1_content),
+        ("Sentinel2a",
+         "/neodc/sentinel2a/data/L1C_MSI/2016/07/03/S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305.zip",
+         s2_content)
+        ]       
+        
+    test_files = [
+        ("Sentinel1a",
+         "S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF.zip",
+         s1_content),
+        ("Sentinel2a",
+         "S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305.zip",
+         s2_content)
+        ]        
+
+        
+    for (sat, filepath, to_match) in test_files:
   
-        print "Testing: %s" % sat 
+        print "\n\nTesting: %s" % sat 
         print "With: %s" % filepath
  
         cls = eval("SAFE%s" % sat)
         with cls(filepath) as handler: 
-            print handler.get_properties() 
+            resp = handler.get_properties().as_dict() 
+            #resp['spatial']['geometries']['display'] = resp['spatial']['geometries']['search'] = "dummy"
+            pprint.pprint(resp)
+            check_match(to_match, resp)
+            
 
+if __name__ == "__main__":
+
+    test_parser()
