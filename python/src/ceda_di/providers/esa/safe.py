@@ -214,7 +214,7 @@ class SAFESentinelBase(_geospatial):
         extra_metadata.setdefault('product_info', {})
         
         if self.__class__ == SAFESentinel1a:
-            component = self.fname.split("_")[2]
+            component = os.path.basename(self.fname).split("_")[2]
             if len(component) < 4: 
                 resolution = 'N/A'
             else:
@@ -223,7 +223,7 @@ class SAFESentinelBase(_geospatial):
             extra_metadata['product_info']['Resolution'] = resolution
         
         # Add mission name abbreviation        
-        extra_metadata['product_info']['Name'] = os.path.splitext(self.fname)[0]
+        extra_metadata['product_info']['Name'] = os.path.splitext(os.path.basename(self.fname))[0]
 
     def _derive_extra_metadata(self, extra_metadata):
         """
@@ -319,10 +319,10 @@ def test_parser():
         
     test_files = [
         ("Sentinel1a",
-         "S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF.zip",
+         "../../eg_files/sentinel/S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF.zip",
          s1_content),
         ("Sentinel2a",
-         "S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305.zip",
+         "../../eg_files/sentinel/S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305.zip",
          s2_content)
         ]        
 
