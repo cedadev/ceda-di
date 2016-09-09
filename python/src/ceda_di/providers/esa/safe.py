@@ -63,6 +63,7 @@ def get_mappings(ns):
                "Platform Family Name": "{%(safe)s}platform/{%(safe)s}familyName" % ns, 
                "NSSDC Identifier": "{%(safe)s}platform/{%(safe)s}nssdcIdentifier" % ns,
                "Instrument Family Name": "{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}familyName" % ns,
+               "Instrument Abbreviation": ("{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}familyName[@abbreviation='SAR']"  % ns, "abbreviation")
            },
         },    
         "spatial": {
@@ -81,7 +82,7 @@ def get_mappings(ns):
            "properties": {
                "Start Relative Orbit Number": "{%(safe)s}orbitReference/{%(safe)s}relativeOrbitNumber[@type='start']" % ns,
                "Start Orbit Number": "{%(safe)s}orbitReference/{%(safe)s}orbitNumber[@type='start']" % ns,
-           },     
+           },
         },
         "acquisition_period": {
            "common_prefix":
@@ -142,6 +143,18 @@ class SAFESentinelBase(_geospatial):
         """
         pass
 
+    def _get_content_by_type(self, elem, attr_name=None):
+        """
+        Return the content of an element as "text" (if `attr_name` is None) or
+        as an attribute if `attr_name` is set.
+        """
+        if not attr_name:
+            resp = elem.text
+        else:
+            resp = elem.get(attr_name, "")
+        
+        return resp.strip()
+        
     def _parse_content(self):
         self.sections = {}
        
@@ -152,15 +165,22 @@ class SAFESentinelBase(_geospatial):
             prefix = content_dict["common_prefix"]
             multiple_element_props = content_dict.get("multiples", [])
 
-            for item_name, xml_path_end in content_dict["properties"].items():
-                xml_path = prefix + xml_path_end
+            for item_name, xml_path_details in content_dict["properties"].items():
+            
+                # Decide how to treat the xml path and work out if we need to get the element content or attribute
+                if type(xml_path_details) == str:
+                    xml_path = prefix + xml_path_details
+                    attr_name = None
+                else:
+                    xml_path = prefix + xml_path_details[0]
+                    attr_name = xml_path_details[1]
                     
                 try:
-                    # Handle multiple element case - concatenate them into a space-separated string
+                    # Handle multiple element case - concatenate them into a comma-separated string
                     if item_name in multiple_element_props:
-                        value = " ".join([elem.text.strip() for elem in self.root.findall(xml_path)])
+                        value = ",".join([self._get_content_by_type(elem, attr_name=attr_name) for elem in self.root.findall(xml_path)])
                     else: # single element only
-                        value = self.root.find(xml_path).text.strip()
+                        value = self._get_content_by_type(self.root.find(xml_path), attr_name=attr_name)
 
                     if item_name in content_dict.get("transformers", {}):
                         transformer = getattr(self, content_dict["transformers"][item_name])
@@ -300,10 +320,10 @@ def test_parser():
 
     # Prescribe content to test that find it in the output
     s1_content = {'misc': {'platform': {'Instrument Mode': 'EW', 'Platform Family Name': 'SENTINEL-1',
-                                        'Family': 'SENTINEL-1'},
+                                        'Family': 'SENTINEL-1', 'Instrument Abbreviation': 'SAR'},
                           'product_info': {'Product Type': 'GRD', 'Resolution': 'M',
                                            'Name': 'S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF',
-                                           'Polarisation': 'HH HV'}}}
+                                           'Polarisation': 'HH,HV'}}}
     s2_content = {'misc': {'platform': {'Platform Family Name': 'SENTINEL', 'Platform Number': '2A',
                                         'Family': 'SENTINEL-2A'},
                            'product_info': {'Name': 'S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305'}}}
