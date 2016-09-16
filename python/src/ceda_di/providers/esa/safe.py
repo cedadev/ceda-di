@@ -63,7 +63,7 @@ def get_mappings(ns):
                "Platform Family Name": "{%(safe)s}platform/{%(safe)s}familyName" % ns, 
                "NSSDC Identifier": "{%(safe)s}platform/{%(safe)s}nssdcIdentifier" % ns,
                "Instrument Family Name": "{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}familyName" % ns,
-               "Instrument Abbreviation": ("{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}familyName[@abbreviation='SAR']"  % ns, "abbreviation")
+               "Instrument Abbreviation": ("{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}familyName[@abbreviation]"  % ns, "abbreviation")
            },
         },    
         "spatial": {
@@ -204,7 +204,7 @@ class SAFESentinelBase(_geospatial):
         if len(values) % 2 != 0:
             raise Exception("Number of values for coordinates is not even.")
  
-        return {"lat": values[0::2], "lon": values[1::2], "type": "swath"}
+        return {"lat": values[0::2], "lon": values[1::2], "type": "polygon", "do_sanitise_geometries": False}
 
     def get_geospatial(self):
         """
@@ -229,12 +229,16 @@ class SAFESentinelBase(_geospatial):
         Adds extra metadata extracted from the filename.
         Dictionary `extra_metadata` is changed in place.
         Returns nothing.
-        """
+        """      
+        
         # Make sure product_info section exists
         extra_metadata.setdefault('product_info', {})
         
+        file_name = os.path.basename(self.fname)
+        fn_comps = file_name.split("_")
+        
         if self.__class__ == SAFESentinel1a:
-            component = os.path.basename(self.fname).split("_")[2]
+            component = fn_comps[2]
             if len(component) < 4: 
                 resolution = 'N/A'
             else:
@@ -242,8 +246,14 @@ class SAFESentinelBase(_geospatial):
                 
             extra_metadata['product_info']['Resolution'] = resolution
         
-        # Add mission name abbreviation        
-        extra_metadata['product_info']['Name'] = os.path.splitext(os.path.basename(self.fname))[0]
+        # Add file/scan name        
+        extra_metadata['product_info']['Name'] = os.path.splitext(file_name)[0]
+        
+        # Add Satellite and Mission from the file path
+        comp_1 = fn_comps[0].upper()
+        extra_metadata['platform']['Mission'] = "Sentinel-%s" % comp_1[1]
+        extra_metadata['platform']['Satellite'] = "Sentinel-%s" % comp_1[1:]
+
 
     def _derive_extra_metadata(self, extra_metadata):
         """
@@ -312,7 +322,7 @@ def check_match(d1, d2):
             check_match(value, d2[key])
         else:
             if value != d2[key]:
-                raise Exception("Value for key '%s' does not match expected value: '%s'" % (key, d2[key]))            
+                raise Exception("Value ('%s') for key '%s' does not match expected value: '%s'" % (value, key, d2[key]))            
 
                 
 def test_parser():
@@ -320,39 +330,56 @@ def test_parser():
 
     # Prescribe content to test that find it in the output
     s1_content = {'misc': {'platform': {'Instrument Mode': 'EW', 'Platform Family Name': 'SENTINEL-1',
-                                        'Family': 'SENTINEL-1', 'Instrument Abbreviation': 'SAR'},
+                                        'Family': 'SENTINEL-1', 'Instrument Abbreviation': 'SAR',
+                                        'Mission': 'Sentinel-1', 'Satellite': 'Sentinel-1A'},
                           'product_info': {'Product Type': 'GRD', 'Resolution': 'M',
                                            'Name': 'S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF',
                                            'Polarisation': 'HH,HV'}}}
-    s2_content = {'misc': {'platform': {'Platform Family Name': 'SENTINEL', 'Platform Number': '2A',
-                                        'Family': 'SENTINEL-2A'},
+    s2_1_content = {'misc': {'platform': {'Platform Family Name': 'SENTINEL', 'Platform Number': '2A',
+                                        'Family': 'SENTINEL-2A', 'Mission': 'Sentinel-2', 'Satellite': 'Sentinel-2A'},
                            'product_info': {'Name': 'S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305'}}}
-                          
-    test_files = [
-        ("Sentinel1a",
+
+    s2_2_content = {'misc': {'platform': {'Platform Family Name': 'SENTINEL', 'Platform Number': '2A',
+                                        'Family': 'SENTINEL-2A', 'Mission': 'Sentinel-2', 'Satellite': 'Sentinel-2A'},
+                           'product_info': {'Name': 'S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734'}},
+                    'spatial': {'geometries': {'search': {'coordinates': 
+                          [[[154.81522194202373,
+                             -10.849976483467962],
+                            [151.7477474521766,
+                             -10.849976483467962],
+                            [151.7477474521766,
+                             -12.762291212286028],
+                            [154.81522194202373,
+                             -12.762291212286028],
+                            [154.81522194202373,
+                             -10.849976483467962]]]
+                        }}}
+                    }
+                           
+    source_files = [
          "/neodc/sentinel1a/data/EW/L1_GRD/m/IPF_v2/2016/01/01/S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF.zip",
-         s1_content),
-        ("Sentinel2a",
          "/neodc/sentinel2a/data/L1C_MSI/2016/07/03/S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305.zip",
-         s2_content)
-        ]       
+         "/neodc/sentinel2a/data/L1C_MSI/2016/08/01/S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734.zip"]       
         
     test_files = [
         ("Sentinel1a",
          "../../eg_files/sentinel/S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF.zip",
          s1_content),
-        ("Sentinel2a",
+        ("Sentinel2a: 1",
          "../../eg_files/sentinel/S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305.zip",
-         s2_content)
+         s2_1_content),
+        ("Sentinel2a: 2",
+         "../../eg_files/sentinel/S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734.zip",
+         s2_2_content), 
         ]        
 
         
-    for (sat, filepath, to_match) in test_files:
+    for (test, filepath, to_match) in test_files:
   
-        print "\n\nTesting: %s" % sat 
-        print "With: %s" % filepath
+        print "\n\nTesting: %s" % test
+        print "With: %s\n" % filepath
  
-        cls = eval("SAFE%s" % sat)
+        cls = eval("SAFE%s" % test.split(":")[0])
         with cls(filepath) as handler: 
             resp = handler.get_properties().as_dict() 
             #resp['spatial']['geometries']['display'] = resp['spatial']['geometries']['search'] = "dummy"

@@ -23,11 +23,18 @@ class GeoJSONGenerator(object):
     A class to translate between different scientific data types and GeoJSON.
 
         * Flight tracks => GeoJSON "LineString"
+        * Polygon => GeoJSON "Polygon" - i.e. anything that is a bounding polygon.
         * Photography / stationary observation points => GeoJSON "Point"
         * Satellite swaths => GeoJSON "MultiPolygon"
     """
-    def __init__(self, latitudes, longitudes, shape_type=None):
-        self._sanitise_geometry(ma.array(longitudes), ma.array(latitudes))
+    def __init__(self, latitudes, longitudes, shape_type=None, do_sanitise_geometries=True):
+    
+        if do_sanitise_geometries:
+            self._sanitise_geometry(ma.array(longitudes), ma.array(latitudes))
+        else:
+            self.latitudes = latitudes
+            self.longitudes = longitudes
+            
         self.shape_type = shape_type
 
     def get_elasticsearch_geojson(self):
@@ -38,6 +45,7 @@ class GeoJSONGenerator(object):
 
             * None (returns a "LineString" type) [defaults to "track"]
             * "track" (returns a "LineString" type) [default]
+            * "polygon" (returns a "Polygon" type) 
             * "point" (returns a "Point" type)
             * "swath" (returns a "MultiPolygon" type)
 
@@ -51,6 +59,13 @@ class GeoJSONGenerator(object):
                     "geometries": {
                         "search": self._gen_point(),
                         "display": self._gen_point()
+                    }
+                }
+            elif self.shape_type == "polygon":
+                geojson = {
+                    "geometries": {
+                       "search": self._gen_bbox(),
+                       "display": self._gen_polygon_from_all_lats_lons()
                     }
                 }
             elif self.shape_type == "swath":
@@ -146,6 +161,28 @@ class GeoJSONGenerator(object):
 
         return geojson
 
+    def _gen_polygon_from_all_lats_lons(self):
+        """
+        Generate and return a polygon from lats and lons received on instance creation.
+
+        :return: A GeoJSON bounding box
+        """
+        # Just in case we don't have the same number of lats and lons we will use the lower
+        # value to create a list of points
+        min_len = len(self.latitudes)
+        n_lons = len(self.longitudes)
+        
+        if n_lons < min_len: min_len = n_lons
+                
+        coordinates = [[[self.latitudes[i], self.longitudes[i]] for i in range(n_lons)]]
+        
+        polygon = {
+            "type": "polygon",
+            "coordinates": coordinates
+        }
+
+        return polygon      
+        
     def _gen_swath(self, num_polygons=30):
         """
         Returns a GeoJSON 'MultiPolygon' type.
@@ -162,7 +199,7 @@ class GeoJSONGenerator(object):
             lo = track[i]
             hi = track[i + 1]
 
-            polygon = self._gen_polygon(lo[0], hi[0], lo[1], hi[1])
+            polygon = self._gen_polygon_from_4_points(lo[0], hi[0], lo[1], hi[1])
             geojson["coordinates"].append(polygon["coordinates"])
 
         return geojson
@@ -230,12 +267,12 @@ class GeoJSONGenerator(object):
                 lat_bottom is None or lat_top is None):
             return None
 
-        bbox = self._gen_polygon(lon_left, lon_right, lat_bottom, lat_top)
+        bbox = self._gen_polygon_from_4_points(lon_left, lon_right, lat_bottom, lat_top)
 
         return bbox
 
     @staticmethod
-    def _gen_polygon(lon_l, lon_r, lat_b, lat_t):
+    def _gen_polygon_from_4_points(lon_l, lon_r, lat_b, lat_t):
         """
         Generate and return a polygon from two provided sets of coordinates.
 
@@ -257,7 +294,7 @@ class GeoJSONGenerator(object):
             "coordinates": corners
         }
 
-        return bbox
+        return bbox  
 
     @staticmethod
     def _get_bounds(item_list, wrapped_coords=False):
