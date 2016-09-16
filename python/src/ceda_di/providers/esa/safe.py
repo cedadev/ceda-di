@@ -7,6 +7,7 @@ import xml.etree.cElementTree as ET
 
 from ceda_di._dataset import _geospatial
 from ceda_di.metadata import product
+from ceda_di.providers.esa import sentinel2
 
 
 # Set up name spaces for use in XML paths
@@ -266,7 +267,28 @@ class SAFESentinelBase(_geospatial):
         # Add number if derived from Sentinel2
         if self.__class__ == SAFESentinel2a:
             extra_metadata['platform']['Family'] += "-%s" % extra_metadata['platform']['Platform Number']
-        
+
+            
+    def _extract_metadata_from_zipfile(self, extra_metadata):
+        """
+        Set extra metadata extracted from the zip file.
+        Dictionary `extra_metadata` is changed in place.
+        Returns nothing.       
+        """
+        try:
+            zip_metadata = sentinel2.Sentinel2Scan(self.fname).sentinel_metadata 
+        except:
+            return 
+            
+        datatake_attr = "Datatake Type"
+        if hasattr(zip_metadata, datatake_attr):
+            extra_metadata["product_info"][datatake_attr] = getattr(zip_metadata, datatake_attr)
+
+        cloud_attr = "Cloud Coverage Assessment"
+        if hasattr(zip_metadata, cloud_attr):
+            extra_metadata["quality_info"] = {cloud_attr: getattr(zip_metadata, cloud_attr)}            
+
+            
     def _update_extra_metadata(self, extra_metadata):
         """
         Set extra content from existing content and filename.
@@ -275,7 +297,11 @@ class SAFESentinelBase(_geospatial):
         """
         self._add_filename_metadata(extra_metadata)
         self._derive_extra_metadata(extra_metadata)
+        
+        if self.__class__ == SAFESentinel2a:
+            self._extract_metadata_from_zipfile(extra_metadata)
 
+        
     def get_properties(self):
         """
         Returns ceda_di.metadata.properties.Properties object
@@ -336,12 +362,16 @@ def test_parser():
                                            'Name': 'S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF',
                                            'Polarisation': 'HH,HV'}}}
     s2_1_content = {'misc': {'platform': {'Platform Family Name': 'SENTINEL', 'Platform Number': '2A',
-                                        'Family': 'SENTINEL-2A', 'Mission': 'Sentinel-2', 'Satellite': 'Sentinel-2A'},
+                                        'Family': 'SENTINEL-2A', 'Mission': 'Sentinel-2', 'Satellite': 'Sentinel-2A',
+                                        'Instrument Abbreviation': 'MSI'},
                            'product_info': {'Name': 'S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305'}}}
 
     s2_2_content = {'misc': {'platform': {'Platform Family Name': 'SENTINEL', 'Platform Number': '2A',
-                                        'Family': 'SENTINEL-2A', 'Mission': 'Sentinel-2', 'Satellite': 'Sentinel-2A'},
-                           'product_info': {'Name': 'S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734'}},
+                                        'Family': 'SENTINEL-2A', 'Mission': 'Sentinel-2', 'Satellite': 'Sentinel-2A',
+                                        'Instrument Abbreviation': 'MSI'},
+                           'product_info': {'Name': 'S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734',
+                                            'Datatake Type': 'INS-NOBS'},
+                           'quality_info': {'Cloud Coverage Assessment': '27.67777777777778'}},
                     'spatial': {'geometries': {'search': {'coordinates': 
                           [[[154.81522194202373,
                              -10.849976483467962],
@@ -374,7 +404,7 @@ def test_parser():
         ]        
 
         
-    for (test, filepath, to_match) in test_files:
+    for (test, filepath, to_match) in test_files[:]:
   
         print "\n\nTesting: %s" % test
         print "With: %s\n" % filepath
