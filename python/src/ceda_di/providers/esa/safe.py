@@ -286,7 +286,7 @@ class SAFESentinelBase(_geospatial):
 
         cloud_attr = "Cloud Coverage Assessment"
         if hasattr(zip_metadata, cloud_attr):
-            extra_metadata["quality_info"] = {cloud_attr: getattr(zip_metadata, cloud_attr)}            
+            extra_metadata["quality_info"] = {cloud_attr: float(getattr(zip_metadata, cloud_attr))}
 
             
     def _update_extra_metadata(self, extra_metadata):
@@ -371,7 +371,7 @@ def test_parser():
                                         'Instrument Abbreviation': 'MSI'},
                            'product_info': {'Name': 'S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734',
                                             'Datatake Type': 'INS-NOBS'},
-                           'quality_info': {'Cloud Coverage Assessment': '27.67777777777778'}},
+                           'quality_info': {'Cloud Coverage Assessment': 27.67777777777778}},
                     'spatial': {'geometries': {'search': {'coordinates': 
                           [[[154.81522194202373,
                              -10.849976483467962],
