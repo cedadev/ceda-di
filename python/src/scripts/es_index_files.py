@@ -51,13 +51,13 @@ def sanitise_args(config):
 
 
 def execute_command(cmd, url):
-    print "Command used: " + cmd    
+    print "Running command: %s" % cmd    
     subprocess.check_output(shlex.split(cmd), cwd=src_dir, env=os.environ.copy())
 
     try:
         subprocess.check_output(shlex.split(cmd), cwd=src_dir, env=os.environ.copy())
     except subprocess.CalledProcessError as grepexc:                                                                                                   
-        print "Error code", grepexc.returncode, grepexc.output
+        print "Error code:", grepexc.returncode, grepexc.output
     else:
         time.sleep(2)
         report_files(url) 
@@ -68,13 +68,13 @@ def construct_url(json_file):
         data = json.load(data_file)
 
     url= "http://{}:{}/{}/_count?q=file.filename:*&pretty=true".format(data["es-host"], data["es-port"], data["es-index"])
-    print "URL used: " + url
+    print "URL used: %s" % url
     return url
 
 
 def report_files(url):
     content = urllib2.urlopen(url).read()
-    print "Files in database:" + content.split(",")[0].replace("{","")
+    print "\nFile count in index: %s" % content.split(",")[0].replace("{","")
 
 
 def scan_dataset(dataset, directory):
@@ -104,7 +104,6 @@ def main():
     args, dummy = getopt.getopt(sys.argv[1:], "d:i:l:")
 
     for k, v in args:
-        print k, v
         if k == "-i":
             config["index"] = v
         elif k == "-d":
@@ -113,7 +112,7 @@ def main():
             config["file_list"] = v
             
     start = datetime.datetime.now()
-    print "Script started at: %s" %(str(start))
+    print "Script started at: %s" % start
 
     if config["index"] and config["file_list"]:
         scan_file(config["index"], config["file_list"])
@@ -124,7 +123,7 @@ def main():
         print "Arguments not recognised!"
     
     end = datetime.datetime.now()
-    print "Script ended at : %s it ran for : %s" %(str(end), str(end - start))
+    print "Script ended at: %s ; it ran for: %s seconds." % (str(end), str(end - start))
 
 
 if __name__ == '__main__':
