@@ -289,7 +289,7 @@ class GeoJSONGenerator(object):
         ]
 
         bbox = {
-            "type": "polygon",
+            "type": "Polygon",
             "orientation": "counterclockwise",
             "coordinates": corners
         }
