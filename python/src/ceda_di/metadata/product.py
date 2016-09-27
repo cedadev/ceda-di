@@ -177,7 +177,7 @@ class GeoJSONGenerator(object):
         coordinates = [[[self.latitudes[i], self.longitudes[i]] for i in range(n_lons)]]
         
         polygon = {
-            "type": "polygon",
+            "type": "Polygon",
             "coordinates": coordinates
         }
 
