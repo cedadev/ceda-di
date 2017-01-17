@@ -9,12 +9,15 @@ mkdir -p $outdir
 dirs=$@
 ds=sentinel-$(date +%Y%m%d-%H%M%S)
 
+count=1
 for dr in $dirs; do
 
-    job=${ds}
+    job=${ds}-${count}
 
     cmd="bsub -q ingest -o $outdir/${job}.out -e $outdir/${job}.err ./scripts/wrap_es_index_files.sh $dr"
     echo "Running: $cmd"
     $cmd 
+
+    let x+=1
 
 done
