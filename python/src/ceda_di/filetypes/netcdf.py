@@ -5,6 +5,7 @@ Metadata adapters for NetCDF files.
 import logging
 import re
 
+import numpy.ma
 import netCDF4
 
 from ceda_di._dataset import _geospatial
@@ -78,7 +79,7 @@ class NetCDF_Base(_geospatial):
         """Return True if coordinate is valid."""
         try:
             # This filters out misconfigured "_FillValue" elements
-            if coord == 0.0:
+            if coord == 0.0 or numpy.ma.is_masked(coord):
                 return False
 
             int(coord)  # If this fails, "coord" is not a number!
