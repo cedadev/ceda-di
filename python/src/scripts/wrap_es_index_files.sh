@@ -1,6 +1,12 @@
 #!/bin/bash
 
-cd /home/badc/software/datasets/faam/elasticsearch
+if [ ! -f scripts/wrap_es_index_files.sh ]; then
+    echo "You must run this script from the 'ceda-di/python/src/' directory for it to work."
+    exit
+fi
+
+BASEDIR=$PWD/../../..
+cd $BASEDIR
 . setup_env.sh
 
 DIRS=$@
