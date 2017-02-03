@@ -7,11 +7,12 @@ outdir=$wd/outputs
 mkdir -p $outdir
 
 dirs="/neodc/sentinel2a/data/L1C_MSI"
-ds=sentinel2a
+
 
 for dr in $dirs; do
 
     yrs=$(ls $dr | grep 20)
+    ds=$(echo $dr | cut -d/ -f3)
 
     for yr in $yrs; do
         ydr=$dr/$yr

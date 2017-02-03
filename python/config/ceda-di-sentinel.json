@@ -54,7 +54,7 @@
             "class": "ceda_di.providers.arsf.envi.BIL",
             "priority": 10
         },
-        "S1A_.+.manifest$": {
+        "S1._.+.manifest$": {
             "class": "ceda_di.providers.esa.safe.SAFESentinel1a",
             "priority": 10
         },

@@ -355,12 +355,21 @@ def test_parser():
     "Tests parsing of an S1 and S2 file and searches for content."
 
     # Prescribe content to test that find it in the output
-    s1_content = {'misc': {'platform': {'Instrument Mode': 'EW', 'Platform Family Name': 'SENTINEL-1',
+    s1a_content = {'misc': {'platform': {'Instrument Mode': 'EW', 'Platform Family Name': 'SENTINEL-1',
                                         'Family': 'SENTINEL-1', 'Instrument Abbreviation': 'SAR',
                                         'Mission': 'Sentinel-1', 'Satellite': 'Sentinel-1A'},
                           'product_info': {'Product Type': 'GRD', 'Resolution': 'M',
                                            'Name': 'S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF',
                                            'Polarisation': 'HH,HV'}}}
+
+    s1b_content = {'misc': {'platform': {'Instrument Mode': 'IW', 'Platform Family Name': 'SENTINEL-1',
+                                        'Family': 'SENTINEL-1', 'Instrument Abbreviation': 'SAR',
+                                        'Mission': 'Sentinel-1', 'Satellite': 'Sentinel-1B'},
+                          'product_info': {'Product Type': 'SLC', 
+                                           'Name': 'S1B_IW_SLC__1SSV_20161101T010312_20161101T010340_002758_004AB5_B6E7',
+                                           'Polarisation': 'VV'}}}
+
+
     s2_1_content = {'misc': {'platform': {'Platform Family Name': 'SENTINEL', 'Platform Number': '2A',
                                         'Family': 'SENTINEL-2A', 'Mission': 'Sentinel-2', 'Satellite': 'Sentinel-2A',
                                         'Instrument Abbreviation': 'MSI'},
@@ -385,23 +394,39 @@ def test_parser():
                              -10.849976483467962]]]
                         }}}
                     }
+
+    s3a_content = {}
                            
     source_files = [
-         "/neodc/sentinel1a/data/EW/L1_GRD/m/IPF_v2/2016/01/01/S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF.zip",
-         "/neodc/sentinel2a/data/L1C_MSI/2016/07/03/S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305.zip",
-         "/neodc/sentinel2a/data/L1C_MSI/2016/08/01/S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734.zip"]       
+         "/neodc/sentinel1a/data/EW/L1_GRD/m/IPF_v2/2016/01/01/S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF.manifest",
+         "/neodc/sentinel1b/data/IW/L1_SLC/IPF_v2/2016/11/01/S1B_IW_SLC__1SSV_20161101T010312_20161101T010340_002758_004AB5_B6E7.manifest",
+         "/neodc/sentinel2a/data/L1C_MSI/2016/07/03/S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305.manifest",
+         "/neodc/sentinel2a/data/L1C_MSI/2016/08/01/S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734.manifest",       
+         "/neodc/sentinel3a/data/SLSTR/L1_RBT/2016/11/29/S3A_SL_1_RBT____20161129T002703_20161129T003003_20161129T030545_0179_011_259_0900_SVL_O_NR_002.manifest"]
         
     test_files = [
         ("Sentinel1a",
-         "../../eg_files/sentinel/S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF.zip",
-         s1_content),
+         "../../eg_files/sentinel/S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF.manifest",
+         s1a_content),
         ("Sentinel2a: 1",
-         "../../eg_files/sentinel/S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305.zip",
+         "../../eg_files/sentinel/S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305.manifest",
          s2_1_content),
         ("Sentinel2a: 2",
-         "../../eg_files/sentinel/S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734.zip",
+         "../../eg_files/sentinel/S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734.manifest",
          s2_2_content), 
         ]        
+
+    test_files = [
+        ("Sentinel2a: S3A",
+         "../../eg_files/sentinel/S3A_SL_1_RBT____20161129T002703_20161129T003003_20161129T030545_0179_011_259_0900_SVL_O_NR_002.manifest",
+         s3a_content),
+        ]
+
+    test_files = [
+        ("Sentinel1a: S1B",
+         "../../eg_files/sentinel/S1B_IW_SLC__1SSV_20161101T010312_20161101T010340_002758_004AB5_B6E7.manifest",
+         s1b_content),
+        ]
 
         
     for (test, filepath, to_match) in test_files[:]:

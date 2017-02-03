@@ -6,12 +6,14 @@ cd $wd
 outdir=$wd/outputs
 mkdir -p $outdir
 
-dirs="/neodc/sentinel1a/data/EW/L1_GRD/m/IPF_v2 /neodc/sentinel1a/data/IW/L1_GRD/h/IPF_v2 /neodc/sentinel1a/data/IW/L1_SLC/IPF_v2 /neodc/sentinel1a/data/IW/L1_SLC/IPF_v2 /neodc/sentinel1a/data/IW/L1_SLC/IPF_v2"
-ds=sentinel1a
+s1a_dirs="/neodc/sentinel1a/data/EW/L1_GRD/m/IPF_v2 /neodc/sentinel1a/data/IW/L1_GRD/h/IPF_v2 /neodc/sentinel1a/data/IW/L1_SLC/IPF_v2 /neodc/sentinel1a/data/IW/L1_SLC/IPF_v2 /neodc/sentinel1a/data/IW/L1_SLC/IPF_v2"
 
-for dr in $dirs; do
+s1b_dirs="/neodc/sentinel1b/data/IW/L1_SLC/IPF_v2/2016 /neodc/sentinel1b/data/IW/L1_GRD/h/IPF_v2 /neodc/sentinel1b/data/IW/L1_GRD/h/IPF_v2 /neodc/sentinel1b/data/EW/L1_GRD/m/IPF_v2"
+
+for dr in $s1a_dirs $s1b_dirs; do
 
     yrs=$(ls $dr | grep 20)
+    ds=$(echo $dr | cut -d/ -f3)
 
     for yr in $yrs; do
         ydr=$dr/$yr
