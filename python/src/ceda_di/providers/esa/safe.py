@@ -301,7 +301,43 @@ class SAFESentinelBase(_geospatial):
         if self.__class__ == SAFESentinel2a:
             self._extract_metadata_from_zipfile(extra_metadata)
 
+
+    def _update_filesystem_metadata(self, metadata):
+        """
+        Takes the dictionary file info `metadata` and does some ESA SAFE specific searching for 
+        the '.zip' and '.png' files to report on their existence in the output dictionary by 
+        adding to `metadata`.
+        """
+        directory, fname = os.path.split(self.fname)
+        fbase = os.path.splitext(fname)[0]
         
+        # Test for presence and size of zip file
+        zip_file = fbase + '.zip'
+        zip_path = os.path.join(directory, zip_file)
+        
+        if os.path.isfile(zip_path):
+            location = 'on_disk'
+            data_file_size = os.path.getsize(zip_path)
+        else:
+            location = 'on_tape'
+            data_file_size = 0
+            
+        # Test for presence of quick look PNG file
+        quicklook_file = fbase + '.png'
+        quicklook_path = os.path.join(directory, quicklook_file)
+        
+        if not os.path.isfile(quicklook_path):
+            quicklook_file = ''
+
+        # Add to metadata dictionary
+        item_map = {'directory': directory, 'metadata_file': fname,
+                    'data_file': zip_file, 'location': location, 
+                    'data_file_size': data_file_size, 'quicklook_file': quicklook_file}
+                    
+        for key, value in item_map.items():
+            metadata[key] = value
+        
+
     def get_properties(self):
         """
         Returns ceda_di.metadata.properties.Properties object
@@ -311,7 +347,11 @@ class SAFESentinelBase(_geospatial):
         """
         geospatial = self.get_geospatial()
         temporal = self.get_temporal()
+
+        # File system metadata
         filesystem = super(SAFESentinelBase, self).get_filesystem(self.fname)
+        self._update_filesystem_metadata(filesystem)
+
         data_format = {"format": "SAFE"}
 
         # Gather up extra metadata
