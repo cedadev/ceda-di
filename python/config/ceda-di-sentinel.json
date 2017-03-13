@@ -6,7 +6,7 @@
     "es-port": 9200,
 
     "_option": "es_index: Elasticsearch index to use",
-    "es-index": "sentinel-2017-02-01",
+    "es-index": "sentinel",
 
     "_option": "es_mapping: Elasticsearch document type to index data as",
     "es-mapping": "geo_metadata",
@@ -27,7 +27,7 @@
     "json-path": "json/",
 
     "_option": "input-path: data input path (where to extract metadata from)",
-    "input-path": "/tmp/sentinel1a",
+    "input-path": "/tmp/sentinel",
 
     "_option": "batch-queue: name of the batch queue to submit jobs to",
     "batch-queue": "localhost",
