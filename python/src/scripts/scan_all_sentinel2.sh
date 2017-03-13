@@ -1,6 +1,11 @@
 #!/bin/bash
 
-wd=/home/badc/software/datasets/sentinel/ceda-di-sentinel/ceda-di/python/src
+if [ ! -f scripts/wrap_es_index_files.sh ]; then
+    echo "You must run this script from the 'ceda-di/python/src/' directory for it to work."
+    exit
+fi
+
+wd=$PWD
 cd $wd
 
 outdir=$wd/outputs
@@ -33,7 +38,7 @@ done
 
 echo
 echo "You can count the number of records with this line:"
-echo "curl jasmin-es1.ceda.ac.uk:9200/sentinel/_count ; echo"
+echo "curl jasmin-es1.ceda.ac.uk:9200/${CEDA_DI_PROJECT}/_count ; echo"
 
 echo
 echo "...and check the number of actual 'manifest' files with:"
