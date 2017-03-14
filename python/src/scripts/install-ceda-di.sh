@@ -25,7 +25,7 @@ install_ceda_di()
   echo "**Installing environment.**"
   echo "***************************"
   
-  virtualenv-2.7 --system-site-packages $env_dir
+  virtualenv --system-site-packages $env_dir
   . $env_dir/bin/activate
   pip install -r  $code_dir/python/pip_requirements.txt
   pip install docopt
