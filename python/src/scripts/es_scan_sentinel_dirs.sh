@@ -5,6 +5,6 @@
 
 DIRS=$@
 
-export CEDA_DI_PROJECT=sentinel
-cd /home/badc/software/datasets/sentinel/ceda-di-sentinel/ceda-di/python/src
+export CEDA_DI_PROJECT=ceda-eo
+cd /home/badc/software/datasets/ceda-eo/ceda-di/python/src
 ./scripts/wrap_es_index_files.sh $DIRS

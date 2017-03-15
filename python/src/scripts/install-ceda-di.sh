@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Deactivate any existing virtualenv if it exists
+deactivate 2> /dev/null
+
 code_dir=$PWD/ceda-di
 env_dir=$PWD/venv-ceda-di
 
