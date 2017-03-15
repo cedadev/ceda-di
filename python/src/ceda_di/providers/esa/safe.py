@@ -172,7 +172,6 @@ class SAFESentinelBase(_geospatial):
             multiple_element_props = content_dict.get("multiples", [])
 
             for item_name, xml_path_details in content_dict["properties"].items():
-                print item_name, xml_path_details
             
                 # Decide how to treat the xml path and work out if we need to get the element content or attribute
                 if type(xml_path_details) == str:
@@ -194,9 +193,7 @@ class SAFESentinelBase(_geospatial):
                         value = transformer(value)
                     
                     self.sections[section_id][item_name] = value
-                    #print "SUCCESS: %s --> %s" % (section_id, xml_path)
                 except:
-                    #print "FAILED: %s  -->  %s" % (section_id, xml_path)
                     pass
 
 
@@ -520,7 +517,6 @@ def test_parser():
 
         with cls(filepath) as handler: 
             resp = handler.get_properties().as_dict() 
-            #resp['spatial']['geometries']['display'] = resp['spatial']['geometries']['search'] = "dummy"
             pprint.pprint(resp)
             check_match(to_match, resp)
             
