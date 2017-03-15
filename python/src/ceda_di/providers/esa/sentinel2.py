@@ -38,14 +38,14 @@ class Sentinel2Scan(object):
     def __init__(self, manifest_file, ingestdt = None):
         
         if not os.path.exists(manifest_file):
-            raise Exception( "ERROR: Cannot find manifest file%s "% manifest_file)
+            raise Exception( "ERROR: Cannot find manifest file: %s" % manifest_file)
         
         self.zip_filename = manifest_file.replace('.manifest', '.zip')
     
         if not os.path.exists(self.zip_filename):
-            raise Exception ("ERROR: Cannot find data file file%s " % self.zip_filename)
+            raise Exception ("ERROR: Cannot find data file: %s" % self.zip_filename)
         
-        self.xpath_info()
+        self.xpath_info(manifest_file)
         self.safe_metadata = self.extract_from_zip(self.zip_filename)
        
         self.extract_metadata()
@@ -69,18 +69,30 @@ class Sentinel2Scan(object):
         self.sentinel_metadata = SentinelMetadata(**self.extracted_info)
     
 
-    def xpath_info(self):
+    def xpath_info(self, filename):
         '''
         Put here all info required to be extracted via xpath
             
-        Note namespace used is https://psd-13.sentinel2.eo.esa.int/PSD/User_Product_Level-1C.xsd
+        Note namespace used depends on the file, e.g: 
+
+             S2 format 1: https://psd-13.sentinel2.eo.esa.int/PSD/User_Product_Level-1C.xsd
+             S2 format 2: https://psd-14.sentinel2.eo.esa.int/PSD/User_Product_Level-1C.xsd
         '''
+        fname = os.path.basename(filename)
+
+        if 'S2A_OPER_PRD_MSIL1C' in fname:
+            psd_version = "13"
+        else: # i.e. 'S2A_MSIL1C' in fname:
+            psd_version = "14"
+
+        namespace = "https://psd-%s.sentinel2.eo.esa.int/PSD/User_Product_Level-1C.xsd" % psd_version
         
         self.info_to_extract = {}
-        self.info_to_extract['Datatake Type'] = "{https://psd-13.sentinel2.eo.esa.int/PSD/User_Product_Level-1C.xsd}General_Info/Product_Info/Datatake/DATATAKE_TYPE"
+        self.info_to_extract['Datatake Type'] = "{%s}General_Info/Product_Info/Datatake/DATATAKE_TYPE" % namespace
         
-        self.info_to_extract['Cloud Coverage Assessment'] = "{https://psd-13.sentinel2.eo.esa.int/PSD/User_Product_Level-1C.xsd}Quality_Indicators_Info/Cloud_Coverage_Assessment"
-        self.info_to_extract['product_type'] = "{https://psd-13.sentinel2.eo.esa.int/PSD/User_Product_Level-1C.xsd}General_Info/Product_Info/PRODUCT_TYPE"
+        self.info_to_extract['Cloud Coverage Assessment'] = "{%s}Quality_Indicators_Info/Cloud_Coverage_Assessment" % namespace
+        self.info_to_extract['product_type'] = "{%s}General_Info/Product_Info/PRODUCT_TYPE" % namespace
+
     
     def zip_archive_info(self, filename):
         '''
@@ -145,8 +157,7 @@ class Sentinel2Scan(object):
             except Exception as ex:
                 print "WARNING: Could not access information for %s (%s)" % (element, ex)
                 self.extracted_info[element] = None
-    
-    
+   
     def add_details(self, varname, varval):
         '''
         Add information on ingestion date, manifest file etc - just add given value as a self variable

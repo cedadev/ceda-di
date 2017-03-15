@@ -108,7 +108,6 @@ def get_mappings(cls):
         mappings["platform"]["properties"]["Instrument Mode"] = "{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}mode" % ns
         mappings["platform"]["properties"]["Platform Number"] = "{%(safe)s}platform/{%(safe)s}number" % ns
         mappings["spatial"]["properties"]["Coordinates"] = "{%(safe)s}frameSet/{%(safe)s}footPrint/{%(gml)s}posList" % ns
-        #sentinel-safe:frameSet/sentinel-safe:footPrint srsName="http://www.opengis.net/def/crs/EPSG/0/4326"/gml:posList
 
     else:
         raise Exception("Class {0} not recognised.".format(cls.__name__))
@@ -246,7 +245,7 @@ class SAFESentinelBase(_geospatial):
         file_name = os.path.basename(self.fname)
         fn_comps = file_name.split("_")
         
-        if self.__class__ == SAFESentinel1:
+        if self.__class__ != SAFESentinel1:
             component = fn_comps[2]
             if len(component) < 4: 
                 resolution = 'N/A'
@@ -272,8 +271,8 @@ class SAFESentinelBase(_geospatial):
         """
         extra_metadata['platform']['Family'] = extra_metadata['platform']['Platform Family Name']
 
-        # Add number if derived from Sentinel2
-        if self.__class__ == SAFESentinel2:
+        # Add platform number if derivable from file
+        if self.__class__ is not SAFESentinel1:
             extra_metadata['platform']['Family'] += "-%s" % extra_metadata['platform']['Platform Number']
 
             
@@ -450,6 +449,11 @@ def test_parser():
                         }}}
                     }
 
+    s2_3_content = {'misc': {'product_info': {'Datatake Type': 'INS-NOBS',
+                                              'Name': 'S2A_MSIL1C_20170221T233801_N0204_R001_T53CMQ_20170221T233758'},
+                             'quality_info': {'Cloud Coverage Assessment': 0.0}}
+                   }
+
     s3a_content = {'file': {'data_file': 'S3A_SL_1_RBT____20161129T002703_20161129T003003_20161129T030545_0179_011_259_0900_SVL_O_NR_002.zip',
                             'data_file_size': 0,
                             'directory': '../../eg_files/sentinel',
@@ -461,7 +465,7 @@ def test_parser():
                             'size': 197442},
                    'misc': {'orbit_info': {'Start Orbit Number': '4082',
                                            'Start Relative Orbit Number': '259'},
-                   'platform': {'Family': 'Sentinel-3',
+                   'platform': {'Family': 'Sentinel-3-A',
                                 'Instrument Abbreviation': 'SLSTR',
                                 'Instrument Family Name': 'Sea and Land Surface Temperature Radiometer',
                                 'Instrument Mode': 'Earth Observation',
@@ -478,6 +482,7 @@ def test_parser():
          "/neodc/sentinel1b/data/IW/L1_SLC/IPF_v2/2016/11/01/S1B_IW_SLC__1SSV_20161101T010312_20161101T010340_002758_004AB5_B6E7.manifest",
          "/neodc/sentinel2a/data/L1C_MSI/2016/07/03/S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305.manifest",
          "/neodc/sentinel2a/data/L1C_MSI/2016/08/01/S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734.manifest",       
+         "/neodc/sentinel2a/data/L1C_MSI/2017/02/21/S2A_MSIL1C_20170221T233801_N0204_R001_T53CMQ_20170221T233758.manifest",
          "/neodc/sentinel3a/data/SLSTR/L1_RBT/2016/11/29/S3A_SL_1_RBT____20161129T002703_20161129T003003_20161129T030545_0179_011_259_0900_SVL_O_NR_002.manifest"]
         
     test_files_S1 = [
@@ -496,6 +501,9 @@ def test_parser():
         ("Sentinel2: 2",
          "../../eg_files/sentinel/S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734.manifest",
          s2_2_content), 
+        ("Sentinel2: 3 MSIL1C version (different zip)",
+         "../../eg_files/sentinel/S2A_MSIL1C_20170221T233801_N0204_R001_T53CMQ_20170221T233758.manifest",
+         s2_3_content),
         ]        
 
     test_files_S3 = [
@@ -505,6 +513,7 @@ def test_parser():
         ]
 
     test_files = test_files_S1 + test_files_S2 + test_files_S3
+    test_files = test_files_S3
         
     for (test, filepath, to_match) in test_files[:]:
   
