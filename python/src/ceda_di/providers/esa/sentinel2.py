@@ -82,15 +82,21 @@ class Sentinel2Scan(object):
         self.info_to_extract['Cloud Coverage Assessment'] = "{https://psd-13.sentinel2.eo.esa.int/PSD/User_Product_Level-1C.xsd}Quality_Indicators_Info/Cloud_Coverage_Assessment"
         self.info_to_extract['product_type'] = "{https://psd-13.sentinel2.eo.esa.int/PSD/User_Product_Level-1C.xsd}General_Info/Product_Info/PRODUCT_TYPE"
     
-    def zip_archive_info(self,filename):
+    def zip_archive_info(self, filename):
         '''
-        Calculate where to find the correct xml metadata file in the S2 zip
+        Calculate where to find the correct xml metadata file in the S2 zip.
         '''
-        
         # Work out name of archive member we want to extract
-        sentinel_metadata_zip_dir = os.path.basename(filename).replace('.zip', '.SAFE')
-        sentinel_metadata_zip_file = sentinel_metadata_zip_dir.replace('SAFE', 'xml').replace('PRD_MSIL1C', 'MTD_SAFL1C')
-        
+        fname = os.path.basename(filename)
+        sentinel_metadata_zip_dir = fname.replace('.zip', '.SAFE')
+
+        if 'S2A_OPER_PRD_MSIL1C' in fname: 	 
+            sentinel_metadata_zip_file = sentinel_metadata_zip_dir.replace('SAFE', 'xml').replace('PRD_MSIL1C', 'MTD_SAFL1C')
+        elif 'S2A_MSIL1C' in fname:
+	        sentinel_metadata_zip_file = 'MTD_MSIL1C.xml'
+	    else: 
+	        raise Exception("Could not extract sentinel metadata zip file info for: %s" % filename)
+
         ziploc = os.path.join(sentinel_metadata_zip_dir, sentinel_metadata_zip_file)
         return ziploc
         
