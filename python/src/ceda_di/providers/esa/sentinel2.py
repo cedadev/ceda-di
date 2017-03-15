@@ -90,12 +90,12 @@ class Sentinel2Scan(object):
         fname = os.path.basename(filename)
         sentinel_metadata_zip_dir = fname.replace('.zip', '.SAFE')
 
-        if 'S2A_OPER_PRD_MSIL1C' in fname: 	 
+        if 'S2A_OPER_PRD_MSIL1C' in fname: 
             sentinel_metadata_zip_file = sentinel_metadata_zip_dir.replace('SAFE', 'xml').replace('PRD_MSIL1C', 'MTD_SAFL1C')
         elif 'S2A_MSIL1C' in fname:
-	        sentinel_metadata_zip_file = 'MTD_MSIL1C.xml'
-	    else: 
-	        raise Exception("Could not extract sentinel metadata zip file info for: %s" % filename)
+            sentinel_metadata_zip_file = 'MTD_MSIL1C.xml'
+        else: 
+            raise Exception("Could not extract sentinel metadata zip file info for: %s" % filename)
 
         ziploc = os.path.join(sentinel_metadata_zip_dir, sentinel_metadata_zip_file)
         return ziploc

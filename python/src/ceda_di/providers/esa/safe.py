@@ -11,7 +11,7 @@ from ceda_di.providers.esa import sentinel2
 
 
 # Set up name spaces for use in XML paths
-ns = {
+namespaces = {
     "gml": "http://www.opengis.net/gml",
     "gx": "http://www.google.com/kml/ext/2.2",
     "s1": "http://www.esa.int/safe/sentinel-1.0/sentinel-1",    
@@ -23,23 +23,13 @@ ns = {
     "xfdu": "urn:ccsds:schema:xfdu:1",
 }
 
-# Define mappings dictionary of XML paths to sections we are capturing
-def get_namespace_mappings(cls):
-    """
-    Return a dictionary of mappings according to the class being used.
-    """
-    if cls == SAFESentinel1a:
-        ns["safe"] = ns["safe_1_0"]
-        
-    else: # if SafeSentinel2a
-        ns["safe"] = ns["safe_1_1"]
 
-    return get_mappings(ns)
+def get_mappings(cls):
 
+    ns = {key: value for key, value in namespaces.items()}
+    ns["safe"] = ns[cls.namespace]
 
-def get_mappings(ns):
-
-    if ns["safe"] == ns["safe_1_0"]:
+    if cls == SAFESentinel1:
         product_info = {
           "multiples": ["Polarisation"],
           "common_prefix":
@@ -56,6 +46,7 @@ def get_mappings(ns):
     else:
         product_info = {}
 
+    # Generic mappings
     mappings = {
         "platform": {
            "common_prefix": 
@@ -94,7 +85,7 @@ def get_mappings(ns):
         }    
     }
 
-    if ns["safe"] == ns["safe_1_0"]:
+    if cls == SAFESentinel1:
         mappings["platform"]["properties"]["Instrument Mode"] = "{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}extension/{%(s1sarl1)s}instrumentMode/{%(s1sarl1)s}mode" % ns
 
         mappings["orbit_info"]["properties"]["Stop Relative Orbit Number"] = "{%(safe)s}orbitReference/{%(safe)s}relativeOrbitNumber[@type='stop']" % ns
@@ -107,10 +98,20 @@ def get_mappings(ns):
 
         mappings["spatial"]["properties"]["Coordinates"] = "{%(safe)s}frameSet/{%(safe)s}frame/{%(safe)s}footPrint/{%(gml)s}coordinates" % ns
         mappings["acquisition_period"]["properties"]["Stop Time"] = "{%(safe)s}acquisitionPeriod/{%(safe)s}stopTime" % ns
-    else: # Sentinel 2
+
+    elif cls == SAFESentinel2:
         mappings["platform"]["properties"]["Instrument Mode"] = "{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}mode" % ns
         mappings["platform"]["properties"]["Platform Number"] = "{%(safe)s}platform/{%(safe)s}number" % ns
         mappings["spatial"]["properties"]["Coordinates"] = "{%(safe)s}frameSet/{%(safe)s}footPrint/{%(gml)s}coordinates" % ns
+
+    elif cls == SAFESentinel3:
+        mappings["platform"]["properties"]["Instrument Mode"] = "{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}mode" % ns
+        mappings["platform"]["properties"]["Platform Number"] = "{%(safe)s}platform/{%(safe)s}number" % ns
+        mappings["spatial"]["properties"]["Coordinates"] = "{%(safe)s}frameSet/{%(safe)s}footPrint/{%(gml)s}posList" % ns
+        #sentinel-safe:frameSet/sentinel-safe:footPrint srsName="http://www.opengis.net/def/crs/EPSG/0/4326"/gml:posList
+
+    else:
+        raise Exception("Class {0} not recognised.".format(cls.__name__))
 
     return mappings
 
@@ -126,7 +127,8 @@ class SAFESentinelBase(_geospatial):
         """
         self.fname = str(fname)
         self.manifest = os.path.splitext(self.fname)[0] + ".manifest"
-        self.mappings = get_namespace_mappings(self.__class__)
+        self.mappings = get_mappings(self.__class__)
+
               
     def __enter__(self):
         """
@@ -138,11 +140,13 @@ class SAFESentinelBase(_geospatial):
         self._parse_content()
         return self
 
+
     def __exit__(self, *args):
         """
         Close interfaces and file after finishing use in context manager.
         """
         pass
+
 
     def _get_content_by_type(self, elem, attr_name=None):
         """
@@ -155,6 +159,7 @@ class SAFESentinelBase(_geospatial):
             resp = elem.get(attr_name, "")
         
         return resp.strip()
+
         
     def _parse_content(self):
         self.sections = {}
@@ -167,6 +172,7 @@ class SAFESentinelBase(_geospatial):
             multiple_element_props = content_dict.get("multiples", [])
 
             for item_name, xml_path_details in content_dict["properties"].items():
+                print item_name, xml_path_details
             
                 # Decide how to treat the xml path and work out if we need to get the element content or attribute
                 if type(xml_path_details) == str:
@@ -193,6 +199,7 @@ class SAFESentinelBase(_geospatial):
                     #print "FAILED: %s  -->  %s" % (section_id, xml_path)
                     pass
 
+
     def _package_coordinates(self, coords_string):
         """
         Converts a coordinates string into a dictionary of lats and lons.
@@ -202,10 +209,12 @@ class SAFESentinelBase(_geospatial):
         :returns: Dictionary of: {"lats": <list of lats>, "lons": <list of lons>}
         """
         values = [float(x) for x in coords_string.strip().replace(",", " ").split()]
+
         if len(values) % 2 != 0:
             raise Exception("Number of values for coordinates is not even.")
  
         return {"lat": values[0::2], "lon": values[1::2], "type": "polygon", "do_sanitise_geometries": False}
+
 
     def get_geospatial(self):
         """
@@ -214,6 +223,7 @@ class SAFESentinelBase(_geospatial):
         :returns: Dict containing geospatial information.
         """
         return self.sections["spatial"]["Coordinates"]
+
 
     def get_temporal(self):
         """
@@ -224,6 +234,7 @@ class SAFESentinelBase(_geospatial):
         ap = self.sections["acquisition_period"]
         return {"start_time": ap["Start Time"],
                 "end_time": ap.get("Stop Time", ap["Start Time"])} 
+
 
     def _add_filename_metadata(self, extra_metadata):
         """
@@ -238,7 +249,7 @@ class SAFESentinelBase(_geospatial):
         file_name = os.path.basename(self.fname)
         fn_comps = file_name.split("_")
         
-        if self.__class__ == SAFESentinel1a:
+        if self.__class__ == SAFESentinel1:
             component = fn_comps[2]
             if len(component) < 4: 
                 resolution = 'N/A'
@@ -265,7 +276,7 @@ class SAFESentinelBase(_geospatial):
         extra_metadata['platform']['Family'] = extra_metadata['platform']['Platform Family Name']
 
         # Add number if derived from Sentinel2
-        if self.__class__ == SAFESentinel2a:
+        if self.__class__ == SAFESentinel2:
             extra_metadata['platform']['Family'] += "-%s" % extra_metadata['platform']['Platform Number']
 
             
@@ -298,7 +309,7 @@ class SAFESentinelBase(_geospatial):
         self._add_filename_metadata(extra_metadata)
         self._derive_extra_metadata(extra_metadata)
         
-        if self.__class__ == SAFESentinel2a:
+        if self.__class__ == SAFESentinel2:
             self._extract_metadata_from_zipfile(extra_metadata)
 
 
@@ -373,9 +384,16 @@ class SAFESentinelBase(_geospatial):
 
 
 # Define specific classes for different Sentinel missions
-class SAFESentinel1a(SAFESentinelBase): pass
+class SAFESentinel1(SAFESentinelBase): 
+    namespace = "safe_1_0"
 
-class SAFESentinel2a(SAFESentinelBase): pass
+
+class SAFESentinel2(SAFESentinelBase): 
+    namespace = "safe_1_1"
+
+
+class SAFESentinel3(SAFESentinelBase):
+    namespace = "safe_1_1"
 
 
 def check_match(d1, d2):
@@ -435,7 +453,28 @@ def test_parser():
                         }}}
                     }
 
-    s3a_content = {}
+    s3a_content = {'file': {'data_file': 'S3A_SL_1_RBT____20161129T002703_20161129T003003_20161129T030545_0179_011_259_0900_SVL_O_NR_002.zip',
+                            'data_file_size': 0,
+                            'directory': '../../eg_files/sentinel',
+                            'filename': 'S3A_SL_1_RBT____20161129T002703_20161129T003003_20161129T030545_0179_011_259_0900_SVL_O_NR_002.manifest',
+                            'location': 'on_tape',
+                            'metadata_file': 'S3A_SL_1_RBT____20161129T002703_20161129T003003_20161129T030545_0179_011_259_0900_SVL_O_NR_002.manifest',
+                            'path': '../../eg_files/sentinel/S3A_SL_1_RBT____20161129T002703_20161129T003003_20161129T030545_0179_011_259_0900_SVL_O_NR_002.manifest',
+                            'quicklook_file': '',
+                            'size': 197442},
+                   'misc': {'orbit_info': {'Start Orbit Number': '4082',
+                                           'Start Relative Orbit Number': '259'},
+                   'platform': {'Family': 'Sentinel-3',
+                                'Instrument Abbreviation': 'SLSTR',
+                                'Instrument Family Name': 'Sea and Land Surface Temperature Radiometer',
+                                'Instrument Mode': 'Earth Observation',
+                                'Mission': 'Sentinel-3',
+                                'NSSDC Identifier': '0000-000A',
+                                'Platform Family Name': 'Sentinel-3',
+                                'Platform Number': 'A',
+                                'Satellite': 'Sentinel-3A'},
+                   'product_info': {'Name': 'S3A_SL_1_RBT____20161129T002703_20161129T003003_20161129T030545_0179_011_259_0900_SVL_O_NR_002'}},
+                    }
                            
     source_files = [
          "/neodc/sentinel1a/data/EW/L1_GRD/m/IPF_v2/2016/01/01/S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF.manifest",
@@ -444,37 +483,41 @@ def test_parser():
          "/neodc/sentinel2a/data/L1C_MSI/2016/08/01/S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734.manifest",       
          "/neodc/sentinel3a/data/SLSTR/L1_RBT/2016/11/29/S3A_SL_1_RBT____20161129T002703_20161129T003003_20161129T030545_0179_011_259_0900_SVL_O_NR_002.manifest"]
         
-    test_files = [
-        ("Sentinel1a",
+    test_files_S1 = [
+        ("Sentinel1",
          "../../eg_files/sentinel/S1A_EW_GRDM_1SDH_20160101T144136_20160101T144236_009302_00D6FE_49DF.manifest",
          s1a_content),
-        ("Sentinel2a: 1",
+        ("Sentinel1: S1B",
+         "../../eg_files/sentinel/S1B_IW_SLC__1SSV_20161101T010312_20161101T010340_002758_004AB5_B6E7.manifest",
+         s1b_content)
+        ]
+
+    test_files_S2 = [
+        ("Sentinel2: 1",
          "../../eg_files/sentinel/S2A_OPER_PRD_MSIL1C_PDMC_20160703T192815_R095_V20160703T124305_20160703T124305.manifest",
          s2_1_content),
-        ("Sentinel2a: 2",
+        ("Sentinel2: 2",
          "../../eg_files/sentinel/S2A_OPER_PRD_MSIL1C_PDMC_20160801T072514_R073_V20160801T000734_20160801T000734.manifest",
          s2_2_content), 
         ]        
 
-    test_files = [
-        ("Sentinel2a: S3A",
+    test_files_S3 = [
+        ("Sentinel3: S3A",
          "../../eg_files/sentinel/S3A_SL_1_RBT____20161129T002703_20161129T003003_20161129T030545_0179_011_259_0900_SVL_O_NR_002.manifest",
          s3a_content),
         ]
 
-    test_files = [
-        ("Sentinel1a: S1B",
-         "../../eg_files/sentinel/S1B_IW_SLC__1SSV_20161101T010312_20161101T010340_002758_004AB5_B6E7.manifest",
-         s1b_content),
-        ]
-
+    test_files = test_files_S1 + test_files_S2 + test_files_S3
         
     for (test, filepath, to_match) in test_files[:]:
   
         print "\n\nTesting: %s" % test
         print "With: %s\n" % filepath
  
-        cls = eval("SAFE%s" % test.split(":")[0])
+        cls_name = "SAFE%s" % test.split(":")[0]
+        cls = eval(cls_name)
+        print "Using class: {0}".format(cls_name)
+
         with cls(filepath) as handler: 
             resp = handler.get_properties().as_dict() 
             #resp['spatial']['geometries']['display'] = resp['spatial']['geometries']['search'] = "dummy"
