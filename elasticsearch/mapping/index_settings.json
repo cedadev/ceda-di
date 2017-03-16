@@ -56,7 +56,7 @@
                     "properties": {
                         "filename": {
                             "type": "string",
-                            "analyzer": "simple"
+                            "analyzer": "not_analyzed"
                         },
                         "path": {
                             "type": "string",

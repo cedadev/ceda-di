@@ -55,11 +55,11 @@
             "priority": 10
         },
         "S1._.+.manifest$": {
-            "class": "ceda_di.providers.esa.safe.SAFESentinel1a",
+            "class": "ceda_di.providers.esa.safe.SAFESentinel1",
             "priority": 10
         },
         "S2A_.*.manifest$": {
-            "class": "ceda_di.providers.esa.safe.SAFESentinel2a",
+            "class": "ceda_di.providers.esa.safe.SAFESentinel2",
             "priority": 10
         },
         ".hdf$": {
