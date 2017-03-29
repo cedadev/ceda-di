@@ -245,7 +245,7 @@ class SAFESentinelBase(_geospatial):
         file_name = os.path.basename(self.fname)
         fn_comps = file_name.split("_")
         
-        if self.__class__ != SAFESentinel1:
+        if self.__class__ == SAFESentinel1:
             component = fn_comps[2]
             if len(component) < 4: 
                 resolution = 'N/A'
@@ -423,7 +423,6 @@ def test_parser():
                                            'Name': 'S1B_IW_SLC__1SSV_20161101T010312_20161101T010340_002758_004AB5_B6E7',
                                            'Polarisation': 'VV'}}}
 
-
     s2_1_content = {'misc': {'platform': {'Platform Family Name': 'SENTINEL', 'Platform Number': '2A',
                                         'Family': 'SENTINEL-2A', 'Mission': 'Sentinel-2', 'Satellite': 'Sentinel-2A',
                                         'Instrument Abbreviation': 'MSI'},
@@ -503,7 +502,7 @@ def test_parser():
          s2_2_content), 
         ("Sentinel2: 3 MSIL1C version (different zip)",
          "../../eg_files/sentinel/S2A_MSIL1C_20170221T233801_N0204_R001_T53CMQ_20170221T233758.manifest",
-         s2_3_content),
+         s2_3_content)
         ]        
 
     test_files_S3 = [
@@ -513,7 +512,6 @@ def test_parser():
         ]
 
     test_files = test_files_S1 + test_files_S2 + test_files_S3
-    test_files = test_files_S3
         
     for (test, filepath, to_match) in test_files[:]:
   
