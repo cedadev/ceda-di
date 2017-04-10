@@ -32,10 +32,13 @@ def get_mappings(cls):
                                 'CORNER_UL_LON_PRODUCT',
                                 'CORNER_UR_LAT_PRODUCT',
                                 'CORNER_UR_LON_PRODUCT',
+                                'CORNER_LR_LAT_PRODUCT',
+                                'CORNER_LR_LON_PRODUCT',
                                 'CORNER_LL_LAT_PRODUCT',
                                 'CORNER_LL_LON_PRODUCT',
-                                'CORNER_LR_LAT_PRODUCT',
-                                'CORNER_LR_LON_PRODUCT']
+                                'CORNER_UL_LAT_PRODUCT',
+                                'CORNER_UL_LON_PRODUCT'
+                               ]
             },
         },
         "product_info": product_info,

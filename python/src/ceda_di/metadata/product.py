@@ -174,7 +174,7 @@ class GeoJSONGenerator(object):
         
         if n_lons < min_len: min_len = n_lons
                 
-        coordinates = [[[self.latitudes[i], self.longitudes[i]] for i in range(n_lons)]]
+        coordinates = [[[self.longitudes[i], self.latitudes[i]] for i in range(n_lons)]]
         
         polygon = {
             "type": "Polygon",
