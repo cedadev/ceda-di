@@ -58,3 +58,14 @@ class FAAMNetCDF(object):
             props.properties = properties
 
         return props
+
+
+def test_parser():
+    "Run a test with a test file."
+    fpath = "/badc/faam/data/2016/b989-oct-20/core_processed/core_faam_20161020_v004_r0_b989_1hz.nc"
+    test = FAAMNetCDF(fpath) 
+    print test.get_properties()
+
+if __name__ == "__main__":
+
+    test_parser()
