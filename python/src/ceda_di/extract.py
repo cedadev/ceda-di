@@ -171,8 +171,8 @@ class Extract(object):
             self.es.index(index=self.conf('es-index'),
                           doc_type=self.conf('es-mapping'),
                           body=str(props),
-                          id=hashlib.sha1(filename).hexdigest()\
-                         )#kltsa 08/03/2016: Changes for issue #23275.
+                          id=hashlib.sha1(filename).hexdigest())
+
 
     def write_properties(self, fname, _geospatial_obj):
         """
@@ -181,9 +181,10 @@ class Extract(object):
         # Construct JSON path
         fname = os.path.basename(fname)
         json_path = os.path.join(self.conf("output-path"), self.conf("json-path"))
-        out_fname = "%s/%s.json" % (json_path, os.path.splitext(fname)[0])
 
+        out_fname = "%s/%s.json" % (json_path, os.path.splitext(fname)[0])
         props = _geospatial_obj.get_properties()
+
         if props is not None:
             with open(out_fname, 'w') as j:
                 j.write(str(props))

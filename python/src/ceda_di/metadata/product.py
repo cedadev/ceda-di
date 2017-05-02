@@ -383,6 +383,10 @@ class Properties(object):
 
         if spatial is None:
             self.spatial = None
+        # Check if spatial component is already formatted (e.g. if JSON already provided)
+        elif spatial.has_key("geometries") and spatial["geometries"].has_key("display"):
+            # Leave unchanged
+            self.spatial = spatial
         else:
             if "type" not in spatial:
                 gj = GeoJSONGenerator(spatial["lat"], spatial["lon"])
@@ -393,8 +397,6 @@ class Properties(object):
 
         self.misc = kwargs
         self.properties = {
-            # kltsa 08/03/2016 : Changes for issue #23275.
-            #"_id": hashlib.sha1(self.filesystem["path"]).hexdigest(),
             "data_format": self.data_format,
             "file": self.filesystem,
             "misc": self.misc,
