@@ -1,6 +1,9 @@
 """Base class for metadata wrapper classes."""
 import os
 
+# Local import
+
+
 
 class _geospatial(object):
     """
@@ -9,6 +12,10 @@ class _geospatial(object):
     """
     def __init__(self):
         self.unimpl_base_class()
+
+    def _add_checksum(self, dct):
+        """Adds `checksum` and `checksum_type` to file info dict if they are accessible."""
+        md5_cksum = None 
 
     @staticmethod
     def get_filesystem(fpath):

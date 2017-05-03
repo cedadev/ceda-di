@@ -452,7 +452,6 @@ def test_parser():
                                               'Name': 'S2A_MSIL1C_20170221T233801_N0204_R001_T53CMQ_20170221T233758'},
                              'quality_info': {'Cloud Coverage Assessment': 0.0}}
                    }
-
     s3a_content = {'file': {'data_file': 'S3A_SL_1_RBT____20161129T002703_20161129T003003_20161129T030545_0179_011_259_0900_SVL_O_NR_002.zip',
                             'data_file_size': 0,
                             'directory': '../../eg_files/sentinel',
@@ -512,6 +511,7 @@ def test_parser():
         ]
 
     test_files = test_files_S1 + test_files_S2 + test_files_S3
+    test_files = test_files_S3
         
     for (test, filepath, to_match) in test_files[:]:
   
