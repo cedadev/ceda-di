@@ -8,8 +8,10 @@ fi
 wd=$PWD
 cd $wd
 
-outdir=$wd/outputs
+today=$(date +%Y-%m-%d)
+outdir=$wd/outputs/$today
 mkdir -p $outdir
+
 dirs="/neodc/sentinel3a/data/SLSTR/L1_RBT"
 
 

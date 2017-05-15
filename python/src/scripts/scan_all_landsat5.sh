@@ -8,7 +8,8 @@ fi
 wd=$PWD
 cd $wd
 
-outdir=$wd/outputs
+today=$(date +%Y-%m-%d)
+outdir=$wd/outputs/$today
 mkdir -p $outdir
 
 dirs="/neodc/landsat5/data/TM"

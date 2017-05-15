@@ -8,7 +8,8 @@ fi
 wd=$PWD
 cd $wd
 
-outdir=$wd/outputs
+today=$(date +%Y-%m-%d)
+outdir=$wd/outputs/$today
 mkdir -p $outdir
 
 dirs="/neodc/landsat7etm/p020 /neodc/landsat7etm/p021 /neodc/landsat7etm/p022 /neodc/landsat7etm/p030 /neodc/landsat7etm/p031 /neodc/landsat7etm/p032 /neodc/landsat7etm/p041 /neodc/landsat7etm/p042"

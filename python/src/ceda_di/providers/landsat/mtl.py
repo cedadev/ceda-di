@@ -54,6 +54,10 @@ def get_mappings(cls):
         },
 
         "quality_info": {
+            "transformers": {
+                # Defines method name used to convert a float
+                "Cloud Coverage Assessment": "_to_float",
+            },
             "properties": {
                 "Cloud Coverage Assessment": "CLOUD_COVER",
             }
@@ -145,6 +149,9 @@ class LandsatBase(_geospatial):
     def _package_datetime(self, datetime_string):
         value = datetime_string.replace(",", "T")
         return value
+
+    def _to_float(self, item):
+        return float(item)
 
     def get_geospatial(self):
         """
@@ -340,17 +347,13 @@ def test_parser():
                              'Platform Family Name': 'LANDSAT',
                              'Satellite': 'LANDSAT-5'},
                             'product_info': {'Name': 'LT50300432008315EDC00'},
-                            'quality_info': {'Cloud Coverage Assessment': '39.00'}},
+                            'quality_info': {'Cloud Coverage Assessment': 39.00}},
                    'spatial': {'geometries':
                                {'display':
-                                {'coordinates': [[[25.483609999999999,
-                                                   -105.04975],
-                                                  [25.46557,
-                                                   -102.6985],
-                                                  [23.592390000000002,
-                                                   -105.04901],
-                                                  [23.575849999999999,
-                                                   -102.73269999999999]]],
+                                {'coordinates': [[[-105.04975, 25.483609999999999], [-102.6985, 25.46557], 
+                                             [-102.73269999999999, 23.575849999999999], 
+                                             [-105.04901, 23.592390000000002], 
+                                             [-105.04975, 25.483609999999999]]],
                                  'type': 'Polygon'}}},
                    'temporal': {'end_time': '2008-11-10T17:06:17.5690940Z',
                                 'start_time': '2008-11-10T17:06:17.5690940Z'}
@@ -374,17 +377,14 @@ def test_parser():
                              'Platform Family Name': 'LANDSAT',
                              'Satellite': 'LANDSAT-7'},
                             'product_info': {'Name': 'LE70200492009223EDC00'},
-                            'quality_info': {'Cloud Coverage Assessment': '76.00'}},
+                            'quality_info': {'Cloud Coverage Assessment': 76.00}},
                    'spatial': {'geometries':
                                {'display':
-                                {'coordinates': [[[16.850989999999999,
-                                                   -91.599530000000001],
-                                                  [16.823699999999999,
-                                                   -89.371549999999999],
-                                                  [14.97475,
-                                                   -91.612470000000002],
-                                                  [14.95064,
-                                                   -89.404989999999998]]],
+                                {'coordinates': [[[-91.599530000000001, 16.850989999999999], 
+                                      [-89.371549999999999, 16.823699999999999], 
+                                      [-89.404989999999998, 14.95064], 
+                                      [-91.612470000000002, 14.97475], 
+                                      [-91.599530000000001, 16.850989999999999]]],
                                  'type': 'Polygon'}}},
                    'temporal': {'end_time': '2009-08-11T16:13:53.3465278Z',
                                 'start_time': '2009-08-11T16:13:53.3465278Z'}
@@ -406,17 +406,14 @@ def test_parser():
                              'Platform Family Name': 'LANDSAT',
                              'Satellite': 'LANDSAT-8'},
                             'product_info': {'Name': 'LC81940122016126LGN00'},
-                            'quality_info': {'Cloud Coverage Assessment': '19.38'}},
+                            'quality_info': {'Cloud Coverage Assessment': 19.38}},
                    'spatial': {'geometries':
                                {'display':
-                                {'coordinates': [[[69.426270000000002,
-                                                   20.023389999999999],
-                                                  [69.343649999999997,
-                                                   26.441880000000001],
-                                                  [67.144850000000005,
-                                                   20.116320000000002],
-                                                  [67.071219999999997,
-                                                   25.92662]]],
+                                {'coordinates': [[[20.023389999999999, 69.426270000000002], 
+                                        [26.441880000000001, 69.343649999999997], 
+                                        [25.92662, 67.071219999999997], 
+                                        [20.116320000000002, 67.144850000000005], 
+                                        [20.023389999999999, 69.426270000000002]]],
                                  'type': 'Polygon'}}},
                    'temporal': {'end_time': '2016-05-05T10:03:58.0056090Z',
                                 'start_time': '2016-05-05T10:03:58.0056090Z'}
