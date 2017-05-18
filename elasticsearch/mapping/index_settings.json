@@ -67,7 +67,7 @@
                                     "type": "string",
                                     "analyzer": "path_hierarchy_analyzer"
                                 },
-				{"raw":{"type":"string","index":"not_analyzed"}}
+				"raw":{"type":"string","index":"not_analyzed"}
                             }
                         },
                         "size": {
