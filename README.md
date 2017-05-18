@@ -35,6 +35,7 @@ Guide to This Repository
     * Schema for JSON metadata
     * ElasticSearch mapping for JSON metadata
     * Sample ElasticSearch queries
+    
 * "examples"
     * Simple Python script to plot the output of a request to ElasticSearch
     * A Google Maps demonstration interface
