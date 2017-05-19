@@ -1,151 +1,168 @@
 ﻿{
-    "settings": {
-        "analysis": {
-            "filter": {
-                "min_length_5_filter": {
-                    "type": "length",
-                    "min": 5,
-                    "max": 256
-                },
-                "path_filter": {
-                    "type": "word_delimiter",
-                    "generate_word_parts": "yes",
-                    "generate_number_parts": "no",
-                    "split_on_numerics": "no"
-                }
+   "settings": {
+      "analysis": {
+         "filter": {
+            "min_length_5_filter": {
+               "type": "length",
+               "min": 5,
+               "max": 256
             },
-            "analyzer": {
-                "variable_name_analyzer": {
-                    "type": "custom",
-                    "tokenizer": "keyword",
-                    "filter": ["min_length_5_filter"]
-                },
-                "path_hierarchy_analyzer": {
-                    "type": "custom",
-                    "tokenizer": "path_hierarchy"
-                },
-                "path_analyzer": {
-                    "type": "custom",
-                    "tokenizer": "standard",
-                    "filter": ["path_filter"]
-                }
+            "path_filter": {
+               "type": "word_delimiter",
+               "generate_word_parts": "yes",
+               "generate_number_parts": "no",
+               "split_on_numerics": "no"
             }
-        }
-    },
-    "mappings": {
-        "geo_metadata": {
-            "_all": {
-                "enabled": true
+         },
+         "analyzer": {
+            "variable_name_analyzer": {
+               "type": "custom",
+               "tokenizer": "keyword",
+               "filter": [
+                  "min_length_5_filter"
+               ]
             },
-            "properties": {
-                "data_format": {
-                    "properties": {
-                        "format": {
-                            "type": "string"
+            "path_hierarchy_analyzer": {
+               "type": "custom",
+               "tokenizer": "path_hierarchy"
+            },
+            "path_analyzer": {
+               "type": "custom",
+               "tokenizer": "standard",
+               "filter": [
+                  "path_filter"
+               ]
+            }
+         }
+      }
+   },
+   "mappings": {
+      "geo_metadata": {
+         "_all": {
+            "enabled": true
+         },
+         "properties": {
+            "data_format": {
+               "properties": {
+                  "format": {
+                     "type": "string"
+                  }
+               }
+            },
+            "index_entry_creation": {
+               "properties": {
+                  "indexer": {
+                     "type": "string"
+                  }
+               }
+            },
+            "file": {
+               "properties": {
+                  "filename": {
+                     "type": "string",
+                     "analyzer": "simple",
+                     "fields": {
+                        "raw": {
+                           "type": "string",
+                           "index": "not_analyzed"
                         }
-                    }
-                },
-                "index_entry_creation": {
-                    "properties": {
-                        "indexer": {
-                            "type": "string"
+                     }
+                  },
+                  "path": {
+                     "type": "string",
+                     "analyzer": "path_analyzer",
+                     "fields": {
+                        "hierarchy": {
+                           "type": "string",
+                           "analyzer": "path_hierarchy_analyzer"
+                        },
+                        "raw": {
+                           "type": "string",
+                           "index": "not_analyzed"
                         }
-                    }
-                },
-                "file": {
-                    "properties": {
-                        "filename": {
-                            "type": "string",
-                            "analyzer": "simple",
-			    "fields": {"raw":{"type":"string","index":"not_analyzed"}}
-                        },
-                        "path": {
-                            "type": "string",
-                            "analyzer": "path_analyzer",
-                            "fields": {
-                                "hierarchy": {
-                                    "type": "string",
-                                    "analyzer": "path_hierarchy_analyzer"
-                                },
-				"raw":{"type":"string","index":"not_analyzed"}
-                            }
-                        },
-                        "size": {
-                            "type": "long"
+                     }
+                  },
+                  "size": {
+                     "type": "long"
+                  }
+               }
+            },
+            "misc": {
+               "properties": {
+                  "platform": {
+                     "properties": {
+                        "Satellite": {
+                           "type": "string",
+                           "fields": {
+                              "raw": {
+                                 "type": "string",
+                                 "index": "not_analyzed"
+                              }
+                           }
                         }
-                    }
-                },
-                "misc": {
-			"properties":{
-				"platform":{
-					"properties": {
-						"Satellite": {
-							"type":"string",
-							"fields":{"raw":{"type":"string","index":"not_analyzed"}}
-						}
-					}
-				}
-			}
-                },
-                "parameters": {
-                    "include_in_parent": true,
-                    "type": "nested",
-                    "properties": {
-                        "name": {
-                            "type": "string",
-                            "analyzer": "variable_name_analyzer"
-                        },
+                     }
+                  }
+               }
+            },
+            "parameters": {
+               "include_in_parent": true,
+               "type": "nested",
+               "properties": {
+                  "name": {
+                     "type": "string",
+                     "analyzer": "variable_name_analyzer"
+                  },
+                  "value": {
+                     "type": "multi_field",
+                     "fields": {
                         "value": {
-                            "type": "multi_field",
-                            "fields": {
-                                "value": {
-                                    "type": "string",
-                                    "analyzer": "variable_name_analyzer"
-                                },
-                                "autocomplete": {
-                                    "type": "completion",
-                                    "analyzer": "variable_name_analyzer",
-                                    "search_analyzer": "simple"
-                                }
-                            }
-                        }
-                    }
-                },
-                "spatial": {
-                    "properties": {
-                        "geometries": {
-                            "properties": {
-                                "search": {
-                                    "type": "geo_shape",
-                                    "tree": "quadtree",
-                                    "precision": "2km"
-                                },
-                                "display": {
-                                    "properties": {
-                                        "coordinates": {
-                                            "type": "double",
-                                            "include_in_all" : false,
-                                            "index": "no"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "temporal": {
-                    "properties": {
-                        "end_time": {
-                            "type": "date",
-                            "format": "dateOptionalTime"
+                           "type": "string",
+                           "analyzer": "variable_name_analyzer"
                         },
-                        "start_time": {
-                            "type": "date",
-                            "format": "dateOptionalTime"
+                        "autocomplete": {
+                           "type": "completion",
+                           "analyzer": "variable_name_analyzer",
+                           "search_analyzer": "simple"
                         }
-                    }
-                }
+                     }
+                  }
+               }
+            },
+            "spatial": {
+               "properties": {
+                  "geometries": {
+                     "properties": {
+                        "search": {
+                           "type": "geo_shape",
+                           "tree": "quadtree",
+                           "precision": "2km"
+                        },
+                        "display": {
+                           "properties": {
+                              "coordinates": {
+                                 "type": "double",
+                                 "include_in_all": false,
+                                 "index": "no"
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            },
+            "temporal": {
+               "properties": {
+                  "end_time": {
+                     "type": "date",
+                     "format": "dateOptionalTime"
+                  },
+                  "start_time": {
+                     "type": "date",
+                     "format": "dateOptionalTime"
+                  }
+               }
             }
-        }
-    }
+         }
+      }
+   }
 }
