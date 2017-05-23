@@ -3,6 +3,7 @@ Module for holding and exporting file metadata as JSON documents.
 """
 
 from __future__ import division
+from coordinate_sort import conditionPolygon
 import hashlib
 import simplejson as json
 import logging
@@ -174,10 +175,13 @@ class GeoJSONGenerator(object):
         
         if n_lons < min_len: min_len = n_lons
                 
-        coordinates = [[[self.longitudes[i], self.latitudes[i]] for i in range(n_lons)]]
+        coordinates = [[self.longitudes[i], self.latitudes[i]] for i in range(n_lons)]
+
+        coordinates = [conditionPolygon(coordinates)]
         
         polygon = {
             "type": "Polygon",
+            "orientation": "counterclockwise",
             "coordinates": coordinates
         }
 
