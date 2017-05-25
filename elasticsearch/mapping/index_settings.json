@@ -138,13 +138,9 @@
                            "precision": "2km"
                         },
                         "display": {
-                           "properties": {
-                              "coordinates": {
-                                 "type": "double",
-                                 "include_in_all": false,
-                                 "index": "no"
-                              }
-                           }
+                           "type": "geo_shape",
+                           "tree": "quadtree",
+                           "precision": "2000.0m"
                         }
                      }
                   }
