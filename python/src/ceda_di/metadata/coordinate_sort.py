@@ -34,6 +34,7 @@ def magnitude(u,v):
     '''Returns the vector magnitude'''
     return sqrt(u**2 + v**2)
 
+
 def winding_angle(reference_vector, lon, lat):
     '''
     Calculates the winding angle from the coordinates
@@ -48,6 +49,7 @@ def winding_angle(reference_vector, lon, lat):
     angle = reference_vector - atan2(v, u)  # lat, lon
 
     return angle
+
 
 def calculate_sorting_index(coordinates):
     '''
@@ -145,18 +147,38 @@ def close_polygon(coordinates):
     return coordinates + [first]
 
 
+def filterDupes(coordinates):
+    '''
+    Removes consecutive duplicates from a list of coordinates.
+
+    :param coordinates:  A list of [lon, lat] coordinate pairs.
+    :return: same list with consecutive duplicates removed.
+    '''
+
+    for i, pair in enumerate(coordinates):
+        if i > 0:
+            if pair == coordinates[i - 1]:
+                coordinates.pop(i)
+
+    return coordinates
+
+
 def conditionPolygon(coordinates):
     '''
     Wrapper:
+
      1. Checks if polygon is ccw, if not it sorts it.
-     2. Checks if polygon is closed, if not closes it.
-    
+     2. Removes and duplicate coordinates that are not starting or closing the polygon.
+     3. Checks if polygon is closed, if not closes it.
+
     :param coordinates: list of [lon, lat] coordinate pairs
     :return: sanitised coordinates, making sure it is a closed polygon and defined counter-clockwise
     '''
 
     if not ccw(coordinates):
         coordinates = sort_coords(coordinates)
+
+    coordinates = filterDupes(coordinates)
 
     if not coordinates[0] == coordinates[-1]:
         coordinates = close_polygon(coordinates)
