@@ -58,11 +58,13 @@ def main():
     if conf_args["extract"]:
         extract = Extract(config)
         extract.run()
+
     elif conf_args["index"]:
         # Opening the BulkIndexer as a context manager ensures all docs get
         # submitted properly to the index (all pools get submitted)
         with BulkIndexer(config) as index:
             index.index_directory(config["path-to-json-docs"])
+
     elif conf_args["search"]:
         searcher = Searcher(config)
         searcher.run()
