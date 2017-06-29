@@ -135,12 +135,12 @@
                         "search": {
                            "type": "geo_shape",
                            "tree": "quadtree",
-                           "precision": "2km"
+                           "precision": "8km"
                         },
                         "full_search": {
                            "type": "geo_shape",
                            "tree": "quadtree",
-                           "precision": "2km"
+                           "precision": "8km"
                         },
                         "display": {
                            "properties": {
