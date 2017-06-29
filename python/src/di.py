@@ -15,6 +15,7 @@ Options:
     --host=<host>              Specify ElasticSearch host.
     --port=<port>              Specify ElasticSearch port.
     --index=<name>             Specify ElasticSearch index name.
+    --file-list-file=<path>    File containing a list of file paths to scan (for extract).
     --send-to-index            Index metadata with ElasticSearch.
     --no-create-files          Don't create JSON metadata files.
     --max-results=<num>        Max number of results to return when searching
@@ -56,7 +57,12 @@ def main():
     config = cmd.get_settings(conf_args["config"], conf_args)
 
     if conf_args["extract"]:
-        extract = Extract(config)
+        file_list = None
+        if conf_args.has_key('file-list-file'):
+            with open(config['file-list-file']) as reader:
+                file_list = reader.read().strip().split()
+        
+        extract = Extract(config, file_list=file_list)
         extract.run()
 
     elif conf_args["index"]:
@@ -70,4 +76,5 @@ def main():
         searcher.run()
 
 if __name__ == "__main__":
+
     main()
