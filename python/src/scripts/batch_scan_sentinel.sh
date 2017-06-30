@@ -14,7 +14,7 @@ for dr in $dirs; do
 
     job=${ds}-${count}
 
-    cmd="bsub -q ingest -o $outdir/${job}.out -e $outdir/${job}.err ./scripts/wrap_es_index_files.sh $dr"
+    cmd="bsub -q ingest -W 72:00 -o $outdir/${job}.out -e $outdir/${job}.err ./scripts/wrap_es_index_files.sh $dr"
     echo "Running: $cmd"
     $cmd 
 

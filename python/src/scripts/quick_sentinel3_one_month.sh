@@ -21,11 +21,19 @@ for dr in $dirs; do
     ds=$(echo $dr | cut -d/ -f3)
 
     for yr in $yrs; do
+        if [ $yr -ne 2017 ] ; then
+           continue
+        fi
+
         ydr=$dr/$yr
 
         mdirs=$(ls $ydr/)
     
         for mon in $mdirs; do
+            if [ $mon != "06" ] ; then
+               continue
+            fi
+
             path=$ydr/$mon
             job=${ds}-${yr}-${mon}
 

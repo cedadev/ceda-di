@@ -63,10 +63,12 @@ class GeoJSONGenerator(object):
                     }
                 }
             elif self.shape_type == "polygon":
+                geometry = self._gen_polygon_from_all_lats_lons()
                 geojson = {
                     "geometries": {
                        "search": self._gen_bbox(),
-                       "display": self._gen_polygon_from_all_lats_lons()
+                       "display": geometry,
+                       "full_search": geometry 
                     }
                 }
             elif self.shape_type == "swath":
@@ -176,7 +178,6 @@ class GeoJSONGenerator(object):
         if n_lons < min_len: min_len = n_lons
                 
         coordinates = [[self.longitudes[i], self.latitudes[i]] for i in range(n_lons)]
-
         coordinates = [conditionPolygon(coordinates)]
         
         polygon = {

@@ -12,7 +12,7 @@ today=$(date +%Y-%m-%d)
 outdir=$wd/outputs/$today
 mkdir -p $outdir
 
-dirs="/neodc/sentinel3a/data/SLSTR/L1_RBT"
+dirs="/neodc/sentinel2a/data/L1C_MSI"
 
 
 for dr in $dirs; do
@@ -21,11 +21,19 @@ for dr in $dirs; do
     ds=$(echo $dr | cut -d/ -f3)
 
     for yr in $yrs; do
+        if [ $yr -ne 2017 ] ; then
+           continue
+        fi
+
         ydr=$dr/$yr
 
         mdirs=$(ls $ydr/)
     
         for mon in $mdirs; do
+            if [ $mon != "06" ] ; then
+               continue
+            fi
+
             path=$ydr/$mon
             job=${ds}-${yr}-${mon}
 

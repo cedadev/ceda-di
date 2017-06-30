@@ -51,7 +51,8 @@ def build_file_list(path, extension=None):
         for each_file in files:
 
             if not extension or each_file.endswith(extension):
-                file_list.append(os.path.join(root, each_file))
+                fpath = os.path.join(root, each_file)
+                file_list.append(fpath)
 
     return file_list
 
@@ -101,22 +102,21 @@ def search_es_for_files(cfg):
     files_indexed = 0
     files_not_indexed = 0 
 
-    for filename in file_list:
-        query = { "query": { "matchPhrase" : { "file.path" : filename } } }
+    for filepath in file_list:
+        query = { "query": { "matchPhrase" : { "file.path.raw" : filepath } } }
         res = es_conn.search(index=es_index, doc_type=es_type, body=query,
                              request_timeout=60, size = 10000)
-
         hits = res[u'hits'][u'hits']
 
         if len(hits) > 0:
             files_indexed = files_indexed + 1
             if cfg.verbose: 
-                print "File: {} ...is in index.".format(filename)
+                print "File: {} ...is in index.".format(filepath)
         else:
             files_not_indexed = files_not_indexed + 1
-            file_not_found_list.append(filename)
+            file_not_found_list.append(filepath)
             if cfg.verbose:
-                print "File: {} ...NOT FOUND IN INDEX.".format(filename)
+                print "File: {} ...NOT FOUND IN INDEX.".format(filepath)
 
 
     print "\nNumber of files indexed: {}".format(files_indexed)

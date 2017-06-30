@@ -22,24 +22,30 @@ class HandlerFactory(object):
     """
     Factory for file handler classes.
     """
+
     def __init__(self, handler_map):
         self.logger = logging.getLogger(__name__)
         self.handlers = {}
+
         for pattern, handler in handler_map.iteritems():
+
             handler_class = handler['class']
             priority = handler['priority']
             (module, _class) = handler_class.rsplit(".", 1)
+
             mod = __import__(module, fromlist=[_class])
+
             self.handlers[pattern] = {
                 "class": getattr(mod, _class),
                 "priority": priority
-            }
+                }
 
     def get_handler(self, filename):
         """
         Return instance of correct file handler class.
         """
         handler_class = self.get_handler_class(filename)
+
         if handler_class is not None:
             return handler_class(filename)
 
@@ -48,6 +54,7 @@ class HandlerFactory(object):
         Return the class of the correct file handler (un-instantiated).
         """
         handler_candidates = []  # All handlers whose file signatures match
+
         for pattern, handler in self.handlers.iteritems():
             if re.search(pattern, filename):
                 handler_candidates.append(handler)
@@ -55,6 +62,7 @@ class HandlerFactory(object):
         # Sort by priority to ensure the correct class is returned
         # when files match multiple signatures
         handler_candidates.sort(key=lambda h: h['priority'])
+
         for handler in handler_candidates:
             handler_class = handler['class']
             try:
@@ -65,6 +73,7 @@ class HandlerFactory(object):
                 pass
             except AttributeError:
                 return handler_class
+
         return None
 
 
@@ -73,8 +82,11 @@ class Extract(object):
     File crawler and metadata extractor class.
     Part of core functionality of ceda_di.
     """
+
     def __init__(self, conf, file_list=None):
+
         self.configuration = conf
+
         try:
             self.make_dirs(conf)
             self.logger = self.prepare_logging()
@@ -167,11 +179,18 @@ class Extract(object):
         Index the file in Elasticsearch
         """
         props = handler.get_properties()
+
         if props is not None:
-            self.es.index(index=self.conf('es-index'),
-                          doc_type=self.conf('es-mapping'),
-                          body=str(props),
-                          id=hashlib.sha1(filename).hexdigest())
+            index = self.conf('es-index')
+            doc_type = self.conf('es-mapping')
+            body = str(props)
+            doc_id = hashlib.sha1(filename).hexdigest()
+
+            try:
+                self.es.index(index=index, doc_type=doc_type, body=body, id=doc_id)
+            except Exception, err:
+                print "FAILED to log: {}".format(filename)
+                print "FAILURE ERROR WAS: {}".format(str(err))
 
 
     def write_properties(self, fname, _geospatial_obj):

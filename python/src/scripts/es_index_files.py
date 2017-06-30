@@ -51,16 +51,22 @@ def sanitise_args(config):
 
 
 def execute_command(cmd, url):
+    """
+    Runs command `cmd` then calls URL `url` to report on the amount of
+    records in the index.
+    :cmd Scan command [string]
+    :url URL to call Elastic search
+    :return: None
+    """
     print "Running command: %s" % cmd    
-    subprocess.check_output(shlex.split(cmd), cwd=src_dir, env=os.environ.copy())
 
     try:
         subprocess.check_output(shlex.split(cmd), cwd=src_dir, env=os.environ.copy())
-    except subprocess.CalledProcessError as grepexc:                                                                                                   
-        print "Error code:", grepexc.returncode, grepexc.output
-    else:
-        time.sleep(2)
-        report_files(url) 
+    except subprocess.CalledProcessError as exc:
+        print "Error code:", exc.returncode, exc.output
+
+    time.sleep(2)
+    report_files(url) 
 
 
 def construct_url(json_file):
@@ -87,7 +93,11 @@ def scan_dataset(dataset, directory):
         print "Invalid 'dataset' argument: '%s'" % dataset
 
 
-def scan_file(dataset, list_file):
+def scan_from_list_file(dataset, list_file):
+    """
+    Reads a set of paths from `list_file` file and scans
+    each path specified.
+    """
     with open(list_file) as fd:
         lines = fd.readlines()
 
@@ -115,7 +125,7 @@ def main():
     print "Script started at: %s" % start
 
     if config["index"] and config["file_list"]:
-        scan_file(config["index"], config["file_list"])
+        scan_from_list_file(config["index"], config["file_list"])
     elif config["index"] and config["directory"]:
         scan_dataset(config["index"], config["directory"])
     else:
