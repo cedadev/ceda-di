@@ -282,14 +282,12 @@ class SAFESentinelBase(_geospatial):
         Dictionary `extra_metadata` is changed in place.
         Returns nothing.       
         """
-        print "FROM ZIP"
         try:
             zip_metadata = sentinel2.Sentinel2Scan(self.fname).sentinel_metadata 
         except:
             return 
             
         datatake_attr = "Datatake Type"
-        print ("DD:" + datatake_attr)
         if hasattr(zip_metadata, datatake_attr):
             extra_metadata["product_info"][datatake_attr] = getattr(zip_metadata, datatake_attr)
 
