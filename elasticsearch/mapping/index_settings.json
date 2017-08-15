@@ -113,12 +113,9 @@
                      "analyzer": "variable_name_analyzer"
                   },
                   "value": {
-                     "type": "multi_field",
+                     "type": "string",
+                     "analyzer": "variable_name_analyzer",
                      "fields": {
-                        "value": {
-                           "type": "string",
-                           "analyzer": "variable_name_analyzer"
-                        },
                         "autocomplete": {
                            "type": "completion",
                            "analyzer": "variable_name_analyzer",
