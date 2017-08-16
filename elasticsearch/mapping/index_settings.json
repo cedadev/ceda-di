@@ -120,6 +120,9 @@
                            "type": "completion",
                            "analyzer": "variable_name_analyzer",
                            "search_analyzer": "simple"
+                        },
+                        "raw":{
+                           "type": "keyword"
                         }
                      }
                   }
