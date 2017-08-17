@@ -204,23 +204,41 @@ def translateCoordinates(coordinates):
 
     for pair in coordinates:
         if pair[0] < 0:
-            pair[0] += 180
+            lon = pair[0] + 180
 
         else:
-            pair[0] -= 180
+            lon = pair[0] - 180
 
-        translated_coordinates.append(pair)
+        translated_coordinates.append([lon,pair[1]])
 
     return translated_coordinates
+
+def offset_dateline(coordinates):
+    '''
+    Elasticsearch has problems when presented with values dead on the international dateline. Slightly offset these
+    values to allow elasticsearch to process the polygons.
+
+    :param coordinates: list of [lon,lat] pairs.
+    :return: coordinates with any 180 values adjusted to be just less.
+    '''
+    sanitised_coords = []
+    for pair in coordinates:
+        if pair[0] == 0.0:
+            pair[0] -= 0.00000000000001
+        sanitised_coords.append(pair)
+    return sanitised_coords
 
 
 def conditionPolygon(coordinates):
     '''
     Wrapper:
-
-     1. Checks if polygon is ccw, if not it sorts it.
-     2. Removes and duplicate coordinates that are not starting or closing the polygon.
-     3. Checks if polygon is closed, if not closes it.
+     1. Checks if polygon traverses the date line.
+     2. If polygon traverses the dateline, translate polygon to meridian for processing.
+     3. Checks if polygon is ccw, if not it sorts it.
+     4. Removes and duplicate coordinates that are not starting or closing the polygon.
+     5. If any values in the polygon are on the date line eg. 180.0 or -180.0, the offset by 1e10^-14
+     6. Checks if polygon is closed, if not closes it.
+     7. If traverse_dateline = True, translate polygon back to correct position.
 
     :param coordinates: list of [lon, lat] coordinate pairs
     :return: sanitised coordinates, making sure it is a closed polygon and defined counter-clockwise
@@ -239,6 +257,9 @@ def conditionPolygon(coordinates):
 
     # Remove duplicate values
     coordinates = filterDupes(coordinates)
+
+    # Modify any "on date line" values.
+    coordinates = offset_dateline(coordinates)
 
     # Close polygon
     if not coordinates[0] == coordinates[-1]:
