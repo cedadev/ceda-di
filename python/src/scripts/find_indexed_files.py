@@ -103,7 +103,7 @@ def search_es_for_files(cfg):
     files_not_indexed = 0 
 
     for filepath in file_list:
-        query = { "query": { "matchPhrase" : { "file.path.raw" : filepath } } }
+        query = { "query": { "match_phrase" : { "file.path.raw" : filepath } } }
         res = es_conn.search(index=es_index, doc_type=es_type, body=query,
                              request_timeout=60, size = 10000)
         hits = res[u'hits'][u'hits']
