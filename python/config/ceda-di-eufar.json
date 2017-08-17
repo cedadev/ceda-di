@@ -1,12 +1,12 @@
 {
     "_option": "es_host: hostname of Elasticsearch node to use",
-    "es-host": "fatcat-test.jc.rl.ac.uk",
+    "es-host": "jasmin-es1.ceda.ac.uk",
 
     "_option": "es_port: port number of Elasticsearch node to use",
     "es-port": 9200,
 
     "_option": "es_index: Elasticsearch index to use",
-    "es-index": "cis_test",
+    "es-index": "eufar-2017-08-15",
 
     "_option": "es_mapping: Elasticsearch document type to index data as",
     "es-mapping": "geo_metadata",
@@ -18,22 +18,28 @@
     "max-results": 100,
 
     "_option": "output-path: main output directory",
-    "output-path": "/home/vagrant/PycharmProjects/out/",
+    "output-path": "/datacentre/processing/file_based_search",
 
     "_option": "log-path: log dir path, relative to 'outputpath'",
     "log-path": "log/",
-
-    "_option": "log-file: log file path, relative to 'logpath'",
-    "log-file": "ceda-di.log",
 
     "_option": "json-path: directory for JSON metadata, relative to 'outputpath'",
     "json-path": "json/",
 
     "_option": "input-path: data input path (where to extract metadata from)",
-    "input-path": "/home/vagrant/PycharmProjects/data_to_index/",
+    "input-path": "/tmp/faam",
+
+    "_option": "batch-queue: name of the batch queue to submit jobs to",
+    "batch-queue": "localhost",
 
     "_option": "num-cores: number of processes to use in parallel",
-    "num-cores": 16,
+    "num-cores": 1,
+
+    "_option": "no-create-files: don't create JSON documents on disk",
+    "no-create-files": true,
+
+    "_option": "send-to-index: send documents to Elasticsearch",
+    "send-to-index": true,
 
     "_option": "logging: options for the 'logging' module",
     "_ref": "(see: https://docs.python.org/2/library/logging.html)",
@@ -57,12 +63,36 @@
             "priority": 10
         },
         ".nc$": {
-            "class": "ceda_di.filetypes.netcdf.NetCDFFactory",
+            "class": "ceda_di.providers.faam.faam.FAAMNetCDF",
             "priority": 10
         },
-        ".*": {
-            "class": "ceda_di.providers.jascis.JasCisDataProduct",
-            "priority": 1
+        "_flight_info.json$": {
+            "class": "ceda_di.providers.flights.generic_flight.GenericFlight",
+            "priority": 10
+        },
+        "S1._.+.manifest$": {
+            "class": "ceda_di.providers.esa.safe.SAFESentinel1",
+            "priority": 10
+        },
+        "S2A_.*.manifest$": {
+            "class": "ceda_di.providers.esa.safe.SAFESentinel2",
+            "priority": 10
+        },
+        "S3A_.*.manifest$": {
+            "class": "ceda_di.providers.esa.safe.SAFESentinel3",
+            "priority": 10
+        },
+        "LT5.+_MTL.txt$": {
+            "class": "ceda_di.providers.landsat.mtl.Landsat5",
+            "priority": 10
+        },
+        "LE7.+_MTL.txt$": {
+            "class": "ceda_di.providers.landsat.mtl.Landsat7",
+            "priority": 10
+        },
+        "LC8.+.txt$": {
+            "class": "ceda_di.providers.landsat.mtl.Landsat8",
+            "priority": 10
         }
     }
 }

@@ -6,7 +6,7 @@
     "es-port": 9200,
 
     "_option": "es_index: Elasticsearch index to use",
-    "es-index": "sentinel",
+    "es-index": "arsf-2017-08-15",
 
     "_option": "es_mapping: Elasticsearch document type to index data as",
     "es-mapping": "geo_metadata",
@@ -27,7 +27,7 @@
     "json-path": "json/",
 
     "_option": "input-path: data input path (where to extract metadata from)",
-    "input-path": "/tmp/sentinel",
+    "input-path": "/tmp/faam",
 
     "_option": "batch-queue: name of the batch queue to submit jobs to",
     "batch-queue": "localhost",
@@ -54,14 +54,6 @@
             "class": "ceda_di.providers.arsf.envi.BIL",
             "priority": 10
         },
-        "S1._.+.manifest$": {
-            "class": "ceda_di.providers.esa.safe.SAFESentinel1a",
-            "priority": 10
-        },
-        "S2A_.*.manifest$": {
-            "class": "ceda_di.providers.esa.safe.SAFESentinel2a",
-            "priority": 10
-        },
         ".hdf$": {
             "class": "ceda_di.providers.arsf.hdf4.HDF4",
             "priority": 10
@@ -72,6 +64,34 @@
         },
         ".nc$": {
             "class": "ceda_di.providers.faam.faam.FAAMNetCDF",
+            "priority": 10
+        },
+        "_flight_info.json$": {
+            "class": "ceda_di.providers.flights.generic_flight.GenericFlight",
+            "priority": 10
+        },
+        "S1._.+.manifest$": {
+            "class": "ceda_di.providers.esa.safe.SAFESentinel1",
+            "priority": 10
+        },
+        "S2A_.*.manifest$": {
+            "class": "ceda_di.providers.esa.safe.SAFESentinel2",
+            "priority": 10
+        },
+        "S3A_.*.manifest$": {
+            "class": "ceda_di.providers.esa.safe.SAFESentinel3",
+            "priority": 10
+        },
+        "LT5.+_MTL.txt$": {
+            "class": "ceda_di.providers.landsat.mtl.Landsat5",
+            "priority": 10
+        },
+        "LE7.+_MTL.txt$": {
+            "class": "ceda_di.providers.landsat.mtl.Landsat7",
+            "priority": 10
+        },
+        "LC8.+.txt$": {
+            "class": "ceda_di.providers.landsat.mtl.Landsat8",
             "priority": 10
         }
     }

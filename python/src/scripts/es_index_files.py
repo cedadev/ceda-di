@@ -11,7 +11,7 @@ Usage:
 Options:
   -h --help             Show this screen.
   --version             Show version.
-  -i=<dataset>          Dataset to scan "faam", "eufar", "sentinel" or "ceda-eo" (for the combined index).
+  -i=<dataset>          Dataset to scan "faam", "eufar", "arsf" or "ceda-eo" (for the combined index).
   -d=<directory>        Directory to scan. 
   -l=<list_file>        List of files.
  """
@@ -84,7 +84,7 @@ def report_files(url):
 
 
 def scan_dataset(dataset, directory):
-    if dataset in ("faam", "eufar", "sentinel", "ceda-eo"):
+    if dataset in ("faam", "eufar", "arsf", "ceda-eo"):
         config_file = os.path.join(CONFIG_DIR, "ceda-di-%s.json" % dataset)
         cmd = "{}/di.py extract --no-create-files --config {} --send-to-index {}".format(src_dir, config_file, directory)
         url = construct_url(config_file)

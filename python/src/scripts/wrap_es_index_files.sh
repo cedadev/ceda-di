@@ -5,18 +5,19 @@ if [ ! -f scripts/wrap_es_index_files.sh ]; then
     exit
 fi
 
-BASEDIR=$PWD/../../..
-cd $BASEDIR
-. setup_env.sh
-
-DIRS=$@
-
 # Get project name from CEDA_DI_PROJECT environment variable
 if [ ! $CEDA_DI_PROJECT ]; then
     echo "Please set CEDA_DI_PROJECT environment variable to use this script."
     echo "E.g.: $ export CEDA_DI_PROJECT=faam"
     exit
 fi
+
+
+BASEDIR=$PWD/../../..
+cd $BASEDIR
+. setup_env.sh $CEDA_DI_PROJECT
+
+DIRS=$@
 
 proj=$CEDA_DI_PROJECT
 echo "Working on project: $proj"
