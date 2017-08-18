@@ -224,8 +224,10 @@ def offset_dateline(coordinates):
     sanitised_coords = []
     for pair in coordinates:
         if pair[0] == 0.0:
-            pair[0] -= 0.00000000000001
-        sanitised_coords.append(pair)
+            lon = pair[0] - 0.00000000000001
+            sanitised_coords.append([lon,pair[1]])
+        else:
+            sanitised_coords.append(pair)
     return sanitised_coords
 
 
@@ -235,8 +237,8 @@ def conditionPolygon(coordinates):
      1. Checks if polygon traverses the date line.
      2. If polygon traverses the dateline, translate polygon to meridian for processing.
      3. Checks if polygon is ccw, if not it sorts it.
-     4. Removes and duplicate coordinates that are not starting or closing the polygon.
-     5. If any values in the polygon are on the date line eg. 180.0 or -180.0, the offset by 1e10^-14
+     4. If any values in the polygon are on the date line eg. 180.0 or -180.0, the offset by 1e10^-14
+     5. Removes and duplicate coordinates that are not starting or closing the polygon.
      6. Checks if polygon is closed, if not closes it.
      7. If traverse_dateline = True, translate polygon back to correct position.
 
@@ -255,11 +257,11 @@ def conditionPolygon(coordinates):
     if not ccw(coordinates):
         coordinates = sort_coords(coordinates)
 
-    # Remove duplicate values
-    coordinates = filterDupes(coordinates)
-
     # Modify any "on date line" values.
     coordinates = offset_dateline(coordinates)
+
+    # Remove duplicate values
+    coordinates = filterDupes(coordinates)
 
     # Close polygon
     if not coordinates[0] == coordinates[-1]:
