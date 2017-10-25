@@ -42,6 +42,9 @@ class NetCDFFactory(object):
         Return correct metadata extraction class based on metadata format.
         """
         if not self.convention:
+            if "famm-dropsonde" in self.fpath:
+                return NetCDF_Dropsonde(self.fpath, self.convention).get_properties()
+
             # Return a placeholder NetCDF handler with no convention
             return NetCDF_Unknown(self.fpath).get_properties()
         elif "CF" in self.convention:
@@ -141,11 +144,16 @@ class NetCDF_Base(_geospatial):
                 continue
 
         logger = logging.getLogger(__name__)
-        logger.error("Could not find standard name variable \"%s\": %s" %
+        logger.warning("Could not find standard name variable \"%s\": %s, trying by regex." %
                      (standard_name, fpath))
 
+        key = NetCDF_Base.find_var_by_regex(ncdf, fpath, "^%s$" % standard_name)
+        if key:
+            return key
+
+
     @staticmethod
-    def find_var_by_regex(ncdf, regex):
+    def find_var_by_regex(ncdf, fpath, regex):
         """
         Find a variable reference searching by regular expression.
 
@@ -157,7 +165,7 @@ class NetCDF_Base(_geospatial):
                 return key
 
         logger = logging.getLogger(__name__)
-        logger.error("Could not find variable by regex: \"%s\"", regex)
+        logger.error("Could not find variable by regex: \"%s\": %s" % (regex, fpath))
 
     @staticmethod
     def get_flight_info(fname):
@@ -283,6 +291,52 @@ class NetCDF_RAF(_geospatial):
                                   spatial=self.get_geospatial(),
                                   data_format=data_format,
                                   parameters=self.get_parameters())
+
+
+class NetCDF_Dropsonde(_geospatial):
+    """
+    Metadata extraction class for FAAM-dropsonde NetCDF files.
+    """
+    def __init__(self, fpath, convention):
+        self.fpath = fpath
+        self.logger = logging.getLogger(__name__)
+        self.convention = convention
+
+    def get_temporal(self):
+        with netCDF4.Dataset(self.fpath) as ncdf:
+            time_name = NetCDF_Base.find_var_by_regex(ncdf, self.fpath, "^time$")
+            return NetCDF_Base.temporal(ncdf, time_name)
+
+    def get_parameters(self):
+        with netCDF4.Dataset(self.fpath) as ncdf:
+            return NetCDF_Base.params(ncdf)
+
+    def get_geospatial(self):
+        with netCDF4.Dataset(self.fpath) as ncdf:
+            lat_name = NetCDF_Base.find_var_by_regex(ncdf, self.fpath, "lat")
+            lon_name = NetCDF_Base.find_var_by_regex(ncdf, self.fpath, "lon")
+
+            if lat_name and lon_name:
+                return NetCDF_Base.geospatial(ncdf, lat_name, lon_name)
+            else:
+                self.logger.error("Could not find lat/lon variables: %s" %
+                                  self.fpath)
+
+    def get_properties(self):
+        """
+        Return a metadata.product.Properties object populated with metadata.
+
+        :returns: Properties object populated with metadata
+        """
+        data_format = {"format": ("NetCDF")}
+        filesystem = self.get_filesystem(self.fpath)
+        flight_info = NetCDF_Base.get_flight_info(filesystem["filename"])
+        return product.Properties(temporal=self.get_temporal(),
+                                  filesystem=filesystem,
+                                  spatial=self.get_geospatial(),
+                                  data_format=data_format,
+                                  parameters=self.get_parameters(),
+                                  flight_info=flight_info)
 
 
 class NetCDF_Unknown(_geospatial):

@@ -14,6 +14,8 @@ import argparse
 
 # Third-party imports
 from elasticsearch import Elasticsearch
+from tqdm import tqdm
+import simplejson as json
 
 
 DEFAULT_ES_DETAILS = {'host': 'jasmin-es1.ceda.ac.uk', 'port': '9200', 'type': 'geo_metadata'}
@@ -84,6 +86,52 @@ def _resolve_es_index_path(index):
         d = DEFAULT_ES_DETAILS
         return d['host'], d['port'], index, d['type']
   
+def build_msearch_query(file_list):
+    msearch_json = ""
+    query_list  = []
+
+    for i, item in enumerate(tqdm(file_list, desc="Building query"), 1):
+
+        index = json.dumps({}) + "\n"
+        search_query = json.dumps({ "query": { "match_phrase" : { "file.path.raw" : item } } }) + "\n"
+
+        msearch_json += index + search_query
+
+        if i % 800 == 0:
+            query_list.append(msearch_json)
+            msearch_json = ""
+
+    if msearch_json:
+        query_list.append(msearch_json)
+
+    return query_list
+
+
+def get_results(file_list, query_list, es_conn, es_index, es_type, cfg):
+    scroll_count = 0
+    not_found = []
+    files_indexed = 0
+    files_not_indexed = 0
+
+    for query in tqdm(query_list, desc="Getting results"):
+        results = es_conn.msearch(index=es_index, doc_type=es_type, body=query)
+
+        for i, response in enumerate(results["responses"]):
+            if response["hits"]["total"] > 0:
+                files_indexed += 1
+                if cfg.verbose:
+                    print "File: {} ...is in index.".format(file_list[i + (800 * scroll_count)])
+            else:
+                files_not_indexed += 1
+                not_found.append(file_list[i + (800 * scroll_count)])
+                if cfg.verbose:
+                    print "File: {} ...NOT FOUND IN INDEX.".format(file_list[i + (800 * scroll_count)])
+
+    print "\nNumber of files indexed: {}".format(files_indexed)
+    print "Number of files not indexed: {}\n".format(files_not_indexed)
+
+    return not_found
+
 
 def search_es_for_files(cfg):
     "Searches Elasticsearch index for files under directory given in config."
@@ -94,33 +142,14 @@ def search_es_for_files(cfg):
     file_list = build_file_list(directory, cfg.extension)
 
     files_found = len(file_list)
-    file_not_found_list = []
+
 
     print "\nDirectory: {}".format(directory)
     print "Number of files found under directory: {}\n".format(files_found)
-  
-    files_indexed = 0
-    files_not_indexed = 0 
 
-    for filepath in file_list:
-        query = { "query": { "match_phrase" : { "file.path.raw" : filepath } } }
-        res = es_conn.search(index=es_index, doc_type=es_type, body=query,
-                             request_timeout=60, size = 10000)
-        hits = res[u'hits'][u'hits']
+    query_list = build_msearch_query(file_list)
 
-        if len(hits) > 0:
-            files_indexed = files_indexed + 1
-            if cfg.verbose: 
-                print "File: {} ...is in index.".format(filepath)
-        else:
-            files_not_indexed = files_not_indexed + 1
-            file_not_found_list.append(filepath)
-            if cfg.verbose:
-                print "File: {} ...NOT FOUND IN INDEX.".format(filepath)
-
-
-    print "\nNumber of files indexed: {}".format(files_indexed)
-    print "Number of files not indexed: {}\n".format(files_not_indexed)
+    file_not_found_list = get_results(file_list, query_list, es_conn, es_index, es_type, cfg)
 
     if file_not_found_list:
         FNAME = "files_not_found.txt" 
