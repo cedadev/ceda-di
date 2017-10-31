@@ -1,0 +1,74 @@
+{
+    "_option": "es_host: hostname of Elasticsearch node to use",
+    "es-host": "jasmin-es1.ceda.ac.uk",
+
+    "_option": "es_port: port number of Elasticsearch node to use",
+    "es-port": 9200,
+
+    "_option": "es_index: Elasticsearch index to use",
+    "es-index": "faam-test",
+
+    "_option": "es_mapping: Elasticsearch document type to index data as",
+    "es-mapping": "geo_metadata",
+
+    "_option": "es_index_settings: Path to Elasticsearch index settings config",
+    "es-index-settings": "../../elasticsearch/mapping/index_settings.json",
+
+    "_option": "max_results: max number of search results to request",
+    "max-results": 100,
+
+    "_option": "output-path: main output directory",
+    "output-path": "/tmp/ceda-di-output",
+
+    "_option": "log-path: log dir path, relative to 'outputpath'",
+    "log-path": "log/",
+
+    "_option": "json-path: directory for JSON metadata, relative to 'outputpath'",
+    "json-path": "json/",
+
+    "_option": "input-path: data input path (where to extract metadata from)",
+    "input-path": "/badc/faam",
+
+    "_option": "batch-queue: name of the batch queue to submit jobs to",
+    "batch-queue": "localhost",
+
+    "_option": "num-cores: number of processes to use in parallel",
+    "num-cores": 1,
+
+    "_option": "no-create-files: don't create JSON documents on disk",
+    "no-create-files": false,
+
+    "_option": "send-to-index: send documents to Elasticsearch",
+    "send-to-index": true,
+
+    "_option": "logging: options for the 'logging' module",
+    "_ref": "(see: https://docs.python.org/2/library/logging.html)",
+    "logging": {
+        "_option": "format: log entry format string",
+        "format": "[%(levelname)s] (%(name)s) %(message)s"
+    },
+
+    "_option": "handlers: python classes to handle data files",
+    "handlers": {
+        ".zip$": {
+            "class": "ceda_di.providers.esa.safe.SAFESentinel",
+            "priority": 10
+        },
+        "_nav_post_processed.bil.hdr$": {
+            "class": "ceda_di.providers.arsf.envi.BIL",
+            "priority": 10
+        },
+        ".hdf$": {
+            "class": "ceda_di.providers.arsf.hdf4.HDF4",
+            "priority": 10
+        },
+        ".tif$": {
+            "class": "ceda_di.providers.arsf.exif.EXIF",
+            "priority": 10
+        },
+        ".nc$": {
+            "class": "ceda_di.providers.faam.faam.FAAMNetCDF",
+            "priority": 10
+        }
+    }
+}
