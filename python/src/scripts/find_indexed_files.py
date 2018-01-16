@@ -127,6 +127,9 @@ def get_results(file_list, query_list, es_conn, es_index, es_type, cfg):
                 if cfg.verbose:
                     print "File: {} ...NOT FOUND IN INDEX.".format(file_list[i + (800 * scroll_count)])
 
+        # Update scroll count
+        scroll_count += 1
+
     print "\nNumber of files indexed: {}".format(files_indexed)
     print "Number of files not indexed: {}\n".format(files_not_indexed)
 
