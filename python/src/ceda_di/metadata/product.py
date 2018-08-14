@@ -59,7 +59,8 @@ class GeoJSONGenerator(object):
                 geojson = {
                     "geometries": {
                         "search": self._gen_point(),
-                        "display": self._gen_point()
+                        "display": self._gen_point(),
+                        "agg_envelope": self._gen_envelope()
                     }
                 }
             elif self.shape_type == "polygon":
@@ -68,7 +69,8 @@ class GeoJSONGenerator(object):
                     "geometries": {
                        "search": self._gen_bbox(),
                        "display": geometry,
-                       "full_search": geometry 
+                       "full_search": geometry,
+                       "agg_envelope": self._gen_envelope()
                     }
                 }
             elif self.shape_type == "swath":
@@ -82,7 +84,8 @@ class GeoJSONGenerator(object):
                 geojson = {
                     "geometries": {
                         "search": self._gen_envelope(),
-                        "display": self._gen_track()
+                        "display": self._gen_track(),
+                        "agg_envelope": self._gen_envelope()
                     }
                 }
 

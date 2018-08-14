@@ -143,6 +143,13 @@
                                                     "index": "false"
                                                 }
                                             }
+                                        },
+                                        "agg_envelope": {
+                                            "properties": {
+                                                "coordinates": {
+                                                    "type": "geo_point"
+                                                }
+                                            }
                                         }
                                     }
                                 }
