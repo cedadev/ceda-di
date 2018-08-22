@@ -66,7 +66,7 @@ ceda-di  install-ceda-fbs.sh  venv-ceda-fbs
 ```
 $ cat setup_env.sh
 export BASEDIR=/group_workspaces/jasmin/cedaproc/$USER/ceda-di
-export PYTHONPATH=$BASEDIR/ceda-di/python:$BASEDIR/ceda-di/python/src/ceda-di:$PYTHONPATH
+export PYTHONPATH=$BASEDIR/ceda-di/python:$BASEDIR/ceda-di/python/src/ceda_di:$PYTHONPATH
 export PATH=$PATH:$BASEDIR/ceda-di/python/src/scripts
 . venv-ceda-di/bin/activate
 ```
