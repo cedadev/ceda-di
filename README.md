@@ -43,6 +43,33 @@ Guide to This Repository
     * Helper scripts for running the Python suite on a cluster
 * "python"
     * The main Python backend for metadata extraction
+    
+Setting up the environment
+==========================
+
+Get and install ceda-fbs code from Git (with install script)
+
+```
+$ wget https://raw.githubusercontent.com/cedadev/ceda-di/master/python/src/scripts/install-ceda-di.sh
+$ .  ./install-ceda-di.sh
+```
+
+This will build you a `virtualenv` locally so your environment should look like:
+
+```
+$ ls
+ceda-di  install-ceda-fbs.sh  venv-ceda-fbs
+```
+
+## Create a little setup script
+
+```
+$ cat setup_env.sh
+export BASEDIR=/group_workspaces/jasmin/cedaproc/$USER/ceda-di
+export PYTHONPATH=$BASEDIR/ceda-di/python:$BASEDIR/ceda-di/python/src/ceda-di:$PYTHONPATH
+export PATH=$PATH:$BASEDIR/ceda-di/python/src/scripts
+. venv-ceda-di/bin/activate
+```
 
 Example usage
 =============
