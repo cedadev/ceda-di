@@ -170,7 +170,7 @@ class NetCDF_Base(_geospatial):
         patterns = {
             "faam": {
                 "patterns": [
-                    r"_(?P<flight_num>b(\d{3}))"
+                    r"_(?P<flight_num>[a-z](\d{3}))"
                 ]
             },
             "safire": {
