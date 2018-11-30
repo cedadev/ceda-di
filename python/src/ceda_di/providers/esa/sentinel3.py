@@ -4,6 +4,7 @@ import zipfile
 from netCDF4 import Dataset
 from tempfile import NamedTemporaryFile
 import shutil
+from sentinel2 import SentinelMetadata
 
 sentinel3_zip_mapping = {
     "solar_zenith_nadir": "geometry_tn.nc",
@@ -24,6 +25,8 @@ class Sentinel3Scan(object):
 
         if not os.path.exists(self.zip_filename):
             raise Exception("ERROR: Cannot find data file: %s" % self.zip_filename)
+
+        self.extract_metadata()
 
     def get_solar_zenith_range(self, data_file_extn, variable_name, archive_obj):
 
@@ -47,7 +50,6 @@ class Sentinel3Scan(object):
 
         return v[:].min(), v[:].max()
 
-
     def extract_solar_zenith(self):
 
         # Open archive file object
@@ -62,17 +64,30 @@ class Sentinel3Scan(object):
         # Extract oblique zenith range
         min_oblique, max_oblique = self.get_solar_zenith_range('.SEN3/geometry_to.nc', 'solar_zenith_to', zf)
 
+        extracted_info = {
+            "nadir": {
+                "max": max_nadir,
+                "min": min_nadir,
+                "range": {
+                    "gte": min_nadir,
+                    "lte": max_nadir
+                }
+            },
+            "oblique": {
+                "max": max_oblique,
+                "min": min_oblique,
+                "range":{
+                    "gte": min_oblique,
+                    "lte": max_oblique
+                }
+            }
+        }
 
-        return min_nadir, max_nadir, min_oblique, max_oblique
+        self.sentinel_metadata = SentinelMetadata(**extracted_info)
 
-    def scan(self):
-
+    def extract_metadata(self):
         # Extract data from zipfile
         self.extract_solar_zenith()
-
-
-
-
 
 
 if __name__ == '__main__':
@@ -80,11 +95,9 @@ if __name__ == '__main__':
     manifest_file = sys.argv[1]
     outputdir = sys.argv[2]
 
-
     try:
         scan = Sentinel3Scan(manifest_file).scan()
 
     except Exception as ex:
         print "Error: %s" % ex
         sys.exit()
-
