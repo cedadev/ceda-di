@@ -96,7 +96,7 @@ if __name__ == '__main__':
     outputdir = sys.argv[2]
 
     try:
-        scan = Sentinel3Scan(manifest_file).scan()
+        scan = Sentinel3Scan(manifest_file).extract_metadata()
 
     except Exception as ex:
         print "Error: %s" % ex
