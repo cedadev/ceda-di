@@ -209,7 +209,7 @@ class Sentinel2Scan(object):
                 
 if __name__ == '__main__':
 
-    manifest_file = sys.argv[1]
+    manifest_file = sys.argv
     outputdir = sys.argv[2]
     
     try:
@@ -222,6 +222,7 @@ if __name__ == '__main__':
     # Write metadata
     if outputdir is not None:
         scan.write_metadata()
+
     
     
         

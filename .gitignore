@@ -12,7 +12,7 @@ man/
 out/
 dist/
 python/src/test/integration/test_files/json/
-
+*.zip
 *.pyc
 *.egg-info
 *~
