@@ -3,7 +3,13 @@
     "es-host": "jasmin-es1.ceda.ac.uk",
 
     "_option": "es_port: port number of Elasticsearch node to use",
-    "es-port": 9200,
+    "es-port": 443,
+
+    "_option": "es_user: User to use for authentication",
+    "es-user": "ceda-test",
+
+    "_option": "es_password: Password to use for authentication",
+    "es-password": "****",
 
     "_option": "es_index: Elasticsearch index to use",
     "es-index": "ceda-di-testing",

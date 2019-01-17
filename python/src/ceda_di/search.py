@@ -300,12 +300,22 @@ class ElasticsearchClientFactory(object):
         """
         Return an appropriately configured Elasticsearch client.
 
-        :param config_args: Configuration dictionary. Should contain an Elasticsearch hostname under key 'es-host' and an Elasticsearch port under the key 'es-port'.
+        :param config_args: Configuration dictionary.
+                            Should contain:
+                                Elasticsearch hostname under key 'es-host'.
+                                Elasticsearch user under key 'es-user'.
+                                Elasticsearch password under key 'es-password'.
+
         :returns: A configured Elasticsearch instance
         """
         host = config_args['es-host']
-        port = config_args['es-port']
-        return Elasticsearch(hosts=[{"host": host, "port": port}])
+        user = config_args["es-user"]
+        password = config_args["es-password"]
+
+        return Elasticsearch(
+            [host],
+            http_auth=(user, password)
+        )
 
 
 class Searcher(object):
@@ -357,7 +367,7 @@ class Searcher(object):
             results = es.search(index=index, doc_type=doc_type, body=query)
         except ConnectionError as ex:
             url = es.transport.seed_connections[0].host
-            error_msg = "Couldn't connect to Elasticsearch node at {url}. Exception was {exc}"\
+            error_msg = "Couldn't connect to Elasticsearch node at {url}. Exception was {exc}" \
                 .format(url=url, exc=str(ex))
             print(error_msg)
             sys.exit(1)

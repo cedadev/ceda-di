@@ -73,7 +73,7 @@ def construct_url(json_file):
     with open(json_file) as data_file:    
         data = json.load(data_file)
 
-    url= "http://{}:{}/{}/_count?q=file.filename:*&pretty=true".format(data["es-host"], data["es-port"], data["es-index"])
+    url= "{}/{}/_count?q=file.filename:*&pretty=true".format(data["es-host"], data["es-index"])
     print "URL used: %s" % url
     return url
 
