@@ -16,3 +16,4 @@ python/src/test/integration/test_files/json/
 *.pyc
 *.egg-info
 *~
+python/config/*.json
