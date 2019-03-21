@@ -60,10 +60,7 @@ def execute_command(cmd, url):
     """
     print "Running command: %s" % cmd    
 
-    try:
-        subprocess.check_output(shlex.split(cmd), cwd=src_dir, env=os.environ.copy())
-    except subprocess.CalledProcessError as exc:
-        print "Error code:", exc.returncode, exc.output
+    subprocess.call(cmd, shell=True)
 
     time.sleep(2)
     report_files(url) 
