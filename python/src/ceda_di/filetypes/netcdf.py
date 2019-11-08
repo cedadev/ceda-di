@@ -4,10 +4,12 @@ Metadata adapters for NetCDF files.
 
 import logging
 import re
+import os
 
 import numpy.ma
 import netCDF4
 
+from datetime import datetime, timedelta
 from ceda_di._dataset import _geospatial
 from ceda_di.metadata import product
 
@@ -118,11 +120,34 @@ class NetCDF_Base(_geospatial):
         :param Dataset ncdf: Reference to an opened netcdf4.Dataset object
         :param str time_name: Name of the time parameter
         """
-        times = list(netCDF4.num2date(list(ncdf.variables[time_name]),
-                                      ncdf.variables[time_name].units))
+        try:
+
+            times = list(netCDF4.num2date(list(ncdf.variables[time_name]),
+                                          ncdf.variables[time_name].units))
+            return {
+                "start_time": times[0].isoformat(),
+                "end_time": times[-1].isoformat()
+            }
+        except:
+            return None
+
+    @staticmethod
+    def estimate_temporal_from_filename(fpath):
+
+        pattern = r'(?P<year>[0-9]{4})(?P<month>[0-9]{2})(?P<day>[0-9]{2})(?P<hour>[0-9]{2})?(?P<minute>[0-9]{2})?'
+        m = re.search(pattern, os.path.basename(fpath))
+        key_list = ["year", "month", "day", "hour", "minute"]
+        kwargs = {}
+        for key in key_list:
+            if m.group(key):
+                kwargs[key] = int(m.group(key))
+
+        start_date = datetime(**kwargs)
+        end_date = datetime(kwargs["year"], kwargs["month"], kwargs["day"]) + timedelta(1)
+
         return {
-            "start_time": times[0].isoformat(),
-            "end_time": times[-1].isoformat()
+            "start_time": start_date.isoformat(),
+            "end_time": end_date.isoformat()
         }
 
     @staticmethod
@@ -141,11 +166,16 @@ class NetCDF_Base(_geospatial):
                 continue
 
         logger = logging.getLogger(__name__)
-        logger.error("Could not find standard name variable \"%s\": %s" %
+        logger.warning("Could not find standard name variable \"%s\": %s, trying by regex." %
                      (standard_name, fpath))
 
+        key = NetCDF_Base.find_var_by_regex(ncdf, fpath, "^%s$" % standard_name)
+        if key:
+            return key
+
+
     @staticmethod
-    def find_var_by_regex(ncdf, regex):
+    def find_var_by_regex(ncdf, fpath, regex):
         """
         Find a variable reference searching by regular expression.
 
@@ -157,7 +187,7 @@ class NetCDF_Base(_geospatial):
                 return key
 
         logger = logging.getLogger(__name__)
-        logger.error("Could not find variable by regex: \"%s\"", regex)
+        logger.error("Could not find variable by regex: \"%s\": %s" % (regex, fpath))
 
     @staticmethod
     def get_flight_info(fname):
@@ -170,7 +200,8 @@ class NetCDF_Base(_geospatial):
         patterns = {
             "faam": {
                 "patterns": [
-                    r"_(?P<flight_num>[a-z](\d{3}))"
+
+                    r"_(?P<flight_num>[a-d](\d{3}))"
                 ]
             },
             "safire": {
@@ -204,7 +235,12 @@ class NetCDF_CF(_geospatial):
     def get_temporal(self):
         with netCDF4.Dataset(self.fpath) as ncdf:
             time_name = NetCDF_Base.find_var_by_standard_name(ncdf, self.fpath, "time")
-            return NetCDF_Base.temporal(ncdf, time_name)
+            temporal = NetCDF_Base.temporal(ncdf, time_name)
+            if temporal:
+                return temporal
+            else:
+                # Can't read time data, approximate time from filename
+                return NetCDF_Base.estimate_temporal_from_filename(self.fpath)
 
     def get_parameters(self):
         with netCDF4.Dataset(self.fpath) as ncdf:

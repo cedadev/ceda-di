@@ -3,10 +3,16 @@
     "es-host": "jasmin-es1.ceda.ac.uk",
 
     "_option": "es_port: port number of Elasticsearch node to use",
-    "es-port": 9200,
+    "es-port": 443,
+
+    "_option": "es_user: User to use for authentication",
+    "es-user": "ceda-flights",
+
+    "_option": "es_password: Password to use for authentication",
+    "es-password": "****",
 
     "_option": "es_index: Elasticsearch index to use",
-    "es-index": "ceda-eo-2017-06-15",
+    "es-index": "eufar",
 
     "_option": "es_mapping: Elasticsearch document type to index data as",
     "es-mapping": "geo_metadata",
@@ -18,7 +24,7 @@
     "max-results": 100,
 
     "_option": "output-path: main output directory",
-    "output-path": "/datacentre/processing/file_based_search",
+    "output-path": "/datacentre/processing3/file_based_search",
 
     "_option": "log-path: log dir path, relative to 'outputpath'",
     "log-path": "log/",
@@ -27,10 +33,7 @@
     "json-path": "json/",
 
     "_option": "input-path: data input path (where to extract metadata from)",
-    "input-path": "/tmp/ceda-eo",
-
-    "_option": "file-list-file: File containing a list of file paths to scan (for extract).",
-    "file-list-file": null,
+    "input-path": "/tmp/faam",
 
     "_option": "batch-queue: name of the batch queue to submit jobs to",
     "batch-queue": "localhost",
@@ -57,18 +60,6 @@
             "class": "ceda_di.providers.arsf.envi.BIL",
             "priority": 10
         },
-        "S1._.+.manifest$": {
-            "class": "ceda_di.providers.esa.safe.SAFESentinel1",
-            "priority": 10
-        },
-        "S2[AB]_.*.manifest$": {
-            "class": "ceda_di.providers.esa.safe.SAFESentinel2",
-            "priority": 10
-        },
-        "S3[AB]_.*.manifest$": {
-            "class": "ceda_di.providers.esa.safe.SAFESentinel3",
-            "priority": 10
-        },
         ".hdf$": {
             "class": "ceda_di.providers.arsf.hdf4.HDF4",
             "priority": 10
@@ -79,6 +70,22 @@
         },
         ".nc$": {
             "class": "ceda_di.providers.faam.faam.FAAMNetCDF",
+            "priority": 10
+        },
+        "_flight_info.json$": {
+            "class": "ceda_di.providers.flights.generic_flight.GenericFlight",
+            "priority": 10
+        },
+        "S1._.+.manifest$": {
+            "class": "ceda_di.providers.esa.safe.SAFESentinel1",
+            "priority": 10
+        },
+        "S2A_.*.manifest$": {
+            "class": "ceda_di.providers.esa.safe.SAFESentinel2",
+            "priority": 10
+        },
+        "S3A_.*.manifest$": {
+            "class": "ceda_di.providers.esa.safe.SAFESentinel3",
             "priority": 10
         },
         "LT5.+_MTL.txt$": {

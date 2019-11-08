@@ -17,9 +17,10 @@ Options
 .. option:: es-host [url]
 
     The master Elasticsearch node of the Elasticsearch cluster used.
-    In the example configuration file, this is set to "fatcat-test.jc.rl.ac.uk".
+    In the example configuration file, this is set to "https://jasmin-es1.ceda.ac.uk".
+    Use full url including protocol and port if not 80 or 443.
 
-.. option:: es-port [port]
+.. option:: es-port [port] DEPRECATED
 
     The port that the Elasticsearch installation is running on.
     In the example configuration file, this is set to 9200.

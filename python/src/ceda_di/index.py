@@ -5,17 +5,6 @@ from elasticsearch import ElasticsearchException
 from elasticsearch.exceptions import TransportError
 
 
-def _get_host_string(config):
-    """
-    Take appropriate elements from a config dictionary and convert them into
-    a string of format 'host:port'.
-    :param dict config: Application configuration dictionary, including ES config.
-    """
-    host = config["es-host"]
-    port = config["es-port"]
-    return "%s:%d" % (host, port)
-
-
 def create_index(config, elasticsearch):
     """
     Set up an index in ElasticSearch, given a configuration file path.
@@ -46,7 +35,7 @@ class BulkIndexer(object):
         self.index = config["es-index"]
         self.default_mapping = config["es-mapping"]
         self.threshold = threshold
-        self.es = Elasticsearch([_get_host_string(config)])
+        self.es = Elasticsearch([config["es-host"]])
 
         # If the index doesn't exist, create it
         # This will throw an error if the index already exists this is *fine*

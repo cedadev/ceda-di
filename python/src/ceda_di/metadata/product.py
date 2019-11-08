@@ -449,8 +449,10 @@ class Parameter(object):
         # Other arbitrary arguments
         if other_params:
             for key, value in other_params.iteritems():
-                self.items.append(
-                    self.make_param_item(key.strip(), unicode(value).strip()))
+                # If value is blank, ignore.
+                if unicode(value).strip():
+                    self.items.append(
+                        self.make_param_item(key.strip(), unicode(value).strip()))
 
     @staticmethod
     def make_param_item(name, value):
