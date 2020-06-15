@@ -140,14 +140,10 @@
                                 "geometries": {
                                     "properties": {
                                         "search": {
-                                            "type": "geo_shape",
-                                            "tree": "quadtree",
-                                            "precision": "8km"
+                                            "type": "geo_shape"
                                         },
                                         "full_search": {
-                                            "type": "geo_shape",
-                                            "tree": "quadtree",
-                                            "precision": "8km"
+                                            "type": "geo_shape"
                                         },
                                         "display": {
                                             "properties": {
