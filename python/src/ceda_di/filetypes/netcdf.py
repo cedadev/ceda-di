@@ -70,7 +70,7 @@ class NetCDF_Base(_geospatial):
         :returns list: List of metadata.product.Parameter objects
         """
         params = []
-        for v_name, v_data in ncdf.variables.iteritems():
+        for v_name, v_data in ncdf.variables.items():
             param = product.Parameter(v_name, v_data.__dict__)
             params.append(param)
 
@@ -102,10 +102,10 @@ class NetCDF_Base(_geospatial):
         """
 
         # Filter out items that are equal to "masked"
-        lats = filter(NetCDF_Base.clean_coordinate,
-                      ncdf.variables[lat_name][:].ravel())
-        lons = filter(NetCDF_Base.clean_coordinate,
-                      ncdf.variables[lon_name][:].ravel())
+        lats = list(filter(NetCDF_Base.clean_coordinate,
+                      ncdf.variables[lat_name][:].ravel()))
+        lons = list(filter(NetCDF_Base.clean_coordinate,
+                      ncdf.variables[lon_name][:].ravel()))
         return {
             "type": "track",
             "lat": lats,
@@ -158,7 +158,7 @@ class NetCDF_Base(_geospatial):
         :param Dataset ncdf: Reference to an opened netCDF4.Dataset object
         :param str standard_name: The CF standard name to search for
         """
-        for key, value in ncdf.variables.iteritems():
+        for key, value in ncdf.variables.items():
             try:
                 if value.standard_name.lower() == standard_name.lower():
                     return key
@@ -211,7 +211,7 @@ class NetCDF_Base(_geospatial):
             }
         }
 
-        for org, info in patterns.iteritems():
+        for org, info in patterns.items():
             for pattern in info["patterns"]:
                 match = re.search(pattern, fname)
                 if match:

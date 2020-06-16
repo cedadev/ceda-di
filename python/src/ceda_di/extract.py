@@ -27,7 +27,7 @@ class HandlerFactory(object):
         self.logger = logging.getLogger(__name__)
         self.handlers = {}
 
-        for pattern, handler in handler_map.iteritems():
+        for pattern, handler in handler_map.items():
 
             handler_class = handler['class']
             priority = handler['priority']
@@ -55,7 +55,7 @@ class HandlerFactory(object):
         """
         handler_candidates = []  # All handlers whose file signatures match
 
-        for pattern, handler in self.handlers.iteritems():
+        for pattern, handler in self.handlers.items():
             if re.search(pattern, filename):
                 handler_candidates.append(handler)
 
@@ -120,7 +120,7 @@ class Extract(object):
             return self.configuration[conf_opt]
         else:
             raise AttributeError(
-                "Mandatory configuration option not found: %s" % conf_opt)
+                f"Mandatory configuration option not found: {conf_opt}")
 
     def make_dirs(self, conf):
         """
@@ -188,9 +188,9 @@ class Extract(object):
 
             try:
                 self.es.index(index=index, doc_type=doc_type, body=body, id=doc_id)
-            except Exception, err:
-                print "FAILED to log: {}".format(filename)
-                print "FAILURE ERROR WAS: {}".format(str(err))
+            except Exception as err:
+                print(f"FAILED to log: {filename}")
+                print(f"FAILURE ERROR WAS: {str(err)}")
 
 
     def write_properties(self, fname, _geospatial_obj):
@@ -201,7 +201,7 @@ class Extract(object):
         fname = os.path.basename(fname)
         json_path = os.path.join(self.conf("output-path"), self.conf("json-path"))
 
-        out_fname = "%s/%s.json" % (json_path, os.path.splitext(fname)[0])
+        out_fname = f"{json_path}/{os.path.splitext(fname)[0]}.json"
         props = _geospatial_obj.get_properties()
 
         if props is not None:
@@ -214,8 +214,7 @@ class Extract(object):
         """
         # Log beginning of processing
         start = datetime.datetime.now()
-        self.logger.info("Metadata extraction started at: %s",
-                         start.isoformat())
+        self.logger.info(f"Metadata extraction started at: {start.isoformat()}")
 
         # Create index if necessary
         if self.conf("send-to-index"):

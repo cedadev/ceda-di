@@ -111,7 +111,7 @@ class LandsatBase(_geospatial):
             for item_name, property_name in content_dict["properties"].items():
                 if property_name != "":
                     try:
-                        if isinstance(property_name, basestring):
+                        if isinstance(property_name, str):
                             value = manifest_properties[property_name]
                         else:
                             multi_value = []
@@ -440,8 +440,8 @@ def test_parser():
     ]
     for (test, filepath, to_match) in test_files[:]:
 
-        print "\n\nTesting: %s" % test
-        print "With: %s\n" % filepath
+        print("\n\nTesting: %s" % test)
+        print("With: %s\n" % filepath)
 
         cls = eval("%s" % test.split(":")[0])
         with cls(filepath) as handler:

@@ -228,7 +228,7 @@ class TestGeoJSONGenerator(unittest.TestCase):
 
         expected_display_geojson = {
             "type": "LineString",
-            "coordinates": zip(longitudes, latitudes)
+            "coordinates": list(zip(longitudes, latitudes))
         }
 
         assert_that(geojson["geometries"]["search"], is_(expected_search_geojson))

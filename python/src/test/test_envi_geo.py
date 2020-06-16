@@ -15,7 +15,7 @@ class ENVIStub(object):
     def __init__(self, **kwargs):
         self.hdr = {}
 
-        for k, val in kwargs.iteritems():
+        for k, val in kwargs.items():
             self.hdr[k] = val
 
     def read(self):

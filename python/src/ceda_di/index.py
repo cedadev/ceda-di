@@ -127,6 +127,6 @@ class BulkIndexer(object):
         """
         Submit all current document pools to the ElasticSearch index.
         """
-        for mapping in self.doc_pool.keys():
+        for mapping in list(self.doc_pool.keys()):
             if len(self.doc_pool[mapping]) > 0:
                 self.submit_pool(mapping)

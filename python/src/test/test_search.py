@@ -398,10 +398,10 @@ class TestSearcher(unittest.TestCase):
         self.config['file-paths'] = True
 
     results_template = {
-        u'_shards': {u'successful': 5, u'failed': 0, u'total': 5},
-        u'timed_out': False,
-        u'took': 2,
-        u'hits': {u'max_score': 1.0, u'total': 0, u'hits': []}
+        '_shards': {'successful': 5, 'failed': 0, 'total': 5},
+        'timed_out': False,
+        'took': 2,
+        'hits': {'max_score': 1.0, 'total': 0, 'hits': []}
     }
 
     def test_GIVEN_results_found_WHEN_run_THEN_results_printed(self):
@@ -475,26 +475,26 @@ class TestSearcher(unittest.TestCase):
     def make_two_results(self):
         results = copy.deepcopy(self.results_template)
         results['hits']['hits'].append({
-            u'_id': u'8a0b3fbf45bb60996a21834db9ae16e0d5074d2a',
-            u'_index': u'badc',
-            u'_score': 1.0,
-            u'_type': u'eufar',
-            u'_source': {
-                u'file': {
-                    u'path': u'/badc/eufar/data/projects/eyjafjallajokull/nerc_arsf/'
-                             u'core-cloud-phy_arsf_dornier_20100419_v500_r0_arsf109bpart1-10.nc'
+            '_id': '8a0b3fbf45bb60996a21834db9ae16e0d5074d2a',
+            '_index': 'badc',
+            '_score': 1.0,
+            '_type': 'eufar',
+            '_source': {
+                'file': {
+                    'path': '/badc/eufar/data/projects/eyjafjallajokull/nerc_arsf/'
+                             'core-cloud-phy_arsf_dornier_20100419_v500_r0_arsf109bpart1-10.nc'
                 }
             }
         })
         results['hits']['hits'].append({
-            u'_id': u'e8b819a11819d45835282971bac489baec7562b9',
-            u'_index': u'badc',
-            u'_score': 1.0,
-            u'_type': u'eufar',
-            u'_source': {
-                u'file': {
-                    u'path': u'/badc/eufar/data/projects/eyjafjallajokull/nerc_arsf/'
-                             u'core-cloud-phy_arsf_dornier_20100419_v500_r1_arsf109bpart1-10_densitymineraldust.nc'
+            '_id': 'e8b819a11819d45835282971bac489baec7562b9',
+            '_index': 'badc',
+            '_score': 1.0,
+            '_type': 'eufar',
+            '_source': {
+                'file': {
+                    'path': '/badc/eufar/data/projects/eyjafjallajokull/nerc_arsf/'
+                             'core-cloud-phy_arsf_dornier_20100419_v500_r1_arsf109bpart1-10_densitymineraldust.nc'
                 }
             }
         })

@@ -4,7 +4,7 @@ import zipfile
 from netCDF4 import Dataset
 from tempfile import NamedTemporaryFile
 import shutil
-from sentinel2 import SentinelMetadata
+from .sentinel2 import SentinelMetadata
 
 sentinel3_zip_mapping = {
     "solar_zenith_nadir": "geometry_tn.nc",
@@ -99,5 +99,5 @@ if __name__ == '__main__':
         scan = Sentinel3Scan(manifest_file).extract_metadata()
 
     except Exception as ex:
-        print "Error: %s" % ex
+        print("Error: %s" % ex)
         sys.exit()
