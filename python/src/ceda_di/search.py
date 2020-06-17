@@ -1,10 +1,12 @@
 import re
 import sys
 
-import simplejson as json
+import json
 
 from elasticsearch import Elasticsearch, ConnectionError
 from ceda_di.metadata.product import GeoJSONGenerator
+from dateutil.parser import parse
+import datetime
 
 
 class JsonQueryBuilder(object):
@@ -110,7 +112,7 @@ class JsonQueryBuilder(object):
         except Exception as ex:
             raise ValueError("An error occurred when determining the file format for the {action}. "
                              "Filename: '{filename}', error: '{error}'"
-                             .format(filename=filename, error=ex.message, action=action))
+                             .format(filename=filename, error=ex, action=action))
         if handler is None:
             raise ValueError("File can not be read because format is not known, file: '{filename}'."
                              .format(filename=filename))
@@ -130,7 +132,7 @@ class JsonQueryBuilder(object):
             self._add_region_to_query_filter(spatial["lat"], spatial["lon"], False)
         except Exception as ex:
             raise ValueError("An error occurred when reading the file for the bounding box. Filename: '{filename}', "
-                             "error: '{error}'".format(filename=filename, error=ex.message))
+                             "error: '{error}'".format(filename=filename, error=ex))
 
     def process_times_from_file(self, filename):
         """
@@ -143,7 +145,7 @@ class JsonQueryBuilder(object):
             temporal = handler.get_temporal()
         except Exception as ex:
             raise ValueError("An error occurred when reading the file for the times. Filename: '{filename}', "
-                             "error: '{error}'".format(filename=filename, error=ex.message))
+                             "error: '{error}'".format(filename=filename, error=ex))
         try:
             self._add_temporal_query_to_filter(temporal["start_time"], temporal["end_time"])
         except KeyError:
@@ -177,10 +179,9 @@ class JsonQueryBuilder(object):
         :param start: Start datetime string
         :param end: End datetime string
         """
-        from jasmin_cis.parse_datetime import parse_partial_datetime
         try:
-            start = parse_partial_datetime(start, True).isoformat()
-            end = parse_partial_datetime(end, False).isoformat()
+            start = parse(start, default=datetime.datetime(1,1,1,0,0,0)).isoformat()
+            end = parse(end, default=datetime.datetime(1,12,31,23,59,59)).isoformat()
         except ValueError:
             raise ValueError("Couldn't parse datetimes '{start}' and '{end}': "
                              "use the ISO-8601 YYYY-MM-DDTHH:MM:SS format.".format(start=start, end=end))

@@ -6,8 +6,10 @@ import unittest
 
 from ceda_di.providers.arsf.exif import EXIF
 
+
 class TestEXIF(unittest.TestCase):
     """Test class for ceda_di.exif_geo.EXIF"""
+
     def setUp(self):
         self.path = "/path/to/some/file"
         self.xml = {
@@ -29,15 +31,18 @@ class TestEXIF(unittest.TestCase):
             }
         }
 
-
     def test_get_geospatial(self):
         with EXIF(self.path) as exif_file:
             exif_file.xml = self.xml
-            assert exif_file.get_geospatial() == {
-                "lat": [1.234],
-                "lon": [4.321],
-                "alt": [9.876]
-            }
+            self.assertDictEqual(
+                exif_file.get_geospatial(),
+                {
+                    "lat": [1.234],
+                    "lon": [4.321],
+                    "alt": [9.876],
+                    "type": "point"
+                }
+            )
 
             exif_file.xml = {}
             self.assertRaises(KeyError, exif_file.get_temporal)

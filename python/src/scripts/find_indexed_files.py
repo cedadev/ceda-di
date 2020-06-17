@@ -15,7 +15,7 @@ import argparse
 # Third-party imports
 from elasticsearch import Elasticsearch
 from tqdm import tqdm
-import simplejson as json
+import json
 
 
 DEFAULT_ES_DETAILS = {'host': 'jasmin-es1.ceda.ac.uk', 'port': '9200', 'type': 'geo_metadata'}

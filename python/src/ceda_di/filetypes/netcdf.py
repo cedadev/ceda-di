@@ -169,13 +169,13 @@ class NetCDF_Base(_geospatial):
         logger.warning("Could not find standard name variable \"%s\": %s, trying by regex." %
                      (standard_name, fpath))
 
-        key = NetCDF_Base.find_var_by_regex(ncdf, fpath, "^%s$" % standard_name)
+        key = NetCDF_Base.find_var_by_regex(ncdf, "^%s$" % standard_name)
         if key:
             return key
 
 
     @staticmethod
-    def find_var_by_regex(ncdf, fpath, regex):
+    def find_var_by_regex(ncdf, regex):
         """
         Find a variable reference searching by regular expression.
 
@@ -187,7 +187,7 @@ class NetCDF_Base(_geospatial):
                 return key
 
         logger = logging.getLogger(__name__)
-        logger.error("Could not find variable by regex: \"%s\": %s" % (regex, fpath))
+        logger.error("Could not find variable by regex: \"%s\": %s" % (regex, ncdf.filepath()))
 
     @staticmethod
     def get_flight_info(fname):

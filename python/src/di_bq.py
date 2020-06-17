@@ -20,7 +20,7 @@ Options:
     --delete-after      Delete input files after job submission.
 """
 
-import simplejson as json
+import json
 import os
 
 from docopt import docopt

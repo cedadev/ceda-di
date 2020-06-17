@@ -1,7 +1,6 @@
 import copy
 import os
 from datetime import datetime
-from hamcrest import *
 import unittest
 from elasticsearch import ConnectionError
 from mock import MagicMock
@@ -9,7 +8,7 @@ import sys
 from ceda_di._dataset import _geospatial
 from ceda_di.extract import HandlerFactory
 from ceda_di.search import Searcher, JsonQueryBuilder
-from di import read_conf
+from ceda_di.util.cmd import read_conf
 
 
 class TestJsonQueryBuilder(unittest.TestCase):
@@ -35,7 +34,7 @@ class TestJsonQueryBuilder(unittest.TestCase):
 
         query = query_builder.build(query_string)
 
-        assert_that(query, is_({
+        self.assertDictEqual(query, {
             "query": {
                 "filtered": {
                     "filter": {
@@ -60,13 +59,13 @@ class TestJsonQueryBuilder(unittest.TestCase):
                 }
             },
             "size": 10
-        }))
+        })
 
     def test_GIVEN_extents_are_None_WHEN_build_THEN_correct_JSON_returned(self):
         query_builder = JsonQueryBuilder(None)
         query_string = None
         query = query_builder.build(query_string)
-        assert_that(query, is_({
+        self.assertDictEqual(query, {
             "query": {
                 "filtered": {
                     "filter": {
@@ -79,7 +78,7 @@ class TestJsonQueryBuilder(unittest.TestCase):
                 }
             },
             "size": 10
-        }))
+        })
 
     def test_GIVEN_invalid_timestamp_WHEN_build_THEN_ValueError_raised(self):
         start = "2010/04/191 233:39:54"
@@ -95,8 +94,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
 
         must = self.run_query_builder_return_must(query_string)
 
-        assert_that(must[0]['range']['eufar.temporal.start_time']['lte'], is_('2010-12-31T23:59:59'))
-        assert_that(must[1]['range']['eufar.temporal.end_time']['gte'], is_('2009-01-01T00:00:00'))
+        self.assertEqual(must[0]['range']['eufar.temporal.start_time']['lte'], '2010-12-31T23:59:59')
+        self.assertEqual(must[1]['range']['eufar.temporal.end_time']['gte'],'2009-01-01T00:00:00')
 
     def test_GIVEN_one_partial_timestamp_WHEN_build_THEN_start_and_end_timestamps_are_extremes_in_range(self):
         date = "2009"
@@ -104,16 +103,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
 
         must = self.run_query_builder_return_must(query_string)
 
-        assert_that(must[0]['range']['eufar.temporal.start_time']['lte'], is_('2009-12-31T23:59:59'))
-        assert_that(must[1]['range']['eufar.temporal.end_time']['gte'], is_('2009-01-01T00:00:00'))
-
-    def test_GIVEN_non_iso_timestamp_WHEN_build_THEN_raises_ValueError(self):
-        start = "2010/04/19 23:39:54"
-        end = "2010/04/19 15:12:40"
-        query_string = "t=[%s,%s]" % (start, end)
-
-        with self.assertRaises(ValueError):
-            self.run_query_builder_return_must(query_string)
+        self.assertEqual(must[0]['range']['eufar.temporal.start_time']['lte'], '2009-12-31T23:59:59')
+        self.assertEqual(must[1]['range']['eufar.temporal.end_time']['gte'], '2009-01-01T00:00:00')
 
     def test_GIVEN_lat_range_WHEN_build_THEN_lat_bounds_in_json(self):
         ymin, ymax = 40, 60
@@ -122,8 +113,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
         must = self.run_query_builder_return_must(query_string)
 
         shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
-        assert_that(shape['type'], is_('envelope'))
-        assert_that(shape['coordinates'], is_([[-180, ymax], [180, ymin]]))
+        self.assertEqual(shape['type'], 'envelope')
+        self.assertListEqual(shape['coordinates'], [[-180, ymax], [180, ymin]])
 
     def test_GIVEN_single_lat_WHEN_build_THEN_lat_bounds_in_json(self):
         lat = 55
@@ -132,8 +123,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
         must = self.run_query_builder_return_must(query_string)
 
         shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
-        assert_that(shape['type'], is_('envelope'))
-        assert_that(shape['coordinates'], is_([[-180, lat], [180, lat]]))
+        self.assertEqual(shape['type'], 'envelope')
+        self.assertEqual(shape['coordinates'], [[-180, lat], [180, lat]])
 
     def test_GIVEN_invalid_lat_WHEN_build_THEN_raises_ValueError(self):
         query_string = "y=[51N, 55N]"
@@ -157,8 +148,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
         must = self.run_query_builder_return_must(query_string)
 
         shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
-        assert_that(shape['type'], is_('envelope'))
-        assert_that(shape['coordinates'], is_([[xmin, 90], [xmax, -90]]))
+        self.assertEqual(shape['type'], 'envelope')
+        self.assertEqual(shape['coordinates'], [[xmin, 90], [xmax, -90]])
 
     def test_GIVEN_single_lon_WHEN_build_THEN_lat_bounds_in_json(self):
         lon = 120
@@ -167,8 +158,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
         must = self.run_query_builder_return_must(query_string)
 
         shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
-        assert_that(shape['type'], is_('envelope'))
-        assert_that(shape['coordinates'], is_([[lon, 90], [lon, -90]]))
+        self.assertEqual(shape['type'], 'envelope')
+        self.assertEqual(shape['coordinates'], [[lon, 90], [lon, -90]])
 
     def test_GIVEN_invalid_lon_WHEN_build_THEN_ValueError(self):
         query_string = "x=[90E]"
@@ -183,8 +174,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
         must = self.run_query_builder_return_must(query_string)
 
         shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
-        assert_that(shape['type'], is_('envelope'))
-        assert_that(shape['coordinates'], is_([[wrapped_lon, 90], [wrapped_lon, -90]]))
+        self.assertEqual(shape['type'], 'envelope')
+        self.assertListEqual(shape['coordinates'], [[wrapped_lon, 90], [wrapped_lon, -90]])
 
     def test_GIVEN_lon_range_less_than_minus_180_WHEN_build_THEN_wraps_around(self):
         start, end = -190, 10
@@ -194,8 +185,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
         must = self.run_query_builder_return_must(query_string)
 
         shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
-        assert_that(shape['type'], is_('envelope'))
-        assert_that(shape['coordinates'], is_([[wrapped_start, 90], [wrapped_end, -90]]))
+        self.assertEqual(shape['type'], 'envelope')
+        self.assertListEqual(shape['coordinates'], [[wrapped_start, 90], [wrapped_end, -90]])
 
     def test_GIVEN_single_lon_greater_than_180_WHEN_build_THEN_wraps_around(self):
         lon = 200
@@ -205,8 +196,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
         must = self.run_query_builder_return_must(query_string)
 
         shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
-        assert_that(shape['type'], is_('envelope'))
-        assert_that(shape['coordinates'], is_([[wrapped_lon, 90], [wrapped_lon, -90]]))
+        self.assertEqual(shape['type'], 'envelope')
+        self.assertListEqual(shape['coordinates'], [[wrapped_lon, 90], [wrapped_lon, -90]])
 
     def test_GIVEN_single_lon_greater_than_360_WHEN_build_THEN_wraps_around(self):
         lon = 370
@@ -216,8 +207,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
         must = self.run_query_builder_return_must(query_string)
 
         shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
-        assert_that(shape['type'], is_('envelope'))
-        assert_that(shape['coordinates'], is_([[wrapped_lon, 90], [wrapped_lon, -90]]))
+        self.assertEqual(shape['type'], 'envelope')
+        self.assertListEqual(shape['coordinates'], [[wrapped_lon, 90], [wrapped_lon, -90]])
 
     def test_GIVEN_lon_range_greater_than_180_WHEN_build_THEN_wraps_around(self):
         start, end = 0, 270
@@ -227,8 +218,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
         must = self.run_query_builder_return_must(query_string)
 
         shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
-        assert_that(shape['type'], is_('envelope'))
-        assert_that(shape['coordinates'], is_([[wrapped_start, 90], [wrapped_end, -90]]))
+        self.assertEqual(shape['type'], 'envelope')
+        self.assertListEqual(shape['coordinates'], [[wrapped_start, 90], [wrapped_end, -90]])
 
     def test_GIVEN_lon_range_greater_than_360_WHEN_build_THEN_wraps_around(self):
         start, end = - 150, 730
@@ -237,8 +228,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
 
         must = self.run_query_builder_return_must(query_string)
         shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
-        assert_that(shape['type'], is_('envelope'))
-        assert_that(shape['coordinates'], is_([[wrapped_start, 90], [wrapped_end, -90]]))
+        self.assertEqual(shape['type'], 'envelope')
+        self.assertListEqual(shape['coordinates'], [[wrapped_start, 90], [wrapped_end, -90]])
 
     def test_GIVEN_lon_range_crossing_0_WHEN_build_THEN_ranges_crosses_0(self):
         start, end = 170, -170
@@ -246,8 +237,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
 
         must = self.run_query_builder_return_must(query_string)
         shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
-        assert_that(shape['type'], is_('envelope'))
-        assert_that(shape['coordinates'], is_([[start, 90], [end, -90]]))
+        self.assertEqual(shape['type'], 'envelope')
+        self.assertListEqual(shape['coordinates'], [[start, 90], [end, -90]])
 
     def test_GIVEN_no_bounding_box_filename_WHEN_build_THEN_error(self):
         file_handle_factory = MagicMock(HandlerFactory)
@@ -257,7 +248,7 @@ class TestJsonQueryBuilder(unittest.TestCase):
         with self.assertRaises(ValueError) as exception_context:
             self.run_query_builder_return_must(query_string, file_handle_factory)
 
-        assert_that(exception_context.exception.message, contains_string("No filename given when reading the file for bounding box."), "error message")
+        self.assertIn(str(exception_context.exception), "No filename given when reading the file for bounding box.", "error message")
 
     def test_GIVEN_bounding_box_filename_with_no_handler_WHEN_build_THEN_error(self):
         file_handle_factory = MagicMock(HandlerFactory)
@@ -268,7 +259,7 @@ class TestJsonQueryBuilder(unittest.TestCase):
         with self.assertRaises(ValueError) as exception_context:
             self.run_query_builder_return_must(query_string, file_handle_factory)
 
-        assert_that(exception_context.exception.message, contains_string("File can not be read"), "error message")
+        self.assertIn(str(exception_context.exception), "File can not be read", "error message")
 
     def test_GIVEN_bounding_box_filename_and_get_handler_raises_WHEN_build_THEN_error(self):
         file_handle_factory = MagicMock(HandlerFactory)
@@ -280,8 +271,10 @@ class TestJsonQueryBuilder(unittest.TestCase):
         with self.assertRaises(ValueError) as exception_context:
             self.run_query_builder_return_must(query_string, file_handle_factory)
 
-        assert_that(exception_context.exception.message, contains_string("An error occurred when determining the file format"), "error message")
-        assert_that(exception_context.exception.message, contains_string(error_message), "error message")
+        print(exception_context.exception)
+
+        self.assertIn(str(exception_context.exception), "An error occurred when determining the file format", "error message")
+        self.assertIn(str(exception_context.exception), error_message, "error message")
 
     def test_GIVEN_bounding_box_filename_handler_throws_when_called_WHEN_build_THEN_error(self):
         file_handle_factory = MagicMock(HandlerFactory)
@@ -296,8 +289,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
         with self.assertRaises(ValueError) as exception_context:
             self.run_query_builder_return_must(query_string, file_handle_factory)
 
-        assert_that(exception_context.exception.message, contains_string("An error occurred when reading"), "error message")
-        assert_that(exception_context.exception.message, contains_string(error_message), "error message")
+        self.assertIn(str(exception_context.exception), "An error occurred when reading", "error message")
+        self.assertIn(str(exception_context.exception), error_message, "error message")
 
     def test_GIVEN_bounding_box_filename_with_lat_and_lon_WHEN_build_THEN_lat_and_lon_set(self):
         file_handle_factory = MagicMock(HandlerFactory)
@@ -316,8 +309,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
 
         must = self.run_query_builder_return_must(query_string, file_handle_factory)
         shape = must[0]['geo_shape']['eufar.spatial.geometries.bbox']['shape']
-        assert_that(shape['type'], is_('envelope'))
-        assert_that(shape['coordinates'], is_([[lon_lo, lat_hi], [lon_hi, lat_lo]]))
+        self.assertEqual(shape['type'], 'envelope')
+        self.assertListEqual(shape['coordinates'], [[lon_lo, lat_hi], [lon_hi, lat_lo]])
 
     def test_GIVEN_bounding_box_filename_with_no_lat_and_lon_WHEN_build_THEN_lat_and_lon_set(self):
         file_handle_factory = MagicMock(HandlerFactory)
@@ -333,7 +326,7 @@ class TestJsonQueryBuilder(unittest.TestCase):
         with self.assertRaises(ValueError) as exception_context:
             self.run_query_builder_return_must(query_string, file_handle_factory)
 
-        assert_that(exception_context.exception.message, contains_string("No bounding box generated when reading the file."), "error message")
+        self.assertIn(str(exception_context.exception), "No bounding box generated when reading the file.", "error message")
 
     def test_GIVEN_temporal_filename_handler_throws_when_called_WHEN_build_THEN_error(self):
         file_handle_factory = MagicMock(HandlerFactory)
@@ -348,8 +341,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
         with self.assertRaises(ValueError) as exception_context:
             self.run_query_builder_return_must(query_string, file_handle_factory)
 
-        assert_that(exception_context.exception.message, contains_string("An error occurred when reading"), "error message")
-        assert_that(exception_context.exception.message, contains_string(error_message), "error message")
+        self.assertIn(str(exception_context.exception), "An error occurred when reading", "error message")
+        self.assertIn(str(exception_context.exception), error_message, "error message")
 
     def test_GIVEN_temporal_filename_with_times_WHEN_build_THEN_times_set(self):
         file_handle_factory = MagicMock(HandlerFactory)
@@ -365,8 +358,8 @@ class TestJsonQueryBuilder(unittest.TestCase):
             "end_time": end_time.isoformat()})
 
         must = self.run_query_builder_return_must(query_string, file_handle_factory)
-        assert_that(must[0]['range']['eufar.temporal.start_time']['lte'], is_('2009-01-01T00:00:00'))
-        assert_that(must[1]['range']['eufar.temporal.end_time']['gte'], is_('2009-12-31T23:59:59'))
+        self.assertEqual(must[0]['range']['eufar.temporal.start_time']['lte'], '2009-01-01T00:00:00')
+        self.assertEqual(must[1]['range']['eufar.temporal.end_time']['gte'], '2009-12-31T23:59:59')
 
 
     def test_GIVEN_bounding_box_filename_with_times_WHEN_build_THEN_error(self):
@@ -381,7 +374,7 @@ class TestJsonQueryBuilder(unittest.TestCase):
         with self.assertRaises(ValueError) as exception_context:
             self.run_query_builder_return_must(query_string, file_handle_factory)
 
-        assert_that(exception_context.exception.message, contains_string("No times found when reading the file."), "error message")
+        self.assertIn(str(exception_context.exception), "No times found when reading the file." "error message")
 
 
 
@@ -390,7 +383,7 @@ class TestSearcher(unittest.TestCase):
     Test the ceda_di.search.Searcher class
     """
 
-    CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../../config/ceda_di.json')
+    CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../../config/ceda-di-test.tmpl')
 
     def setUp(self):
         sys.stdout = MagicMock()  # Mock stdout so we can capture printed output
@@ -413,15 +406,15 @@ class TestSearcher(unittest.TestCase):
             searcher.run()
         except SystemExit:
             pass
-        assert_that(sys.stdout.write.call_count, is_(2 * 2))
-        assert_that(sys.stdout.write.call_args_list[0][0][0], is_('/badc/eufar/data/projects/eyjafjallajokull/'
+        self.assertEqual(sys.stdout.write.call_count, 2 * 2)
+        self.assertEqual(sys.stdout.write.call_args_list[0][0][0], '/badc/eufar/data/projects/eyjafjallajokull/'
                                                                   'nerc_arsf/core-cloud-phy_arsf_dornier_20100419'
-                                                                  '_v500_r0_arsf109bpart1-10.nc'))
-        assert_that(sys.stdout.write.call_args_list[1][0][0], is_('\n'))
-        assert_that(sys.stdout.write.call_args_list[2][0][0], is_('/badc/eufar/data/projects/eyjafjallajokull/'
+                                                                  '_v500_r0_arsf109bpart1-10.nc')
+        self.assertEqual(sys.stdout.write.call_args_list[1][0][0], '\n')
+        self.assertEqual(sys.stdout.write.call_args_list[2][0][0], '/badc/eufar/data/projects/eyjafjallajokull/'
                                                                   'nerc_arsf/core-cloud-phy_arsf_dornier_20100419'
-                                                                  '_v500_r1_arsf109bpart1-10_densitymineraldust.nc'))
-        assert_that(sys.stdout.write.call_args_list[3][0][0], is_('\n'))
+                                                                  '_v500_r1_arsf109bpart1-10_densitymineraldust.nc')
+        self.assertEqual(sys.stdout.write.call_args_list[3][0][0], '\n')
 
     def test_GIVEN_results_found_WHEN_run_THEN_SystemExit_with_code_zero(self):
         results = self.make_two_results()
@@ -430,7 +423,7 @@ class TestSearcher(unittest.TestCase):
         searcher = Searcher(self.config, elastic_search_client_factory=client_factory)
         with self.assertRaises(SystemExit) as ex:
             searcher.run()
-        assert_that(ex.exception.code, is_(0))
+        self.assertEqual(ex.exception.code, 0)
 
     def test_GIVEN_no_results_found_WHEN_run_THEN_nothing_printed(self):
         client_factory = self.make_mock_client_factory(self.results_template)
@@ -440,7 +433,7 @@ class TestSearcher(unittest.TestCase):
             searcher.run()
         except SystemExit:
             pass
-        assert_that(sys.stdout.write.call_count, is_(0))
+        self.assertEqual(sys.stdout.write.call_count, 0)
 
     def test_GIVEN_no_results_found_WHEN_run_THEN_SystemExit_with_code_zero(self):
         client_factory = self.make_mock_client_factory(self.results_template)
@@ -448,7 +441,7 @@ class TestSearcher(unittest.TestCase):
         searcher = Searcher(self.config, elastic_search_client_factory=client_factory)
         with self.assertRaises(SystemExit) as ex:
             searcher.run()
-        assert_that(ex.exception.code, is_(0))
+        self.assertEqual(ex.exception.code, 0)
 
     def test_GIVEN_connection_error_occurs_WHEN_run_THEN_SystemExit_with_non_zero_code(self):
         client_factory = self.make_mock_client_factory_with_bad_connection()
@@ -456,7 +449,7 @@ class TestSearcher(unittest.TestCase):
         searcher = Searcher(self.config, elastic_search_client_factory=client_factory)
         with self.assertRaises(SystemExit) as ex:
             searcher.run()
-        assert_that(ex.exception.code, not_(0))
+        self.assertEqual(ex.exception.code, 0)
 
     def make_mock_client_factory_with_bad_connection(self):
         es_client = MagicMock()

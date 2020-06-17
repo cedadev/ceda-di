@@ -1,4 +1,4 @@
-import simplejson as json
+import json
 
 from elasticsearch import Elasticsearch
 from elasticsearch import ElasticsearchException
@@ -14,7 +14,7 @@ def create_index(config, elasticsearch):
     index_settings_path = config["es-index-settings"]
     index_name = config["es-index"]
 
-    import simplejson as json  # Import here as unused in rest of module
+    import json  # Import here as unused in rest of module
     with open(index_settings_path, 'r') as settings:
         index_settings = json.load(settings)
 

@@ -5,7 +5,7 @@ Module containing useful functions for the command-line interfaces.
 import os
 import sys
 
-import simplejson as json
+import json
 
 
 def sanitise_args(config):

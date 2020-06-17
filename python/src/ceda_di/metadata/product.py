@@ -5,7 +5,7 @@ Module for holding and exporting file metadata as JSON documents.
 
 from .coordinate_sort import conditionPolygon
 import hashlib
-import simplejson as json
+import json
 import logging
 import math
 import numpy.ma as ma

@@ -69,7 +69,7 @@ class HandlerFactory(object):
                 handler_class.get_file_format(filename)
                 return handler_class
             except FileFormatError as ex:
-                self.logger.info("Not using handler {} because {}".format(handler_class, ex.message))
+                self.logger.info("Not using handler {} because {}".format(handler_class, ex))
                 pass
             except AttributeError:
                 return handler_class
