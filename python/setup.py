@@ -15,11 +15,6 @@ sys.path.insert(1, os.path.join(os.path.dirname(__file__), 'src'))
 from ceda_di import __version__
 from ceda_di import __doc__ as long_description
 
-basepath = os.path.dirname(os.path.abspath(__file__))
-path = os.path.join(basepath, "pip_requirements.txt")
-with open(path, 'r') as f:
-    requirements = [l.rstrip() for l in f.readlines()]
-
 setup(
     name='ceda-di',
     version=__version__,
