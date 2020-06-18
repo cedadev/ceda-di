@@ -17,3 +17,4 @@ python/src/test/integration/test_files/json/
 *.egg-info
 *~
 python/config/*.json
+venv

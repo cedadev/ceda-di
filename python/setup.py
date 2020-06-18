@@ -42,7 +42,23 @@ setup(
     package_dir={'': 'src'},
     include_package_data=True,
     zip_safe=False,
-    install_requires=[],
+    install_requires=[
+        'certifi',
+        'cftime',
+        'docopt',
+        'elasticsearch',
+        'ExifRead',
+        'netCDF4',
+        'numpy',
+        'pyhdf',
+        'python-dateutil',
+        'six',
+        'urllib3',
+        'xmltodict'
+    ],
+    extras_require={
+        'test': ['mock']
+    },
     entry_points={
         'console_scripts': [
             'ceda-di = ceda_di.main:main',
