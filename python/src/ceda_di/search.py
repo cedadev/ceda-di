@@ -363,8 +363,7 @@ class Searcher(object):
         try:
             # XXX
             index = self._config_args.get('es-index')
-            doc_type = self._config_args.get('es-mapping')
-            results = es.search(index=index, doc_type=doc_type, body=query)
+            results = es.search(index=index, body=query)
         except ConnectionError as ex:
             url = es.transport.seed_connections[0].host
             error_msg = "Couldn't connect to Elasticsearch node at {url}. Exception was {exc}" \
