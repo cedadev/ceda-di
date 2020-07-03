@@ -121,7 +121,7 @@ class EXIF(_geospatial):
         try:
             geospatial = self.get_geospatial()
             temporal = self.get_temporal()
-        except KeyError:
+        except (KeyError, TypeError):
             self.logger.warning("Could not extract metadata from EXIF XML: %s"
                                 % self.fname)
             temporal = None

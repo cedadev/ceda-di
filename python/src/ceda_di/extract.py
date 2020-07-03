@@ -178,13 +178,18 @@ class Extract(object):
         """
         Index the file in Elasticsearch
         """
-        props = handler.get_properties()
+        try:
+            props = handler.get_properties()
+        except Exception as e:
+            print(filename)
+            raise e
+
 
         if props is not None:
             index = self.conf('es-index')
             doc_type = self.conf('es-mapping')
             body = str(props)
-            doc_id = hashlib.sha1(filename).hexdigest()
+            doc_id = ha shlib.sha1(filename.encode('utf-8')).hexdigest()
 
             try:
                 self.es.index(index=index, doc_type=doc_type, body=body, id=doc_id)
@@ -221,13 +226,7 @@ class Extract(object):
             es_factory = ElasticsearchClientFactory()
             self.es = es_factory.get_client(self.configuration)
 
-            try:
-                index.create_index(self.configuration, self.es)
-            except TransportError as te:
-                if te[0] == 400:
-                    pass
-                else:
-                    raise TransportError(te)
+            index.create_index(self.configuration, self.es)
 
         if len(self.file_list) > 0:
             # Process files

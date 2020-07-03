@@ -18,7 +18,8 @@ def create_index(config, elasticsearch):
     with open(index_settings_path, 'r') as settings:
         index_settings = json.load(settings)
 
-    elasticsearch.indices.create(index=index_name, body=index_settings)
+    if not elasticsearch.indices.exists(index=index_name):
+        elasticsearch.indices.create(index=index_name, body=index_settings)
 
 
 class BulkIndexer(object):
@@ -39,13 +40,7 @@ class BulkIndexer(object):
 
         # If the index doesn't exist, create it
         # This will throw an error if the index already exists this is *fine*
-        try:
-            create_index(config, self.es)
-        except TransportError as te:
-            if te[0] == 400:
-                print(te)
-            else:
-                raise TransportError(te)
+        create_index(config, self.es)
 
         # Dict containing key:value pairs of mapping:[list of documents]
         # That way, this class can handle indexing multiple types of documents

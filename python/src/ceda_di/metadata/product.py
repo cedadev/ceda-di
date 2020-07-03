@@ -243,10 +243,10 @@ class GeoJSONGenerator(object):
                                                wrapped_coords=True)
         lat_bottom, lat_top = self._get_bounds(self.latitudes)
 
-        if (lon_left is None or lon_right is None or
-                lat_bottom is None or lat_top is None):
+        if not all((lon_left, lon_right, lat_bottom,lat_top)):
             return None
 
+        #LatLon SW, NE
         envelope = {
             "type": "envelope",
             "coordinates": [

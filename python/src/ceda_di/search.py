@@ -315,7 +315,8 @@ class ElasticsearchClientFactory(object):
 
         return Elasticsearch(
             [host],
-            http_auth=(user, password)
+            http_auth=(user, password),
+            timeout=60
         )
 
 
