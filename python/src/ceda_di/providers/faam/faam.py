@@ -29,7 +29,7 @@ class FAAMNetCDF(object):
         fpath = os.path.split(fpath)[0]  # Chop off filename
 
         # Look at (maximum) 3 levels up directory tree for a "README"
-        for i in xrange(0, 3):
+        for i in range(0, 3):
             fpath = os.path.split(fpath)[0]
             readme_loc = os.path.join(fpath, readme_name)
 
@@ -64,7 +64,7 @@ def test_parser():
     "Run a test with a test file."
     fpath = "/badc/faam/data/2016/b989-oct-20/core_processed/core_faam_20161020_v004_r0_b989_1hz.nc"
     test = FAAMNetCDF(fpath) 
-    print test.get_properties()
+    print(test.get_properties())
 
 if __name__ == "__main__":
 

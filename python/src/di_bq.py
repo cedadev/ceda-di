@@ -20,7 +20,7 @@ Options:
     --delete-after      Delete input files after job submission.
 """
 
-import simplejson as json
+import json
 import os
 
 from docopt import docopt
@@ -57,7 +57,7 @@ def construct_bsub_command(path, params={}):
     }
 
     command = "bsub"
-    for k, v in params.iteritems():
+    for k, v in params.items():
         if k in bsub_param:
             opt = " {option} {value}".format(option=bsub_param[k], value=v)
             command += opt

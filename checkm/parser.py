@@ -2,7 +2,7 @@ import os
 import re
 
 import requests
-import simplejson as json
+import json
 
 from ceda_di.index import BulkIndexer
 

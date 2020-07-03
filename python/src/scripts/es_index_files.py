@@ -23,7 +23,7 @@ import subprocess
 import os
 import pipes
 import shlex
-import urllib2
+import urllib.request
 import json
 import time
 
@@ -42,7 +42,7 @@ def sanitise_args(config):
     :returns: Config dictionary with all keys stripped of '<' '>' and '--'
     """
     sane_conf = {}
-    for key, value in config.iteritems():
+    for key, value in config.items():
         if value is not None:
             key = key.lstrip("-><").rstrip("><")
             sane_conf[key] = value
@@ -58,7 +58,7 @@ def execute_command(cmd, url):
     :url URL to call Elastic search
     :return: None
     """
-    print "Running command: %s" % cmd    
+    print("Running command: %s" % cmd)    
 
     subprocess.call(cmd, shell=True)
 
@@ -71,13 +71,13 @@ def construct_url(json_file):
         data = json.load(data_file)
 
     url= "{}/{}/_count?q=file.filename:*&pretty=true".format(data["es-host"], data["es-index"])
-    print "URL used: %s" % url
+    print("URL used: %s" % url)
     return url
 
 
 def report_files(url):
-    content = urllib2.urlopen(url).read()
-    print "\nFile count in index: %s" % content.split(",")[0].replace("{","")
+    content = urllib.request.urlopen(url).read()
+    print("\nFile count in index: %s" % content.split(",")[0].replace("{",""))
 
 
 def scan_dataset(dataset, directory):
@@ -87,7 +87,7 @@ def scan_dataset(dataset, directory):
         url = construct_url(config_file)
         execute_command(cmd, url)
     else:
-        print "Invalid 'dataset' argument: '%s'" % dataset
+        print("Invalid 'dataset' argument: '%s'" % dataset)
 
 
 def scan_from_list_file(dataset, list_file):
@@ -119,18 +119,18 @@ def main():
             config["file_list"] = v
             
     start = datetime.datetime.now()
-    print "Script started at: %s" % start
+    print("Script started at: %s" % start)
 
     if config["index"] and config["file_list"]:
         scan_from_list_file(config["index"], config["file_list"])
     elif config["index"] and config["directory"]:
         scan_dataset(config["index"], config["directory"])
     else:
-        print __doc__
-        print "Arguments not recognised!"
+        print(__doc__)
+        print("Arguments not recognised!")
     
     end = datetime.datetime.now()
-    print "Script ended at: %s ; it ran for: %s seconds." % (str(end), str(end - start))
+    print("Script ended at: %s ; it ran for: %s seconds." % (str(end), str(end - start)))
 
 
 if __name__ == '__main__':

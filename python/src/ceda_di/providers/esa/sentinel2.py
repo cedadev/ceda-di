@@ -14,7 +14,7 @@ class SentinelMetadata(object):
         # Record as a dict for writing final version once full of details
         self.metadata_dict = {}
         
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             setattr(self, key, value)
             self.metadata_dict[key] = value
     
@@ -155,7 +155,7 @@ class Sentinel2Scan(object):
                     self.extracted_info[element] = value.text
                 
             except Exception as ex:
-                print "WARNING: Could not access information for %s (%s)" % (element, ex)
+                print("WARNING: Could not access information for %s (%s)" % (element, ex))
                 self.extracted_info[element] = None
    
     def add_details(self, varname, varval):
@@ -184,7 +184,7 @@ class Sentinel2Scan(object):
             output_file.close()
             
         except Exception as ex:
-            print "ERROR: Problem generating metadata output file: %s (%s)" % (output_filename, ex)
+            print("ERROR: Problem generating metadata output file: %s (%s)" % (output_filename, ex))
             sys.exit()
             
         if os.path.exists(output_filename):
@@ -199,12 +199,12 @@ class Sentinel2Scan(object):
             output_file = os.path.join(outputdir, os.path.basename(scan.zip_filename).replace('zip', 'metadata'))
             
             if self.write_metadata_file(output_file):
-                print "INFO: Created metadata file: %s" % output_file
+                print("INFO: Created metadata file: %s" % output_file)
             else:
-                print "ERROR: Unable to create metadata file: %s" % output_file
+                print("ERROR: Unable to create metadata file: %s" % output_file)
                 
         except Exception:
-            print "ERROR: Could not write metadata file"
+            print("ERROR: Could not write metadata file")
             
                 
 if __name__ == '__main__':
@@ -216,7 +216,7 @@ if __name__ == '__main__':
         scan = Sentinel2Scan(manifest_file)
                 
     except Exception as ex:
-        print "Error: %s" % ex
+        print("Error: %s" % ex)
         sys.exit()
     
     # Write metadata

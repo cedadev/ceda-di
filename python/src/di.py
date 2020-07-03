@@ -58,7 +58,7 @@ def main():
 
     if conf_args["extract"]:
         file_list = None
-        if conf_args.has_key('file-list-file'):
+        if 'file-list-file' in conf_args:
             with open(config['file-list-file']) as reader:
                 file_list = reader.read().strip().split()
         

@@ -5,7 +5,7 @@ Module containing useful functions for the command-line interfaces.
 import os
 import sys
 
-import simplejson as json
+import json
 
 
 def sanitise_args(config):
@@ -16,7 +16,7 @@ def sanitise_args(config):
     :returns: Config dictionary with all keys stripped of '<' '>' and '--'
     """
     sane_conf = {}
-    for key, value in config.iteritems():
+    for key, value in config.items():
         if value is not None:
             key = key.lstrip("-><").rstrip("><")
             sane_conf[key] = value

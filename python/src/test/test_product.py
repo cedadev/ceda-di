@@ -3,7 +3,6 @@ Test module for ceda_di.metadata.product
 """
 
 import unittest
-from hamcrest import *
 import numpy.ma as ma
 
 from ceda_di.metadata.product import Properties, Parameter, GeoJSONGenerator
@@ -33,21 +32,21 @@ class TestGeoJSONGenerator(unittest.TestCase):
     def assert_type_and_coords(self, actual, is_polygon, lat_bottom, lat_top, lon_left, lon_right):
 
         if is_polygon:
-            assert_that(actual["type"], is_("polygon"), "bbounding box type")
+            self.assertEqual(actual["type"], "Polygon", "bbounding box type")
             bounds = [[[lon_right, lat_top], [lon_left, lat_top], [lon_left, lat_bottom], [lon_right, lat_bottom], [lon_right, lat_top]]]
-            assert_that(actual["coordinates"], is_(bounds), "bbounding box type")
+            self.assertListEqual(actual["coordinates"], bounds, "bbounding box type")
 
         else:
-            assert_that(actual["type"], is_("envelope"), "bbounding box type")
+            self.assertEqual(actual["type"], "envelope", "bbounding box type")
             bounds = [[lon_left, lat_top], [lon_right, lat_bottom]]
-            assert_that(actual["coordinates"], is_(bounds), "bbounding box type")
+            self.assertListEqual(actual["coordinates"], bounds, "bbounding box type")
 
     def test_GIVEN_no_entries_THEN_bounding_box_is_empty(self):
         gen = GeoJSONGenerator(latitudes=[], longitudes=[])
 
         box = gen._gen_bbox()
 
-        assert_that(box, is_(None), "bbox should be none")
+        self.assertIsNone(box, None)
 
     def test_GIVEN_one_entry_THEN_bounding_box_is_that_entry(self):
         gen = GeoJSONGenerator(latitudes=[1.0], longitudes=[2.0])
@@ -118,8 +117,7 @@ class TestGeoJSONGenerator(unittest.TestCase):
         geojson = gen.get_elasticsearch_geojson()
 
         for result, expected in zip(geojson["geometries"]["display"]["coordinates"], [(0, 3.0), (100, 6.5)]):
-            assert_that(result[0], close_to(expected[0], 0.01), "lat" )
-            assert_that(result[1], close_to(expected[1], 0.01), "lon")
+            self.assertTupleEqual(result, expected)
 
     def test_GIVEN_more_than_one_entry_and_no_type_THEN_geojson_is_track_type(self):
         latitudes = [3, 5, 1, 6]
@@ -150,7 +148,7 @@ class TestGeoJSONGenerator(unittest.TestCase):
             }
         }
 
-        assert_that(geojson, is_(expected_geojson))
+        self.assertDictEqual(geojson, expected_geojson)
 
     def test_GIVEN_coordinates_with_point_type_THEN_geojson_is_point_type(self):
         latitudes = [3, 5, 1, 6]
@@ -174,7 +172,7 @@ class TestGeoJSONGenerator(unittest.TestCase):
             }
         }
 
-        assert_that(geojson, is_(expected_geojson))
+        self.assertDictEqual(geojson, expected_geojson)
 
     def test_GIVEN_coordinates_with_swath_type_THEN_geojson_is_swath_type(self):
         # This is a little hard to test without the codelooking horrific,
@@ -228,11 +226,11 @@ class TestGeoJSONGenerator(unittest.TestCase):
 
         expected_display_geojson = {
             "type": "LineString",
-            "coordinates": zip(longitudes, latitudes)
+            "coordinates": list(zip(longitudes, latitudes))
         }
 
-        assert_that(geojson["geometries"]["search"], is_(expected_search_geojson))
-        assert_that(geojson["geometries"]["display"], is_(expected_display_geojson))
+        self.assertDictEqual(geojson["geometries"]["search"], expected_search_geojson)
+        self.assertDictEqual(geojson["geometries"]["display"], expected_display_geojson)
 
     def test_GIVEN_coordinates_with_track_type_THEN_geojson_is_track_type(self):
         latitudes = [3, 5, 1, 6]
@@ -268,4 +266,4 @@ class TestGeoJSONGenerator(unittest.TestCase):
         longitudes = [0, 120,  -120, 100]
 
         gen = GeoJSONGenerator(latitudes, longitudes)
-        assert_that(gen._num_points(longitudes, latitudes), is_(3))
+        self.assertEqual(gen._num_points(longitudes, latitudes), 3)

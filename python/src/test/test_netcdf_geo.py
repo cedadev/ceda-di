@@ -13,7 +13,7 @@ class NetCDFStub(object):
     class VarStub(object):
         """Parameter stub class"""
         def __init__(self, attributes):
-            for key, value in attributes.iteritems():
+            for key, value in attributes.items():
                 setattr(self, key, value)
 
         def __getitem__(self, key):

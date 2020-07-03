@@ -88,7 +88,7 @@ class CISProductTests(object):
             variable_names_in_json.append(name)
 
             if name == self.cis_test_file.data_variable_standard_name:
-                for key, expected_value in self.cis_test_file.data_variable_properties.iteritems():
+                for key, expected_value in self.cis_test_file.data_variable_properties.items():
                     value = get_variable_attribute_value_by_name(variable_attrs, key)
                     assert_that(value, is_(str(expected_value)), "Value is present and matched for key '{}'".format(key))
                 return
@@ -114,7 +114,7 @@ class TestCloudSat(CISProductTests, TestCase):
 
     @classmethod
     def setUpClass(cls):
-        for key, value in ceda_di_test_files.iteritems():
+        for key, value in ceda_di_test_files.items():
             cis_test_files[key] = value
         cls.setUpForTest("cloudsat_PRECIP_2007")
 

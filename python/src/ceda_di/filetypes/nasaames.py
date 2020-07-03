@@ -33,7 +33,7 @@ class NASAAmes(_geospatial):
 
     def _find_attribute(self, search_string):
         search_string = search_string.lower()
-        for k, v in self.na.getNADict().iteritems():
+        for k, v in self.na.getNADict().items():
             if search_string in k.lower():
                 return (k, v)
 
@@ -106,7 +106,7 @@ class NASAAmes(_geospatial):
                 }
             })
 
-        variables = [product.Parameter(k, other_params=v) for (k, v) in variables.iteritems()]
+        variables = [product.Parameter(k, other_params=v) for (k, v) in variables.items()]
         return variables
 
     def get_properties(self):
