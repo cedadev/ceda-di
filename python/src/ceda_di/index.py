@@ -3,6 +3,7 @@ import json
 from elasticsearch import Elasticsearch
 from elasticsearch import ElasticsearchException
 from elasticsearch.exceptions import TransportError
+from .search import ElasticsearchClientFactory
 
 
 def create_index(config, elasticsearch):
@@ -36,7 +37,7 @@ class BulkIndexer(object):
         self.index = config["es-index"]
         self.default_mapping = config["es-mapping"]
         self.threshold = threshold
-        self.es = Elasticsearch([config["es-host"]])
+        self.es = ElasticsearchClientFactory.get_client(config)
 
         # If the index doesn't exist, create it
         # This will throw an error if the index already exists this is *fine*
