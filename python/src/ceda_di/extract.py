@@ -197,8 +197,6 @@ class Extract(object):
             try:
                 self.es.index(index=index, body=body, id=doc_id)
             except Exception as err:
-                import pdb
-                pdb.set_trace()
                 print(f"FAILED to log: {filename}")
                 print(f"FAILURE ERROR WAS: {str(err)}")
 
