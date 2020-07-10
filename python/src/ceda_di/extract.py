@@ -166,13 +166,17 @@ class Extract(object):
         """
         Instantiate a handler for a file and extract metadata.
         """
-        handler = self.handler_factory.get_handler(filename)
-        if handler is not None:
-            with handler as hand:
-                if self.conf('send-to-index'):
-                    self.index_properties(filename, hand)
-                if not self.conf('no-create-files'):
-                    self.write_properties(filename, hand)
+        try:
+            handler = self.handler_factory.get_handler(filename)
+            if handler is not None:
+                with handler as hand:
+                    if self.conf('send-to-index'):
+                        self.index_properties(filename, hand)
+                    if not self.conf('no-create-files'):
+                        self.write_properties(filename, hand)
+        except Exception as exc:
+            print(f"Failure in process_file for {filename}")
+            raise
 
     def index_properties(self, filename, handler):
         """
@@ -193,6 +197,8 @@ class Extract(object):
             try:
                 self.es.index(index=index, body=body, id=doc_id)
             except Exception as err:
+                import pdb
+                pdb.set_trace()
                 print(f"FAILED to log: {filename}")
                 print(f"FAILURE ERROR WAS: {str(err)}")
 
@@ -229,26 +235,31 @@ class Extract(object):
 
         if len(self.file_list) > 0:
             # Process files
-            pool = []
+            #pool = []
+            #
+            #for f in self.file_list:
+            #    # HDF libraries don't seem to like unicode strings,
+            #    # which the filenames will be if the configuration paths
+            #    # loaded from JSON end up in unicode
+            #    path = f
+            #    if "raw" not in path:
+            #        p = multiprocessing.Process(target=self.process_file,
+            #                                    args=(path,))
+            #        pool.append(p)
+            #        p.start()
+            #
+            #    while len(pool) >= self.conf("num-cores"):
+            #        for p in pool:
+            #            if p.exitcode is not None:
+            #                pool.remove(p)
+            #
+            #for p in pool:
+            #    p.join()
 
             for f in self.file_list:
-                # HDF libraries don't seem to like unicode strings,
-                # which the filenames will be if the configuration paths
-                # loaded from JSON end up in unicode
                 path = f
                 if "raw" not in path:
-                    p = multiprocessing.Process(target=self.process_file,
-                                                args=(path,))
-                    pool.append(p)
-                    p.start()
-
-                while len(pool) >= self.conf("num-cores"):
-                    for p in pool:
-                        if p.exitcode is not None:
-                            pool.remove(p)
-
-            for p in pool:
-                p.join()
+                    self.process_file(path)
 
         # Log end of processing
         end = datetime.datetime.now()
