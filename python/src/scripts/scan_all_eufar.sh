@@ -15,7 +15,7 @@ today=$(date +%Y-%m-%d)
 outdir=$wd/outputs/$today
 mkdir -p $outdir
 
-dirs=/neodc/eufar
+dirs=/badc/eufar
 
 for dr in $dirs; do
 
