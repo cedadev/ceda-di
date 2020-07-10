@@ -33,9 +33,14 @@ class FAAMNetCDF(object):
             fpath = os.path.split(fpath)[0]
             readme_loc = os.path.join(fpath, readme_name)
 
-            if os.path.isfile(readme_loc):
-                with open(readme_loc, "r") as readme_file:
-                    return readme_file.readline().rstrip().split(" ")
+            try:
+                if os.path.isfile(readme_loc):
+                    with open(readme_loc, "rb") as readme_file:
+                        #return readme_file.readline().decode().rstrip().split()
+                        return readme_file.readline().decode("ISO-8859-1").rstrip().split()
+            except Exception as err:
+                print(f"Error parsing {readme_loc}")
+                raise
 
         return None
 
