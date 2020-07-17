@@ -12,7 +12,7 @@ today=$(date +%Y-%m-%d)
 outdir=$wd/outputs/$today
 mkdir -p $outdir
 
-dirs="/neodc/landsat7etm/p020 /neodc/landsat7etm/p021 /neodc/landsat7etm/p022 /neodc/landsat7etm/p030 /neodc/landsat7etm/p031 /neodc/landsat7etm/p032 /neodc/landsat7etm/p041 /neodc/landsat7etm/p042"
+dirs="/neodc/landsat7etm/"
 
 for dr in $dirs; do
 
@@ -24,7 +24,7 @@ for dr in $dirs; do
 
         job=${ds}-${yr}
 
-        cmd="bsub -q ingest -W 72:00 -o $outdir/${job}.out -e $outdir/${job}.err ./scripts/wrap_es_index_files.sh $path"
+        cmd="sbatch -p long-serial -t 72:00:00 -o $outdir/${job}.out -e $outdir/${job}.err ./scripts/wrap_es_index_files.sh $path"
         echo "Running: $cmd"
         $cmd
 
