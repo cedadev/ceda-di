@@ -206,10 +206,10 @@ class Sentinel_ARD_Base(_geospatial):
         Returns nothing.
         """
         self._add_filename_metadata(extra_metadata)
-        self._derive_extra_metadata(extra_metadata)
+        #self._derive_extra_metadata(extra_metadata)
 
-        if type(self) == SAFESentinel3:
-            self._extract_metadata_from_zipfile(extra_metadata)
+        #if type(self) == SAFESentinel3:
+        #    self._extract_metadata_from_zipfile(extra_metadata)
 
 
     def _add_filename_metadata(self, extra_metadata):
@@ -227,19 +227,11 @@ class Sentinel_ARD_Base(_geospatial):
         file_name = os.path.basename(self.fname)
         fn_comps = file_name.split("_")
 
-        if self.__class__ == Sentinel_ARD_Sentine11:
-            component = fn_comps[2]
-            if len(component) < 4:
-                resolution = 'N/A'
-            else:
-                resolution = component[-1]
-
-            extra_metadata['product_info']['Resolution'] = resolution
-
         # Add file/scan name
         extra_metadata['product_info']['Name'] = os.path.splitext(file_name)[0]
 
         # Add Satellite and Mission from the file path
+        extra_metadata['platform'] = {}
         comp_1 = fn_comps[0].upper()
         extra_metadata['platform']['Mission'] = "Sentinel-%s" % comp_1[1]
         extra_metadata['platform']['Satellite'] = "Sentinel-%s" % comp_1[1:]
@@ -252,10 +244,10 @@ class Sentinel_ARD_Base(_geospatial):
         adding to `metadata`.
         """
         directory, fname = os.path.split(self.fname)
-        fbase = os.path.splitext(fname)[0]
+        fbase = os.path.splitext(fname)[0].replace('_meta','')
 
         # Test for presence and size of zip file
-        zip_file = fbase + '.zip'
+        zip_file = fbase + '.tif'
         zip_path = os.path.join(directory, zip_file)
 
         if os.path.isfile(zip_path):
@@ -265,12 +257,7 @@ class Sentinel_ARD_Base(_geospatial):
             location = 'on_tape'
             data_file_size = 0
 
-        # Test for presence of quick look PNG file
-        quicklook_file = fbase + '.png'
-        quicklook_path = os.path.join(directory, quicklook_file)
-
-        if not os.path.isfile(quicklook_path):
-            quicklook_file = ''
+        quicklook_file = ''
 
         # Add to metadata dictionary
         item_map = {'directory': directory, 'metadata_file': fname,
@@ -294,7 +281,7 @@ class Sentinel_ARD_Base(_geospatial):
         filesystem = super(Sentinel_ARD_Base, self).get_filesystem(self.fname)
         self._update_filesystem_metadata(filesystem)
 
-        data_format = {"format": "SAFE"}
+        data_format = {"format": "ARD"}
 
         # Gather up extra metadata
         extra_metadata = {}
