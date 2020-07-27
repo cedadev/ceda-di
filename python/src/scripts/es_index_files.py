@@ -50,7 +50,7 @@ def sanitise_args(config):
     return sane_conf
 
 
-def execute_command(cmd, url):
+def execute_command(cmd):
     """
     Runs command `cmd` then calls URL `url` to report on the amount of
     records in the index.
@@ -62,30 +62,12 @@ def execute_command(cmd, url):
 
     subprocess.call(cmd, shell=True)
 
-    time.sleep(2)
-    report_files(url) 
-
-
-def construct_url(json_file):
-    with open(json_file) as data_file:    
-        data = json.load(data_file)
-
-    url= "{}/{}/_count?q=file.filename:*&pretty=true".format(data["es-host"], data["es-index"])
-    print("URL used: %s" % url)
-    return url
-
-
-def report_files(url):
-    content = urllib.request.urlopen(url).read()
-    print("\nFile count in index: %s" % content.split(",")[0].replace("{",""))
-
 
 def scan_dataset(dataset, directory):
     if dataset in ("faam", "eufar", "arsf", "ceda-eo"):
         config_file = os.path.join(CONFIG_DIR, "ceda-di-%s.json" % dataset)
         cmd = "{}/di.py extract --no-create-files --config {} --send-to-index {}".format(src_dir, config_file, directory)
-        url = construct_url(config_file)
-        execute_command(cmd, url)
+        execute_command(cmd)
     else:
         print("Invalid 'dataset' argument: '%s'" % dataset)
 

@@ -114,7 +114,7 @@ def get_results(file_list, query_list, es_conn, es_index, es_type, cfg):
     files_not_indexed = 0
 
     for query in tqdm(query_list, desc="Getting results"):
-        results = es_conn.msearch(index=es_index, doc_type=es_type, body=query)
+        results = es_conn.msearch(index=es_index, body=query)
 
         for i, response in enumerate(results["responses"]):
             if response["hits"]["total"] > 0:

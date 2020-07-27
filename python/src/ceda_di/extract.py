@@ -166,28 +166,36 @@ class Extract(object):
         """
         Instantiate a handler for a file and extract metadata.
         """
-        handler = self.handler_factory.get_handler(filename)
-        if handler is not None:
-            with handler as hand:
-                if self.conf('send-to-index'):
-                    self.index_properties(filename, hand)
-                if not self.conf('no-create-files'):
-                    self.write_properties(filename, hand)
+        try:
+            handler = self.handler_factory.get_handler(filename)
+            if handler is not None:
+                with handler as hand:
+                    if self.conf('send-to-index'):
+                        self.index_properties(filename, hand)
+                    if not self.conf('no-create-files'):
+                        self.write_properties(filename, hand)
+        except Exception as exc:
+            print(f"Failure in process_file for {filename}")
+            raise
 
     def index_properties(self, filename, handler):
         """
         Index the file in Elasticsearch
         """
-        props = handler.get_properties()
+        try:
+            props = handler.get_properties()
+        except Exception as e:
+            print(filename)
+            raise e
+
 
         if props is not None:
             index = self.conf('es-index')
-            doc_type = self.conf('es-mapping')
             body = str(props)
-            doc_id = hashlib.sha1(filename).hexdigest()
+            doc_id = hashlib.sha1(filename.encode('utf-8')).hexdigest()
 
             try:
-                self.es.index(index=index, doc_type=doc_type, body=body, id=doc_id)
+                self.es.index(index=index, body=body, id=doc_id)
             except Exception as err:
                 print(f"FAILED to log: {filename}")
                 print(f"FAILURE ERROR WAS: {str(err)}")
@@ -221,36 +229,35 @@ class Extract(object):
             es_factory = ElasticsearchClientFactory()
             self.es = es_factory.get_client(self.configuration)
 
-            try:
-                index.create_index(self.configuration, self.es)
-            except TransportError as te:
-                if te[0] == 400:
-                    pass
-                else:
-                    raise TransportError(te)
+            index.create_index(self.configuration, self.es)
 
         if len(self.file_list) > 0:
             # Process files
-            pool = []
+            #pool = []
+            #
+            #for f in self.file_list:
+            #    # HDF libraries don't seem to like unicode strings,
+            #    # which the filenames will be if the configuration paths
+            #    # loaded from JSON end up in unicode
+            #    path = f
+            #    if "raw" not in path:
+            #        p = multiprocessing.Process(target=self.process_file,
+            #                                    args=(path,))
+            #        pool.append(p)
+            #        p.start()
+            #
+            #    while len(pool) >= self.conf("num-cores"):
+            #        for p in pool:
+            #            if p.exitcode is not None:
+            #                pool.remove(p)
+            #
+            #for p in pool:
+            #    p.join()
 
             for f in self.file_list:
-                # HDF libraries don't seem to like unicode strings,
-                # which the filenames will be if the configuration paths
-                # loaded from JSON end up in unicode
                 path = f
                 if "raw" not in path:
-                    p = multiprocessing.Process(target=self.process_file,
-                                                args=(path,))
-                    pool.append(p)
-                    p.start()
-
-                while len(pool) >= self.conf("num-cores"):
-                    for p in pool:
-                        if p.exitcode is not None:
-                            pool.remove(p)
-
-            for p in pool:
-                p.join()
+                    self.process_file(path)
 
         # Log end of processing
         end = datetime.datetime.now()

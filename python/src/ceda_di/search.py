@@ -7,6 +7,7 @@ from elasticsearch import Elasticsearch, ConnectionError
 from ceda_di.metadata.product import GeoJSONGenerator
 from dateutil.parser import parse
 import datetime
+from ceda_elasticsearch_tools.elasticsearch import CEDAElasticsearchClient
 
 
 class JsonQueryBuilder(object):
@@ -297,7 +298,8 @@ class JsonQueryBuilder(object):
 
 class ElasticsearchClientFactory(object):
 
-    def get_client(self, config_args):
+    @classmethod
+    def get_client(cls, config_args):
         """
         Return an appropriately configured Elasticsearch client.
 
@@ -309,14 +311,11 @@ class ElasticsearchClientFactory(object):
 
         :returns: A configured Elasticsearch instance
         """
-        host = config_args['es-host']
-        user = config_args["es-user"]
-        password = config_args["es-password"]
+        api_key = config_args["es-api-key"]
 
-        return Elasticsearch(
-            [host],
-            http_auth=(user, password)
-        )
+        return CEDAElasticsearchClient(headers={
+            'x-api-key': api_key
+        })
 
 
 class Searcher(object):
@@ -325,7 +324,7 @@ class Searcher(object):
     """
 
     def __init__(self, config_args, json_query_builder=None,
-                 elastic_search_client_factory=ElasticsearchClientFactory()):
+                 elastic_search_client_factory=ElasticsearchClientFactory):
         """
         Create a new Searcher instance.
 
@@ -364,8 +363,7 @@ class Searcher(object):
         try:
             # XXX
             index = self._config_args.get('es-index')
-            doc_type = self._config_args.get('es-mapping')
-            results = es.search(index=index, doc_type=doc_type, body=query)
+            results = es.search(index=index, body=query)
         except ConnectionError as ex:
             url = es.transport.seed_connections[0].host
             error_msg = "Couldn't connect to Elasticsearch node at {url}. Exception was {exc}" \
