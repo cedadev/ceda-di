@@ -29,7 +29,6 @@ class GeoJSONGenerator(object):
         * Satellite swaths => GeoJSON "MultiPolygon"
     """
     def __init__(self, latitudes, longitudes, shape_type=None, do_sanitise_geometries=True):
-    
         if do_sanitise_geometries:
             self._sanitise_geometry(ma.array(longitudes), ma.array(latitudes))
         else:

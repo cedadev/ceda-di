@@ -164,6 +164,10 @@ class Sentinel_ARD_Base(_geospatial):
         latitudes_in_order = [coords_string['southbc'], coords_string['northbc'], coords_string['northbc'], coords_string['southbc']]
         longitudes_in_order = [coords_string['westbc'], coords_string['westbc'], coords_string['eastbc'], coords_string['eastbc']]
 
+        # Convert strings to floats
+        latitudes_in_order = [float(x) for x in latitudes_in_order]
+        longitudes_in_order = [float(x) for x in longitudes_in_order]
+
         return {"lat": latitudes_in_order, "lon": longitudes_in_order, "type": "polygon", "do_sanitise_geometries": False}
 
     def get_geospatial(self):
@@ -233,8 +237,8 @@ class Sentinel_ARD_Base(_geospatial):
         # Add Satellite and Mission from the file path
         extra_metadata['platform'] = {}
         comp_1 = fn_comps[0].upper()
-        extra_metadata['platform']['Mission'] = "Sentinel-%s" % comp_1[1]
-        extra_metadata['platform']['Satellite'] = "Sentinel-%s" % comp_1[1:]
+        extra_metadata['platform']['Mission'] = f"Sentinel-{comp_1[1]}"
+        extra_metadata['platform']['Satellite'] = f"Sentinel-{comp_1[1:]} ARD"
 
 
     def _update_filesystem_metadata(self, metadata):
@@ -301,11 +305,11 @@ class Sentinel_ARD_Base(_geospatial):
         return props
 
 
-class Sentinel_ARD_Sentine12(Sentinel_ARD_Base):
+class SentinelARDSentinel2(Sentinel_ARD_Base):
     mission = "Sentinel1"
 
 
-class Sentinel_ARD_Sentine11(Sentinel_ARD_Base):
+class SentinelARDSentinel1(Sentinel_ARD_Base):
     mission = "Sentinel2"
 
 
