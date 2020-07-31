@@ -37,134 +37,136 @@
     }
   },
   "mappings": {
-    "properties": {
-      "data_format": {
-        "properties": {
-          "format": {
-            "type": "text"
-          }
-        }
-      },
-      "index_entry_creation": {
-        "properties": {
-          "indexer": {
-            "type": "text"
-          }
-        }
-      },
-      "file": {
-        "properties": {
-          "filename": {
-            "type": "text",
-            "analyzer": "simple",
-            "fields": {
-              "raw": {
-                "type": "keyword"
-              }
+    "geo_metadata": {
+      "properties": {
+        "data_format": {
+          "properties": {
+            "format": {
+              "type": "text"
             }
-          },
-          "path": {
-            "type": "text",
-            "analyzer": "path_analyzer",
-            "fields": {
-              "hierarchy": {
-                "type": "text",
-                "analyzer": "path_hierarchy_analyzer"
-              },
-              "raw": {
-                "type": "keyword"
-              }
-            }
-          },
-          "size": {
-            "type": "long"
           }
-        }
-      },
-      "misc": {
-        "properties": {
-          "platform": {
-            "properties": {
-              "Satellite": {
-                "type": "text",
-                "fields": {
-                  "raw": {
-                    "type": "keyword"
+        },
+        "index_entry_creation": {
+          "properties": {
+            "indexer": {
+              "type": "text"
+            }
+          }
+        },
+        "file": {
+          "properties": {
+            "filename": {
+              "type": "text",
+              "analyzer": "simple",
+              "fields": {
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "path": {
+              "type": "text",
+              "analyzer": "path_analyzer",
+              "fields": {
+                "hierarchy": {
+                  "type": "text",
+                  "analyzer": "path_hierarchy_analyzer"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "size": {
+              "type": "long"
+            }
+          }
+        },
+        "misc": {
+          "properties": {
+            "platform": {
+              "properties": {
+                "Satellite": {
+                  "type": "text",
+                  "fields": {
+                    "raw": {
+                      "type": "keyword"
+                    }
                   }
                 }
               }
-            }
-          },
-          "solar_zenith_angle": {
-            "properties": {
-              "max": {
-                "type": "double"
-              },
-              "min": {
-                "type": "double"
-              },
-              "range": {
-                "type": "double_range"
-              }
-            }
-          }
-        }
-      },
-      "parameters": {
-        "include_in_parent": "true",
-        "type": "nested",
-        "properties": {
-          "name": {
-            "type": "text",
-            "analyzer": "variable_name_analyzer"
-          },
-          "value": {
-            "type": "text",
-            "analyzer": "variable_name_analyzer",
-            "fields": {
-              "autocomplete": {
-                "type": "completion",
-                "analyzer": "variable_name_analyzer",
-                "search_analyzer": "simple"
-              },
-              "raw": {
-                "type": "keyword"
-              }
-            }
-          }
-        }
-      },
-      "spatial": {
-        "properties": {
-          "geometries": {
-            "properties": {
-              "search": {
-                "type": "geo_shape"
-              },
-              "full_search": {
-                "type": "geo_shape"
-              },
-              "display": {
-                "properties": {
-                  "coordinates": {
-                    "type": "double",
-                    "index": "false"
-                  }
+            },
+            "solar_zenith_angle": {
+              "properties": {
+                "max": {
+                  "type": "double"
+                },
+                "min": {
+                  "type": "double"
+                },
+                "range": {
+                  "type": "double_range"
                 }
               }
             }
           }
-        }
-      },
-      "temporal": {
-        "properties": {
-          "end_time": {
-            "type": "date",
-            "format": "dateOptionalTime"
-          },
-          "start_time": {
-            "type": "date",
-            "format": "dateOptionalTime"
+        },
+        "parameters": {
+          "include_in_parent": "true",
+          "type": "nested",
+          "properties": {
+            "name": {
+              "type": "text",
+              "analyzer": "variable_name_analyzer"
+            },
+            "value": {
+              "type": "text",
+              "analyzer": "variable_name_analyzer",
+              "fields": {
+                "autocomplete": {
+                  "type": "completion",
+                  "analyzer": "variable_name_analyzer",
+                  "search_analyzer": "simple"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "spatial": {
+          "properties": {
+            "geometries": {
+              "properties": {
+                "search": {
+                  "type": "geo_shape"
+                },
+                "full_search": {
+                  "type": "geo_shape"
+                },
+                "display": {
+                  "properties": {
+                    "coordinates": {
+                      "type": "double",
+                      "index": "false"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "temporal": {
+          "properties": {
+            "end_time": {
+              "type": "date",
+              "format": "dateOptionalTime"
+            },
+            "start_time": {
+              "type": "date",
+              "format": "dateOptionalTime"
+            }
           }
         }
       }

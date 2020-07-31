@@ -111,7 +111,7 @@ class BulkIndexer(object):
             docs.append(doc)
 
         # We want to see any errors that are thrown up by Elasticsearch
-        response = self.es.bulk(docs, index=self.index, timeout=75)
+        response = self.es.bulk(docs, index=self.index, doc_type=mapping, timeout=75)
         if response["errors"] is True:
             raise ElasticsearchException(
                 "Error response from Elasticsearch server: %s" % response)

@@ -195,11 +195,12 @@ class Extract(object):
 
         if props is not None:
             index = self.conf('es-index')
+            doc_type = self.conf('es-mapping')
             body = str(props)
             doc_id = hashlib.sha1(filename.encode('utf-8')).hexdigest()
 
             try:
-                self.es.index(index=index, body=body, id=doc_id)
+                self.es.index(index=index, doc_type=doc_type, body=body, id=doc_id)
             except Exception as err:
                 print(f"FAILED to log: {filename}")
                 print(f"FAILURE ERROR WAS: {str(err)}")

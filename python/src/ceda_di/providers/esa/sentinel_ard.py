@@ -333,7 +333,7 @@ def test_parser():
     test_files = test_files_S1_ARD
 
     for (test, filepath, to_match) in test_files[:]:
-        print("\n\nTesting: %s" % test)
+        ("\n\nTesting: %s" % test)
         print("With: %s\n" % filepath)
 
         #cls_name = "SAFE%s" % test.split(":")[0]

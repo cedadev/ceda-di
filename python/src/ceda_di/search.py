@@ -181,8 +181,8 @@ class JsonQueryBuilder(object):
         :param end: End datetime string
         """
         try:
-            start = parse(start, default=datetime.datetime(1,1,1,0,0,0)).isoformat()
-            end = parse(end, default=datetime.datetime(1,12,31,23,59,59)).isoformat()
+            start = parse(start, default=datetime.datetime(1, 1, 1, 0, 0, 0)).isoformat()
+            end = parse(end, default=datetime.datetime(1, 12, 31, 23, 59, 59)).isoformat()
         except ValueError:
             raise ValueError("Couldn't parse datetimes '{start}' and '{end}': "
                              "use the ISO-8601 YYYY-MM-DDTHH:MM:SS format.".format(start=start, end=end))
@@ -311,11 +311,15 @@ class ElasticsearchClientFactory(object):
 
         :returns: A configured Elasticsearch instance
         """
-        api_key = config_args["es-api-key"]
+        host = config_args['es-host']
+        user = config_args["es-user"]
+        password = config_args["es-password"]
 
-        return CEDAElasticsearchClient(headers={
-            'x-api-key': api_key
-        })
+        return Elasticsearch(
+            [host],
+            http_auth=(user, password),
+            timeout=60
+        )
 
 
 class Searcher(object):
