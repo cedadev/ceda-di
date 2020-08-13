@@ -31,12 +31,16 @@ class HandlerFactory(object):
 
             handler_class = handler['class']
             priority = handler['priority']
-            (module, _class) = handler_class.rsplit(".", 1)
+            if handler_class != "None":
+                (module, _class) = handler_class.rsplit(".", 1)
 
-            mod = __import__(module, fromlist=[_class])
+                mod = __import__(module, fromlist=[_class])
+                handler = getattr(mod, _class)
+            else:
+                handler = None
 
             self.handlers[pattern] = {
-                "class": getattr(mod, _class),
+                "class": handler,
                 "priority": priority
                 }
 
