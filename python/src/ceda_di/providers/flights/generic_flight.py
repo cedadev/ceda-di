@@ -182,8 +182,8 @@ def test_parser():
 
     for (test, filepath, to_match) in test_files[:]:
 
-        print "\n\nTesting: %s" % test
-        print "With: %s\n" % filepath
+        print("\n\nTesting: %s" % test)
+        print("With: %s\n" % filepath)
 
         cls = eval("%s" % test.split(":")[0])
         with cls(filepath) as handler:

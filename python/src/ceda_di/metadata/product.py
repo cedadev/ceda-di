@@ -2,10 +2,10 @@
 Module for holding and exporting file metadata as JSON documents.
 """
 
-from __future__ import division
-from coordinate_sort import conditionPolygon
+
+from .coordinate_sort import conditionPolygon
 import hashlib
-import simplejson as json
+import json
 import logging
 import math
 import numpy.ma as ma
@@ -29,7 +29,6 @@ class GeoJSONGenerator(object):
         * Satellite swaths => GeoJSON "MultiPolygon"
     """
     def __init__(self, latitudes, longitudes, shape_type=None, do_sanitise_geometries=True):
-    
         if do_sanitise_geometries:
             self._sanitise_geometry(ma.array(longitudes), ma.array(latitudes))
         else:
@@ -200,7 +199,7 @@ class GeoJSONGenerator(object):
         }
 
         track = self._gen_track(num_polygons + 1)["coordinates"]
-        for i in xrange(0, len(track) - 1):
+        for i in range(0, len(track) - 1):
             lo = track[i]
             hi = track[i + 1]
 
@@ -230,7 +229,7 @@ class GeoJSONGenerator(object):
             track_lons = self.longitudes[::step]
             track_lats = self.latitudes[::step]
 
-        track["coordinates"] = zip(track_lons, track_lats)
+        track["coordinates"] = list(zip(track_lons, track_lats))
 
         return track
 
@@ -243,10 +242,10 @@ class GeoJSONGenerator(object):
                                                wrapped_coords=True)
         lat_bottom, lat_top = self._get_bounds(self.latitudes)
 
-        if (lon_left is None or lon_right is None or
-                lat_bottom is None or lat_top is None):
+        if not all((lon_left, lon_right, lat_bottom,lat_top)):
             return None
 
+        #LatLon SW, NE
         envelope = {
             "type": "envelope",
             "coordinates": [
@@ -389,7 +388,7 @@ class Properties(object):
         if spatial is None:
             self.spatial = None
         # Check if spatial component is already formatted (e.g. if JSON already provided)
-        elif spatial.has_key("geometries") and spatial["geometries"].has_key("display"):
+        elif "geometries" in spatial and "display" in spatial.get("geometries",{}):
             # Leave unchanged
             self.spatial = spatial
         else:
@@ -448,11 +447,11 @@ class Parameter(object):
 
         # Other arbitrary arguments
         if other_params:
-            for key, value in other_params.iteritems():
+            for key, value in other_params.items():
                 # If value is blank, ignore.
-                if unicode(value).strip():
+                if str(value).strip():
                     self.items.append(
-                        self.make_param_item(key.strip(), unicode(value).strip()))
+                        self.make_param_item(key.strip(), str(value).strip()))
 
     @staticmethod
     def make_param_item(name, value):

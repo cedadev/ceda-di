@@ -12,9 +12,9 @@ today=$(date +%Y-%m-%d)
 outdir=$wd/outputs/$today
 mkdir -p $outdir
 
-s1a_dirs="/neodc/sentinel1a/data/EW/L1_GRD/m/IPF_v2 /neodc/sentinel1a/data/IW/L1_GRD/h/IPF_v2 /neodc/sentinel1a/data/IW/L1_SLC/IPF_v2 /neodc/sentinel1a/data/IW/L1_SLC/IPF_v2 /neodc/sentinel1a/data/IW/L1_SLC/IPF_v2"
+s1a_dirs="/neodc/sentinel1a/data/EW/L1_GRD/m/IPF_v2 /neodc/sentinel1a/data/IW/L0_RAW /neodc/sentinel1a/data/IW/L1_GRD/h/IPF_v2 /neodc/sentinel1a/data/IW/L1_GRD/h/IPF_v3 /neodc/sentinel1a/data/IW/L1_SLC/IPF_v2 /neodc/sentinel1a/data/IW/L1_SLC/IPF_v3 /neodc/sentinel1a/data/IW/L2_OCN/IPF_v2 /neodc/sentinel1a/data/IW/L2_OCN/IPF_v3"
 
-s1b_dirs="/neodc/sentinel1b/data/IW/L1_SLC/IPF_v2/2016 /neodc/sentinel1b/data/IW/L1_GRD/h/IPF_v2 /neodc/sentinel1b/data/IW/L1_GRD/h/IPF_v2 /neodc/sentinel1b/data/EW/L1_GRD/m/IPF_v2"
+s1b_dirs="/neodc/sentinel1b/data/IW/L1_GRD/h/IPF_v2 /neodc/sentinel1b/data/IW/L1_GRD/h/IPF_v3 /neodc/sentinel1b/data/IW/L1_SLC/IPF_v2 /neodc/sentinel1b/data/IW/L1_SLC/IPF_v3 /neodc/sentinel1b/data/IW/L2_OCN/IPF_v2 /neodc/sentinel1b/data/IW/L2_OCN/IPF_v3 /neodc/sentinel1b/data/EW/L1_GRD/m/IPF_v2"
 
 for dr in $s1a_dirs $s1b_dirs; do
 
@@ -30,7 +30,7 @@ for dr in $s1a_dirs $s1b_dirs; do
             path=$ydr/$mon
             job=${ds}-${yr}-${mon}
 
-            cmd="bsub -q ingest -W 72:00 -o $outdir/${job}.out -e $outdir/${job}.err ./scripts/wrap_es_index_files.sh $path"
+            cmd="sbatch -p long-serial -t 72:00:00 -o $outdir/${job}.out -e $outdir/${job}.err ./scripts/wrap_es_index_files.sh $path"
             echo "Running: $cmd"
             $cmd
 

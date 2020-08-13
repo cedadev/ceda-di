@@ -1,179 +1,173 @@
 {
-            "settings": {
-                "analysis": {
-                    "filter": {
-                        "min_length_5_filter": {
-                            "type": "length",
-                            "min": 5,
-                            "max": 256
-                        },
-                        "path_filter": {
-                            "type": "word_delimiter",
-                            "generate_word_parts": "true",
-                            "generate_number_parts": "false",
-                            "split_on_numerics": "false"
-                        }
-                    },
-                    "analyzer": {
-                        "variable_name_analyzer": {
-                            "type": "custom",
-                            "tokenizer": "keyword",
-                            "filter": [
-                                "min_length_5_filter"
-                            ]
-                        },
-                        "path_hierarchy_analyzer": {
-                            "type": "custom",
-                            "tokenizer": "path_hierarchy"
-                        },
-                        "path_analyzer": {
-                            "type": "custom",
-                            "tokenizer": "standard",
-                            "filter": [
-                                "path_filter"
-                            ]
-                        }
-                    }
-                }
-            },
-            "mappings": {
-                "geo_metadata": {
-                    "properties": {
-                        "data_format": {
-                            "properties": {
-                                "format": {
-                                    "type": "text"
-                                }
-                            }
-                        },
-                        "index_entry_creation": {
-                            "properties": {
-                                "indexer": {
-                                    "type": "text"
-                                }
-                            }
-                        },
-                        "file": {
-                            "properties": {
-                                "filename": {
-                                    "type": "text",
-                                    "analyzer": "simple",
-                                    "fields": {
-                                        "raw": {
-                                            "type": "keyword"
-                                        }
-                                    }
-                                },
-                                "path": {
-                                    "type": "text",
-                                    "analyzer": "path_analyzer",
-                                    "fields": {
-                                        "hierarchy": {
-                                            "type": "text",
-                                            "analyzer": "path_hierarchy_analyzer"
-                                        },
-                                        "raw": {
-                                            "type": "keyword"
-                                        }
-                                    }
-                                },
-                                "size": {
-                                    "type": "long"
-                                }
-                            }
-                        },
-                        "misc": {
-                            "properties": {
-                                "platform": {
-                                    "properties": {
-                                        "Satellite": {
-                                            "type": "text",
-                                            "fields": {
-                                                "raw": {
-                                                    "type": "keyword"
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "solar_zenith_angle":{
-                                    "properties":{
-                                        "max":{
-                                            "type": "double"
-                                        },
-                                        "min": {
-                                            "type": "double"
-                                        },
-                                        "range": {
-                                            "type": "double_range"
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "parameters": {
-                            "include_in_parent": "true",
-                            "type": "nested",
-                            "properties": {
-                                "name": {
-                                    "type": "text",
-                                    "analyzer": "variable_name_analyzer"
-                                },
-                                "value": {
-                                    "type": "text",
-                                    "analyzer": "variable_name_analyzer",
-                                    "fields": {
-                                        "autocomplete": {
-                                            "type": "completion",
-                                            "analyzer": "variable_name_analyzer",
-                                            "search_analyzer": "simple"
-                                        },
-                                        "raw": {
-                                            "type": "keyword"
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "spatial": {
-                            "properties": {
-                                "geometries": {
-                                    "properties": {
-                                        "search": {
-                                            "type": "geo_shape",
-                                            "tree": "quadtree",
-                                            "precision": "8km"
-                                        },
-                                        "full_search": {
-                                            "type": "geo_shape",
-                                            "tree": "quadtree",
-                                            "precision": "8km"
-                                        },
-                                        "display": {
-                                            "properties": {
-                                                "coordinates": {
-                                                    "type": "double",
-                                                    "index": "false"
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "temporal": {
-                            "properties": {
-                                "end_time": {
-                                    "type": "date",
-                                    "format": "dateOptionalTime"
-                                },
-                                "start_time": {
-                                    "type": "date",
-                                    "format": "dateOptionalTime"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+  "settings": {
+    "analysis": {
+      "filter": {
+        "min_length_5_filter": {
+          "type": "length",
+          "min": 5,
+          "max": 256
+        },
+        "path_filter": {
+          "type": "word_delimiter",
+          "generate_word_parts": "true",
+          "generate_number_parts": "false",
+          "split_on_numerics": "false"
         }
+      },
+      "analyzer": {
+        "variable_name_analyzer": {
+          "type": "custom",
+          "tokenizer": "keyword",
+          "filter": [
+            "min_length_5_filter"
+          ]
+        },
+        "path_hierarchy_analyzer": {
+          "type": "custom",
+          "tokenizer": "path_hierarchy"
+        },
+        "path_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "path_filter"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "data_format": {
+        "properties": {
+          "format": {
+            "type": "text"
+          }
+        }
+      },
+      "index_entry_creation": {
+        "properties": {
+          "indexer": {
+            "type": "text"
+          }
+        }
+      },
+      "file": {
+        "properties": {
+          "filename": {
+            "type": "text",
+            "analyzer": "simple",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "path": {
+            "type": "text",
+            "analyzer": "path_analyzer",
+            "fields": {
+              "hierarchy": {
+                "type": "text",
+                "analyzer": "path_hierarchy_analyzer"
+              },
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "size": {
+            "type": "long"
+          }
+        }
+      },
+      "misc": {
+        "properties": {
+          "platform": {
+            "properties": {
+              "Satellite": {
+                "type": "text",
+                "fields": {
+                  "raw": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "solar_zenith_angle": {
+            "properties": {
+              "max": {
+                "type": "double"
+              },
+              "min": {
+                "type": "double"
+              },
+              "range": {
+                "type": "double_range"
+              }
+            }
+          }
+        }
+      },
+      "parameters": {
+        "include_in_parent": "true",
+        "type": "nested",
+        "properties": {
+          "name": {
+            "type": "text",
+            "analyzer": "variable_name_analyzer"
+          },
+          "value": {
+            "type": "text",
+            "analyzer": "variable_name_analyzer",
+            "fields": {
+              "autocomplete": {
+                "type": "completion",
+                "analyzer": "variable_name_analyzer",
+                "search_analyzer": "simple"
+              },
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
+      "spatial": {
+        "properties": {
+          "geometries": {
+            "properties": {
+              "search": {
+                "type": "geo_shape"
+              },
+              "full_search": {
+                "type": "geo_shape"
+              },
+              "display": {
+                "properties": {
+                  "coordinates": {
+                    "type": "double",
+                    "index": "false"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "temporal": {
+        "properties": {
+          "end_time": {
+            "type": "date",
+            "format": "dateOptionalTime"
+          },
+          "start_time": {
+            "type": "date",
+            "format": "dateOptionalTime"
+          }
+        }
+      }
+    }
+  }
+}

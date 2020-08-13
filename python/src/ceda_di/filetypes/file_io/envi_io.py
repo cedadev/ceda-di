@@ -7,7 +7,7 @@ arsf-dan.nerc.ac.uk/trac/attachment/ticket/287/data_handler.py
 Original author: Ben Taylor (benj)
 """
 
-from __future__ import division
+
 import logging
 import os
 import stat
@@ -146,13 +146,13 @@ class EnviFile(object):
         with open(filename, 'rb') as envi:
             # Pre-allocate list
             data = []
-            for i in xrange(0, x_size):
+            for i in range(0, x_size):
                 data.append([])
-                data[i] = [[] for j in xrange(0, y_size)]
+                data[i] = [[] for j in range(0, y_size)]
 
-            for y in xrange(0, y_size):
-                for x in xrange(0, x_size):
-                    for z in xrange(0, z_size):
+            for y in range(0, y_size):
+                for x in range(0, x_size):
+                    for z in range(0, z_size):
                         # Read one data item (pixel) from the data file.
                         datum = envi.read(bytesperpix)
 

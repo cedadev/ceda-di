@@ -27,16 +27,20 @@ class HandlerFactory(object):
         self.logger = logging.getLogger(__name__)
         self.handlers = {}
 
-        for pattern, handler in handler_map.iteritems():
+        for pattern, handler in handler_map.items():
 
             handler_class = handler['class']
             priority = handler['priority']
-            (module, _class) = handler_class.rsplit(".", 1)
+            if handler_class != "None":
+                (module, _class) = handler_class.rsplit(".", 1)
 
-            mod = __import__(module, fromlist=[_class])
+                mod = __import__(module, fromlist=[_class])
+                handler = getattr(mod, _class)
+            else:
+                handler = None
 
             self.handlers[pattern] = {
-                "class": getattr(mod, _class),
+                "class": handler,
                 "priority": priority
                 }
 
@@ -55,7 +59,7 @@ class HandlerFactory(object):
         """
         handler_candidates = []  # All handlers whose file signatures match
 
-        for pattern, handler in self.handlers.iteritems():
+        for pattern, handler in self.handlers.items():
             if re.search(pattern, filename):
                 handler_candidates.append(handler)
 
@@ -69,7 +73,7 @@ class HandlerFactory(object):
                 handler_class.get_file_format(filename)
                 return handler_class
             except FileFormatError as ex:
-                self.logger.info("Not using handler {} because {}".format(handler_class, ex.message))
+                self.logger.info("Not using handler {} because {}".format(handler_class, ex))
                 pass
             except AttributeError:
                 return handler_class
@@ -120,7 +124,7 @@ class Extract(object):
             return self.configuration[conf_opt]
         else:
             raise AttributeError(
-                "Mandatory configuration option not found: %s" % conf_opt)
+                f"Mandatory configuration option not found: {conf_opt}")
 
     def make_dirs(self, conf):
         """
@@ -166,31 +170,39 @@ class Extract(object):
         """
         Instantiate a handler for a file and extract metadata.
         """
-        handler = self.handler_factory.get_handler(filename)
-        if handler is not None:
-            with handler as hand:
-                if self.conf('send-to-index'):
-                    self.index_properties(filename, hand)
-                if not self.conf('no-create-files'):
-                    self.write_properties(filename, hand)
+        try:
+            handler = self.handler_factory.get_handler(filename)
+            if handler is not None:
+                with handler as hand:
+                    if self.conf('send-to-index'):
+                        self.index_properties(filename, hand)
+                    if not self.conf('no-create-files'):
+                        self.write_properties(filename, hand)
+        except Exception as exc:
+            print(f"Failure in process_file for {filename}")
+            raise
 
     def index_properties(self, filename, handler):
         """
         Index the file in Elasticsearch
         """
-        props = handler.get_properties()
+        try:
+            props = handler.get_properties()
+        except Exception as e:
+            print(filename)
+            raise e
+
 
         if props is not None:
             index = self.conf('es-index')
-            doc_type = self.conf('es-mapping')
             body = str(props)
-            doc_id = hashlib.sha1(filename).hexdigest()
+            doc_id = hashlib.sha1(filename.encode('utf-8')).hexdigest()
 
             try:
-                self.es.index(index=index, doc_type=doc_type, body=body, id=doc_id)
-            except Exception, err:
-                print "FAILED to log: {}".format(filename)
-                print "FAILURE ERROR WAS: {}".format(str(err))
+                self.es.index(index=index, body=body, id=doc_id)
+            except Exception as err:
+                print(f"FAILED to log: {filename}")
+                print(f"FAILURE ERROR WAS: {str(err)}")
 
 
     def write_properties(self, fname, _geospatial_obj):
@@ -201,7 +213,7 @@ class Extract(object):
         fname = os.path.basename(fname)
         json_path = os.path.join(self.conf("output-path"), self.conf("json-path"))
 
-        out_fname = "%s/%s.json" % (json_path, os.path.splitext(fname)[0])
+        out_fname = f"{json_path}/{os.path.splitext(fname)[0]}.json"
         props = _geospatial_obj.get_properties()
 
         if props is not None:
@@ -214,44 +226,42 @@ class Extract(object):
         """
         # Log beginning of processing
         start = datetime.datetime.now()
-        self.logger.info("Metadata extraction started at: %s",
-                         start.isoformat())
+        self.logger.info(f"Metadata extraction started at: {start.isoformat()}")
 
         # Create index if necessary
         if self.conf("send-to-index"):
             es_factory = ElasticsearchClientFactory()
             self.es = es_factory.get_client(self.configuration)
 
-            try:
-                index.create_index(self.configuration, self.es)
-            except TransportError as te:
-                if te[0] == 400:
-                    pass
-                else:
-                    raise TransportError(te)
+            index.create_index(self.configuration, self.es)
 
         if len(self.file_list) > 0:
             # Process files
-            pool = []
+            #pool = []
+            #
+            #for f in self.file_list:
+            #    # HDF libraries don't seem to like unicode strings,
+            #    # which the filenames will be if the configuration paths
+            #    # loaded from JSON end up in unicode
+            #    path = f
+            #    if "raw" not in path:
+            #        p = multiprocessing.Process(target=self.process_file,
+            #                                    args=(path,))
+            #        pool.append(p)
+            #        p.start()
+            #
+            #    while len(pool) >= self.conf("num-cores"):
+            #        for p in pool:
+            #            if p.exitcode is not None:
+            #                pool.remove(p)
+            #
+            #for p in pool:
+            #    p.join()
 
             for f in self.file_list:
-                # HDF libraries don't seem to like unicode strings,
-                # which the filenames will be if the configuration paths
-                # loaded from JSON end up in unicode
                 path = f
                 if "raw" not in path:
-                    p = multiprocessing.Process(target=self.process_file,
-                                                args=(path,))
-                    pool.append(p)
-                    p.start()
-
-                while len(pool) >= self.conf("num-cores"):
-                    for p in pool:
-                        if p.exitcode is not None:
-                            pool.remove(p)
-
-            for p in pool:
-                p.join()
+                    self.process_file(path)
 
         # Log end of processing
         end = datetime.datetime.now()

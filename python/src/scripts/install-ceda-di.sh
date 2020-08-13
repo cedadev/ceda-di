@@ -28,14 +28,9 @@ install_ceda_di()
   echo "**Installing environment.**"
   echo "***************************"
   
-  virtualenv --system-site-packages $env_dir
+  python -m venv --system-site-packages $env_dir
   . $env_dir/bin/activate
-  pip install -r  $code_dir/python/pip_requirements.txt
-  pip install docopt
-  pip install simplejson
-  pip install elasticsearch
-  pip install exifread
-  pip install xmltodict
+  pip install -r  $code_dir/python/requirements.txt
 
   echo  "********************"
   echo  "**Testing scripts.**"

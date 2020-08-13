@@ -1,0 +1,308 @@
+<gmd:MD_Metadata xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gml="http://www.opengis.net/gml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.isotc211.org/2005/gmd http://www.isotc211.org/2005/gmd/gmd.xsd">
+   <gmd:fileIdentifier>
+     <gco:CharacterString>S1B_20200202_110_desc_055728_055753_VVVH_G0_GB_OSGB_RTCK_SpkRL</gco:CharacterString>
+   </gmd:fileIdentifier>
+   <gmd:language>
+     <gco:CharacterString>eng</gco:CharacterString>
+   </gmd:language>
+   <gmd:characterSet>
+     <gmd:MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">utf8</gmd:MD_CharacterSetCode>
+   </gmd:characterSet>
+   <gmd:hierarchyLevel>
+    <gmd:MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset" codeSpace="ISOTC211/19115">dataset</gmd:MD_ScopeCode>
+   </gmd:hierarchyLevel>
+
+   <gmd:contact>
+     <gmd:CI_ResponsibleParty>
+       <gmd:individualName gco:nilReason="missing">
+
+       </gmd:individualName>
+       <gmd:organisationName>
+          Department for Environment Food &amp; Rural Affairs
+       </gmd:organisationName>
+       <gmd:positionName>
+          Head of Data &amp; Information Access
+       </gmd:positionName>
+       <gmd:contactInfo>
+         <gmd:CI_Contact>
+           <gmd:phone>
+             <gmd:CI_Telephone>
+               <gmd:voice gco:nilReason="missing">
+
+               </gmd:voice>
+               <gmd:facsimile gco:nilReason="missing">
+
+               </gmd:facsimile>
+             </gmd:CI_Telephone>
+           </gmd:phone>
+           <gmd:address>
+             <gmd:CI_Address>
+               <gmd:deliveryPoint>
+                 Seacole Building, 2 Marsham Street
+               </gmd:deliveryPoint>
+               <gmd:city>
+                 London
+               </gmd:city>
+               <gmd:administrativeArea gco:nilReason="missing">
+
+               </gmd:administrativeArea>
+               <gmd:postalCode>
+                 SW1P 4DF
+               </gmd:postalCode>
+               <gmd:country>
+                 United Kingdom
+               </gmd:country>
+               <gmd:electronicMailAddress>
+                 <gco:CharacterString>open@defra.gov.uk</gco:CharacterString>
+               </gmd:electronicMailAddress>
+             </gmd:CI_Address>
+           </gmd:address>
+
+         </gmd:CI_Contact>
+       </gmd:contactInfo>
+       <gmd:role>
+         <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="author" codeSpace="ISOTC211/19115">author</gmd:CI_RoleCode>
+       </gmd:role>
+     </gmd:CI_ResponsibleParty>
+   </gmd:contact>
+
+   <gmd:dateStamp>
+     <gco:DateTime>2020-02-03T06:56:00Z</gco:DateTime>
+   </gmd:dateStamp>
+   <gmd:metadataStandardName>
+     <gco:CharacterString>ISO 19115:2003 - Geographic information - Metadata</gco:CharacterString>
+   </gmd:metadataStandardName>
+   <gmd:metadataStandardVersion>
+     <gco:CharacterString>ISO 19115:2003</gco:CharacterString>
+   </gmd:metadataStandardVersion>
+   <gmd:spatialRepresentationInfo />
+   <gmd:referenceSystemInfo>
+     <gmd:MD_ReferenceSystem>
+       <gmd:referenceSystemIdentifier>
+         <gmd:RS_Identifier>
+           <gmd:code>
+             <gco:CharacterString>27700</gco:CharacterString>
+           </gmd:code>
+           <gmd:codeSpace>
+             <gco:CharacterString>EPSG</gco:CharacterString>
+           </gmd:codeSpace>
+         </gmd:RS_Identifier>
+       </gmd:referenceSystemIdentifier>
+     </gmd:MD_ReferenceSystem>
+   </gmd:referenceSystemInfo>
+
+   <gmd:identificationInfo>
+     <gmd:MD_DataIdentification>
+       <gmd:citation>
+         <gmd:CI_Citation>
+
+           <gmd:title>
+             <gco:CharacterString>S1B_20200202_110_desc_055728_055753_VVVH_G0_GB_OSGB_RTCK_SpkRL</gco:CharacterString>
+           </gmd:title>
+           <gmd:date>
+             <gmd:CI_Date>
+               <gmd:date>
+                 <gco:DateTime>2020-02-02T05:57:28Z</gco:DateTime>
+               </gmd:date>
+               <gmd:dateType>
+                 <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation" codeSpace="ISOTC211/19115">creation</gmd:CI_DateTypeCode>
+               </gmd:dateType>
+             </gmd:CI_Date>
+           </gmd:date>
+           <gmd:edition gco:nilReason="missing">
+
+           </gmd:edition>
+           <gmd:presentationForm>
+             <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="ISOTC211/19115">mapDigital</gmd:CI_PresentationFormCode>
+           </gmd:presentationForm>
+         </gmd:CI_Citation>
+       </gmd:citation>
+       <gmd:abstract>
+         <gco:CharacterString>These data have been created by the Department for Environment, Food and Rural Affairs (Defra) in order to cost effectively provide high quality, analysis ready data for a wide range of applications. Contact details for both data and metadata are: Head of Data &amp; Information Access, Defra, Seacole Building, 2 Marsham Street, London, SW1P 4DF.  Data is supplied under the Open Government Licence.  They contain modified Copernicus Sentinel-1 (C-Band SAR) data processed into a backscatter product, using ESA SNAP v6.0 using a docker image jncc/s1-ard-processor:0.0.0.17 produced by JNCC. Products acquired from ESA are ground-range detected (GRD) interferometric wide-swath (IW). Processing used the following steps: apply orbit file, border and thermal noise removal, radiometric calibration, multilook, terrain correction using the Aerial Photography Great Britain (APGB) 10m resolution DEM, radiometric normalisation (Kellndorfer approach, Kellndorfer et al., 1998) and refined Lee speckle filter. Data is outputted on a linear scale in dB. A final reprojection is applied to transform the data to OSGB 1936/British National Grid (EPSG:27700) using GDAL v2.3.0. The processed product is stacked, containing VV_dB in Band 1 and VH_dB in Band 2. Images are named in accordance with the sensor information and processing parameters employed, delineated by the alphanumeric characters separated by an underscore (_). The relative orbit number is displayed in each name as ORBXXX, where XXX is the relative orbit number (ESA Sentinel-1 Orbit). They have been processed to Gamma-0 (G0) using SNAP Toolbox v6.0 (ESA SNAP).  These Sentinel-1 data are obtained in the DV mode, as indicated by ESA (ESA Sentinel-1 Naming Conventions), where both VV and VH polarisations are collected; the naming convention reflects these polarisations.</gco:CharacterString>
+       </gmd:abstract>
+       <gmd:purpose gco:nilReason="missing">
+
+       </gmd:purpose>
+       <gmd:status>
+         <gmd:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="ISOTC211/19115">completed</gmd:MD_ProgressCode>
+       </gmd:status>
+
+       <gmd:resourceMaintenance>
+         <gmd:MD_MaintenanceInformation>
+           <gmd:maintenanceAndUpdateFrequency>
+             <gmd:MD_MaintenanceFrequencyCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="notPlanned" codeSpace="ISOTC211/19115">notPlanned</gmd:MD_MaintenanceFrequencyCode>
+           </gmd:maintenanceAndUpdateFrequency>
+         </gmd:MD_MaintenanceInformation>
+       </gmd:resourceMaintenance>
+
+       <gmd:descriptiveKeywords>
+         <gmd:MD_Keywords>
+
+           <gmd:keyword>
+             <gco:CharacterString>Analysis Ready Data</gco:CharacterString>
+           </gmd:keyword>
+
+           <gmd:keyword>
+             <gco:CharacterString>Earth Observation</gco:CharacterString>
+           </gmd:keyword>
+
+           <gmd:keyword>
+             <gco:CharacterString>Backscatter</gco:CharacterString>
+           </gmd:keyword>
+
+           <gmd:keyword>
+             <gco:CharacterString>Synthetic Aperture Radar</gco:CharacterString>
+           </gmd:keyword>
+
+           <gmd:keyword>
+             <gco:CharacterString>Sentinel-1</gco:CharacterString>
+           </gmd:keyword>
+
+           <gmd:keyword>
+             <gco:CharacterString>Surface Reflectance</gco:CharacterString>
+           </gmd:keyword>
+
+           <gmd:keyword>
+             <gco:CharacterString>Satellite Imagery</gco:CharacterString>
+           </gmd:keyword>
+
+           <gmd:type>
+              <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">theme</gmd:MD_KeywordTypeCode>
+            </gmd:type>
+         </gmd:MD_Keywords>
+       </gmd:descriptiveKeywords>
+
+       <gmd:descriptiveKeywords>
+         <gmd:MD_Keywords>
+           <gmd:keyword>
+             <gco:CharacterString>Europe</gco:CharacterString>
+           </gmd:keyword>
+           <gmd:type>
+              <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="place" codeSpace="ISOTC211/19115">place</gmd:MD_KeywordTypeCode>
+            </gmd:type>
+         </gmd:MD_Keywords>
+       </gmd:descriptiveKeywords>
+
+       <gmd:descriptiveKeywords>
+         <gmd:MD_Keywords>
+           <gmd:keyword>
+             <gco:CharacterString>United Kingdom</gco:CharacterString>
+           </gmd:keyword>
+           <gmd:type>
+              <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="place" codeSpace="ISOTC211/19115">place</gmd:MD_KeywordTypeCode>
+            </gmd:type>
+         </gmd:MD_Keywords>
+       </gmd:descriptiveKeywords>
+
+       <gmd:resourceConstraints>
+         <gmd:MD_LegalConstraints>
+           <gmd:useConstraints>
+             <gmd:MD_RestrictionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="license" codeSpace="ISOTC211/19115">license</gmd:MD_RestrictionCode>
+           </gmd:useConstraints>
+           <gmd:otherConstraints>
+             <gco:CharacterString>OGL (OGL): Open Government Licence v3 (OGL): This data is licensed under the Open Government Licence v3. The Keeper of the Public Records has authority to license Information subject to copyright and database right owned by the Crown. The extent of the offer to license this Information under the terms of this licence is set out in the UK Government Licensing Framework. (http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/)</gco:CharacterString>
+           </gmd:otherConstraints>
+         </gmd:MD_LegalConstraints>
+       </gmd:resourceConstraints>
+
+       <gmd:resourceConstraints>
+         <gmd:MD_LegalConstraints>
+           <gmd:useConstraints>
+              <gmd:MD_RestrictionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions" codeSpace="ISOTC211/19115">otherRestrictions</gmd:MD_RestrictionCode>
+           </gmd:useConstraints>
+           <gmd:otherConstraints>
+             <gco:CharacterString>Other Restrictions</gco:CharacterString>
+           </gmd:otherConstraints>
+         </gmd:MD_LegalConstraints>
+       </gmd:resourceConstraints>
+       <gmd:spatialRepresentationType>
+         <gmd:MD_SpatialRepresentationTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="grid" codeSpace="ISOTC211/19115">grid</gmd:MD_SpatialRepresentationTypeCode>
+       </gmd:spatialRepresentationType>
+       <gmd:language>
+         <gco:CharacterString>eng</gco:CharacterString>
+       </gmd:language>
+       <gmd:characterSet>
+         <gmd:MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">utf8</gmd:MD_CharacterSetCode>
+       </gmd:characterSet>
+       <gmd:topicCategory>
+
+         <gmd:MD_TopicCategoryCode>imagerybasemapsearthcover</gmd:MD_TopicCategoryCode>
+
+       </gmd:topicCategory>
+       <gmd:extent>
+         <gmd:EX_Extent>
+           <gmd:geographicElement>
+             <gmd:EX_GeographicBoundingBox>
+               <gmd:westBoundLongitude>
+                 <gco:Decimal>1.942106</gco:Decimal>
+               </gmd:westBoundLongitude>
+               <gmd:eastBoundLongitude>
+                 <gco:Decimal>6.284688</gco:Decimal>
+               </gmd:eastBoundLongitude>
+               <gmd:southBoundLatitude>
+                 <gco:Decimal>51.834194</gco:Decimal>
+               </gmd:southBoundLatitude>
+               <gmd:northBoundLatitude>
+                 <gco:Decimal>53.745213</gco:Decimal>
+               </gmd:northBoundLatitude>
+             </gmd:EX_GeographicBoundingBox>
+           </gmd:geographicElement>
+         </gmd:EX_Extent>
+       </gmd:extent>
+
+       <gmd:extent>
+         <gmd:EX_Extent>
+           <gmd:temporalElement>
+             <gmd:EX_TemporalExtent>
+               <gmd:extent>
+                 <gml:TimePeriod gml:id="T_01">
+                   <gml:beginPosition>2020-02-02T05:57:28Z</gml:beginPosition>
+                   <gml:endPosition>2020-02-02T05:57:53Z</gml:endPosition>
+                 </gml:TimePeriod>
+               </gmd:extent>
+             </gmd:EX_TemporalExtent>
+           </gmd:temporalElement>
+         </gmd:EX_Extent>
+       </gmd:extent>
+
+       <gmd:supplementalInformation>
+         <gco:CharacterString>
+Data Collection Time: 05:57:28
+Instrument: Sentinel-1  C-band synthetic aperture radar instrument operating at a centre frequency of 5.405 GHz
+Software Info: : SNAP. URL:https://step.esa.int/main/toolboxes/snap/. Version: 6.0
+Docker Image Version: jncc/s1-ard-processor:0.0.0.17
+Algorithms: Radiometric normalisation and Terrain correction use Kellndorfer (Kellndorfer et al., 1998) algorithms implemented in SNAP toolbox (http://step.esa.int). Speckle filtering uses Refined Lee (Lee Pottier, 2009), also implemented in SNAP toolbox. Reprojection applied using GDAL v2.3.0
+CEOS Analysis Ready Data for Land (CARD4L): http://ceos.org/ard/files/CARD4L_Product_Specification_Backscatter_v4.0.pdf
+</gco:CharacterString>
+       </gmd:supplementalInformation>
+     </gmd:MD_DataIdentification>
+   </gmd:identificationInfo>
+
+   <gmd:contentInfo>
+
+     <gmd:MD_CoverageDescription>
+       <gmd:attributeDescription gco:nilReason="inapplicable" />
+       <gmd:contentType>
+         <gmd:MD_CoverageContentTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml" codeListValue="image">image</gmd:MD_CoverageContentTypeCode>
+       </gmd:contentType>
+     </gmd:MD_CoverageDescription>
+
+   </gmd:contentInfo>
+
+   <gmd:dataQualityInfo>
+     <gmd:DQ_DataQuality>
+       <gmd:scope>
+         <gmd:DQ_Scope>
+           <gmd:level>
+             <gmd:MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset" codeSpace="ISOTC211/19115">dataset</gmd:MD_ScopeCode>
+           </gmd:level>
+         </gmd:DQ_Scope>
+       </gmd:scope>
+       <gmd:lineage>
+         <gmd:LI_Lineage>
+           <gmd:statement><gco:CharacterString>Data originally from European Space Agency (ESA) are ground range detected (GRD) interferometric wide swath (IW) Copernicus Sentinel-1 (C-Band SAR). Processed into a backscatter product using ESA SNAP v6.0 using a docker image jncc/s1-ard-processor:0.0.017 produced by JNCC. Processing included the following steps: apply orbit file, border and thermal noise removal, radiometric calibration, multilook, terrain correction using the Aerial Photography Great Britain (APGB) 10m resolution DEM, radiometric normalisation (Kellndorfer approach, Kellndorfer et al., 1998) and refined Lee speckle filter. Data is outputted on a linear scale in dB. A final reprojection is applied to transform the data to OSGB1936/British National Grid (EPSG:27700) using GDAL v2.3.0. The processed product is stacked, containing VV_dB in Band 1 and VH_dB in Band 2. JNCC, in collaboration with Defra, Aberystwyth University, Satellite Applications Catapult and Airbus Defence and Space, have produced standardised data processing pipelines for producing Sentinel-1 and Sentinel-2 ARD currently being considered as datasets for approval in the CEOS Analysis Ready Data for Land (CARD4L) project.</gco:CharacterString></gmd:statement>
+         </gmd:LI_Lineage>
+       </gmd:lineage>
+     </gmd:DQ_DataQuality>
+   </gmd:dataQualityInfo>
+ </gmd:MD_Metadata>

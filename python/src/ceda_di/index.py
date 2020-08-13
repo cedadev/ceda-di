@@ -1,8 +1,9 @@
-import simplejson as json
+import json
 
 from elasticsearch import Elasticsearch
 from elasticsearch import ElasticsearchException
 from elasticsearch.exceptions import TransportError
+from .search import ElasticsearchClientFactory
 
 
 def create_index(config, elasticsearch):
@@ -14,11 +15,12 @@ def create_index(config, elasticsearch):
     index_settings_path = config["es-index-settings"]
     index_name = config["es-index"]
 
-    import simplejson as json  # Import here as unused in rest of module
+    import json  # Import here as unused in rest of module
     with open(index_settings_path, 'r') as settings:
         index_settings = json.load(settings)
 
-    elasticsearch.indices.create(index=index_name, body=index_settings)
+    if not elasticsearch.indices.exists(index=index_name):
+        elasticsearch.indices.create(index=index_name, body=index_settings)
 
 
 class BulkIndexer(object):
@@ -35,17 +37,11 @@ class BulkIndexer(object):
         self.index = config["es-index"]
         self.default_mapping = config["es-mapping"]
         self.threshold = threshold
-        self.es = Elasticsearch([config["es-host"]])
+        self.es = ElasticsearchClientFactory.get_client(config)
 
         # If the index doesn't exist, create it
         # This will throw an error if the index already exists this is *fine*
-        try:
-            create_index(config, self.es)
-        except TransportError as te:
-            if te[0] == 400:
-                print(te)
-            else:
-                raise TransportError(te)
+        create_index(config, self.es)
 
         # Dict containing key:value pairs of mapping:[list of documents]
         # That way, this class can handle indexing multiple types of documents
@@ -115,7 +111,7 @@ class BulkIndexer(object):
             docs.append(doc)
 
         # We want to see any errors that are thrown up by Elasticsearch
-        response = self.es.bulk(docs, index=self.index, doc_type=mapping, timeout=75)
+        response = self.es.bulk(docs, index=self.index, timeout=75)
         if response["errors"] is True:
             raise ElasticsearchException(
                 "Error response from Elasticsearch server: %s" % response)
@@ -127,6 +123,6 @@ class BulkIndexer(object):
         """
         Submit all current document pools to the ElasticSearch index.
         """
-        for mapping in self.doc_pool.keys():
+        for mapping in list(self.doc_pool.keys()):
             if len(self.doc_pool[mapping]) > 0:
                 self.submit_pool(mapping)

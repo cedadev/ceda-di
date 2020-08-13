@@ -62,7 +62,7 @@ class HDF4(_geospatial):
         }
 
         coords = {}
-        for k, v in mappings.iteritems():
+        for k, v in mappings.items():
             ref = vs.find(k)
             vd = vs.attach(ref)
 
@@ -93,7 +93,7 @@ class HDF4(_geospatial):
         }
 
         timestamps = {}
-        for k, v in mappings.iteritems():
+        for k, v in mappings.items():
             ref = vs.find(k)
             vd = vs.attach(ref)
 
