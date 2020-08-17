@@ -14,6 +14,7 @@ fi
 
 
 BASEDIR=$PWD/../../..
+cd $BASEDIR
 . $BASEDIR/setup_env.sh $CEDA_DI_PROJECT
 
 DIRS=$@

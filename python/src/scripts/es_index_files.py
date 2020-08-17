@@ -21,11 +21,6 @@ import getopt
 import datetime
 import subprocess
 import os
-import pipes
-import shlex
-import urllib.request
-import json
-import time
 
 # Default locations for script and virtual env.
 # Get base directory from script location
